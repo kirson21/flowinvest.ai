@@ -4,16 +4,20 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import sys
 from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List
 import uuid
 from datetime import datetime
 
+# Add the backend directory to Python path
+ROOT_DIR = Path(__file__).parent
+sys.path.append(str(ROOT_DIR))
+
 # Import the new webhook routes
 from routes.webhook import router as webhook_router
 
-ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
