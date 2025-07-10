@@ -1,0 +1,211 @@
+import React, { useState } from 'react';
+import { useApp } from '../../contexts/AppContext';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Progress } from '../ui/progress';
+import { 
+  Briefcase, 
+  TrendingUp, 
+  TrendingDown, 
+  Users, 
+  DollarSign,
+  Plus,
+  Star
+} from 'lucide-react';
+import { mockPortfolios } from '../../data/mockData';
+
+const Portfolios = () => {
+  const { t } = useApp();
+  const [portfolios, setPortfolios] = useState(mockPortfolios);
+
+  const getRiskColor = (risk) => {
+    switch (risk.toLowerCase()) {
+      case 'low': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'high': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getRiskTextColor = (risk) => {
+    switch (risk.toLowerCase()) {
+      case 'low': return 'text-green-600';
+      case 'medium': return 'text-yellow-600';
+      case 'high': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getAssetTypeColor = (type) => {
+    switch (type.toLowerCase()) {
+      case 'stock': return 'bg-blue-500';
+      case 'crypto': return 'bg-orange-500';
+      case 'etf': return 'bg-green-500';
+      case 'bond': return 'bg-purple-500';
+      case 'reit': return 'bg-pink-500';
+      case 'dividend': return 'bg-indigo-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const PortfolioCard = ({ portfolio }) => (
+    <Card className="hover:shadow-lg transition-all duration-200 group relative">
+      {portfolio.featured && (
+        <div className="absolute top-4 right-4 z-10">
+          <Badge className="bg-[#0097B2] text-white">
+            <Star size={12} className="mr-1" />
+            Featured
+          </Badge>
+        </div>
+      )}
+      
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-2">
+            <Briefcase className="text-[#0097B2]" size={20} />
+            <div>
+              <CardTitle className="text-lg text-[#474545] dark:text-white">
+                {portfolio.name}
+              </CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {portfolio.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              {t('riskLevel')}
+            </p>
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${getRiskColor(portfolio.riskLevel)}`} />
+              <span className={`text-sm font-medium ${getRiskTextColor(portfolio.riskLevel)}`}>
+                {t(portfolio.riskLevel.toLowerCase())}
+              </span>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              {t('expectedReturn')}
+            </p>
+            <p className="text-sm font-medium text-[#474545] dark:text-white">
+              {portfolio.expectedReturn}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              {t('minimumInvestment')}
+            </p>
+            <p className="text-sm font-medium text-[#474545] dark:text-white">
+              ${portfolio.minimumInvestment.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              Total Investors
+            </p>
+            <div className="flex items-center space-x-1">
+              <Users size={14} className="text-gray-500" />
+              <span className="text-sm font-medium text-[#474545] dark:text-white">
+                {portfolio.totalInvestors.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-sm font-medium text-[#474545] dark:text-white mb-2">
+            Asset Allocation
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {portfolio.assets.map((asset, index) => (
+              <div
+                key={index}
+                className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded"
+              >
+                <div className={`w-2 h-2 rounded-full ${getAssetTypeColor(asset.type)}`} />
+                <span className="text-xs font-medium text-[#474545] dark:text-white">
+                  {asset.symbol}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {asset.allocation}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-sm font-medium text-[#474545] dark:text-white mb-2">
+            Performance
+          </p>
+          <div className="grid grid-cols-5 gap-2 text-center">
+            {Object.entries(portfolio.performance).map(([period, value]) => (
+              <div key={period} className="bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                <p className="text-xs text-gray-500 dark:text-gray-400">{period}</p>
+                <p className={`text-sm font-bold ${value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {value >= 0 ? '+' : ''}{value}%
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Button
+          className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white font-medium"
+          onClick={() => {
+            // Mock investment action
+            alert(`Investment in ${portfolio.name} initiated! (Mock action)`);
+          }}
+        >
+          <DollarSign size={16} className="mr-2" />
+          {t('invest')}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="p-4 pb-20 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#474545] dark:text-white">
+            {t('portfolios')}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+            Ready-made investment portfolios
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+          onClick={() => {
+            alert('Portfolio builder coming soon! (Mock action)');
+          }}
+        >
+          <Plus size={16} className="mr-2" />
+          {t('createPortfolio')}
+        </Button>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {portfolios.map((portfolio) => (
+          <PortfolioCard key={portfolio.id} portfolio={portfolio} />
+        ))}
+      </div>
+
+      <div className="mt-8 text-center">
+        <p className="text-gray-500 dark:text-gray-400 text-sm">
+          More portfolios coming soon...
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Portfolios;
