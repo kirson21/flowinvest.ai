@@ -1,24 +1,22 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
 from typing import List
 import os
 import logging
 
-from models.feed_entry import FeedEntry, FeedEntryCreate, FeedEntryResponse
-
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
-
 router = APIRouter()
 
-async def cleanup_old_entries():
+# We'll get the database connection from the main server file
+async def get_database():
+    from server import db
+    return db
+
+async def cleanup_old_entries(db):
     """Keep only the latest 20 feed entries, remove older ones"""
     try:
         # Count total entries
@@ -40,8 +38,41 @@ async def cleanup_old_entries():
     except Exception as e:
         logger.error(f"Error during cleanup: {e}")
 
+# Define models inline to avoid import issues
+from pydantic import BaseModel, Field
+import uuid
+
+class FeedEntry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str = Field(..., description="News headline")
+    summary: str = Field(..., description="AI-generated summary")
+    sentiment: int = Field(..., ge=0, le=100, description="Market sentiment score (0-100)")
+    source: str = Field(..., description="Source of the news")
+    timestamp: datetime = Field(..., description="Timestamp of the news")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class FeedEntryCreate(BaseModel):
+    title: str = Field(..., description="News headline")
+    summary: str = Field(..., description="AI-generated summary") 
+    sentiment: int = Field(..., ge=0, le=100, description="Market sentiment score (0-100)")
+    source: str = Field(..., description="Source of the news")
+    timestamp: str = Field(..., description="ISO datetime string")
+
+class FeedEntryResponse(BaseModel):
+    id: str
+    title: str
+    summary: str
+    sentiment: int
+    source: str
+    timestamp: datetime
+    created_at: datetime
+
 @router.post("/ai_news_webhook", response_model=FeedEntryResponse)
-async def receive_news_webhook(news_data: FeedEntryCreate, background_tasks: BackgroundTasks):
+async def receive_news_webhook(
+    news_data: FeedEntryCreate, 
+    background_tasks: BackgroundTasks,
+    db=Depends(get_database)
+):
     """
     Webhook endpoint to receive investment news updates from n8n
     
@@ -79,7 +110,7 @@ async def receive_news_webhook(news_data: FeedEntryCreate, background_tasks: Bac
             raise HTTPException(status_code=500, detail="Failed to insert feed entry")
         
         # Schedule cleanup of old entries in background
-        background_tasks.add_task(cleanup_old_entries)
+        background_tasks.add_task(cleanup_old_entries, db)
         
         logger.info(f"Successfully added news entry: {feed_entry.title}")
         
@@ -90,7 +121,7 @@ async def receive_news_webhook(news_data: FeedEntryCreate, background_tasks: Bac
         raise HTTPException(status_code=500, detail=f"Error processing webhook: {str(e)}")
 
 @router.get("/feed_entries", response_model=List[FeedEntryResponse])
-async def get_feed_entries(limit: int = 20):
+async def get_feed_entries(limit: int = 20, db=Depends(get_database)):
     """
     Get the latest feed entries for display in AI Feed
     Returns entries in descending order (latest first)
@@ -113,7 +144,7 @@ async def get_feed_entries(limit: int = 20):
         raise HTTPException(status_code=500, detail=f"Error retrieving feed entries: {str(e)}")
 
 @router.delete("/feed_entries", status_code=200)
-async def clear_all_feed_entries():
+async def clear_all_feed_entries(db=Depends(get_database)):
     """
     Clear all feed entries (for testing purposes)
     """
@@ -126,7 +157,7 @@ async def clear_all_feed_entries():
         raise HTTPException(status_code=500, detail=f"Error clearing feed entries: {str(e)}")
 
 @router.get("/feed_entries/count")
-async def get_feed_entries_count():
+async def get_feed_entries_count(db=Depends(get_database)):
     """
     Get the total count of feed entries
     """
