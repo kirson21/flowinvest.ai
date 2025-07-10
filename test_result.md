@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Please test the Flow Invest app that I just created. The app should have these features: 1. Login Screen with Flow Invest branding, email/phone tabs, Google login, mock login functionality. 2. Main App with Bottom Navigation (AI Feed, Trading Bots, Portfolios, Settings). 3. Functionality to test: Login, navigation, theme toggle, language toggle, custom bot creation, mock data display."
+user_problem_statement: "Test the newly created webhook system for the Flow Invest app. Test webhook endpoints, data retrieval, data management, error handling, and API integration for the investment news feed system."
 
 frontend:
   - task: "Login Screen with Flow Invest Branding"
