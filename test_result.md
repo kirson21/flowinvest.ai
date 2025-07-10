@@ -104,6 +104,79 @@
 
 user_problem_statement: "Test the newly created webhook system for the Flow Invest app. Test webhook endpoints, data retrieval, data management, error handling, and API integration for the investment news feed system."
 
+backend:
+  - task: "Webhook Endpoint for AI News"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ POST /api/ai_news_webhook endpoint working perfectly. Successfully accepts JSON data with title, summary, sentiment, source, and timestamp. Creates feed entries with proper validation and returns structured response with generated ID."
+
+  - task: "Feed Entries Data Retrieval"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ GET /api/feed_entries endpoint working correctly. Returns entries in descending order (latest first) with proper JSON structure. GET /api/feed_entries/count also working and returns accurate count."
+
+  - task: "Feed Entries Data Management"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ DELETE /api/feed_entries endpoint working correctly for clearing all entries. Automatic cleanup functionality working - successfully limits entries to latest 20 when more are added."
+
+  - task: "Webhook Error Handling"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Error handling working well. Properly rejects missing required fields (422 validation errors). Handles invalid sentiment values correctly. Minor: Invalid timestamps are gracefully handled by falling back to current time rather than rejecting."
+
+  - task: "MongoDB Integration and Data Persistence"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ MongoDB integration working perfectly. Data persists correctly across operations. Database operations (insert, find, delete, count) all functioning properly with proper async handling."
+
+  - task: "API Integration and Response Models"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Complete API integration working correctly. All endpoints return proper JSON responses with correct data models. Pydantic validation working for both input and output models. Background task cleanup functioning properly."
+
 frontend:
   - task: "Login Screen with Flow Invest Branding"
     implemented: true
