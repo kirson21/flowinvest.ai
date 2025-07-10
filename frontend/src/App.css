@@ -1,34 +1,226 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
-}
+/* Flow Invest App Styles */
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
-}
-
-.App-header {
-    background-color: #0f0f10;
+/* Remove default app styles and let Tailwind handle everything */
+.App {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
+}
+
+/* Custom Flow Invest branding colors */
+:root {
+    --flow-dark-gray: #474545;
+    --flow-cyan-blue: #0097B2;
+    --flow-light-beige: #FAECEC;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom selection color */
+::selection {
+    background-color: var(--flow-cyan-blue);
     color: white;
 }
 
-.App-link {
-    color: #61dafb;
+/* Focus styles */
+*:focus {
+    outline: 2px solid var(--flow-cyan-blue);
+    outline-offset: 2px;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+/* Custom backdrop blur for modals */
+.backdrop-blur {
+    backdrop-filter: blur(8px);
+}
+
+/* Loading spinner */
+.loading-spinner {
+    border: 2px solid var(--flow-light-beige);
+    border-top: 2px solid var(--flow-cyan-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive breakpoints helper */
+@media (max-width: 640px) {
+    .responsive-padding {
+        padding: 1rem;
     }
-    to {
-        transform: rotate(360deg);
+}
+
+@media (min-width: 641px) {
+    .responsive-padding {
+        padding: 2rem;
+    }
+}
+
+/* Custom shadows */
+.shadow-flow {
+    box-shadow: 0 4px 20px rgba(0, 151, 178, 0.1);
+}
+
+.shadow-flow-lg {
+    box-shadow: 0 8px 30px rgba(0, 151, 178, 0.15);
+}
+
+/* Text gradient */
+.text-gradient {
+    background: linear-gradient(135deg, var(--flow-cyan-blue), var(--flow-dark-gray));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Animated underline */
+.animated-underline {
+    position: relative;
+    display: inline-block;
+}
+
+.animated-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--flow-cyan-blue);
+    transition: width 0.3s ease;
+}
+
+.animated-underline:hover::after {
+    width: 100%;
+}
+
+/* Flow Invest specific animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px var(--flow-cyan-blue); }
+    50% { box-shadow: 0 0 20px var(--flow-cyan-blue); }
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Custom scrollbar for webkit browsers */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--flow-light-beige);
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--flow-cyan-blue);
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #007a93;
+}
+
+/* Utility classes for Flow Invest theme */
+.bg-flow-gradient {
+    background: linear-gradient(135deg, var(--flow-light-beige) 0%, var(--flow-cyan-blue) 100%);
+}
+
+.bg-flow-gradient-dark {
+    background: linear-gradient(135deg, var(--flow-dark-gray) 0%, var(--flow-cyan-blue) 100%);
+}
+
+.border-flow {
+    border-color: var(--flow-cyan-blue);
+}
+
+.text-flow-primary {
+    color: var(--flow-cyan-blue);
+}
+
+.text-flow-secondary {
+    color: var(--flow-dark-gray);
+}
+
+.bg-flow-primary {
+    background-color: var(--flow-cyan-blue);
+}
+
+.bg-flow-secondary {
+    background-color: var(--flow-dark-gray);
+}
+
+.bg-flow-light {
+    background-color: var(--flow-light-beige);
+}
+
+/* Dark mode adjustments */
+.dark .bg-flow-light {
+    background-color: rgba(71, 69, 69, 0.1);
+}
+
+.dark .text-flow-secondary {
+    color: var(--flow-light-beige);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .mobile-friendly {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .mobile-padding {
+        padding: 1rem;
+    }
+    
+    .mobile-margin {
+        margin: 0.5rem;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .flow-button {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    * {
+        color: black !important;
+        background: white !important;
     }
 }
