@@ -102,10 +102,10 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the newly created webhook system for the Flow Invest app. Test webhook endpoints, data retrieval, data management, error handling, and API integration for the investment news feed system."
+user_problem_statement: "Test the enhanced webhook system with automatic translation functionality for the Flow Invest app. Test webhook endpoints, language-aware feed retrieval, translation system with OpenAI integration, caching, and production-ready features."
 
 backend:
-  - task: "Webhook Endpoint for AI News"
+  - task: "Enhanced Webhook Endpoint for AI News"
     implemented: true
     working: true
     file: "/app/backend/routes/webhook.py"
@@ -116,8 +116,11 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ POST /api/ai_news_webhook endpoint working perfectly. Successfully accepts JSON data with title, summary, sentiment, source, and timestamp. Creates feed entries with proper validation and returns structured response with generated ID."
+        - working: true
+          agent: "testing"
+          comment: "✅ Enhanced webhook endpoint tested with new TranslatedFeedEntryResponse model. All validation working correctly, handles invalid timestamps gracefully by falling back to current time (acceptable behavior)."
 
-  - task: "Feed Entries Data Retrieval"
+  - task: "Language-Aware Feed Retrieval"
     implemented: true
     working: true
     file: "/app/backend/routes/webhook.py"
@@ -128,6 +131,57 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ GET /api/feed_entries endpoint working correctly. Returns entries in descending order (latest first) with proper JSON structure. GET /api/feed_entries/count also working and returns accurate count."
+        - working: true
+          agent: "testing"
+          comment: "✅ Language-aware feed retrieval working perfectly. GET /api/feed_entries?language=en returns English entries with language='en' and is_translated=false. GET /api/feed_entries?language=ru triggers automatic translation and returns Russian content with language='ru' and is_translated=true."
+
+  - task: "Translation System with OpenAI Integration"
+    implemented: true
+    working: true
+    file: "/app/backend/services/translation.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ OpenAI translation system working excellently. First Russian request triggers translation via OpenAI API (took 3.55s), returns proper Russian content. Translation service correctly uses GPT-4o model with financial terminology preservation. Fallback to English works when translation fails."
+
+  - task: "Translation Caching System"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Translation caching working perfectly. Second Russian request uses cached translation (took 0.01s, 329x faster than first request). Translations stored in MongoDB translations collection. Cache hit/miss logic working correctly."
+
+  - task: "New API Endpoints - Translations Count"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ GET /api/translations/count endpoint working correctly. Returns accurate count of cached translations in database. Properly tracks translation cache usage."
+
+  - task: "Production-Ready Features"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Production-ready features verified. No development controls in API responses. Error handling working for translation failures with graceful fallback to English. Invalid language parameters handled gracefully. System ready for production deployment."
 
   - task: "Feed Entries Data Management"
     implemented: true
@@ -140,18 +194,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ DELETE /api/feed_entries endpoint working correctly for clearing all entries. Automatic cleanup functionality working - successfully limits entries to latest 20 when more are added."
-
-  - task: "Webhook Error Handling"
-    implemented: true
-    working: true
-    file: "/app/backend/routes/webhook.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
         - working: true
           agent: "testing"
-          comment: "✅ Error handling working well. Properly rejects missing required fields (422 validation errors). Handles invalid sentiment values correctly. Minor: Invalid timestamps are gracefully handled by falling back to current time rather than rejecting."
+          comment: "✅ Enhanced data management working perfectly. DELETE endpoint now clears both feed entries and translations. Automatic cleanup still working correctly (keeps latest 20 entries). Background cleanup tasks functioning properly."
 
   - task: "MongoDB Integration and Data Persistence"
     implemented: true
@@ -164,6 +209,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ MongoDB integration working perfectly. Data persists correctly across operations. Database operations (insert, find, delete, count) all functioning properly with proper async handling."
+        - working: true
+          agent: "testing"
+          comment: "✅ Enhanced MongoDB integration working excellently. Now handles both feed_entries and translations collections. Upsert operations for translation caching working correctly. All async database operations functioning properly."
 
   - task: "API Integration and Response Models"
     implemented: true
@@ -176,6 +224,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ Complete API integration working correctly. All endpoints return proper JSON responses with correct data models. Pydantic validation working for both input and output models. Background task cleanup functioning properly."
+        - working: true
+          agent: "testing"
+          comment: "✅ Enhanced API integration working perfectly. New TranslatedFeedEntryResponse model working correctly with language and is_translated fields. All endpoints returning proper structured responses. Complete integration test passed with 100% success rate."
 
 frontend:
   - task: "Login Screen with Flow Invest Branding"
