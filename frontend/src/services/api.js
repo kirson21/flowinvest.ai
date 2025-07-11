@@ -38,10 +38,10 @@ apiClient.interceptors.response.use(
 
 // Feed API functions
 export const feedAPI = {
-  // Get all feed entries
-  getFeedEntries: async (limit = 20) => {
+  // Get all feed entries with language support
+  getFeedEntries: async (limit = 20, language = 'en') => {
     try {
-      const response = await apiClient.get(`/feed_entries?limit=${limit}`);
+      const response = await apiClient.get(`/feed_entries?limit=${limit}&language=${language}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching feed entries:', error);
@@ -60,6 +60,17 @@ export const feedAPI = {
     }
   },
 
+  // Get translations count
+  getTranslationsCount: async () => {
+    try {
+      const response = await apiClient.get('/translations/count');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching translations count:', error);
+      throw error;
+    }
+  },
+
   // Clear all feed entries (for testing)
   clearFeedEntries: async () => {
     try {
@@ -71,7 +82,7 @@ export const feedAPI = {
     }
   },
 
-  // Simulate webhook call (for testing)
+  // Simulate webhook call (for development only)
   simulateWebhook: async (newsData) => {
     try {
       const response = await apiClient.post('/ai_news_webhook', newsData);
