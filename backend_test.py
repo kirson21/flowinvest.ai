@@ -517,8 +517,8 @@ class WebhookTester:
                      f"Added: {added_entries}, Retrieved: {retrieved_count}, Count: {count_endpoint}")
         
     def run_all_tests(self):
-        """Run all webhook system tests"""
-        print("🚀 Starting Flow Invest Webhook System Tests")
+        """Run all enhanced webhook system tests including translation features"""
+        print("🚀 Starting Flow Invest Enhanced Webhook System Tests")
         print("=" * 60)
         
         # Test basic webhook functionality
@@ -529,6 +529,19 @@ class WebhookTester:
         self.test_get_feed_entries()
         self.test_get_feed_entries_count()
         
+        # Test language-aware feed retrieval
+        self.test_language_aware_feed_english()
+        self.test_language_aware_feed_russian()
+        
+        # Test translation system with caching
+        self.test_translation_system()
+        
+        # Test new API endpoints
+        self.test_translations_count_endpoint()
+        
+        # Test production-ready features
+        self.test_production_ready_features()
+        
         # Test data management
         self.test_delete_feed_entries()
         self.test_automatic_cleanup()
@@ -538,7 +551,7 @@ class WebhookTester:
         
         # Summary
         print("\n" + "=" * 60)
-        print("📊 TEST SUMMARY")
+        print("📊 ENHANCED WEBHOOK SYSTEM TEST SUMMARY")
         print("=" * 60)
         
         total_tests = len(self.test_results)
