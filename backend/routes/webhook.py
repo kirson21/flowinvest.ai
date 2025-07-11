@@ -1,9 +1,15 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 import os
 import logging
+import sys
+from pathlib import Path
+
+# Add the backend directory to Python path
+ROOT_DIR = Path(__file__).parent.parent
+sys.path.append(str(ROOT_DIR))
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -67,6 +73,17 @@ class FeedEntryResponse(BaseModel):
     timestamp: datetime
     created_at: datetime
 
+class TranslatedFeedEntryResponse(BaseModel):
+    id: str
+    title: str
+    summary: str
+    sentiment: int
+    source: str
+    timestamp: datetime
+    created_at: datetime
+    language: str
+    is_translated: bool
+
 @router.post("/ai_news_webhook", response_model=FeedEntryResponse)
 async def receive_news_webhook(
     news_data: FeedEntryCreate, 
@@ -120,11 +137,16 @@ async def receive_news_webhook(
         logger.error(f"Error processing webhook: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing webhook: {str(e)}")
 
-@router.get("/feed_entries", response_model=List[FeedEntryResponse])
-async def get_feed_entries(limit: int = 20, db=Depends(get_database)):
+@router.get("/feed_entries", response_model=List[TranslatedFeedEntryResponse])
+async def get_feed_entries(
+    limit: int = 20, 
+    language: str = "en",
+    db=Depends(get_database)
+):
     """
     Get the latest feed entries for display in AI Feed
     Returns entries in descending order (latest first)
+    Supports automatic translation to Russian
     """
     try:
         # Fetch latest entries
@@ -133,25 +155,130 @@ async def get_feed_entries(limit: int = 20, db=Depends(get_database)):
             {"_id": 0}  # Exclude MongoDB _id field
         ).sort("created_at", -1).limit(limit).to_list(limit)
         
-        # Convert to response models
-        feed_entries = [FeedEntryResponse(**entry) for entry in entries]
+        translated_entries = []
         
-        logger.info(f"Retrieved {len(feed_entries)} feed entries")
-        return feed_entries
+        for entry in entries:
+            # If language is Russian, attempt to get/create translation
+            if language == "ru":
+                translated_entry = await get_translated_entry(db, entry)
+                translated_entries.append(translated_entry)
+            else:
+                # Return original English entry
+                translated_entry = TranslatedFeedEntryResponse(
+                    **entry,
+                    language="en",
+                    is_translated=False
+                )
+                translated_entries.append(translated_entry)
+        
+        logger.info(f"Retrieved {len(translated_entries)} feed entries in {language}")
+        return translated_entries
         
     except Exception as e:
         logger.error(f"Error retrieving feed entries: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving feed entries: {str(e)}")
 
+async def get_translated_entry(db, entry: dict) -> TranslatedFeedEntryResponse:
+    """Get or create translated version of a feed entry"""
+    try:
+        # Import translation service
+        from services.translation import get_translation_service
+        
+        entry_id = entry['id']
+        
+        # Check for cached translation
+        cached = await db.translations.find_one({
+            "entry_id": entry_id,
+            "language": "ru"
+        })
+        
+        if cached:
+            # Return cached translation
+            return TranslatedFeedEntryResponse(
+                id=entry['id'],
+                title=cached['title'],
+                summary=cached['summary'],
+                sentiment=entry['sentiment'],
+                source=entry['source'],
+                timestamp=entry['timestamp'],
+                created_at=entry['created_at'],
+                language="ru",
+                is_translated=True
+            )
+        
+        # Get API key and create translation
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if not api_key:
+            logger.warning("OpenAI API key not found, returning original text")
+            return TranslatedFeedEntryResponse(
+                **entry,
+                language="en",
+                is_translated=False
+            )
+        
+        # Translate the content
+        translation_service = get_translation_service(api_key)
+        translation = await translation_service.translate_to_russian(
+            entry['title'], 
+            entry['summary']
+        )
+        
+        # Cache the translation
+        try:
+            translation_doc = {
+                "entry_id": entry_id,
+                "language": "ru",
+                "title": translation['title'],
+                "summary": translation['summary'],
+                "created_at": datetime.utcnow()
+            }
+            
+            await db.translations.update_one(
+                {"entry_id": entry_id, "language": "ru"},
+                {"$set": translation_doc},
+                upsert=True
+            )
+        except Exception as cache_error:
+            logger.error(f"Failed to cache translation: {cache_error}")
+        
+        # Return translated entry
+        return TranslatedFeedEntryResponse(
+            id=entry['id'],
+            title=translation['title'],
+            summary=translation['summary'],
+            sentiment=entry['sentiment'],
+            source=entry['source'],
+            timestamp=entry['timestamp'],
+            created_at=entry['created_at'],
+            language="ru",
+            is_translated=True
+        )
+        
+    except Exception as e:
+        logger.error(f"Translation failed for entry {entry['id']}: {e}")
+        # Return original entry as fallback
+        return TranslatedFeedEntryResponse(
+            **entry,
+            language="en", 
+            is_translated=False
+        )
+
 @router.delete("/feed_entries", status_code=200)
 async def clear_all_feed_entries(db=Depends(get_database)):
     """
-    Clear all feed entries (for testing purposes)
+    Clear all feed entries and translations (for testing purposes)
     """
     try:
-        result = await db.feed_entries.delete_many({})
-        logger.info(f"Cleared {result.deleted_count} feed entries")
-        return {"message": f"Cleared {result.deleted_count} feed entries"}
+        # Clear feed entries
+        entries_result = await db.feed_entries.delete_many({})
+        
+        # Clear translations
+        translations_result = await db.translations.delete_many({})
+        
+        logger.info(f"Cleared {entries_result.deleted_count} feed entries and {translations_result.deleted_count} translations")
+        return {
+            "message": f"Cleared {entries_result.deleted_count} feed entries and {translations_result.deleted_count} translations"
+        }
     except Exception as e:
         logger.error(f"Error clearing feed entries: {e}")
         raise HTTPException(status_code=500, detail=f"Error clearing feed entries: {str(e)}")
@@ -167,3 +294,15 @@ async def get_feed_entries_count(db=Depends(get_database)):
     except Exception as e:
         logger.error(f"Error getting feed entries count: {e}")
         raise HTTPException(status_code=500, detail=f"Error getting count: {str(e)}")
+
+@router.get("/translations/count")
+async def get_translations_count(db=Depends(get_database)):
+    """
+    Get the total count of cached translations
+    """
+    try:
+        count = await db.translations.count_documents({})
+        return {"count": count}
+    except Exception as e:
+        logger.error(f"Error getting translations count: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting translations count: {str(e)}")
