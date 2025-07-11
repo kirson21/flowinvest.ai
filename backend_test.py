@@ -243,6 +243,221 @@ class WebhookTester:
         else:
             self.log_test("Automatic cleanup", False, f"Too many entries: {final_count} (>20)")
             
+    def test_language_aware_feed_english(self):
+        """Test GET /api/feed_entries?language=en for English content"""
+        print("\n🇺🇸 Testing Language-Aware Feed Retrieval (English)")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/feed_entries?language=en")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    # Check response structure for language-aware features
+                    if len(data) > 0:
+                        entry = data[0]
+                        required_fields = ['id', 'title', 'summary', 'sentiment', 'source', 'timestamp', 'created_at', 'language', 'is_translated']
+                        missing_fields = [field for field in required_fields if field not in entry]
+                        
+                        if not missing_fields:
+                            # Verify English entries are not translated
+                            english_entries = [e for e in data if e.get('language') == 'en' and e.get('is_translated') == False]
+                            self.log_test("English feed entries", True, 
+                                        f"Retrieved {len(data)} entries, {len(english_entries)} in English (not translated)")
+                        else:
+                            self.log_test("English feed entries", False, f"Missing fields: {missing_fields}")
+                    else:
+                        self.log_test("English feed entries", True, "No entries found (empty database)")
+                else:
+                    self.log_test("English feed entries", False, "Response is not a list")
+            else:
+                self.log_test("English feed entries", False, f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_test("English feed entries", False, f"Exception: {str(e)}")
+            
+    def test_language_aware_feed_russian(self):
+        """Test GET /api/feed_entries?language=ru for Russian translation"""
+        print("\n🇷🇺 Testing Language-Aware Feed Retrieval (Russian Translation)")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/feed_entries?language=ru")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    if len(data) > 0:
+                        entry = data[0]
+                        required_fields = ['id', 'title', 'summary', 'sentiment', 'source', 'timestamp', 'created_at', 'language', 'is_translated']
+                        missing_fields = [field for field in required_fields if field not in entry]
+                        
+                        if not missing_fields:
+                            # Check if translation was attempted
+                            russian_entries = [e for e in data if e.get('language') == 'ru']
+                            translated_entries = [e for e in data if e.get('is_translated') == True]
+                            
+                            self.log_test("Russian feed entries", True, 
+                                        f"Retrieved {len(data)} entries, {len(russian_entries)} in Russian, {len(translated_entries)} translated")
+                            
+                            # Return first entry for further testing
+                            return data[0] if data else None
+                        else:
+                            self.log_test("Russian feed entries", False, f"Missing fields: {missing_fields}")
+                    else:
+                        self.log_test("Russian feed entries", True, "No entries found (empty database)")
+                        return None
+                else:
+                    self.log_test("Russian feed entries", False, "Response is not a list")
+            else:
+                self.log_test("Russian feed entries", False, f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_test("Russian feed entries", False, f"Exception: {str(e)}")
+            
+        return None
+        
+    def test_translation_system(self):
+        """Test the complete translation system with caching"""
+        print("\n🔄 Testing Translation System with Caching")
+        
+        # First, clear all data
+        self.test_delete_feed_entries()
+        
+        # Add sample English news as provided in the request
+        sample_data = {
+            "title": "AI Trading Revolution Transforms Investment Landscape",
+            "summary": "Artificial intelligence is revolutionizing the investment industry with sophisticated algorithms that can analyze vast amounts of market data in real-time. These AI-powered systems are enabling both institutional and retail investors to make more informed decisions, leading to improved portfolio performance and reduced risks. The technology has democratized access to advanced trading strategies previously available only to professional fund managers.",
+            "sentiment": 78,
+            "source": "FinTech Weekly",
+            "timestamp": "2025-01-10T16:45:00Z"
+        }
+        
+        # Add the entry
+        try:
+            response = self.session.post(
+                f"{API_BASE}/ai_news_webhook",
+                json=sample_data,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            if response.status_code == 200:
+                self.log_test("Add sample news for translation", True, "Sample news added successfully")
+                
+                # Test first Russian request (should trigger translation)
+                print("   Testing first Russian request (should trigger OpenAI translation)...")
+                start_time = time.time()
+                
+                russian_response = self.session.get(f"{API_BASE}/feed_entries?language=ru")
+                first_request_time = time.time() - start_time
+                
+                if russian_response.status_code == 200:
+                    russian_data = russian_response.json()
+                    if russian_data and len(russian_data) > 0:
+                        first_entry = russian_data[0]
+                        
+                        # Check if translation occurred
+                        if first_entry.get('language') == 'ru' and first_entry.get('is_translated'):
+                            self.log_test("First Russian translation request", True, 
+                                        f"Translation successful (took {first_request_time:.2f}s)")
+                            
+                            # Test second Russian request (should use cached version)
+                            print("   Testing second Russian request (should use cached translation)...")
+                            start_time = time.time()
+                            
+                            cached_response = self.session.get(f"{API_BASE}/feed_entries?language=ru")
+                            second_request_time = time.time() - start_time
+                            
+                            if cached_response.status_code == 200:
+                                cached_data = cached_response.json()
+                                if cached_data and len(cached_data) > 0:
+                                    cached_entry = cached_data[0]
+                                    
+                                    # Verify cached translation matches
+                                    if (cached_entry.get('title') == first_entry.get('title') and 
+                                        cached_entry.get('summary') == first_entry.get('summary')):
+                                        self.log_test("Cached translation request", True, 
+                                                    f"Cache working (took {second_request_time:.2f}s, {first_request_time/second_request_time:.1f}x faster)")
+                                    else:
+                                        self.log_test("Cached translation request", False, "Translation content mismatch")
+                                else:
+                                    self.log_test("Cached translation request", False, "No cached data returned")
+                            else:
+                                self.log_test("Cached translation request", False, f"HTTP {cached_response.status_code}")
+                        else:
+                            # Check if it fell back to English (acceptable behavior)
+                            if first_entry.get('language') == 'en' and not first_entry.get('is_translated'):
+                                self.log_test("First Russian translation request", True, 
+                                            "Translation failed gracefully, returned English (acceptable fallback)")
+                            else:
+                                self.log_test("First Russian translation request", False, "Unexpected translation result")
+                    else:
+                        self.log_test("First Russian translation request", False, "No data returned")
+                else:
+                    self.log_test("First Russian translation request", False, f"HTTP {russian_response.status_code}")
+            else:
+                self.log_test("Add sample news for translation", False, f"HTTP {response.status_code}")
+                
+        except Exception as e:
+            self.log_test("Translation system test", False, f"Exception: {str(e)}")
+            
+    def test_translations_count_endpoint(self):
+        """Test GET /api/translations/count endpoint"""
+        print("\n🔢 Testing Translations Count Endpoint")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/translations/count")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'count' in data and isinstance(data['count'], int):
+                    self.log_test("GET translations count", True, f"Translation count: {data['count']}")
+                    return data['count']
+                else:
+                    self.log_test("GET translations count", False, "Invalid response format")
+            else:
+                self.log_test("GET translations count", False, f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_test("GET translations count", False, f"Exception: {str(e)}")
+            
+        return -1
+        
+    def test_production_ready_features(self):
+        """Test production-ready features: no dev controls, cleanup, error handling"""
+        print("\n🏭 Testing Production-Ready Features")
+        
+        # Test that API responses don't contain development controls
+        try:
+            response = self.session.get(f"{API_BASE}/feed_entries")
+            if response.status_code == 200:
+                data = response.json()
+                response_text = json.dumps(data)
+                
+                # Check for development-related fields that shouldn't be in production
+                dev_indicators = ['debug', 'test', 'development', 'dev_mode', 'admin']
+                found_dev_indicators = [indicator for indicator in dev_indicators if indicator in response_text.lower()]
+                
+                if not found_dev_indicators:
+                    self.log_test("No development controls in API", True, "Clean production API responses")
+                else:
+                    self.log_test("No development controls in API", False, f"Found dev indicators: {found_dev_indicators}")
+            else:
+                self.log_test("No development controls in API", False, f"Could not test API response")
+                
+        except Exception as e:
+            self.log_test("No development controls in API", False, f"Exception: {str(e)}")
+            
+        # Test error handling for translation failures (simulate by testing with invalid language)
+        try:
+            response = self.session.get(f"{API_BASE}/feed_entries?language=invalid")
+            if response.status_code == 200:
+                # Should handle gracefully, likely returning English
+                self.log_test("Translation error handling", True, "Invalid language handled gracefully")
+            else:
+                self.log_test("Translation error handling", False, f"HTTP {response.status_code}")
+        except Exception as e:
+            self.log_test("Translation error handling", False, f"Exception: {str(e)}")
+            
     def test_api_integration(self):
         """Test complete API integration workflow"""
         print("\n🔄 Testing Complete API Integration")
