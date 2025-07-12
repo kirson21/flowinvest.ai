@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import os
 import logging
 import sys
@@ -44,9 +44,35 @@ async def cleanup_old_entries(db):
     except Exception as e:
         logger.error(f"Error during cleanup: {e}")
 
-# Define models inline to avoid import issues
-from pydantic import BaseModel, Field
+# Define models for the new OpenAI response format
+from pydantic import BaseModel, Field, validator
 import uuid
+
+class MessageContent(BaseModel):
+    """Content structure from OpenAI API response"""
+    title: str = Field(..., description="News headline")
+    summary: str = Field(..., description="AI-generated summary")
+    sentiment_score: int = Field(..., ge=0, le=100, description="Market sentiment score (0-100)")
+
+class Message(BaseModel):
+    """Message structure from OpenAI API response"""
+    content: MessageContent
+
+class Choice(BaseModel):
+    """Choice structure from OpenAI API response"""
+    message: Message
+
+class OpenAIWebhookRequest(BaseModel):
+    """OpenAI API response format for webhook"""
+    choices: List[Choice]
+    source: Optional[str] = Field(default="AI Generated", description="Source of the news")
+    timestamp: Optional[str] = Field(default=None, description="ISO datetime string")
+
+    @validator('timestamp', always=True)
+    def set_timestamp(cls, v):
+        if v is None:
+            return datetime.utcnow().isoformat()
+        return v
 
 class FeedEntry(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -86,12 +112,80 @@ class TranslatedFeedEntryResponse(BaseModel):
 
 @router.post("/ai_news_webhook", response_model=FeedEntryResponse)
 async def receive_news_webhook(
+    news_data: OpenAIWebhookRequest, 
+    background_tasks: BackgroundTasks,
+    db=Depends(get_database)
+):
+    """
+    Enhanced webhook endpoint to receive investment news updates from n8n with OpenAI format
+    
+    Expected JSON format:
+    {
+        "choices": [
+            {
+                "message": {
+                    "content": {
+                        "title": "News headline",
+                        "summary": "AI-generated summary",
+                        "sentiment_score": 75
+                    }
+                }
+            }
+        ],
+        "source": "Source name (optional)",
+        "timestamp": "ISO datetime string (optional)"
+    }
+    """
+    try:
+        # Extract data from OpenAI response format
+        if not news_data.choices or len(news_data.choices) == 0:
+            raise HTTPException(status_code=400, detail="No choices found in request")
+        
+        choice = news_data.choices[0]
+        content = choice.message.content
+        
+        # Parse the timestamp
+        try:
+            timestamp = datetime.fromisoformat(news_data.timestamp.replace('Z', '+00:00'))
+        except ValueError:
+            # Fallback to current time if timestamp parsing fails
+            timestamp = datetime.utcnow()
+            logger.warning(f"Could not parse timestamp {news_data.timestamp}, using current time")
+
+        # Create feed entry from OpenAI format
+        feed_entry = FeedEntry(
+            title=content.title,
+            summary=content.summary,
+            sentiment=content.sentiment_score,  # Map sentiment_score to sentiment
+            source=news_data.source,
+            timestamp=timestamp
+        )
+        
+        # Insert into database
+        result = await db.feed_entries.insert_one(feed_entry.dict())
+        
+        if not result.inserted_id:
+            raise HTTPException(status_code=500, detail="Failed to insert feed entry")
+        
+        # Schedule cleanup of old entries in background
+        background_tasks.add_task(cleanup_old_entries, db)
+        
+        logger.info(f"Successfully added news entry from OpenAI format: {feed_entry.title}")
+        
+        return FeedEntryResponse(**feed_entry.dict())
+        
+    except Exception as e:
+        logger.error(f"Error processing OpenAI webhook: {e}")
+        raise HTTPException(status_code=500, detail=f"Error processing webhook: {str(e)}")
+
+@router.post("/ai_news_webhook/legacy", response_model=FeedEntryResponse)
+async def receive_news_webhook_legacy(
     news_data: FeedEntryCreate, 
     background_tasks: BackgroundTasks,
     db=Depends(get_database)
 ):
     """
-    Webhook endpoint to receive investment news updates from n8n
+    Legacy webhook endpoint for backward compatibility
     
     Expected JSON format:
     {
@@ -129,12 +223,12 @@ async def receive_news_webhook(
         # Schedule cleanup of old entries in background
         background_tasks.add_task(cleanup_old_entries, db)
         
-        logger.info(f"Successfully added news entry: {feed_entry.title}")
+        logger.info(f"Successfully added news entry via legacy endpoint: {feed_entry.title}")
         
         return FeedEntryResponse(**feed_entry.dict())
         
     except Exception as e:
-        logger.error(f"Error processing webhook: {e}")
+        logger.error(f"Error processing legacy webhook: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing webhook: {str(e)}")
 
 @router.get("/feed_entries", response_model=List[TranslatedFeedEntryResponse])
@@ -306,3 +400,32 @@ async def get_translations_count(db=Depends(get_database)):
     except Exception as e:
         logger.error(f"Error getting translations count: {e}")
         raise HTTPException(status_code=500, detail=f"Error getting translations count: {str(e)}")
+
+@router.get("/webhook/test")
+async def test_webhook_format():
+    """
+    Get example request format for the new webhook
+    """
+    return {
+        "description": "Send POST request to /api/ai_news_webhook with this format:",
+        "example_request": {
+            "choices": [
+                {
+                    "message": {
+                        "content": {
+                            "title": "{{ $json.choices[0].message.content.title }}",
+                            "summary": "{{ $json.choices[0].message.content.summary }}",
+                            "sentiment_score": "{{ $json.choices[0].message.content.sentiment_score }}"
+                        }
+                    }
+                }
+            ],
+            "source": "Your News Source",
+            "timestamp": "2025-01-11T10:30:00Z"
+        },
+        "n8n_mapping": {
+            "title": "{{ $json.choices[0].message.content.title }}",
+            "summary": "{{ $json.choices[0].message.content.summary }}",
+            "sentiment_score": "{{ $json.choices[0].message.content.sentiment_score }}"
+        }
+    }
