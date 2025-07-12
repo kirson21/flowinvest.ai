@@ -30,8 +30,8 @@ export const mockFeedPosts = [
 export const mockTradingBots = [
   {
     id: 1,
-    name: "AI Trend Master",
-    description: "Advanced trend-following algorithm with machine learning capabilities",
+    name: "AI Trend Master Pro",
+    description: "Advanced trend-following algorithm with machine learning capabilities and smart risk management",
     strategy: "Trend Following",
     exchange: "Binance",
     riskLevel: "Medium",
@@ -41,13 +41,14 @@ export const mockTradingBots = [
     isActive: true,
     tradingPair: "BTC/USDT",
     winRate: 68.5,
-    created: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-    type: "pre-built"
+    created: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    type: "pre-built",
+    creator: "FlowInvest.ai"
   },
   {
     id: 2,
-    name: "Scalping Expert",
-    description: "High-frequency trading bot optimized for quick profits",
+    name: "Quantum Scalping Engine",
+    description: "High-frequency trading bot optimized for quick profits with AI-powered entry and exit signals",
     strategy: "Scalping",
     exchange: "Bybit",
     riskLevel: "High",
@@ -57,14 +58,15 @@ export const mockTradingBots = [
     isActive: true,
     tradingPair: "ETH/USDT",
     winRate: 72.3,
-    created: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
-    type: "pre-built"
+    created: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+    type: "pre-built",
+    creator: "FlowInvest.ai"
   },
   {
     id: 3,
-    name: "Conservative Growth",
-    description: "Low-risk strategy focused on steady gains",
-    strategy: "Conservative",
+    name: "Shield Conservative Growth",
+    description: "Low-risk strategy focused on steady gains with advanced portfolio protection mechanisms",
+    strategy: "Conservative Growth",
     exchange: "Kraken",
     riskLevel: "Low",
     dailyPnL: 0.87,
@@ -73,8 +75,26 @@ export const mockTradingBots = [
     isActive: false,
     tradingPair: "BTC/USD",
     winRate: 78.9,
-    created: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000), // 45 days ago
-    type: "pre-built"
+    created: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+    type: "pre-built",
+    creator: "FlowInvest.ai"
+  },
+  {
+    id: 4,
+    name: "DeFi Yield Maximizer",
+    description: "Smart contract integration for optimized DeFi yield farming with automated rebalancing",
+    strategy: "DeFi Yield",
+    exchange: "Binance",
+    riskLevel: "Medium",
+    dailyPnL: 1.95,
+    weeklyPnL: 8.74,
+    monthlyPnL: 32.15,
+    isActive: true,
+    tradingPair: "Multi-Asset",
+    winRate: 74.2,
+    created: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+    type: "pre-built",
+    creator: "FlowInvest.ai"
   }
 ];
 
