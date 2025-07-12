@@ -361,7 +361,7 @@ frontend:
           agent: "testing"
           comment: "✅ AI Feed displays 3 market sentiment posts with proper categorization, timestamps, market sentiment indicators, and refresh functionality. All mock data is displaying correctly."
 
-  - task: "Trading Bots Tab with Pre-built and Custom Creation"
+  - task: "Enhanced Trading Bots Section with Pre-built Bots"
     implemented: true
     working: true
     file: "/app/frontend/src/components/bots/TradingBots.js"
@@ -371,9 +371,57 @@ frontend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "✅ Trading Bots section works perfectly with Pre-built Bots and My Bots tabs. Create Bot button opens the Bot Builder interface with all form fields, dropdowns, and preview functionality working correctly."
+          comment: "✅ Enhanced Trading Bots section working perfectly! Pre-built Bots tab shows 5 FlowInvest.ai badges and 6 Pre-built badges. Connection status indicators display 'Connected' and 'Not Connected' properly. Enhanced bot cards with professional layout, color-coded risk levels, and P&L indicators all working correctly."
 
-  - task: "Bot Builder for Custom Bot Creation"
+  - task: "Run Bot Modal with API Keys and OAuth"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/RunBotModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Run Bot modal opens perfectly with bot information display. API Keys tab and OAuth tab both visible and functional. Exchange options (Binance, Bybit, Kraken) all present. Security information and privacy details displayed correctly. Form fields for API key input working properly."
+
+  - task: "View Details Modal with Performance Charts"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/BotDetailsModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ View Details modal working excellently! Performance charts with P&L data display correctly. Timeframe filters (7, 30, 90, 180 days) all functional. Key Metrics, Recent Trades, and Settings tabs all working with proper content. Detailed bot configuration and trading statistics displayed perfectly."
+
+  - task: "My Bots Section with Personal and Custom Badges"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/TradingBots.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ My Bots section working perfectly! Found 3 Personal badges and 4 Custom badges on user bots. AI Creator button (purple) and Advanced Settings button both visible and properly styled. User bot cards display correctly with enhanced layout."
+
+  - task: "AI Creator Interface with Chat and Bot Preview"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/AIBotCreator.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ AI Creator interface working excellently! Chat interface with AI assistant visible and functional. Suggested prompts ('Try these examples') displayed correctly. Bot preview panel on the right working properly. Initial AI message visible. Suggested prompt functionality working - prompts fill input field correctly. Natural language bot creation interface fully operational."
+
+  - task: "Advanced Settings Bot Builder Interface"
     implemented: true
     working: true
     file: "/app/frontend/src/components/bots/BotBuilder.js"
@@ -383,7 +431,7 @@ frontend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "✅ Bot Builder interface is fully functional with form fields for bot name, description, exchange selection, strategy selection, risk level, and trading pair. Bot preview updates dynamically."
+          comment: "✅ Advanced Settings (Bot Builder) interface working perfectly! Traditional manual bot builder with Bot Configuration visible. Form fields for name and description working correctly. Exchange and strategy dropdowns functional. Bot preview with dynamic updates working properly. All form functionality operational."
 
   - task: "Portfolios Tab with Performance Data"
     implemented: true
