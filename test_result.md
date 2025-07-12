@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the enhanced webhook system with automatic translation functionality for the Flow Invest app. Test webhook endpoints, language-aware feed retrieval, translation system with OpenAI integration, caching, and production-ready features."
+user_problem_statement: "Test the enhanced webhook system with automatic translation functionality for the Flow Invest app. Test webhook endpoints, language-aware feed retrieval, translation system with OpenAI integration, caching, and production-ready features. NEW: Test the updated webhook system that now accepts OpenAI API response format with parameter mapping verification, legacy endpoint for backward compatibility, and enhanced API features."
 
 backend:
   - task: "Enhanced Webhook Endpoint for AI News"
@@ -119,6 +119,90 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ Enhanced webhook endpoint tested with new TranslatedFeedEntryResponse model. All validation working correctly, handles invalid timestamps gracefully by falling back to current time (acceptable behavior)."
+
+  - task: "New OpenAI Format Webhook"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ POST /api/ai_news_webhook now accepts OpenAI API response format perfectly. Successfully processes nested structure with choices[0].message.content. Parameter mapping working: title, summary, sentiment_score→sentiment, source, timestamp all mapped correctly. Entry created with proper validation and structured response."
+
+  - task: "Parameter Mapping Verification"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Parameter mapping verification working perfectly. choices[0].message.content.title→title, choices[0].message.content.summary→summary, choices[0].message.content.sentiment_score→sentiment, source→source, timestamp→timestamp all mapping correctly. All field mappings tested and verified."
+
+  - task: "Legacy Endpoint for Backward Compatibility"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ POST /api/ai_news_webhook/legacy endpoint working perfectly for backward compatibility. Accepts old format (title, summary, sentiment, source, timestamp) and processes correctly. Both new and legacy endpoints work independently as designed."
+
+  - task: "Enhanced API Features - Documentation Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ GET /api/webhook/test endpoint working perfectly. Provides comprehensive format documentation with OpenAI structure examples and n8n mapping instructions. Documentation includes proper choices[0].message.content structure."
+
+  - task: "OpenAI Format Error Handling"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Error handling with malformed OpenAI format working excellently. Properly handles missing choices, empty choices array, missing message/content fields, and invalid sentiment_score values. All error scenarios return appropriate HTTP status codes (400/422/500)."
+
+  - task: "Data Storage & Retrieval with OpenAI Format"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Data storage and retrieval working perfectly with OpenAI format. Entries from new format stored correctly in MongoDB with proper data integrity. Feed retrieval shows new entries with correct structure including language and is_translated fields."
+
+  - task: "Translation System with OpenAI Format"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/webhook.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Translation system working perfectly with OpenAI format entries. English entries properly marked as non-translated (language='en', is_translated=false). Russian translation system working correctly with OpenAI format data, providing proper translations with language='ru' and is_translated=true."
 
   - task: "Language-Aware Feed Retrieval"
     implemented: true
