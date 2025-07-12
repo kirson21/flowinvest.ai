@@ -41,9 +41,74 @@ class WebhookTester:
             'details': details
         })
         
+    def test_openai_format_webhook(self):
+        """Test POST /api/ai_news_webhook with new OpenAI format"""
+        print("\n🤖 Testing New OpenAI Format Webhook")
+        
+        # Sample data in OpenAI format as provided in the request
+        openai_sample_data = {
+            "choices": [
+                {
+                    "message": {
+                        "content": {
+                            "title": "AI Revolution Transforms Financial Markets",
+                            "summary": "Cutting-edge artificial intelligence technologies are revolutionizing financial markets with unprecedented speed and accuracy. Machine learning algorithms now process millions of data points in real-time, enabling traders and investors to make more informed decisions. This technological advancement is democratizing access to sophisticated trading strategies and improving market efficiency across global exchanges.",
+                            "sentiment_score": 82
+                        }
+                    }
+                }
+            ],
+            "source": "FinTech AI Weekly",
+            "timestamp": "2025-01-11T10:30:00Z"
+        }
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/ai_news_webhook",
+                json=openai_sample_data,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                # Verify response structure
+                required_fields = ['id', 'title', 'summary', 'sentiment', 'source', 'timestamp', 'created_at']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    # Verify parameter mapping
+                    expected_title = openai_sample_data['choices'][0]['message']['content']['title']
+                    expected_summary = openai_sample_data['choices'][0]['message']['content']['summary']
+                    expected_sentiment = openai_sample_data['choices'][0]['message']['content']['sentiment_score']
+                    expected_source = openai_sample_data['source']
+                    
+                    mapping_correct = (
+                        data['title'] == expected_title and
+                        data['summary'] == expected_summary and
+                        data['sentiment'] == expected_sentiment and
+                        data['source'] == expected_source
+                    )
+                    
+                    if mapping_correct:
+                        self.log_test("OpenAI format webhook with parameter mapping", True, 
+                                    f"Entry created with ID: {data['id']}, all parameters mapped correctly")
+                        return data['id']
+                    else:
+                        self.log_test("OpenAI format webhook with parameter mapping", False, 
+                                    "Parameter mapping incorrect")
+                else:
+                    self.log_test("OpenAI format webhook", False, f"Missing fields in response: {missing_fields}")
+            else:
+                self.log_test("OpenAI format webhook", False, f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_test("OpenAI format webhook", False, f"Exception: {str(e)}")
+            
+        return None
+
     def test_webhook_endpoint_valid_data(self):
-        """Test POST /api/ai_news_webhook with valid JSON data"""
-        print("\n📝 Testing Webhook Endpoint with Valid Data")
+        """Test POST /api/ai_news_webhook with valid JSON data (legacy format)"""
+        print("\n📝 Testing Webhook Endpoint with Valid Data (Legacy Format)")
         
         # Sample data as provided in the request
         sample_data = {
