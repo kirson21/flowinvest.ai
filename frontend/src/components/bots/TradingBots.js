@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { mockTradingBots, mockUserBots } from '../../data/mockData';
 import BotBuilder from './BotBuilder';
+import AdvancedBotBuilder from './AdvancedBotBuilder';
 import RunBotModal from './RunBotModal';
 import BotDetailsModal from './BotDetailsModal';
 import AIBotCreator from './AIBotCreator';
