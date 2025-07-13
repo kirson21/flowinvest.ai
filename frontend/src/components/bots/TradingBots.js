@@ -324,6 +324,29 @@ const TradingBots = () => {
     </Card>
   );
 
+  if (showAdvancedBuilder) {
+    return (
+      <AdvancedBotBuilder 
+        onClose={() => setShowAdvancedBuilder(false)}
+        onSave={(botData) => {
+          const newBot = {
+            ...botData,
+            id: Date.now(),
+            dailyPnL: 0,
+            weeklyPnL: 0,
+            monthlyPnL: 0,
+            winRate: 0,
+            isActive: false,
+            created: new Date(),
+            type: 'advanced'
+          };
+          setUserBots([...userBots, newBot]);
+          setShowAdvancedBuilder(false);
+        }}
+      />
+    );
+  }
+
   if (showBotBuilder) {
     return (
       <BotBuilder 
