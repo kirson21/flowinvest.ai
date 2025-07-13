@@ -559,7 +559,7 @@ class WebhookTester:
         for entry in test_entries:
             try:
                 response = self.session.post(
-                    f"{API_BASE}/ai_news_webhook",
+                    f"{API_BASE}/ai_news_webhook/legacy",
                     json=entry,
                     headers={'Content-Type': 'application/json'}
                 )
