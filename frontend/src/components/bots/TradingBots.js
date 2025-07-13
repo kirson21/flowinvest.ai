@@ -447,11 +447,19 @@ const TradingBots = () => {
                 AI Creator
               </Button>
               <Button
+                onClick={() => setShowBotBuilder(true)}
+                variant="outline"
+                className="border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+              >
+                <Plus size={16} className="mr-2" />
+                Simple Builder
+              </Button>
+              <Button
                 onClick={() => setShowAdvancedBuilder(true)}
                 variant="outline"
                 className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
               >
-                <Plus size={16} className="mr-2" />
+                <Settings size={16} className="mr-2" />
                 Advanced Settings
               </Button>
             </div>
