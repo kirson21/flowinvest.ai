@@ -289,7 +289,7 @@ class WebhookTester:
             
             try:
                 response = self.session.post(
-                    f"{API_BASE}/ai_news_webhook",
+                    f"{API_BASE}/ai_news_webhook/legacy",
                     json=sample_data,
                     headers={'Content-Type': 'application/json'}
                 )
