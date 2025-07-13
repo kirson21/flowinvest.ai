@@ -447,7 +447,7 @@ const TradingBots = () => {
                 AI Creator
               </Button>
               <Button
-                onClick={() => setShowBotBuilder(true)}
+                onClick={() => setShowAdvancedBuilder(true)}
                 variant="outline"
                 className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
               >
