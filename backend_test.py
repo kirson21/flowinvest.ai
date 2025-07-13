@@ -586,7 +586,10 @@ class WebhookTester:
         print("🚀 Starting Flow Invest Enhanced Webhook System Tests")
         print("=" * 60)
         
-        # Test basic webhook functionality
+        # Test new OpenAI format webhook
+        self.test_openai_format_webhook()
+        
+        # Test basic webhook functionality (legacy)
         self.test_webhook_endpoint_valid_data()
         self.test_webhook_invalid_data()
         
