@@ -107,7 +107,7 @@ class WebhookTester:
         return None
 
     def test_webhook_endpoint_valid_data(self):
-        """Test POST /api/ai_news_webhook with valid JSON data (legacy format)"""
+        """Test POST /api/ai_news_webhook/legacy with valid JSON data (legacy format)"""
         print("\n📝 Testing Webhook Endpoint with Valid Data (Legacy Format)")
         
         # Sample data as provided in the request
@@ -121,7 +121,7 @@ class WebhookTester:
         
         try:
             response = self.session.post(
-                f"{API_BASE}/ai_news_webhook",
+                f"{API_BASE}/ai_news_webhook/legacy",
                 json=sample_data,
                 headers={'Content-Type': 'application/json'}
             )
