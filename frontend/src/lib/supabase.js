@@ -20,120 +20,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-// Database types for TypeScript support
-export interface User {
-  id: string
-  email: string
-  full_name?: string
-  phone?: string
-  country?: string
-  avatar_url?: string
-  created_at: string
-  updated_at: string
-}
-
-export interface UserSettings {
-  id: string
-  user_id: string
-  language: string
-  theme: string
-  notifications_enabled: boolean
-  email_notifications: boolean
-  push_notifications: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Bot {
-  id: string
-  user_id?: string
-  name: string
-  description?: string
-  strategy: string
-  risk_level: 'low' | 'medium' | 'high'
-  trade_type: 'long' | 'short'
-  base_coin: string
-  quote_coin: string
-  exchange: 'binance' | 'bybit' | 'kraken'
-  status: 'active' | 'inactive' | 'paused' | 'error'
-  is_prebuilt: boolean
-  deposit_amount?: number
-  trading_mode?: string
-  profit_target?: number
-  stop_loss?: number
-  advanced_settings?: any
-  daily_pnl: number
-  weekly_pnl: number
-  monthly_pnl: number
-  win_rate: number
-  total_trades: number
-  successful_trades: number
-  created_at: string
-  updated_at: string
-  last_executed_at?: string
-}
-
-export interface Portfolio {
-  id: string
-  user_id?: string
-  name: string
-  description?: string
-  portfolio_type: 'manual' | 'ai_generated' | 'prebuilt'
-  risk_level: 'low' | 'medium' | 'high'
-  total_value: number
-  daily_return: number
-  weekly_return: number
-  monthly_return: number
-  yearly_return: number
-  auto_rebalance: boolean
-  rebalance_frequency?: string
-  created_at: string
-  updated_at: string
-  assets?: PortfolioAsset[]
-}
-
-export interface PortfolioAsset {
-  id: string
-  portfolio_id: string
-  symbol: string
-  name?: string
-  quantity: number
-  avg_price?: number
-  current_price?: number
-  allocation_percentage?: number
-  value?: number
-  created_at: string
-  updated_at: string
-}
-
-export interface NewsFeed {
-  id: string
-  title: string
-  summary: string
-  sentiment: number
-  source?: string
-  original_language: string
-  content_hash?: string
-  published_at?: string
-  created_at: string
-  is_translated?: boolean
-}
-
-export interface ApiKey {
-  id: string
-  user_id: string
-  exchange: 'binance' | 'bybit' | 'kraken'
-  name: string
-  is_testnet: boolean
-  is_active: boolean
-  last_used_at?: string
-  created_at: string
-  updated_at: string
-}
-
 // Authentication helper functions
 export const auth = {
-  signUp: async (email: string, password: string, options?: { data?: any }) => {
+  signUp: async (email, password, options = {}) => {
     return await supabase.auth.signUp({
       email,
       password,
@@ -141,7 +30,7 @@ export const auth = {
     })
   },
 
-  signIn: async (email: string, password: string) => {
+  signIn: async (email, password) => {
     return await supabase.auth.signInWithPassword({
       email,
       password
@@ -172,7 +61,7 @@ export const auth = {
 // Database helper functions
 export const database = {
   // User operations
-  getUserProfile: async (userId: string): Promise<User | null> => {
+  getUserProfile: async (userId) => {
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -186,7 +75,7 @@ export const database = {
     return data
   },
 
-  updateUserProfile: async (userId: string, updates: Partial<User>) => {
+  updateUserProfile: async (userId, updates) => {
     const { data, error } = await supabase
       .from('users')
       .update(updates)
@@ -201,7 +90,7 @@ export const database = {
     return data
   },
 
-  getUserSettings: async (userId: string): Promise<UserSettings | null> => {
+  getUserSettings: async (userId) => {
     const { data, error } = await supabase
       .from('user_settings')
       .select('*')
@@ -215,7 +104,7 @@ export const database = {
     return data
   },
 
-  updateUserSettings: async (userId: string, settings: Partial<UserSettings>) => {
+  updateUserSettings: async (userId, settings) => {
     const { data, error } = await supabase
       .from('user_settings')
       .update(settings)
@@ -231,7 +120,7 @@ export const database = {
   },
 
   // Bot operations
-  getUserBots: async (userId: string, includePrebuilt: boolean = true): Promise<Bot[]> => {
+  getUserBots: async (userId, includePrebuilt = true) => {
     let query = supabase.from('bots').select('*')
     
     if (includePrebuilt) {
@@ -249,7 +138,7 @@ export const database = {
     return data || []
   },
 
-  createBot: async (bot: Omit<Bot, 'id' | 'created_at' | 'updated_at'>) => {
+  createBot: async (bot) => {
     const { data, error } = await supabase
       .from('bots')
       .insert(bot)
@@ -263,7 +152,7 @@ export const database = {
     return data
   },
 
-  updateBot: async (botId: string, updates: Partial<Bot>) => {
+  updateBot: async (botId, updates) => {
     const { data, error } = await supabase
       .from('bots')
       .update(updates)
@@ -278,7 +167,7 @@ export const database = {
     return data
   },
 
-  deleteBot: async (botId: string) => {
+  deleteBot: async (botId) => {
     const { error } = await supabase
       .from('bots')
       .delete()
@@ -292,7 +181,7 @@ export const database = {
   },
 
   // Portfolio operations
-  getUserPortfolios: async (userId: string): Promise<Portfolio[]> => {
+  getUserPortfolios: async (userId) => {
     const { data: portfolios, error: portfoliosError } = await supabase
       .from('portfolios')
       .select('*')
@@ -324,7 +213,7 @@ export const database = {
     return portfoliosWithAssets
   },
 
-  createPortfolio: async (portfolio: Omit<Portfolio, 'id' | 'created_at' | 'updated_at'>) => {
+  createPortfolio: async (portfolio) => {
     const { data, error } = await supabase
       .from('portfolios')
       .insert(portfolio)
@@ -339,7 +228,7 @@ export const database = {
   },
 
   // News feed operations
-  getNewsFeed: async (language: string = 'en', limit: number = 20): Promise<NewsFeed[]> => {
+  getNewsFeed: async (language = 'en', limit = 20) => {
     if (language === 'en') {
       const { data, error } = await supabase
         .from('news_feed')
@@ -360,7 +249,7 @@ export const database = {
   },
 
   // API key operations
-  getUserApiKeys: async (userId: string): Promise<ApiKey[]> => {
+  getUserApiKeys: async (userId) => {
     const { data, error } = await supabase
       .from('api_keys')
       .select('id, user_id, exchange, name, is_testnet, is_active, last_used_at, created_at, updated_at')
@@ -374,11 +263,7 @@ export const database = {
     return data || []
   },
 
-  storeApiKey: async (apiKey: Omit<ApiKey, 'id' | 'created_at' | 'updated_at'> & { 
-    api_key: string
-    api_secret: string
-    passphrase?: string 
-  }) => {
+  storeApiKey: async (apiKey) => {
     // Note: In production, these should be encrypted before sending
     const { data, error } = await supabase
       .from('api_keys')
@@ -405,7 +290,7 @@ export const database = {
 
 // Real-time subscriptions
 export const realtime = {
-  subscribeToUserBots: (userId: string, callback: (payload: any) => void) => {
+  subscribeToUserBots: (userId, callback) => {
     return supabase
       .channel('user-bots')
       .on('postgres_changes', 
@@ -420,7 +305,7 @@ export const realtime = {
       .subscribe()
   },
 
-  subscribeToUserPortfolios: (userId: string, callback: (payload: any) => void) => {
+  subscribeToUserPortfolios: (userId, callback) => {
     return supabase
       .channel('user-portfolios')
       .on('postgres_changes', 
@@ -435,7 +320,7 @@ export const realtime = {
       .subscribe()
   },
 
-  subscribeToNewsFeed: (callback: (payload: any) => void) => {
+  subscribeToNewsFeed: (callback) => {
     return supabase
       .channel('news-feed')
       .on('postgres_changes', 
@@ -449,7 +334,7 @@ export const realtime = {
       .subscribe()
   },
 
-  unsubscribe: (channel: any) => {
+  unsubscribe: (channel) => {
     return supabase.removeChannel(channel)
   }
 }
