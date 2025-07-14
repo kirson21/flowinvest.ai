@@ -186,7 +186,7 @@ async def get_bot_details(bot_id: str, user_id: Optional[str] = None):
         raise HTTPException(status_code=500, detail=f"Error fetching bot details: {str(e)}")
 
 # Test endpoint for Grok service
-@router.post("/api/bots/test-grok")
+@router.post("/bots/test-grok")
 async def test_grok_service(request: BotCreationRequest):
     """Test the Grok service without saving to database"""
     try:
