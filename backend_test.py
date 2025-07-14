@@ -368,8 +368,7 @@ class FlowInvestTester:
         
         try:
             response = self.session.put(
-                f"{API_BASE}/bots/{self.test_bot_id}/activate",
-                json={"user_id": self.test_user_id},
+                f"{API_BASE}/bots/{self.test_bot_id}/activate?user_id={self.test_user_id}",
                 headers={'Content-Type': 'application/json'}
             )
             
@@ -398,8 +397,7 @@ class FlowInvestTester:
         
         try:
             response = self.session.put(
-                f"{API_BASE}/bots/{self.test_bot_id}/deactivate",
-                json={"user_id": self.test_user_id},
+                f"{API_BASE}/bots/{self.test_bot_id}/deactivate?user_id={self.test_user_id}",
                 headers={'Content-Type': 'application/json'}
             )
             
@@ -427,7 +425,12 @@ class FlowInvestTester:
             return False
         
         try:
-            response = self.session.get(f"{API_BASE}/bots/{self.test_bot_id}")
+            # Add user_id as query parameter if available
+            url = f"{API_BASE}/bots/{self.test_bot_id}"
+            if self.test_user_id:
+                url += f"?user_id={self.test_user_id}"
+                
+            response = self.session.get(url)
             
             if response.status_code == 200:
                 data = response.json()
@@ -455,8 +458,7 @@ class FlowInvestTester:
         
         try:
             response = self.session.delete(
-                f"{API_BASE}/bots/{self.test_bot_id}",
-                json={"user_id": self.test_user_id},
+                f"{API_BASE}/bots/{self.test_bot_id}?user_id={self.test_user_id}",
                 headers={'Content-Type': 'application/json'}
             )
             
