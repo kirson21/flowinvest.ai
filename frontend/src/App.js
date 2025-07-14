@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AppProvider } from './contexts/AppContext'; // Keep the old AppProvider for compatibility
 import RealAuthScreen from './components/auth/RealAuthScreen';
 import MainApp from './components/MainApp';
 import { Loader2 } from 'lucide-react';
@@ -42,6 +43,17 @@ const PublicRoute = ({ children }) => {
   return user ? <Navigate to="/app" replace /> : children;
 };
 
+// Integration component that bridges old and new auth
+const AppWithAuth = () => {
+  const { user } = useAuth();
+  
+  return (
+    <AppProvider initialUser={user}>
+      <MainApp />
+    </AppProvider>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -58,7 +70,7 @@ function App() {
             {/* Protected routes */}
             <Route path="/app" element={
               <ProtectedRoute>
-                <MainApp />
+                <AppWithAuth />
               </ProtectedRoute>
             } />
             
