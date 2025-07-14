@@ -15,8 +15,10 @@ from datetime import datetime
 ROOT_DIR = Path(__file__).parent
 sys.path.append(str(ROOT_DIR))
 
-# Import the new webhook routes
+# Import routes
 from routes.webhook import router as webhook_router
+from routes.auth import router as auth_router
+from routes.ai_bots import router as ai_bots_router
 
 load_dotenv(ROOT_DIR / '.env')
 
