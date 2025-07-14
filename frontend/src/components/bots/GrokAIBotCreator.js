@@ -33,7 +33,7 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
     setError('');
 
     try {
-      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
       console.log('Backend URL:', backendUrl);
       console.log('Making request to:', `${backendUrl}/api/bots/create-with-ai`);
       
