@@ -163,7 +163,7 @@ class GrokBotCreator:
             
             # Add metadata
             config_json["created_by_ai"] = True
-            config_json["ai_model"] = "grok-beta"
+            config_json["ai_model"] = "grok-2-latest"
             config_json["user_prompt"] = user_prompt
             config_json["is_prebuilt"] = False
             config_json["status"] = "inactive"
