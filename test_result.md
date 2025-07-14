@@ -179,15 +179,18 @@ backend:
 
   - task: "AI Bot Creation with Grok"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/routes/ai_bots.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
           comment: "✅ POST /api/bots/create-with-ai endpoint working perfectly! Successfully creates bots using Grok 4 AI with natural language prompts. Generated bot 'ETH QuickStrike' with proper configuration. AI integration is fully functional."
+        - working: false
+          agent: "testing"
+          comment: "❌ RLS FIX VERIFICATION REVEALED CRITICAL ISSUE: Bot creation appears successful (returns 200 OK with bot data) but actually fails to save to Supabase database due to RLS policy violations. Backend logs show: 'Error saving to Supabase: new row violates row-level security policy for table bots'. This creates phantom bots that exist in API responses but not in database."
 
   - task: "Get User Bots Endpoint"
     implemented: true
