@@ -220,13 +220,16 @@ backend:
     implemented: true
     working: false
     file: "/app/backend/routes/ai_bots.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "❌ PUT /api/bots/{bot_id}/deactivate endpoint implemented but failing due to Supabase RLS policies. Same issue as activation - database security policies preventing bot operations."
+        - working: false
+          agent: "testing"
+          comment: "❌ RLS FIX VERIFICATION FAILED: Bot deactivation still failing with HTTP 500 'Error deactivating bot'. Same underlying RLS policy violations preventing database operations. The claimed RLS fix has NOT been successfully implemented."
 
   - task: "Get Bot Details Endpoint"
     implemented: true
