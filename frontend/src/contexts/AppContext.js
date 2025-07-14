@@ -3,29 +3,29 @@ import { mockTranslations } from '../data/mockData';
 
 const AppContext = createContext();
 
-export const AppProvider = ({ children }) => {
+export const AppProvider = ({ children, initialUser = null }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [language, setLanguage] = useState('en');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!initialUser);
+  const [user, setUser] = useState(initialUser);
   const [activeTab, setActiveTab] = useState('feed');
+
+  // Update authentication when initialUser changes
+  useEffect(() => {
+    setIsAuthenticated(!!initialUser);
+    setUser(initialUser);
+  }, [initialUser]);
 
   // Load saved preferences
   useEffect(() => {
     const savedTheme = localStorage.getItem('flow-invest-theme');
     const savedLanguage = localStorage.getItem('flow-invest-language');
-    const savedAuth = localStorage.getItem('flow-invest-auth');
-    const savedUser = localStorage.getItem('flow-invest-user');
 
     if (savedTheme) {
       setIsDarkMode(savedTheme === 'dark');
     }
     if (savedLanguage) {
       setLanguage(savedLanguage);
-    }
-    if (savedAuth && savedUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(savedUser));
     }
   }, []);
 
