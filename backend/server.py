@@ -59,8 +59,10 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# Include the webhook router
+# Include all routers
 api_router.include_router(webhook_router)
+api_router.include_router(auth_router)
+api_router.include_router(ai_bots_router)
 
 # Include the router in the main app
 app.include_router(api_router)
