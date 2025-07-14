@@ -92,7 +92,7 @@ async def sign_up(request: EmailPasswordSignUp):
         else:
             raise HTTPException(status_code=400, detail=f"Sign up failed: {error_message}")
 
-@router.post("/api/auth/signin", response_model=AuthResponse)
+@router.post("/auth/signin", response_model=AuthResponse)
 async def sign_in(request: EmailPasswordSignIn):
     """Sign in user with email and password"""
     try:
