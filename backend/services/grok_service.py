@@ -118,7 +118,7 @@ class GrokBotCreator:
         
         try:
             response = self.client.chat.completions.create(
-                model="grok-beta",
+                model="grok-2-latest",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
