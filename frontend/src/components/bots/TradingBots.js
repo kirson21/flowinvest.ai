@@ -372,7 +372,7 @@ const TradingBots = () => {
 
   if (showAICreator) {
     return (
-      <AIBotCreator 
+      <GrokAIBotCreator 
         onClose={() => setShowAICreator(false)}
         onSave={(botData) => {
           const newBot = {
