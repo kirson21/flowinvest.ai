@@ -177,7 +177,7 @@ async def get_current_user_profile(current_user: dict = Depends(get_current_user
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get user profile: {str(e)}")
 
-@router.put("/api/auth/user/profile")
+@router.put("/auth/user/profile")
 async def update_user_profile(
     profile_update: UserProfile,
     current_user: dict = Depends(get_current_user)
