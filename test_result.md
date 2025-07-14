@@ -205,13 +205,16 @@ backend:
     implemented: true
     working: false
     file: "/app/backend/routes/ai_bots.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "❌ PUT /api/bots/{bot_id}/activate endpoint implemented but failing due to Supabase Row Level Security (RLS) policies. Error: 'new row violates row-level security policy for table bots'. The endpoint logic is correct but database permissions need configuration."
+        - working: false
+          agent: "testing"
+          comment: "❌ RLS FIX VERIFICATION FAILED: Bot activation still failing with HTTP 500 'Error activating bot'. Backend logs confirm same RLS error persists: 'new row violates row-level security policy for table bots'. The claimed RLS fix has NOT been successfully implemented."
 
   - task: "Bot Deactivation Endpoint"
     implemented: true
