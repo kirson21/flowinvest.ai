@@ -34,6 +34,8 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
 
     try {
       const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+      console.log('Backend URL:', backendUrl);
+      console.log('Making request to:', `${backendUrl}/api/bots/create-with-ai`);
       
       const response = await fetch(`${backendUrl}/api/bots/create-with-ai`, {
         method: 'POST',
@@ -46,7 +48,15 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
         })
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers));
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (data.success) {
         setGeneratedBot(data.bot_config);
