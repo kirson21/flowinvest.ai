@@ -35,6 +35,7 @@ const TradingBots = () => {
   const [selectedDetailsBot, setSelectedDetailsBot] = useState(null);
 
   const getRiskColor = (risk) => {
+    if (!risk) return 'bg-gray-500';
     switch (risk.toLowerCase()) {
       case 'low': return 'bg-green-500';
       case 'medium': return 'bg-yellow-500';
