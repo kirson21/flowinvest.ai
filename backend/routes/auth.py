@@ -242,7 +242,7 @@ async def refresh_token(refresh_token: str):
         raise HTTPException(status_code=401, detail=f"Token refresh failed: {str(e)}")
 
 # Admin endpoints (for your account setup)
-@router.post("/api/auth/admin/setup")
+@router.post("/auth/admin/setup")
 async def setup_admin_account():
     """Set up admin account - for initial setup only"""
     try:
