@@ -165,7 +165,7 @@ async def delete_bot(bot_id: str, user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting bot: {str(e)}")
 
-@router.get("/api/bots/{bot_id}")
+@router.get("/bots/{bot_id}")
 async def get_bot_details(bot_id: str, user_id: Optional[str] = None):
     """Get detailed information about a specific bot"""
     try:
