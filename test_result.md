@@ -250,13 +250,16 @@ backend:
     implemented: true
     working: false
     file: "/app/backend/routes/ai_bots.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "❌ DELETE /api/bots/{bot_id} endpoint implemented but failing due to Supabase RLS policies. Cannot delete bots because of database permission restrictions."
+        - working: false
+          agent: "testing"
+          comment: "❌ RLS FIX VERIFICATION FAILED: Bot deletion still failing with HTTP 500 'Error deleting bot'. Same RLS policy violations preventing all bot database operations. The claimed RLS fix has NOT been successfully implemented."
 
   - task: "Enhanced Webhook Endpoint for AI News"
     implemented: true
