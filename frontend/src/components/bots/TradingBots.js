@@ -22,7 +22,7 @@ import BotBuilder from './BotBuilder';
 import AdvancedBotBuilder from './AdvancedBotBuilder';
 import RunBotModal from './RunBotModal';
 import BotDetailsModal from './BotDetailsModal';
-import AIBotCreator from './AIBotCreator';
+import GrokAIBotCreator from './GrokAIBotCreator';
 
 const TradingBots = () => {
   const { t } = useApp();
