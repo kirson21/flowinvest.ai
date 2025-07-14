@@ -732,13 +732,15 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Supabase RLS Configuration for Bot Management"
+    - "Supabase RLS Configuration for Bot Management - URGENT"
     - "Authentication Token Flow Improvement"
+    - "Bot Database Operations - All Failing Due to RLS"
   stuck_tasks:
     - "Bot Activation Endpoint"
     - "Bot Deactivation Endpoint" 
     - "Get Bot Details Endpoint"
     - "Bot Deletion Endpoint"
+    - "AI Bot Creation with Grok"
   test_all: false
   test_priority: "high_first"
 
