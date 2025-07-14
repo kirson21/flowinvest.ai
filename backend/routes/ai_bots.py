@@ -94,7 +94,7 @@ async def create_bot_with_ai(request: BotCreationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.get("/api/bots/user/{user_id}", response_model=BotListResponse)
+@router.get("/bots/user/{user_id}", response_model=BotListResponse)
 async def get_user_bots(user_id: str, include_prebuilt: bool = True):
     """Get all bots for a specific user"""
     try:
