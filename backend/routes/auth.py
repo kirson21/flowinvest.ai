@@ -200,7 +200,7 @@ async def update_user_profile(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update profile: {str(e)}")
 
-@router.get("/api/auth/google")
+@router.get("/auth/google")
 async def google_auth(request: Request):
     """Initiate Google OAuth flow"""
     try:
