@@ -149,7 +149,7 @@ async def sign_out(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Sign out failed: {str(e)}")
 
-@router.get("/api/auth/user")
+@router.get("/auth/user")
 async def get_current_user_profile(current_user: dict = Depends(get_current_user)):
     """Get current authenticated user profile"""
     try:
