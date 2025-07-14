@@ -27,7 +27,7 @@ class BotListResponse(BaseModel):
     bots: list
     total: int
 
-@router.post("/api/bots/create-with-ai", response_model=BotCreationResponse)
+@router.post("/bots/create-with-ai", response_model=BotCreationResponse)
 async def create_bot_with_ai(request: BotCreationRequest):
     """Create a trading bot using Grok 4 AI"""
     try:
