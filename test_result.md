@@ -235,13 +235,16 @@ backend:
     implemented: true
     working: false
     file: "/app/backend/routes/ai_bots.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "❌ GET /api/bots/{bot_id} endpoint implemented but failing due to Supabase RLS policies. Cannot retrieve bot details because of database permission restrictions."
+        - working: false
+          agent: "testing"
+          comment: "❌ RLS FIX VERIFICATION FAILED: Get bot details still failing with HTTP 500 'Error fetching bot details'. Bots created via AI appear successful but aren't actually saved to database due to RLS violations, causing subsequent retrieval to fail."
 
   - task: "Bot Deletion Endpoint"
     implemented: true
