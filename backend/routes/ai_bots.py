@@ -133,7 +133,7 @@ async def activate_bot(bot_id: str, user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error activating bot: {str(e)}")
 
-@router.put("/api/bots/{bot_id}/deactivate")
+@router.put("/bots/{bot_id}/deactivate")
 async def deactivate_bot(bot_id: str, user_id: str):
     """Deactivate a bot"""
     try:
