@@ -139,7 +139,7 @@ async def sign_in(request: EmailPasswordSignIn):
         else:
             raise HTTPException(status_code=400, detail=f"Sign in failed: {error_message}")
 
-@router.post("/api/auth/signout")
+@router.post("/auth/signout")
 async def sign_out(current_user: dict = Depends(get_current_user)):
     """Sign out current user"""
     try:
