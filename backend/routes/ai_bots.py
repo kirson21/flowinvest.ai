@@ -150,7 +150,7 @@ async def deactivate_bot(bot_id: str, user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deactivating bot: {str(e)}")
 
-@router.delete("/api/bots/{bot_id}")
+@router.delete("/bots/{bot_id}")
 async def delete_bot(bot_id: str, user_id: str):
     """Delete a bot"""
     try:
