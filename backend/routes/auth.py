@@ -220,7 +220,7 @@ async def google_auth(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Google auth initiation failed: {str(e)}")
 
-@router.post("/api/auth/refresh")
+@router.post("/auth/refresh")
 async def refresh_token(refresh_token: str):
     """Refresh access token using refresh token"""
     try:
