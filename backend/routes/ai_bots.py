@@ -115,7 +115,7 @@ async def get_user_bots(user_id: str, include_prebuilt: bool = True):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching bots: {str(e)}")
 
-@router.put("/api/bots/{bot_id}/activate")
+@router.put("/bots/{bot_id}/activate")
 async def activate_bot(bot_id: str, user_id: str):
     """Activate a bot (mock implementation for now)"""
     try:
