@@ -37,7 +37,8 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
         options: {
-          data: metadata
+          data: metadata,
+          emailRedirectTo: undefined // Disable email verification for testing
         }
       });
 
