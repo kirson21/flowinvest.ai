@@ -65,8 +65,18 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
         setError(data.detail || 'Failed to generate bot configuration');
       }
     } catch (err) {
-      setError('Failed to connect to AI service. Please try again.');
-      console.error('Error generating bot:', err);
+      console.error('Full error details:', err);
+      console.error('Error name:', err.name);
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+      
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Network error: Unable to reach AI service. Please check your connection.');
+      } else if (err.message.includes('CORS')) {
+        setError('CORS error: Cross-origin request blocked. Please try again.');
+      } else {
+        setError('Failed to connect to AI service. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
