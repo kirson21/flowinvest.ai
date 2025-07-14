@@ -49,7 +49,7 @@ async def get_current_user(credentials: HTTPBearer = Depends(security)):
     except Exception as e:
         raise HTTPException(status_code=401, detail="Authentication failed")
 
-@router.post("/api/auth/signup", response_model=AuthResponse)
+@router.post("/auth/signup", response_model=AuthResponse)
 async def sign_up(request: EmailPasswordSignUp):
     """Register a new user with email and password"""
     try:
