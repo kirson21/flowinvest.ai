@@ -272,7 +272,7 @@ async def setup_admin_account():
         raise HTTPException(status_code=500, detail=f"Admin setup failed: {str(e)}")
 
 # Health check endpoint
-@router.get("/api/auth/health")
+@router.get("/auth/health")
 async def auth_health_check():
     """Check authentication service health"""
     try:
