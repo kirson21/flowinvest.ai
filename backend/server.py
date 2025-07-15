@@ -125,15 +125,19 @@ async def not_found_handler(request, exc):
 # Main entry point
 if __name__ == "__main__":
     import uvicorn
+    import os
     
-    logger.info(f"Starting Flow Invest API on port {PORT}")
+    # Get port from environment variable (Render sets this)
+    port = int(os.getenv("PORT", 8001))
+    
+    logger.info(f"Starting Flow Invest API on port {port}")
     logger.info(f"Environment: {ENVIRONMENT}")
     logger.info(f"MongoDB URL: {MONGO_URL}")
     
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
-        port=PORT,
+        port=port,
         reload=ENVIRONMENT == "development",
         log_level="info"
     )
