@@ -2,7 +2,6 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from routes import webhook, auth, ai_bots
-from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
 import os
@@ -17,8 +16,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Environment configuration
-MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/flow_invest")
-DB_NAME = os.environ.get("DB_NAME", "flow_invest")
 PORT = int(os.environ.get("PORT", 8001))
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
@@ -29,64 +26,28 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS for production
-allowed_origins = [
-    "http://localhost:3000",
-    "https://flowinvestai.app",
-    "https://www.flowinvestai.app",
-    "https://*.railway.app",
-    "https://*.vercel.app"
-]
-
-if ENVIRONMENT == "production":
-    allowed_origins = [
-        "https://flowinvestai.app",
-        "https://www.flowinvestai.app"
-    ]
-
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Database connection
-mongodb_client = None
-mongodb = None
+# Create API router
+api_router = APIRouter()
 
-@app.on_event("startup")
-async def startup_db_client():
-    global mongodb_client, mongodb
-    try:
-        mongodb_client = AsyncIOMotorClient(MONGO_URL)
-        mongodb = mongodb_client[DB_NAME]
-        logger.info(f"Connected to MongoDB: {DB_NAME}")
-        
-        # Test connection
-        await mongodb.command('ping')
-        logger.info("MongoDB connection successful")
-        
-    except Exception as e:
-        logger.error(f"Failed to connect to MongoDB: {e}")
-        # In production, you might want to use a cloud MongoDB service
-        # For now, we'll continue without MongoDB for Railway deployment
+# Include route modules
+api_router.include_router(webhook.router, prefix="", tags=["webhook"])
+api_router.include_router(auth.router, prefix="", tags=["auth"])
+api_router.include_router(ai_bots.router, prefix="", tags=["ai_bots"])
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    global mongodb_client
-    if mongodb_client:
-        mongodb_client.close()
-        logger.info("MongoDB connection closed")
+# Mount API router
+app.include_router(api_router, prefix="/api")
 
-# Include routers
-app.include_router(webhook.router)
-app.include_router(auth.router)
-app.include_router(ai_bots.router)
-
-# Health check endpoints
-@app.get("/api")
+# Root endpoint
+@app.get("/")
 async def root():
     return {
         "message": "Flow Invest API - AI-Powered Investment Platform",
@@ -103,7 +64,6 @@ async def health_check():
         "environment": ENVIRONMENT,
         "services": {
             "api": "running",
-            "database": "connected" if mongodb else "disconnected",
             "supabase": "connected"
         }
     }
@@ -132,7 +92,6 @@ if __name__ == "__main__":
     
     logger.info(f"Starting Flow Invest API on port {port}")
     logger.info(f"Environment: {ENVIRONMENT}")
-    logger.info(f"MongoDB URL: {MONGO_URL}")
     
     uvicorn.run(
         "server:app",
