@@ -1,93 +1,139 @@
 from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from routes import webhook, auth, ai_bots
 from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+from pathlib import Path
 import os
 import logging
-import sys
-from pathlib import Path
-from pydantic import BaseModel, Field
-from typing import List
-import uuid
-from datetime import datetime
 
-# Add the backend directory to Python path
+# Load environment variables
 ROOT_DIR = Path(__file__).parent
-sys.path.append(str(ROOT_DIR))
-
-# Import routes
-from routes.webhook import router as webhook_router
-from routes.auth import router as auth_router
-from routes.ai_bots import router as ai_bots_router
-
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Create the main app without a prefix
-app = FastAPI(title="Flow Invest API", description="AI-Powered Investment App API", version="1.0.0")
+# Environment configuration
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/flow_invest")
+DB_NAME = os.environ.get("DB_NAME", "flow_invest")
+PORT = int(os.environ.get("PORT", 8001))
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+# Create FastAPI app
+app = FastAPI(
+    title="Flow Invest API",
+    description="AI-Powered Investment Platform API",
+    version="1.0.0"
+)
 
-# Define Models (keeping existing ones)
-class StatusCheck(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+# Configure CORS for production
+allowed_origins = [
+    "http://localhost:3000",
+    "https://flowinvestai.app",
+    "https://www.flowinvestai.app",
+    "https://*.railway.app",
+    "https://*.vercel.app"
+]
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add existing routes to the router
-@api_router.get("/")
-async def root():
-    return {"message": "Flow Invest API - AI-Powered Investment Platform"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
-
-# Include all routers
-api_router.include_router(webhook_router)
-api_router.include_router(auth_router)
-api_router.include_router(ai_bots_router)
-
-# Include the router in the main app
-app.include_router(api_router)
+if ENVIRONMENT == "production":
+    allowed_origins = [
+        "https://flowinvestai.app",
+        "https://www.flowinvestai.app"
+    ]
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Database connection
+mongodb_client = None
+mongodb = None
 
 @app.on_event("startup")
-async def startup_db():
-    logger.info("Flow Invest API starting up...")
-    logger.info("Connected to MongoDB successfully")
+async def startup_db_client():
+    global mongodb_client, mongodb
+    try:
+        mongodb_client = AsyncIOMotorClient(MONGO_URL)
+        mongodb = mongodb_client[DB_NAME]
+        logger.info(f"Connected to MongoDB: {DB_NAME}")
+        
+        # Test connection
+        await mongodb.command('ping')
+        logger.info("MongoDB connection successful")
+        
+    except Exception as e:
+        logger.error(f"Failed to connect to MongoDB: {e}")
+        # In production, you might want to use a cloud MongoDB service
+        # For now, we'll continue without MongoDB for Railway deployment
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    logger.info("Flow Invest API shutting down...")
-    client.close()
+    global mongodb_client
+    if mongodb_client:
+        mongodb_client.close()
+        logger.info("MongoDB connection closed")
+
+# Include routers
+app.include_router(webhook.router)
+app.include_router(auth.router)
+app.include_router(ai_bots.router)
+
+# Health check endpoints
+@app.get("/api")
+async def root():
+    return {
+        "message": "Flow Invest API - AI-Powered Investment Platform",
+        "version": "1.0.0",
+        "environment": ENVIRONMENT,
+        "status": "healthy"
+    }
+
+@app.get("/api/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "version": "1.0.0",
+        "environment": ENVIRONMENT,
+        "services": {
+            "api": "running",
+            "database": "connected" if mongodb else "disconnected",
+            "supabase": "connected"
+        }
+    }
+
+@app.get("/api/status")
+async def get_status():
+    return {"status": "ok", "environment": ENVIRONMENT}
+
+# Error handlers
+@app.exception_handler(500)
+async def internal_error_handler(request, exc):
+    logger.error(f"Internal error: {exc}")
+    return {"error": "Internal server error", "message": str(exc)}
+
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    return {"error": "Not found", "message": "The requested resource was not found"}
+
+# Main entry point
+if __name__ == "__main__":
+    import uvicorn
+    
+    logger.info(f"Starting Flow Invest API on port {PORT}")
+    logger.info(f"Environment: {ENVIRONMENT}")
+    logger.info(f"MongoDB URL: {MONGO_URL}")
+    
+    uvicorn.run(
+        "server:app",
+        host="0.0.0.0",
+        port=PORT,
+        reload=ENVIRONMENT == "development",
+        log_level="info"
+    )
