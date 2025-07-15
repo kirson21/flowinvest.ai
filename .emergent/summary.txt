@@ -1,80 +1,255 @@
 <analysis>
-The AI engineer successfully built the Flow Invest MVP from scratch, initially focusing on a complete frontend-only application with mock data, showcasing core features like AI Feed, Trading Bots, Portfolios, and a mock login system. Subsequent work transitioned to integrating real data, specifically a webhook for investment news updates. This involved significant backend development with FastAPI and MongoDB, including translation capabilities via OpenAI. The engineer then enhanced the webhook to accept specific OpenAI API response formats. The latest major effort involves a comprehensive UI/UX overhaul of the Trading Bots section, adding complex features like detailed bot performance charts, an AI-powered bot creator, and advanced manual bot settings, inspired by Veles Finance. The work is currently focused on implementing these detailed bot builder UI components.
+The AI engineer successfully built the Flow Invest MVP, evolving it from a frontend-only app with mock data to a full-stack solution. Initial development focused on core UI features (AI Feed, Trading Bots, Portfolios) and a mock login. Subsequent work integrated a FastAPI backend with MongoDB for real investment news via webhook, including OpenAI-powered translation. A major UI/UX overhaul for Trading Bots introduced complex features like performance charts and an AI-powered bot creator. The latest phases involved a comprehensive migration to Supabase for authentication and data persistence, integrating Grok 4 for AI bot creation, and preparing the entire application for Railway deployment. Challenges included intricate UI component integration, persistent Supabase RLS issues, environment variable mismatches (Vite vs. CRA), data mapping errors, and complex Railway deployment configurations related to dependencies and build processes. The engineer provided detailed, iterative fixes and manual instructions to the user for external configurations.
 </analysis>
 
 <product_requirements>
-The goal is to build Flow Invest, a minimalist, AI-powered investment app as a scalable MVP, mobile-friendly for web. Initial requirements included a specific color palette (, , ), Comfortaa font, theme (Light/Dark) and language (English/Russian) toggles, a mock login system (Email, Phone, Google), and a bottom navigation. The app features:
-1.  **AI Feed (Main Screen)**: Simulates AI-generated financial news summaries (5-10 sentences) with a visual market sentiment score (0-100, Green/Yellow/Red indicators), updating every 3-4 hours (manual refresh).
-2.  **Trading Bots**: Sections for Pre-built bots (static examples with stats like PnL, risk, exchange) and My bots (placeholder UI), with a Create Your Own Bot flow (simplified Veles Finance UX for MVP) allowing selection of exchange, strategy, risk, and trading pair.
-3.  **Ready-Made Portfolios**: A simple marketplace UI with sample portfolios (name, description, risk, assets breakdown) and a Create Your Portfolio button (no logic).
-AI integration initially used placeholder data but was structured for future OpenAI API and RSS feeds. Backend logic was initially mocked, with plans for Supabase/Firebase and n8n integration.
-Subsequent requests:
--   **Webhook Integration**: Create a POST webhook () to receive investment news JSON (title, summary, sentiment, source, timestamp) from n8n, store latest 20 entries in  (MongoDB), and display them in the AI Feed with specified formatting and visual sentiment.
--   **Localization for AI Feed**: Remove Simulate Webhook, display only real entries, and automatically translate news  and  to Russian () if selected, using OpenAI (sk-svcacct-...) with caching.
--   **OpenAI Webhook Format**: Update the webhook to accept a nested OpenAI API response structure (, , ).
--   **Trading Bots UI/UX Update**:
-    -   **Pre-built Bots**: Replace Settings with Run Bot (modal for API keys/OAuth mock), View Details to show P&L line chart with 7/30/90/180-day filters, replace Active toggle with static Connected/Not Connected status.
-    -   **My Bots**: Add AI Chat for bot creation (natural language prompts, e.g., Create a bot...), with an optional Advanced Settings button for traditional manual configuration, mimicking  for detailed settings (Bot Name, API Key, Trade Type, Trading Pair (up to 100 pairs), Deposit Configuration, Advanced Settings Toggle (collapsible) including Trading Mode Options, Advanced Parameters, Special Features, Exit Trade Settings (Take Profit, Risk Management), Bot Testing and Simulation (test button, period selector, performance metrics).
+The goal is to build Flow Invest, a minimalist, AI-powered investment app as a scalable, mobile-friendly MVP. Initial requirements included a specific color palette (, , ), Comfortaa font, theme/language toggles, mock login, and a bottom navigation. Key features were:
+1.  **AI Feed**: AI-generated financial news summaries with sentiment scores.
+2.  **Trading Bots**: Sections for Pre-built bots and My bots with a Create Your Own Bot flow (simplified Veles Finance UX).
+3.  **Ready-Made Portfolios**: A simple marketplace UI.
+Subsequent requirements evolved to integrate real data and advanced features:
+-   **Webhook Integration**: POST  to receive and store investment news (title, summary, sentiment, source, timestamp) in MongoDB, updating the AI Feed.
+-   **Localization for AI Feed**: Automatic English/Russian translation of news using OpenAI, with caching.
+-   **OpenAI Webhook Format**: Update webhook to parse nested OpenAI API response structure.
+-   **Trading Bots UI/UX Update**: Pre-built Bots to include Run Bot (mock API key/OAuth) and View Details (P&L charts). My Bots to feature an AI Chat for bot creation (natural language prompts, e.g., Create a bot...), with an optional Advanced Settings button mimicking  for detailed configuration (Bot Name, API Key, Trading Pair (100+), Deposit, Entry/Exit, Testing).
+-   **Supabase Migration**: Migrate entire backend to Supabase for User Management, Settings, AI Bots, Trading Data, Portfolios, and API Keys, utilizing Supabase Authentication and Edge Functions.
+-   **Grok 4 Integration**: Replace existing AI logic with Grok 4 for natural language bot creation, saving structured bot data to Supabase, and integrating into the UI with Edit Bot / Save and Activate options.
+-   **Real Authentication System**: Implement user sign-up/login via Google OAuth and Email/Password using Supabase Auth, with access control redirecting unauthenticated users to the login screen.
+-   **Railway Deployment**: Deploy the full application (frontend + backend) to Railway with CI/CD via GitHub, configuring custom domains and replicating environment variables.
+
 </product_requirements>
 
 <key_technical_concepts>
--   **Frontend**: React, React Context API, , Tailwind CSS (with ), Radix UI components,  for API calls, Local Storage for persistence.
--   **Backend**: FastAPI, MongoDB (via ),  for environment variables,  for CORS.
--   **AI/Integration**: OpenAI API (for translation),  library, n8n (for webhook data).
--   **Design Patterns**: Mock data for initial MVP, modular component design, responsive UI, theme/language toggling.
+-   **Frontend**: React, , Tailwind CSS, Radix UI, , React Context API, Local Storage,  for environment variables.
+-   **Backend**: FastAPI, MongoDB (), , , , usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
+
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit (Python client).
+-   **Database/Auth**: Supabase (PostgreSQL), Supabase Auth, Row Level Security (RLS).
+-   **AI/Integration**: OpenAI API (translation), Grok 4 API (bot creation), n8n (webhook data source).
+-   **Deployment**: Docker, Railway (static site/server app), GitHub Actions (CI/CD concept).
 </key_technical_concepts>
 
 <code_architecture>
-The application follows a standard full-stack architecture:
--   **Frontend**: React application served on port 3000.
--   **Backend**: FastAPI application served on port 8001.
--   **Database**: MongoDB.
+The application follows a standard full-stack architecture with React frontend, FastAPI backend, and MongoDB (being migrated to Supabase) for the database.
 
 **Directory Structure:**
 
 
 **Key Files and Changes:**
 
--   : The main React application entry point, setting up  for navigation and integrating the main application layout (). Initially had a placeholder Hello World component.
--    & : Global CSS files, updated to incorporate the custom color palette, Comfortaa font, and remove default React app styles.
--   : Centralized mock data for all frontend components (AI Feed, Trading Bots, Portfolios). This was crucial for the initial MVP, allowing full UI/UX without a backend.
--   : Implements the bottom navigation menu to switch between main app sections (AI Feed, Trading Bots, Ready-Made Portfolios).
--   : This component started as a mock feed, then was heavily refactored to consume data from the backend webhook, include real-time refresh, sentiment visualization, and language localization (English/Russian translation using OpenAI).
--   : The primary component for displaying and managing trading bots. It was first a static display, then enhanced significantly to include Run Bot and View Details modals for pre-built bots, and an AI Bot Creator and Advanced Settings for user-created bots.
--   : New component to handle the mock API key/OAuth connection for Run Bot functionality.
--   : New component for displaying mock P&L charts and detailed bot performance statistics.
--   : New component for the chat-based AI bot creation interface.
--   : New component initiated to implement the detailed, Veles Finance-inspired advanced bot settings.
--   : New file to hold the mock data for 100+ trading pairs used in the Advanced Bot Builder.
--   : Handles API calls from the frontend to the backend, abstracting  requests.
--   : The core FastAPI application. It was modified to:
-    -   Include  and  for MongoDB.
-    -   Mount  prefixed with .
-    -   Define  (root) and  endpoints initially.
-    -   Later, it integrated the  and  routes/services.
-    -   Refactored import paths for modularity ( instead of direct file imports).
--   : Defines Pydantic models for  (schema for news items) and , used for data validation and MongoDB interaction.
--   : Contains FastAPI endpoints for the AI news webhook. Initially, it accepted a flat JSON structure. Later, it was updated to specifically parse the nested OpenAI API response format, and a  endpoint was added for backward compatibility. It handles data storage to MongoDB and triggering translations.
--   : New service responsible for managing OpenAI API calls for translation (English to Russian) and caching translated content in MongoDB ( collection) to improve performance. It uses the  library.
--    & : Documentation files detailing the webhook setup, API specifications, n8n integration, and security considerations, including the specific OpenAI API payload format.
+-   : Main React entry point. Initially had a placeholder. Modified significantly to manage  navigation, integrate , and now includes both  (for real authentication) and  (as a compatibility layer for existing contexts).
+-   : Core bot management component. Originally displayed static bots. Enhanced to include Run Bot and View Details modals. Crucially, updated to correctly render  for Advanced Settings and  for AI Creator, mapping AI-generated bot data ( to ).
+-   : New component implementing the detailed, multi-tab (Basic, Pair, Deposit, Entry, Exit, Test) advanced bot settings UI, inspired by Veles Finance.
+-   : New file holding mock data for 100+ trading pairs for the .
+-   : New component for dual-coin selection, integrated into .
+-   : FastAPI application core. Updated for , MongoDB , mounting  with  prefix. Integrated , , , and  routes. Configured for production with . Fixed  environment variable loading.
+-   : Defines Pydantic models for  and .
+-   : Handles AI news webhook. Updated to accept nested OpenAI API response format.
+-   : Handles OpenAI API calls for translation. Updated to use the standard usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
+
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit Python package instead of .
+-   : New file to initialize and configure the Supabase client for backend operations.
+-   : New file to initialize and configure the Supabase client for frontend operations, using  for environment variables.
+-   : New React Context for managing user authentication state and sessions with Supabase. Includes logic for session persistence.
+-   : New component replacing the mock login screen, implementing real sign-up/sign-in with Email/Password and Google OAuth via Supabase Auth. Temporarily had email verification disabled for testing.
+-   : New service managing Grok 4 API calls for AI bot creation.
+-   : New FastAPI routes for Grok 4 bot creation (e.g., , ), integrated with Supabase. Fixed redundant  prefixes.
+-   : New FastAPI routes for user authentication (sign-up, sign-in, health check) with Supabase. Fixed redundant  prefixes.
+-   : New frontend component for the AI bot creation chat interface, now calling the real Grok 4 API endpoint and handling its responses. Fixed  to .
+-   , , , , , : Series of SQL scripts created to define Supabase table schemas and iteratively fix Row Level Security (RLS) policies for user and service role access, particularly for bot and user data management.
+-   , , , , , , , , , , 🚀 Building Flow Invest Frontend for Production...
+📦 Installing dependencies...
+yarn install v1.22.22
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+Done in 0.09s.
+🔨 Building application...
+yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+❌ Build failed!, Starting Flow Invest Frontend...
+
+added 88 packages in 8s
+
+24 packages are looking for funding
+  run `npm fund` for details, Starting Flow Invest Backend...: Various configuration and script files created or modified for Railway deployment, addressing build process, environment variables, and multi-service deployment.
+
 </code_architecture>
 
 <pending_tasks>
--   Completion and full integration of the detailed Advanced Settings for bot creation, specifically the remaining sections beyond the initial components (e.g., Enter/Exit Trade Settings, Bot Testing).
--   Completion of the  component and its integration into the .
+-   **Supabase RLS Finalization**: The user needs to execute the *definitive* RLS fix script () in their Supabase Dashboard to ensure backend bot creation and management operations are not blocked by RLS policies.
+-   **n8n Webhook URL Update**: The user needs to manually update their n8n workflow's webhook URL to point to the correct, newly provisioned backend URL.
+-   **Railway Deployment Execution**: The user needs to configure and deploy the frontend and backend services separately on Railway, using the provided configuration, build commands, and environment variables.
 </pending_tasks>
 
 <current_work>
-Immediately prior to this summary request, the AI engineer was in the process of implementing the Advanced Settings for the user-created bots section, aiming to replicate the detailed configuration options found on . This work involves a significant UI/UX overhaul for the bot creation flow, moving beyond a simple form to a comprehensive, multi-section interface.
+Immediately prior to this summary request, the AI engineer was focused on resolving persistent deployment issues on Railway. The user reported errors related to package installation ( not found) and shell command execution ( not found) during the Railway build process.
 
-Specifically, the following progress has been made:
--   ****: This new component has been created to house the complex Advanced Settings UI. It is intended to manage various configuration sections like Basic Settings, Trading Pair Management, Deposit Configuration, Enter Trade Settings, Exit Trade Settings, and Bot Testing and Simulation.
--   ****: A new data file was created () to provide mock data for 100+ popular trading pairs. This data will be used within the  component.
--   ****: The creation of this component was just initiated. Its purpose is to provide a dual-coin selection interface (Base/Quote currency) to allow users to choose from the extensive list of trading pairs.
+The AI engineer's most recent actions to address these were:
+1.  **Dependency Fix**: Removed the  package (which is internal to Emergent) from  and replaced it with the standard usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
 
-The current focus is on building out these advanced UI elements and ensuring they align with the specified design requirements, even though the backend logic for these new settings is explicitly stated as not required for now (mocked functionality). The goal is to deliver a visually rich and highly interactive Advanced Settings experience for bot creation.
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit Python package, also updating the  service to use this standard library.
+2.  ** Command Error Fix**: Diagnosed that Railway's build environment might not handle  commands well within certain configurations. The proposed solution involves instructing the user to set up **two separate services** in Railway: one for the backend (root: ) and one for the frontend (root: ), each with simplified, direct build and start commands that don't rely on complex  operations.
+    *   For the **backend**, the recommended  is Looking in indexes: https://pypi.org/simple, https://d33sy5i8bnduwe.cloudfront.net/simple/
+Requirement already satisfied: pip in /root/.venv/lib/python3.11/site-packages (24.0)
+Collecting pip
+  Downloading pip-25.1.1-py3-none-any.whl.metadata (3.6 kB)
+Downloading pip-25.1.1-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 12.7 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 24.0
+    Uninstalling pip-24.0:
+      Successfully uninstalled pip-24.0
+Successfully installed pip-25.1.1 and  is .
+    *   For the **frontend**, the recommendation is to switch from yarn install v1.22.22
+[1/4] Resolving packages...
+success Nothing to install.
+success Saved lockfile.
+Done in 0.20s. to npm <command>
+
+Usage:
+
+npm install        install all the dependencies in your project
+npm install <foo>  add the <foo> dependency to your project
+npm test           run this project's tests
+npm run <foo>      run the script named <foo>
+npm <command> -h   quick help on <command>
+npm -l             display usage info for all commands
+npm help <term>    search for help on <term>
+npm help npm       more involved overview
+
+All commands:
+
+    access, adduser, audit, bugs, cache, ci, completion,
+    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
+    edit, exec, explain, explore, find-dupes, fund, get, help,
+    help-search, hook, init, install, install-ci-test,
+    install-test, link, ll, login, logout, ls, org, outdated,
+    owner, pack, ping, pkg, prefix, profile, prune, publish,
+    query, rebuild, repo, restart, root, run-script, sbom,
+    search, set, shrinkwrap, star, stars, start, stop, team,
+    test, token, uninstall, unpublish, unstar, update, version,
+    view, whoami
+
+Specify configs in the ini-formatted file:
+    /root/.npmrc
+or on the command line via: npm <command> --key=value
+
+More configuration info: npm help config
+Configuration fields: npm help 7 config
+
+npm@10.8.2 /usr/lib/node_modules/npm for better Railway compatibility, with  as  and  as .
+3.  **Environment Variable Handling**: Ensured that the  files for both frontend and backend correctly use  (for Create React App) and  (for FastAPI) respectively, and that Supabase credentials are properly configured.
+4.  **Application State**: The core application functionality, including real user authentication via Supabase, Grok 4 AI bot creation, and the news feed, has been debugged and confirmed to be working within the Emergent environment (after numerous RLS, context, and environment variable fixes). The current state is that the application's code is prepared for Railway, and the AI engineer has provided the user with detailed manual instructions for the Railway dashboard configuration.
 </current_work>
 
 <optional_next_step>
-Complete the implementation of the  component and integrate it within the  to support trading pair management.
+Provide the detailed Railway deployment instructions to the user and await their confirmation on the successful deployment.
 </optional_next_step>
