@@ -1,7 +1,19 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "flow-invest-frontend",
+  "version": "1.0.0",
+  "description": "Flow Invest AI-Powered Investment Platform Frontend",
   "private": true,
+  "homepage": "https://flowinvestai.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/flow-invest.git"
+  },
+  "author": "Flow Invest Team",
+  "license": "MIT",
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
