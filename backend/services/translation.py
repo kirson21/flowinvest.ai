@@ -2,7 +2,8 @@ import asyncio
 import logging
 from typing import Dict, Optional
 from datetime import datetime
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from openai import OpenAI
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +11,7 @@ class TranslationService:
     def __init__(self, api_key: str):
         """Initialize translation service with OpenAI API key"""
         self.api_key = api_key
+        self.client = OpenAI(api_key=api_key)
         
     async def translate_to_russian(self, title: str, summary: str) -> Dict[str, str]:
         """
@@ -23,20 +25,6 @@ class TranslationService:
             Dict with translated title and summary, or original text if translation fails
         """
         try:
-            # Initialize chat session for translation
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=f"translation_{hash(title + summary)}",
-                system_message="""You are a professional financial news translator. Translate the provided English financial news content to fluent, natural Russian while maintaining the professional tone and financial terminology. 
-
-Rules:
-1. Translate both title and summary accurately
-2. Preserve all numbers, percentages, and financial terms
-3. Use appropriate Russian financial terminology
-4. Keep the professional and informative tone
-5. Respond with ONLY the JSON format as requested"""
-            ).with_model("openai", "gpt-4o").with_max_tokens(1000)
-            
             # Create translation prompt
             translation_prompt = f"""Please translate this financial news to Russian. Respond with ONLY a JSON object in this exact format:
 
@@ -50,14 +38,33 @@ Title: {title}
 Summary: {summary}"""
             
             # Send translation request
-            user_message = UserMessage(text=translation_prompt)
-            response = await chat.send_message(user_message)
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a professional financial news translator. Translate the provided English financial news content to fluent, natural Russian while maintaining the professional tone and financial terminology. 
+
+Rules:
+1. Translate both title and summary accurately
+2. Preserve all numbers, percentages, and financial terms
+3. Use appropriate Russian financial terminology
+4. Keep the professional and informative tone
+5. Respond with ONLY the JSON format as requested"""
+                    },
+                    {
+                        "role": "user",
+                        "content": translation_prompt
+                    }
+                ],
+                max_tokens=1000,
+                temperature=0.3
+            )
             
             # Parse the JSON response
-            import json
             try:
                 # Extract JSON from response
-                response_text = response.strip()
+                response_text = response.choices[0].message.content.strip()
                 if response_text.startswith('```json'):
                     response_text = response_text.split('```json')[1].split('```')[0].strip()
                 elif response_text.startswith('```'):
