@@ -1,0 +1,30 @@
+{
+  "name": "flow-invest-backend",
+  "version": "1.0.0",
+  "description": "Flow Invest AI-Powered Investment Platform Backend",
+  "main": "server.py",
+  "scripts": {
+    "start": "python server.py",
+    "dev": "python server.py",
+    "build": "pip install -r requirements.txt"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": "18.x",
+    "python": "3.11.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/flow-invest.git"
+  },
+  "author": "Flow Invest Team",
+  "license": "MIT",
+  "railway": {
+    "build": {
+      "command": "pip install -r requirements.txt"
+    },
+    "start": {
+      "command": "python server.py"
+    }
+  }
+}
