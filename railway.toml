@@ -1,0 +1,26 @@
+# Railway Deployment Configuration for Flow Invest
+
+# Frontend Build Configuration
+[build]
+  command = "cd frontend && yarn install && yarn build"
+  publish = "frontend/build"
+
+# Backend Configuration  
+[backend]
+  command = "cd backend && pip install -r requirements.txt && python server.py"
+  port = 8001
+
+# Environment Variables Required
+[env]
+  SUPABASE_URL = "https://pmfwqmaykidbvjhcqjrr.supabase.co"
+  SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtZndxbWF5a2lkYnZqaGNxanJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MDk2MjUsImV4cCI6MjA2Nzk4NTYyNX0.BsJ0128ME7WhH-CBRb3_LTV5NvsDkVev07SzOalAb-E"
+  SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtZndxbWF5a2lkYnZqaGNxanJyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQwOTYyNSwiZXhwIjoyMDY3OTg1NjI1fQ.XiC_Nf3BR8etEqXRDUggG8sBgZA5lcwipd2GPu_a_tU"
+  OPENAI_API_KEY = "sk-svcacct-v7L_rq7bZGQ0TYX-MYD_f4cPFLQW6fA2HLFX6lRR2r4rNNuI3y0wNbFR0TXQtJT3BlbkFJxD3yOy8Rk4dJwRU8_vMJ_8x5K4jw8eV9jKtR8xoRh6JuMl3q9k3aS7V"
+  GROK_API_KEY = "xai-bUlZS69f4XMDhVeLWRYojX3e3UN6NNrLZe21O8HZsh410Sarqp6mroP1Lm4somBHqUgEAAh61wYrveS0"
+  MONGO_URL = "mongodb://localhost:27017/flow_invest"
+  DB_NAME = "flow_invest"
+
+# Production Domain Configuration
+[domain]
+  production = "flowinvestai.app"
+  staging = "staging.flowinvestai.app"
