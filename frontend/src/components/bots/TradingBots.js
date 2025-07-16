@@ -510,10 +510,17 @@ const TradingBots = () => {
             </div>
           </div>
 
-          {userBots.length > 0 ? (
+          {loadingBots ? (
+            <div className="flex justify-center py-12">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#0097B2]" />
+                <p className="text-gray-500 dark:text-gray-400">Loading your bots...</p>
+              </div>
+            </div>
+          ) : userBots.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">
               {userBots.map((bot) => (
-                <UserBotCard key={bot.id} bot={bot} isUserBot={true} />
+                <UserBotCard key={bot.id} bot={bot} />
               ))}
             </div>
           ) : (
@@ -537,14 +544,6 @@ const TradingBots = () => {
                 >
                   <Plus size={16} className="mr-2" />
                   Simple Setup
-                </Button>
-                <Button
-                  onClick={() => setShowAdvancedBuilder(true)}
-                  variant="outline"
-                  className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
-                >
-                  <Settings size={16} className="mr-2" />
-                  Manual Setup
                 </Button>
               </div>
             </div>
