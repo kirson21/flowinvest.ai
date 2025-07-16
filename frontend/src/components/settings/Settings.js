@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { database, auth } from '../../lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Alert, AlertDescription } from '../ui/alert';
 import { 
   Settings as SettingsIcon,
   Moon,
@@ -16,18 +22,148 @@ import {
   Shield,
   Bell,
   CreditCard,
-  HelpCircle
+  HelpCircle,
+  Edit,
+  Camera,
+  Trash2,
+  Save,
+  X,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 
 const Settings = () => {
-  const { t, isDarkMode, toggleTheme, language, toggleLanguage, user, logout } = useApp();
+  const { t, isDarkMode, toggleTheme, language, toggleLanguage } = useApp();
+  const { user, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  
+  // Profile editing state
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    display_name: '',
+    email: '',
+    phone: '',
+    bio: '',
+    avatar_url: ''
+  });
+  
+  // Delete account state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
-  const handleLogout = () => {
-    logout();
+  useEffect(() => {
+    if (user) {
+      loadUserProfile();
+    }
+  }, [user]);
+
+  const loadUserProfile = async () => {
+    try {
+      const profile = await database.getUserProfile(user.id);
+      if (profile) {
+        setProfileData({
+          display_name: profile.display_name || '',
+          email: profile.email || user.email || '',
+          phone: profile.phone || '',
+          bio: profile.bio || '',
+          avatar_url: profile.avatar_url || ''
+        });
+      } else {
+        // If no profile exists, create one with basic user info
+        setProfileData({
+          display_name: user.user_metadata?.full_name || '',
+          email: user.email || '',
+          phone: '',
+          bio: '',
+          avatar_url: user.user_metadata?.avatar_url || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const updates = {
+        display_name: profileData.display_name,
+        email: profileData.email,
+        phone: profileData.phone,
+        bio: profileData.bio,
+        avatar_url: profileData.avatar_url,
+        updated_at: new Date().toISOString()
+      };
+
+      const result = await database.updateUserProfile(user.id, updates);
+      
+      if (result) {
+        setMessage('Profile updated successfully!');
+        setIsEditing(false);
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        setError('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setError('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE MY ACCOUNT') {
+      setError('Please type "DELETE MY ACCOUNT" to confirm');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      // First, delete all user data (bots, settings, etc.)
+      const userBots = await database.getUserBots(user.id, false);
+      for (const bot of userBots) {
+        await database.deleteBot(bot.id);
+      }
+
+      // Delete user profile
+      await database.updateUserProfile(user.id, { deleted_at: new Date().toISOString() });
+
+      // Sign out the user
+      await auth.signOut();
+      
+      setMessage('Account deleted successfully');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setError('Failed to delete account');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileData({ ...profileData, avatar_url: e.target.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogout = async () => {
+    await auth.signOut();
   };
 
   return (
-    <div className="p-4 pb-20 max-w-2xl mx-auto">
+    <div className="p-4 pb-20 max-w-3xl mx-auto">
       <div className="flex items-center mb-6">
         <SettingsIcon className="text-[#0097B2] mr-3" size={24} />
         <div>
@@ -40,14 +176,138 @@ const Settings = () => {
         </div>
       </div>
 
+      {/* Success/Error Messages */}
+      {message && (
+        <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )}
+      
+      {error && (
+        <Alert className="mb-6 border-red-200 bg-red-50 text-red-800">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       {/* User Profile */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-[#474545] dark:text-white">
-            {t('profile')}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-[#474545] dark:text-white">
+              {t('profile')}
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditing(!isEditing)}
+              disabled={loading}
+            >
+              {isEditing ? (
+                <>
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel
+                </>
+              ) : (
+                <>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
+          <div className="space-y-4">
+            {/* Avatar */}
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-20 h-20">
+                <AvatarImage src={profileData.avatar_url} alt="Profile" />
+                <AvatarFallback className="bg-[#0097B2] text-white text-lg">
+                  {profileData.display_name?.[0] || user?.email?.[0] || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              {isEditing && (
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="avatar-upload"
+                  />
+                  <label
+                    htmlFor="avatar-upload"
+                    className="flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Change Photo
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="display_name">Display Name</Label>
+                <Input
+                  id="display_name"
+                  value={profileData.display_name}
+                  onChange={(e) => setProfileData({ ...profileData, display_name: e.target.value })}
+                  disabled={!isEditing}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  disabled={!isEditing}
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                  disabled={!isEditing}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={profileData.bio}
+                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Tell us about yourself..."
+                rows={3}
+              />
+            </div>
+
+            {isEditing && (
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleSaveProfile}
+                  disabled={loading}
+                  className="bg-[#0097B2] hover:bg-[#0097B2]/90"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
           <div className="flex items-center space-x-4">
             <Avatar className="w-16 h-16">
               <AvatarImage src={user?.avatar} alt={user?.name} />
