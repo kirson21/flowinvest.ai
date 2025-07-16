@@ -454,6 +454,74 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Delete Account */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-red-600 dark:text-red-400">
+            Danger Zone
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full justify-start border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 size={16} className="mr-2" />
+                Delete Account
+              </Button>
+            </div>
+            
+            {showDeleteConfirm && (
+              <div className="border border-red-200 rounded-lg p-4 bg-red-50">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2 text-red-600">
+                    <AlertTriangle size={16} />
+                    <p className="font-medium">Are you sure?</p>
+                  </div>
+                  <p className="text-sm text-red-600">
+                    This will permanently delete your account, all your bots, settings, and data. 
+                    Type "DELETE MY ACCOUNT" to confirm.
+                  </p>
+                  <Input
+                    placeholder="Type DELETE MY ACCOUNT"
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    className="border-red-200 focus:border-red-400"
+                  />
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowDeleteConfirm(false);
+                        setDeleteConfirmText('');
+                        setError('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDeleteAccount}
+                      disabled={loading || deleteConfirmText !== 'DELETE MY ACCOUNT'}
+                    >
+                      {loading ? 'Deleting...' : 'Delete Account'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Logout */}
       <Card>
         <CardContent className="pt-6">
