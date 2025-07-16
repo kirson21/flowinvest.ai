@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppProvider } from './contexts/AppContext'; // Keep the old AppProvider for compatibility
 import RealAuthScreen from './components/auth/RealAuthScreen';
+import AuthCallback from './components/auth/AuthCallback';
 import MainApp from './components/MainApp';
 import { Loader2 } from 'lucide-react';
 import './App.css';
