@@ -39,8 +39,14 @@ export const auth = {
   },
 
   signInWithGoogle: async () => {
+    // Get the current domain for redirect
+    const currentDomain = window.location.origin
+    
     return await supabase.auth.signInWithOAuth({
-      provider: 'google'
+      provider: 'google',
+      options: {
+        redirectTo: `${currentDomain}/auth/callback`
+      }
     })
   },
 
