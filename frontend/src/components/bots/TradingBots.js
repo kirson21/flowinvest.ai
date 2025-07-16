@@ -426,24 +426,21 @@ const TradingBots = () => {
     return (
       <GrokAIBotCreator 
         onClose={() => setShowAICreator(false)}
-        onSave={(botData) => {
-          const newBot = {
-            ...botData,
-            id: Date.now(),
-            // Map AI-generated properties to UI component properties
-            riskLevel: botData.risk_level,
-            tradingPair: `${botData.base_coin}/${botData.quote_coin}`,
-            strategy: botData.strategy,
-            dailyPnL: botData.daily_pnl || 0,
-            weeklyPnL: botData.weekly_pnl || 0,
-            monthlyPnL: botData.monthly_pnl || 0,
-            winRate: botData.win_rate || 0,
-            isActive: false,
-            created: new Date(),
+        onSave={async (botData) => {
+          const success = await saveBot({
+            name: botData.name || 'AI Generated Bot',
+            description: botData.description || 'AI-powered trading bot',
+            strategy: botData.strategy || 'ai_generated',
+            exchange: botData.exchange || 'binance',
+            trading_pair: `${botData.base_coin || 'BTC'}/${botData.quote_coin || 'USDT'}`,
+            risk_level: botData.risk_level || 'medium',
+            config: botData,
             type: 'ai_generated'
-          };
-          setUserBots([...userBots, newBot]);
-          setShowAICreator(false);
+          });
+          
+          if (success) {
+            setShowAICreator(false);
+          }
         }}
       />
     );
