@@ -376,20 +376,22 @@ const TradingBots = () => {
     return (
       <AdvancedBotBuilder 
         onClose={() => setShowAdvancedBuilder(false)}
-        onSave={(botData) => {
-          const newBot = {
+        onSave={async (botData) => {
+          const success = await saveBot({
             ...botData,
-            id: Date.now(),
-            dailyPnL: 0,
-            weeklyPnL: 0,
-            monthlyPnL: 0,
-            winRate: 0,
-            isActive: false,
-            created: new Date(),
+            name: botData.name || 'Advanced Bot',
+            description: botData.description || 'Advanced trading bot',
+            strategy: botData.strategy || 'advanced',
+            exchange: botData.exchange || 'binance',
+            trading_pair: botData.tradingPair || 'BTC/USDT',
+            risk_level: botData.riskLevel || 'medium',
+            config: botData,
             type: 'advanced'
-          };
-          setUserBots([...userBots, newBot]);
-          setShowAdvancedBuilder(false);
+          });
+          
+          if (success) {
+            setShowAdvancedBuilder(false);
+          }
         }}
       />
     );
