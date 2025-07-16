@@ -29,13 +29,57 @@ import GrokAIBotCreator from './GrokAIBotCreator';
 
 const TradingBots = () => {
   const { t } = useApp();
+  const { user } = useAuth();
   const [preBuiltBots, setPreBuiltBots] = useState(mockTradingBots);
-  const [userBots, setUserBots] = useState(mockUserBots);
+  const [userBots, setUserBots] = useState([]);
+  const [loadingBots, setLoadingBots] = useState(true);
   const [showBotBuilder, setShowBotBuilder] = useState(false);
   const [showAdvancedBuilder, setShowAdvancedBuilder] = useState(false);
   const [showAICreator, setShowAICreator] = useState(false);
   const [selectedRunBot, setSelectedRunBot] = useState(null);
   const [selectedDetailsBot, setSelectedDetailsBot] = useState(null);
+
+  // Load user bots from Supabase
+  useEffect(() => {
+    if (user) {
+      loadUserBots();
+    }
+  }, [user]);
+
+  const loadUserBots = async () => {
+    try {
+      setLoadingBots(true);
+      const bots = await database.getUserBots(user.id, false); // Only user bots, not prebuilt
+      setUserBots(bots);
+    } catch (error) {
+      console.error('Error loading user bots:', error);
+    } finally {
+      setLoadingBots(false);
+    }
+  };
+
+  const saveBot = async (botData) => {
+    try {
+      const botToSave = {
+        ...botData,
+        user_id: user.id,
+        is_active: false,
+        is_prebuilt: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const savedBot = await database.createBot(botToSave);
+      if (savedBot) {
+        await loadUserBots(); // Refresh the list
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error saving bot:', error);
+      return false;
+    }
+  };
 
   const getRiskColor = (risk) => {
     if (!risk) return 'bg-gray-500';
