@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { database } from '../../lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -15,9 +17,10 @@ import {
   CheckCircle,
   XCircle,
   MessageSquare,
-  Settings
+  Settings,
+  Loader2
 } from 'lucide-react';
-import { mockTradingBots, mockUserBots } from '../../data/mockData';
+import { mockTradingBots } from '../../data/mockData';
 import BotBuilder from './BotBuilder';
 import AdvancedBotBuilder from './AdvancedBotBuilder';
 import RunBotModal from './RunBotModal';
