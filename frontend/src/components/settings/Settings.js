@@ -308,35 +308,6 @@ const Settings = () => {
           </div>
         </CardContent>
       </Card>
-          <div className="flex items-center space-x-4">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={user?.avatar} alt={user?.name} />
-              <AvatarFallback className="bg-[#0097B2] text-white">
-                {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h3 className="font-medium text-[#474545] dark:text-white">
-                {user?.name || 'User'}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {user?.email || 'user@example.com'}
-              </p>
-              <Badge className="mt-2 bg-[#0097B2]/10 text-[#0097B2] hover:bg-[#0097B2]/20">
-                Premium Member
-              </Badge>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
-            >
-              <User size={16} className="mr-2" />
-              Edit
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* App Settings */}
       <Card className="mb-6">
