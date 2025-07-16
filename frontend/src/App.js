@@ -68,12 +68,18 @@ function App() {
               </PublicRoute>
             } />
             
+            {/* Auth callback route */}
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            
             {/* Protected routes */}
             <Route path="/app" element={
               <ProtectedRoute>
                 <AppWithAuth />
               </ProtectedRoute>
             } />
+            
+            {/* Dashboard redirect */}
+            <Route path="/dashboard" element={<Navigate to="/app" replace />} />
             
             {/* Default redirect */}
             <Route path="/" element={<Navigate to="/app" replace />} />
