@@ -241,136 +241,128 @@ const TradingBots = () => {
     );
   };
 
-  const UserBotCard = ({ bot, isUserBot = false }) => (
-    <Card className="hover:shadow-lg transition-all duration-200 group">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Bot className="text-[#0097B2]" size={20} />
-            <CardTitle className="text-lg text-[#474545] dark:text-white">
-              {bot.name}
-            </CardTitle>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge 
-              variant={bot.isActive ? "default" : "secondary"}
-              className={bot.isActive ? "bg-green-500" : "bg-gray-500"}
-            >
-              {bot.isActive ? t('active') : t('inactive')}
-            </Badge>
-          </div>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {bot.description}
-        </p>
-        <div className="flex items-center space-x-2 mt-2">
-          <Badge variant="outline" className="border-purple-500 text-purple-600">
-            Personal
-          </Badge>
-          <Badge variant="secondary" className="text-xs">
-            Custom
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('strategy')}
-            </p>
-            <p className="text-sm font-medium text-[#474545] dark:text-white">
-              {bot.strategy}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('exchange')}
-            </p>
-            <p className="text-sm font-medium text-[#474545] dark:text-white">
-              {bot.exchange}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('tradingPair')}
-            </p>
-            <p className="text-sm font-medium text-[#474545] dark:text-white">
-              {bot.tradingPair}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('riskLevel')}
-            </p>
+  const UserBotCard = ({ bot }) => {
+    return (
+      <Card className="hover:shadow-lg transition-all duration-200 group">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${getRiskColor(bot.riskLevel)}`} />
-              <span className="text-sm font-medium text-[#474545] dark:text-white">
-                {t(bot.riskLevel.toLowerCase())}
-              </span>
+              <Bot className="text-[#0097B2]" size={20} />
+              <CardTitle className="text-lg text-[#474545] dark:text-white">
+                {bot.name}
+              </CardTitle>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge 
+                variant={bot.is_active ? "default" : "secondary"}
+                className={bot.is_active ? "bg-green-500" : "bg-gray-500"}
+              >
+                {bot.is_active ? t('active') : t('inactive')}
+              </Badge>
             </div>
           </div>
-        </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {bot.description}
+          </p>
+          <div className="flex items-center space-x-2 mt-2">
+            <Badge variant="outline" className="border-purple-500 text-purple-600">
+              Personal
+            </Badge>
+            <Badge variant="secondary" className="text-xs">
+              {bot.type || 'Custom'}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {t('strategy')}
+              </p>
+              <p className="text-sm font-medium text-[#474545] dark:text-white">
+                {bot.strategy}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {t('exchange')}
+              </p>
+              <p className="text-sm font-medium text-[#474545] dark:text-white">
+                {bot.exchange}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {t('tradingPair')}
+              </p>
+              <p className="text-sm font-medium text-[#474545] dark:text-white">
+                {bot.trading_pair}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {t('riskLevel')}
+              </p>
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${getRiskColor(bot.risk_level)}`} />
+                <span className="text-sm font-medium text-[#474545] dark:text-white">
+                  {t(bot.risk_level?.toLowerCase() || 'medium')}
+                </span>
+              </div>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('dailyPnL')}
-            </p>
-            <p className={`text-sm font-bold ${bot.dailyPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {bot.dailyPnL >= 0 ? '+' : ''}{bot.dailyPnL}%
-            </p>
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {t('dailyPnL')}
+              </p>
+              <p className={`text-sm font-bold ${(bot.daily_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {(bot.daily_pnl || 0) >= 0 ? '+' : ''}{bot.daily_pnl || 0}%
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {t('weeklyPnL')}
+              </p>
+              <p className={`text-sm font-bold ${(bot.weekly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {(bot.weekly_pnl || 0) >= 0 ? '+' : ''}{bot.weekly_pnl || 0}%
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {t('monthlyPnL')}
+              </p>
+              <p className={`text-sm font-bold ${(bot.monthly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {(bot.monthly_pnl || 0) >= 0 ? '+' : ''}{bot.monthly_pnl || 0}%
+              </p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('weeklyPnL')}
-            </p>
-            <p className={`text-sm font-bold ${bot.weeklyPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {bot.weeklyPnL >= 0 ? '+' : ''}{bot.weeklyPnL}%
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('monthlyPnL')}
-            </p>
-            <p className={`text-sm font-bold ${bot.monthlyPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {bot.monthlyPnL >= 0 ? '+' : ''}{bot.monthlyPnL}%
-            </p>
-          </div>
-        </div>
 
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {t('winRate')}
-            </span>
-            <span className="text-sm font-medium text-[#474545] dark:text-white">
-              {bot.winRate}%
-            </span>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setSelectedRunBot(bot)}
+            >
+              <Play className="w-4 h-4 mr-2" />
+              {t('runBot')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setSelectedDetailsBot(bot)}
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              {t('viewDetails')}
+            </Button>
           </div>
-          <Progress value={bot.winRate} className="h-2" />
-        </div>
-
-        <div className="flex items-center justify-between space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 border-[#0097B2]/20 hover:bg-[#0097B2]/5"
-          >
-            <Settings size={16} className="mr-2" />
-            Settings
-          </Button>
-          <Button
-            onClick={() => setSelectedDetailsBot(bot)}
-            size="sm"
-            className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
-          >
-            <BarChart3 size={16} className="mr-2" />
-            View Details
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (showAdvancedBuilder) {
     return (
