@@ -150,11 +150,15 @@ const Settings = () => {
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
-    if (file) {
+    if (!file) return;
+    
+    setError(''); // Clear previous errors
+    
+    try {
       // Validate file type
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!validTypes.includes(file.type)) {
-        setError('Please select a valid image file (JPEG, PNG, or GIF)');
+        setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
         return;
       }
 
@@ -166,13 +170,28 @@ const Settings = () => {
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        setProfileData({ ...profileData, avatar_url: e.target.result });
-        setError(''); // Clear any previous errors
+        try {
+          const result = e.target.result;
+          if (result) {
+            setProfileData({ ...profileData, avatar_url: result });
+            setMessage('Image uploaded successfully! Click "Save Changes" to save your profile.');
+            setTimeout(() => setMessage(''), 3000);
+          }
+        } catch (error) {
+          console.error('Error processing image:', error);
+          setError('Failed to process the image');
+        }
       };
+      
       reader.onerror = () => {
+        console.error('FileReader error');
         setError('Failed to read the image file');
       };
+      
       reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error in handleFileUpload:', error);
+      setError('Failed to upload image');
     }
   };
 
