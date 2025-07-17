@@ -4,7 +4,7 @@ import { mockTranslations } from '../data/mockData';
 const AppContext = createContext();
 
 export const AppProvider = ({ children, initialUser = null }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark mode
   const [language, setLanguage] = useState('en');
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialUser);
   const [user, setUser] = useState(initialUser);
@@ -23,6 +23,9 @@ export const AppProvider = ({ children, initialUser = null }) => {
 
     if (savedTheme) {
       setIsDarkMode(savedTheme === 'dark');
+    } else {
+      // Default to dark theme for first-time users
+      setIsDarkMode(true);
     }
     if (savedLanguage) {
       setLanguage(savedLanguage);
