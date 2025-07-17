@@ -92,26 +92,36 @@ const Settings = () => {
       setLoading(true);
       setError('');
       
+      // Basic validation
+      if (!profileData.display_name.trim()) {
+        setError('Display name is required');
+        return;
+      }
+      
       const updates = {
-        display_name: profileData.display_name,
-        phone: profileData.phone,
-        bio: profileData.bio,
+        display_name: profileData.display_name.trim(),
+        phone: profileData.phone.trim(),
+        bio: profileData.bio.trim(),
         avatar_url: profileData.avatar_url,
         updated_at: new Date().toISOString()
       };
 
+      console.log('Saving profile with updates:', updates);
+      
       const result = await database.updateUserProfile(user.id, updates);
+      
+      console.log('Profile update result:', result);
       
       if (result) {
         setMessage('Profile updated successfully!');
         setIsEditing(false);
         setTimeout(() => setMessage(''), 3000);
       } else {
-        setError('Failed to update profile. Please try again.');
+        setError('Failed to update profile. Please check the console for details.');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      setError(`Failed to update profile: ${error.message}`);
+      setError(`Failed to update profile: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
