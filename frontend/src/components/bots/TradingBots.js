@@ -641,6 +641,19 @@ const TradingBots = () => {
           onClose={() => setSelectedDetailsBot(null)}
         />
       )}
+
+      {selectedManageBot && (
+        <BotManagementModal
+          bot={selectedManageBot}
+          onClose={() => setSelectedManageBot(null)}
+          onPause={handlePauseBot}
+          onResume={handleResumeBot}
+          onDelete={handleDeleteBot}
+          onUpdateAPI={handleUpdateAPI}
+          onEditSettings={handleEditSettings}
+          isPrebuilt={manageBotType === 'prebuilt'}
+        />
+      )}
     </div>
   );
 };
