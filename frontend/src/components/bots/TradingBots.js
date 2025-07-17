@@ -286,28 +286,18 @@ const TradingBots = () => {
             <Progress value={bot.winRate} className="h-2" />
           </div>
 
-          <div className="flex items-center justify-between space-x-2">
-            <Button
-              onClick={() => setSelectedRunBot(bot)}
-              size="sm"
-              className={`flex-1 ${isConnected 
-                ? 'bg-green-600 hover:bg-green-700' 
-                : 'bg-[#0097B2] hover:bg-[#0097B2]/90'
-              }`}
-            >
-              <Play size={16} className="mr-2" />
-              {isConnected ? 'Manage' : 'Run Bot'}
-            </Button>
-            <Button
-              onClick={() => setSelectedDetailsBot(bot)}
-              variant="outline"
-              size="sm"
-              className="flex-1 border-[#0097B2]/20 hover:bg-[#0097B2]/5"
-            >
-              <BarChart3 size={16} className="mr-2" />
-              View Details
-            </Button>
-          </div>
+          {/* Only Manage button for pre-built bots */}
+          <Button
+            onClick={() => {
+              setSelectedManageBot(bot);
+              setManageBotType('prebuilt');
+            }}
+            size="sm"
+            className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90"
+          >
+            <Cog size={16} className="mr-2" />
+            Manage
+          </Button>
         </CardContent>
       </Card>
     );
