@@ -69,32 +69,92 @@ export const auth = {
 export const database = {
   // User operations
   getUserProfile: async (userId) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    
-    if (error) {
+    try {
+      // First try to get profile from custom profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+      
+      if (profileData && !profileError) {
+        return profileData
+      }
+      
+      // If no profile exists, return null to create one
+      return null
+    } catch (error) {
       console.error('Error fetching user profile:', error)
       return null
     }
-    return data
   },
 
   updateUserProfile: async (userId, updates) => {
-    const { data, error } = await supabase
-      .from('users')
-      .update(updates)
-      .eq('id', userId)
-      .select()
-      .single()
-    
-    if (error) {
-      console.error('Error updating user profile:', error)
+    try {
+      // First, update the Supabase auth user metadata
+      const { data: authData, error: authError } = await supabase.auth.updateUser({
+        data: {
+          display_name: updates.display_name,
+          avatar_url: updates.avatar_url
+        }
+      })
+      
+      if (authError) {
+        console.error('Error updating auth user:', authError)
+      }
+      
+      // Then update or create user profile in custom table
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: userId,
+          display_name: updates.display_name,
+          phone: updates.phone,
+          bio: updates.bio,
+          avatar_url: updates.avatar_url,
+          updated_at: updates.updated_at
+        })
+        .select()
+        .single()
+      
+      if (error) {
+        console.error('Error updating user profile:', error)
+        return null
+      }
+      
+      return data
+    } catch (error) {
+      console.error('Error in updateUserProfile:', error)
       return null
     }
-    return data
+  },
+
+  createUserProfile: async (userId, profileData) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .insert({
+          user_id: userId,
+          display_name: profileData.display_name,
+          phone: profileData.phone,
+          bio: profileData.bio,
+          avatar_url: profileData.avatar_url,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+      
+      if (error) {
+        console.error('Error creating user profile:', error)
+        return null
+      }
+      
+      return data
+    } catch (error) {
+      console.error('Error in createUserProfile:', error)
+      return null
+    }
   },
 
   getUserSettings: async (userId) => {
