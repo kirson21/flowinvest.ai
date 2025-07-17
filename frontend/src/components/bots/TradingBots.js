@@ -314,6 +314,8 @@ const TradingBots = () => {
   };
 
   const UserBotCard = ({ bot }) => {
+    const isConnected = bot.is_active;
+    
     return (
       <Card className="hover:shadow-lg transition-all duration-200 group">
         <CardHeader className="pb-3">
@@ -326,10 +328,10 @@ const TradingBots = () => {
             </div>
             <div className="flex items-center space-x-2">
               <Badge 
-                variant={bot.is_active ? "default" : "secondary"}
-                className={bot.is_active ? "bg-green-500" : "bg-gray-500"}
+                variant={isConnected ? "default" : "secondary"}
+                className={isConnected ? "bg-green-500" : "bg-gray-500"}
               >
-                {bot.is_active ? t('active') : t('inactive')}
+                {isConnected ? t('connected') : t('not_connected')}
               </Badge>
             </div>
           </div>
@@ -411,26 +413,36 @@ const TradingBots = () => {
             </div>
           </div>
 
-          <div className="flex space-x-2">
+          {/* Different buttons based on connection status */}
+          {isConnected ? (
+            // Connected bots: Manage button
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
-              onClick={() => setSelectedRunBot(bot)}
+              className="w-full"
+              onClick={() => {
+                setSelectedManageBot(bot);
+                setManageBotType('user');
+              }}
             >
-              <Play className="w-4 h-4 mr-2" />
-              {t('runBot')}
+              <Cog className="w-4 h-4 mr-2" />
+              Manage
             </Button>
+          ) : (
+            // Not connected bots: Delete button
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
-              onClick={() => setSelectedDetailsBot(bot)}
+              className="w-full border-red-200 text-red-600 hover:bg-red-50"
+              onClick={() => {
+                setSelectedManageBot(bot);
+                setManageBotType('user');
+              }}
             >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              {t('viewDetails')}
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
             </Button>
-          </div>
+          )}
         </CardContent>
       </Card>
     );
