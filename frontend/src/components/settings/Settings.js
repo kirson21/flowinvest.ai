@@ -150,9 +150,26 @@ const Settings = () => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, or GIF)');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setProfileData({ ...profileData, avatar_url: e.target.result });
+        setError(''); // Clear any previous errors
+      };
+      reader.onerror = () => {
+        setError('Failed to read the image file');
       };
       reader.readAsDataURL(file);
     }
