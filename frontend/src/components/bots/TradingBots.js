@@ -41,6 +41,8 @@ const TradingBots = () => {
   const [showAICreator, setShowAICreator] = useState(false);
   const [selectedRunBot, setSelectedRunBot] = useState(null);
   const [selectedDetailsBot, setSelectedDetailsBot] = useState(null);
+  const [selectedManageBot, setSelectedManageBot] = useState(null);
+  const [manageBotType, setManageBotType] = useState('user'); // 'user' or 'prebuilt'
 
   // Load user bots from Supabase
   useEffect(() => {
@@ -82,6 +84,73 @@ const TradingBots = () => {
       console.error('Error saving bot:', error);
       return false;
     }
+  };
+
+  // Bot management functions
+  const handlePauseBot = async (botId) => {
+    try {
+      const result = await database.updateBot(botId, { is_active: false, status: 'paused' });
+      if (result) {
+        await loadUserBots();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error pausing bot:', error);
+      return false;
+    }
+  };
+
+  const handleResumeBot = async (botId) => {
+    try {
+      const result = await database.updateBot(botId, { is_active: true, status: 'running' });
+      if (result) {
+        await loadUserBots();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error resuming bot:', error);
+      return false;
+    }
+  };
+
+  const handleDeleteBot = async (botId) => {
+    try {
+      const result = await database.deleteBot(botId);
+      if (result) {
+        await loadUserBots();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting bot:', error);
+      return false;
+    }
+  };
+
+  const handleUpdateAPI = async (botId, apiData) => {
+    try {
+      const result = await database.updateBot(botId, { 
+        api_credentials: apiData,
+        updated_at: new Date().toISOString()
+      });
+      if (result) {
+        await loadUserBots();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error updating API:', error);
+      return false;
+    }
+  };
+
+  const handleEditSettings = async (botId) => {
+    // This would open the advanced bot builder with the existing bot data
+    // For now, we'll just close the modal
+    setSelectedManageBot(null);
+    // TODO: Implement bot editing functionality
   };
 
   const getRiskColor = (risk) => {
