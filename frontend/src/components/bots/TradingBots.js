@@ -427,33 +427,44 @@ const TradingBots = () => {
 
           {/* Different buttons based on connection status */}
           {isConnected ? (
-            // Connected bots: Manage button
+            // Connected bots: Manage button only
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
               onClick={() => {
                 setSelectedManageBot(bot);
                 setManageBotType('user');
               }}
             >
               <Cog className="w-4 h-4 mr-2" />
-              Manage
+              Manage Bot
             </Button>
           ) : (
-            // Not connected bots: Delete button
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full border-red-200 text-red-600 hover:bg-red-50"
-              onClick={() => {
-                setSelectedManageBot(bot);
-                setManageBotType('user');
-              }}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
+            // Not connected bots: Run Bot AND Delete Bot buttons
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                onClick={() => setSelectedRunBot(bot)}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Run Bot
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  setSelectedManageBot(bot);
+                  setManageBotType('user');
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>
