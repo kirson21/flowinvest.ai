@@ -286,18 +286,31 @@ const TradingBots = () => {
             <Progress value={bot.winRate} className="h-2" />
           </div>
 
-          {/* Only Manage button for pre-built bots */}
-          <Button
-            onClick={() => {
-              setSelectedManageBot(bot);
-              setManageBotType('prebuilt');
-            }}
-            size="sm"
-            className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90"
-          >
-            <Cog size={16} className="mr-2" />
-            Manage
-          </Button>
+          {/* Different buttons based on connection status */}
+          {isConnected ? (
+            // Connected: Show Manage button
+            <Button
+              onClick={() => {
+                setSelectedManageBot(bot);
+                setManageBotType('prebuilt');
+              }}
+              size="sm"
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              <Cog size={16} className="mr-2" />
+              Manage
+            </Button>
+          ) : (
+            // Not Connected: Show Run Bot button
+            <Button
+              onClick={() => setSelectedRunBot(bot)}
+              size="sm"
+              className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90"
+            >
+              <Play size={16} className="mr-2" />
+              Run Bot
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
