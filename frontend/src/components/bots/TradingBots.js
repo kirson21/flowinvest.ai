@@ -18,13 +18,16 @@ import {
   XCircle,
   MessageSquare,
   Settings,
-  Loader2
+  Loader2,
+  Trash2,
+  Cog
 } from 'lucide-react';
 import { mockTradingBots } from '../../data/mockData';
 import BotBuilder from './BotBuilder';
 import AdvancedBotBuilder from './AdvancedBotBuilder';
 import RunBotModal from './RunBotModal';
 import BotDetailsModal from './BotDetailsModal';
+import BotManagementModal from './BotManagementModal';
 import GrokAIBotCreator from './GrokAIBotCreator';
 
 const TradingBots = () => {
