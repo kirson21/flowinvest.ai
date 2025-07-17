@@ -72,16 +72,18 @@ const Settings = () => {
         });
       } else {
         // If no profile exists, create one with basic user info
-        setProfileData({
-          display_name: user.user_metadata?.full_name || '',
+        const newProfile = {
+          display_name: user.user_metadata?.full_name || user.user_metadata?.display_name || '',
           email: user.email || '',
           phone: '',
           bio: '',
           avatar_url: user.user_metadata?.avatar_url || ''
-        });
+        };
+        setProfileData(newProfile);
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+      setError('Failed to load profile');
     }
   };
 
@@ -92,7 +94,6 @@ const Settings = () => {
       
       const updates = {
         display_name: profileData.display_name,
-        email: profileData.email,
         phone: profileData.phone,
         bio: profileData.bio,
         avatar_url: profileData.avatar_url,
@@ -106,11 +107,11 @@ const Settings = () => {
         setIsEditing(false);
         setTimeout(() => setMessage(''), 3000);
       } else {
-        setError('Failed to update profile');
+        setError('Failed to update profile. Please try again.');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      setError('Failed to update profile');
+      setError(`Failed to update profile: ${error.message}`);
     } finally {
       setLoading(false);
     }
