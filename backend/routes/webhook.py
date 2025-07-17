@@ -150,13 +150,18 @@ async def get_feed_entries(limit: int = 20, language: str = "en"):
         translated_entries = []
         
         for entry in sorted_entries:
-            # For now, just return entries as-is (no translation)
-            translated_entry = TranslatedFeedEntryResponse(
-                **entry,
-                language=language,
-                is_translated=False
-            )
-            translated_entries.append(translated_entry)
+            # If language is Russian, attempt to get/create translation
+            if language == "ru":
+                translated_entry = await get_translated_entry(entry)
+                translated_entries.append(translated_entry)
+            else:
+                # Return original English entry
+                translated_entry = TranslatedFeedEntryResponse(
+                    **entry,
+                    language="en",
+                    is_translated=False
+                )
+                translated_entries.append(translated_entry)
         
         logger.info(f"Retrieved {len(translated_entries)} feed entries in {language}")
         return translated_entries
@@ -164,6 +169,126 @@ async def get_feed_entries(limit: int = 20, language: str = "en"):
     except Exception as e:
         logger.error(f"Error retrieving feed entries: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving feed entries: {str(e)}")
+
+async def get_translated_entry(entry: dict) -> TranslatedFeedEntryResponse:
+    """Get or create translated version of a feed entry"""
+    try:
+        entry_id = entry['id']
+        
+        # Check for cached translation
+        cached_translation = TRANSLATIONS.get(f"{entry_id}_ru")
+        
+        if cached_translation:
+            # Return cached translation
+            return TranslatedFeedEntryResponse(
+                id=entry['id'],
+                title=cached_translation['title'],
+                summary=cached_translation['summary'],
+                sentiment=entry['sentiment'],
+                source=cached_translation['source'],
+                timestamp=entry['timestamp'],
+                created_at=entry['created_at'],
+                language="ru",
+                is_translated=True
+            )
+        
+        # Get API key and create translation
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if not api_key:
+            logger.warning("OpenAI API key not found, returning original text")
+            return TranslatedFeedEntryResponse(
+                **entry,
+                language="en",
+                is_translated=False
+            )
+        
+        # Translate the content
+        translation = await translate_to_russian(api_key, entry['title'], entry['summary'], entry['source'])
+        
+        # Cache the translation
+        TRANSLATIONS[f"{entry_id}_ru"] = {
+            "title": translation['title'],
+            "summary": translation['summary'],
+            "source": translation['source'],
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        # Return translated entry
+        return TranslatedFeedEntryResponse(
+            id=entry['id'],
+            title=translation['title'],
+            summary=translation['summary'],
+            sentiment=entry['sentiment'],
+            source=translation['source'],
+            timestamp=entry['timestamp'],
+            created_at=entry['created_at'],
+            language="ru",
+            is_translated=True
+        )
+        
+    except Exception as e:
+        logger.error(f"Translation failed for entry {entry['id']}: {e}")
+        # Return original entry as fallback
+        return TranslatedFeedEntryResponse(
+            **entry,
+            language="en", 
+            is_translated=False
+        )
+
+async def translate_to_russian(api_key: str, title: str, summary: str, source: str) -> dict:
+    """Translate content to Russian using OpenAI API"""
+    try:
+        import openai
+        
+        client = openai.OpenAI(api_key=api_key)
+        
+        # Translate title
+        title_response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a professional translator. Translate the following financial news title to Russian. Keep it concise and professional."},
+                {"role": "user", "content": title}
+            ],
+            max_tokens=100,
+            temperature=0.3
+        )
+        
+        # Translate summary
+        summary_response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a professional translator. Translate the following financial news summary to Russian. Keep it informative and professional."},
+                {"role": "user", "content": summary}
+            ],
+            max_tokens=500,
+            temperature=0.3
+        )
+        
+        # Translate source
+        source_response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a professional translator. Translate the following news source name to Russian. Keep it short."},
+                {"role": "user", "content": source}
+            ],
+            max_tokens=50,
+            temperature=0.3
+        )
+        
+        return {
+            "title": title_response.choices[0].message.content.strip(),
+            "summary": summary_response.choices[0].message.content.strip(),
+            "source": source_response.choices[0].message.content.strip()
+        }
+        
+    except Exception as e:
+        logger.error(f"OpenAI translation error: {e}")
+        # Return original content as fallback
+        return {
+            "title": title,
+            "summary": summary,
+            "source": source
+        }
 
 @router.get("/feed_entries/count")
 async def get_feed_entries_count():
