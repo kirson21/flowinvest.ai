@@ -164,9 +164,18 @@ const TradingBots = () => {
   };
 
   const getConnectionStatus = (bot) => {
-    // Mock connection status - in real app this would come from backend
-    const isConnected = Math.random() > 0.5; // Random for demo
-    return isConnected;
+    // For pre-built bots, check if user has connected this bot
+    // This should be based on whether the user has API credentials set for this bot
+    // For now, we'll use a more realistic approach based on bot ID
+    // In production, this would come from the backend
+    
+    // Mock realistic connection status based on bot ID
+    if (bot.id === 1) return true;  // AI Trend Master Pro - connected
+    if (bot.id === 2) return false; // Quantum Scalping Engine - not connected
+    if (bot.id === 3) return true;  // Smart DCA Bot - connected
+    
+    // Default to not connected for new bots
+    return false;
   };
 
   const PreBuiltBotCard = ({ bot }) => {
