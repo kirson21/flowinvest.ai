@@ -195,11 +195,12 @@ async def get_translated_entry(entry: dict) -> TranslatedFeedEntryResponse:
         # Get API key and create translation
         api_key = os.environ.get('OPENAI_API_KEY')
         if not api_key:
-            logger.warning("OpenAI API key not found, returning original text")
+            logger.warning("OpenAI API key not found, returning original text with ru language marker")
+            # Return the entry marked as Russian but not translated
             return TranslatedFeedEntryResponse(
                 **entry,
-                language="en",
-                is_translated=False
+                language="ru",
+                is_translated=False  # Mark as not translated
             )
         
         # Translate the content
@@ -227,7 +228,7 @@ async def get_translated_entry(entry: dict) -> TranslatedFeedEntryResponse:
         )
         
     except Exception as e:
-        logger.error(f"Translation failed for entry {entry['id']}: {e}")
+        logger.error(f"Translation failed for entry {entry.get('id', 'unknown')}: {e}")
         # Return original entry as fallback
         return TranslatedFeedEntryResponse(
             **entry,
