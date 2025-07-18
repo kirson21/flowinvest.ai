@@ -628,21 +628,13 @@ const TradingBots = () => {
               <p className="text-gray-500 dark:text-gray-400 mb-4">
                 You haven't created any bots yet.
               </p>
-              <div className="flex justify-center space-x-3">
+              <div className="flex justify-center">
                 <Button
                   onClick={() => setShowAICreator(true)}
                   className="bg-purple-600 hover:bg-purple-700"
                 >
                   <MessageSquare size={16} className="mr-2" />
                   Create with AI
-                </Button>
-                <Button
-                  onClick={() => setShowBotBuilder(true)}
-                  variant="outline"
-                  className="border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-                >
-                  <Plus size={16} className="mr-2" />
-                  Simple Setup
                 </Button>
               </div>
             </div>
