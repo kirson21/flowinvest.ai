@@ -238,7 +238,7 @@ const Portfolios = () => {
 
   return (
     <div className="p-4 pb-20 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#474545] dark:text-white">
             Marketplace
@@ -249,13 +249,13 @@ const Portfolios = () => {
         </div>
         <Button
           variant="outline"
-          className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+          className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 w-full sm:w-auto"
           onClick={() => {
             alert('Product builder coming soon! (Mock action)');
           }}
         >
-          <Plus size={16} className="mr-2" />
-          Create your product
+          <Plus size={16} className="mr-2 flex-shrink-0" />
+          <span className="truncate">Create your product</span>
         </Button>
       </div>
 
