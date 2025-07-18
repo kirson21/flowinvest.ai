@@ -494,31 +494,6 @@ const TradingBots = () => {
     );
   }
 
-  if (showBotBuilder) {
-    return (
-      <BotBuilder 
-        onClose={() => setShowBotBuilder(false)}
-        onSave={async (botData) => {
-          const success = await saveBot({
-            ...botData,
-            name: botData.name || 'Custom Bot',
-            description: botData.description || 'Custom trading bot',
-            strategy: botData.strategy || 'custom',
-            exchange: botData.exchange || 'binance',
-            trading_pair: botData.tradingPair || 'BTC/USDT',
-            risk_level: botData.riskLevel || 'medium',
-            config: botData,
-            type: 'custom'
-          });
-          
-          if (success) {
-            setShowBotBuilder(false);
-          }
-        }}
-      />
-    );
-  }
-
   if (showAICreator) {
     return (
       <GrokAIBotCreator 
