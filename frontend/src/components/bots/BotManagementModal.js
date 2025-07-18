@@ -152,6 +152,14 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
               <p className="text-sm text-gray-500 dark:text-gray-400">Risk Level</p>
               <p className="font-medium text-[#474545] dark:text-white">{bot.risk_level}</p>
             </div>
+            {isConnected && (
+              <div className="col-span-2">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Investment Amount</p>
+                <p className="font-medium text-[#474545] dark:text-white">
+                  ${(bot.investmentAmount || 1000).toLocaleString()}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
