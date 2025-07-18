@@ -141,7 +141,20 @@ export const mockPortfolios = [
       "1Y": 45.67
     },
     totalInvestors: 2847,
-    featured: true
+    featured: true,
+    // Marketplace data
+    seller: {
+      name: "Alex Thompson",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      socialLinks: {
+        telegram: "https://t.me/alexthompson",
+        twitter: "https://x.com/alexthompson",
+        instagram: "https://instagram.com/alexthompson"
+      }
+    },
+    rating: 4.8,
+    totalReviews: 342,
+    price: 75
   },
   {
     id: 2,
@@ -164,7 +177,19 @@ export const mockPortfolios = [
       "1Y": 8.90
     },
     totalInvestors: 1523,
-    featured: false
+    featured: false,
+    // Marketplace data
+    seller: {
+      name: "Sarah Chen",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      socialLinks: {
+        telegram: "https://t.me/sarahchen",
+        twitter: "https://x.com/sarahchen"
+      }
+    },
+    rating: 4.6,
+    totalReviews: 128,
+    price: 50
   },
   {
     id: 3,
@@ -189,7 +214,56 @@ export const mockPortfolios = [
       "1Y": 67.89
     },
     totalInvestors: 892,
-    featured: true
+    featured: true,
+    // Marketplace data
+    seller: {
+      name: "Michael Rodriguez",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      socialLinks: {
+        telegram: "https://t.me/michaelrodriguez",
+        twitter: "https://x.com/michaelrodriguez",
+        instagram: "https://instagram.com/michaelrodriguez"
+      }
+    },
+    rating: 4.9,
+    totalReviews: 456,
+    price: 100
+  },
+  {
+    id: 4,
+    name: "Crypto DeFi Strategy",
+    description: "Advanced DeFi portfolio with yield farming and staking strategies",
+    riskLevel: "High",
+    expectedReturn: "25-40%",
+    minimumInvestment: 3000,
+    assets: [
+      { symbol: "BTC", allocation: 30, type: "crypto" },
+      { symbol: "ETH", allocation: 25, type: "crypto" },
+      { symbol: "AVAX", allocation: 15, type: "crypto" },
+      { symbol: "DOT", allocation: 15, type: "crypto" },
+      { symbol: "SOL", allocation: 15, type: "crypto" }
+    ],
+    performance: {
+      "1D": 3.21,
+      "1W": 12.45,
+      "1M": 28.67,
+      "3M": 56.89,
+      "1Y": 123.45
+    },
+    totalInvestors: 567,
+    featured: true,
+    // Marketplace data
+    seller: {
+      name: "CryptoKing",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
+      socialLinks: {
+        telegram: "https://t.me/cryptoking",
+        twitter: "https://x.com/cryptoking"
+      }
+    },
+    rating: 4.7,
+    totalReviews: 289,
+    price: 125
   }
 ];
 
