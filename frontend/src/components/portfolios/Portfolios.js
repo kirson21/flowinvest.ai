@@ -184,31 +184,53 @@ const Portfolios = () => {
           </div>
         </div>
 
+        {/* Seller Information - Replaces Performance */}
         <div className="mb-4">
           <p className="text-sm font-medium text-[#474545] dark:text-white mb-2">
-            Performance
+            Seller Information
           </p>
-          <div className="grid grid-cols-5 gap-2 text-center">
-            {Object.entries(portfolio.performance).map(([period, value]) => (
-              <div key={period} className="bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                <p className="text-xs text-gray-500 dark:text-gray-400">{period}</p>
-                <p className={`text-sm font-bold ${value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {value >= 0 ? '+' : ''}{value}%
+          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={portfolio.seller.avatar} alt={portfolio.seller.name} />
+                <AvatarFallback className="bg-[#0097B2] text-white text-sm">
+                  {portfolio.seller.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-medium text-[#474545] dark:text-white">
+                  {portfolio.seller.name}
                 </p>
+                <div className="flex items-center space-x-1 mt-1">
+                  {Object.entries(portfolio.seller.socialLinks).map(([platform, url]) => (
+                    <SocialIcon key={platform} platform={platform} url={url} />
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
+            <div className="text-right">
+              <div className="flex items-center space-x-1 mb-1">
+                {renderStars(portfolio.rating)}
+                <span className="text-sm font-medium text-[#474545] dark:text-white ml-1">
+                  {portfolio.rating}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {portfolio.totalReviews} reviews
+              </p>
+            </div>
           </div>
         </div>
 
+        {/* Price Button - Replaces Invest Button */}
         <Button
           className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white font-medium"
           onClick={() => {
-            // Mock investment action
-            alert(`Investment in ${portfolio.name} initiated! (Mock action)`);
+            alert(`Purchase ${portfolio.name} for $${portfolio.price}! (Mock action)`);
           }}
         >
-          <DollarSign size={16} className="mr-2" />
-          {t('invest')}
+          <ShoppingCart size={16} className="mr-2" />
+          Get started - ${portfolio.price}
         </Button>
       </CardContent>
     </Card>
