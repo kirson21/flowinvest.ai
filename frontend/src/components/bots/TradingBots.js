@@ -23,7 +23,6 @@ import {
   Cog
 } from 'lucide-react';
 import { mockTradingBots } from '../../data/mockData';
-import BotBuilder from './BotBuilder';
 import AdvancedBotBuilder from './AdvancedBotBuilder';
 import RunBotModal from './RunBotModal';
 import BotDetailsModal from './BotDetailsModal';
