@@ -259,7 +259,7 @@ const Portfolios = () => {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
         {portfolios.map((portfolio) => (
           <PortfolioCard key={portfolio.id} portfolio={portfolio} />
         ))}
