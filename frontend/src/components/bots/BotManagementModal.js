@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 import { Alert, AlertDescription } from '../ui/alert';
 import { 
   X, 
@@ -12,7 +14,9 @@ import {
   Key, 
   AlertTriangle,
   CheckCircle,
-  Loader2
+  Loader2,
+  DollarSign,
+  Edit
 } from 'lucide-react';
 
 const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdateAPI, onEditSettings, isPrebuilt = false }) => {
@@ -20,6 +24,10 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAmountEdit, setShowAmountEdit] = useState(false);
+  const [showAPIEdit, setShowAPIEdit] = useState(false);
+  const [editAmount, setEditAmount] = useState(bot.investmentAmount || 1000);
+  const [editAPIKey, setEditAPIKey] = useState('');
 
   const handleAction = async (action, params = {}) => {
     try {
@@ -47,8 +55,23 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
           }
           break;
         case 'updateAPI':
-          result = await onUpdateAPI(bot.id, params);
-          setMessage(result ? 'API credentials updated successfully' : 'Failed to update API credentials');
+          result = await onUpdateAPI(bot.id, { apiKey: editAPIKey });
+          if (result) {
+            setMessage('API credentials updated successfully');
+            setShowAPIEdit(false);
+            setEditAPIKey('');
+          } else {
+            setError('Failed to update API credentials');
+          }
+          break;
+        case 'updateAmount':
+          result = await onUpdateAPI(bot.id, { investmentAmount: editAmount });
+          if (result) {
+            setMessage('Investment amount updated successfully');
+            setShowAmountEdit(false);
+          } else {
+            setError('Failed to update investment amount');
+          }
           break;
         case 'editSettings':
           await onEditSettings(bot.id);
