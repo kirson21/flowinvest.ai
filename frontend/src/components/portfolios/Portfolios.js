@@ -3,7 +3,7 @@ import { useApp } from '../../contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
+import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
 import { 
   Briefcase, 
   TrendingUp, 
@@ -11,7 +11,11 @@ import {
   Users, 
   DollarSign,
   Plus,
-  Star
+  Star,
+  MessageCircle,
+  Instagram,
+  Twitter,
+  ShoppingCart
 } from 'lucide-react';
 import { mockPortfolios } from '../../data/mockData';
 
@@ -47,6 +51,46 @@ const Portfolios = () => {
       case 'dividend': return 'bg-indigo-500';
       default: return 'bg-gray-500';
     }
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />);
+    }
+    
+    if (hasHalfStar) {
+      stars.push(<Star key="half" size={14} className="fill-yellow-400/50 text-yellow-400" />);
+    }
+    
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<Star key={`empty-${i}`} size={14} className="text-gray-300" />);
+    }
+    
+    return stars;
+  };
+
+  const SocialIcon = ({ platform, url }) => {
+    const icons = {
+      telegram: <MessageCircle size={16} className="text-blue-500" />,
+      twitter: <Twitter size={16} className="text-blue-400" />,
+      instagram: <Instagram size={16} className="text-pink-500" />
+    };
+    
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      >
+        {icons[platform]}
+      </a>
+    );
   };
 
   const PortfolioCard = ({ portfolio }) => (
