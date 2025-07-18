@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }) => {
       <div className="min-h-screen bg-gradient-to-br from-[#FAECEC] to-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#0097B2]" />
-          <p className="text-[#474545]/70">Loading Flow Invest...</p>
+          <p className="text-[#474545]/70">Loading FlowinvestAI...</p>
         </div>
       </div>
     );
