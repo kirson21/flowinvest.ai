@@ -1,4 +1,4 @@
-// Mock data for Flow Invest app
+// Mock data for FlowinvestAI app
 
 export const mockFeedPosts = [
   {
