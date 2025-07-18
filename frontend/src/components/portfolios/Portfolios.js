@@ -96,15 +96,15 @@ const Portfolios = () => {
   const PortfolioCard = ({ portfolio }) => (
     <Card className="hover:shadow-lg transition-all duration-200 group relative">
       {portfolio.featured && (
-        <div className="absolute top-4 right-4 z-10">
-          <Badge className="bg-[#0097B2] text-white">
+        <div className="absolute top-3 right-3 z-10">
+          <Badge className="bg-[#0097B2] text-white shadow-lg">
             <Star size={12} className="mr-1" />
             Featured
           </Badge>
         </div>
       )}
       
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 pr-20">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
             <Briefcase className="text-[#0097B2]" size={20} />
