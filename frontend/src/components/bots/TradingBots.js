@@ -590,21 +590,13 @@ const TradingBots = () => {
                 Create and manage your custom trading strategies
               </p>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <Button
                 onClick={() => setShowAICreator(true)}
                 className="bg-purple-600 hover:bg-purple-700"
               >
                 <MessageSquare size={16} className="mr-2" />
                 AI Creator
-              </Button>
-              <Button
-                onClick={() => setShowBotBuilder(true)}
-                variant="outline"
-                className="border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-              >
-                <Plus size={16} className="mr-2" />
-                Simple Builder
               </Button>
               <Button
                 onClick={() => setShowAdvancedBuilder(true)}
