@@ -26,7 +26,7 @@ const BottomNav = () => {
     },
     {
       id: 'portfolios',
-      label: t('portfolios'),
+      label: 'Marketplace',
       icon: Briefcase,
       color: 'text-[#0097B2]'
     },
