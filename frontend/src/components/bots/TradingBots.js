@@ -36,7 +36,6 @@ const TradingBots = () => {
   const [preBuiltBots, setPreBuiltBots] = useState(mockTradingBots);
   const [userBots, setUserBots] = useState([]);
   const [loadingBots, setLoadingBots] = useState(true);
-  const [showBotBuilder, setShowBotBuilder] = useState(false);
   const [showAdvancedBuilder, setShowAdvancedBuilder] = useState(false);
   const [showAICreator, setShowAICreator] = useState(false);
   const [selectedRunBot, setSelectedRunBot] = useState(null);
