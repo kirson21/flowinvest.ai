@@ -156,8 +156,59 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            {/* For Connected Bots */}
-            {isConnected && (
+            {/* For Connected Pre-built Bots */}
+            {isConnected && isPrebuilt && (
+              <>
+                {/* Pause/Resume Bot */}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleAction(isRunning ? 'pause' : 'resume')}
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : (
+                    isRunning ? <Pause className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />
+                  )}
+                  {isRunning ? 'Pause Bot' : 'Resume Bot'}
+                </Button>
+
+                {/* Edit Amount / API - Combined Button */}
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowAmountEdit(true)}
+                    disabled={loading}
+                  >
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    Edit Amount
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowAPIEdit(true)}
+                    disabled={loading}
+                  >
+                    <Key className="w-4 h-4 mr-2" />
+                    Edit API
+                  </Button>
+                </div>
+
+                {/* Disconnect Bot */}
+                <Button
+                  variant="outline"
+                  className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={loading}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Disconnect Bot
+                </Button>
+              </>
+            )}
+
+            {/* For Connected User Bots */}
+            {isConnected && !isPrebuilt && (
               <>
                 <div className="flex space-x-2">
                   <Button
@@ -174,7 +225,7 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
                   <Button
                     variant="outline"
                     className="flex-1"
-                    onClick={() => handleAction('updateAPI')}
+                    onClick={() => setShowAPIEdit(true)}
                     disabled={loading}
                   >
                     <Key className="w-4 h-4 mr-2" />
@@ -182,19 +233,16 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
                   </Button>
                 </div>
 
-                {!isPrebuilt && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleAction('editSettings')}
-                    disabled={loading}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Edit Bot Settings
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleAction('editSettings')}
+                  disabled={loading}
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Edit Bot Settings
+                </Button>
 
-                {/* Delete button for user bots or disconnect for prebuilt */}
                 <Button
                   variant="outline"
                   className="w-full border-red-200 text-red-600 hover:bg-red-50"
@@ -202,7 +250,7 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
                   disabled={loading}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  {isPrebuilt ? 'Disconnect Bot' : 'Delete Bot'}
+                  Delete Bot
                 </Button>
               </>
             )}
@@ -220,6 +268,96 @@ const BotManagementModal = ({ bot, onClose, onPause, onResume, onDelete, onUpdat
               </Button>
             )}
           </div>
+
+          {/* Edit Amount Modal */}
+          {showAmountEdit && (
+            <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2 text-blue-600">
+                  <DollarSign size={16} />
+                  <p className="font-medium">Edit Investment Amount</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Investment Amount (USD)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={editAmount}
+                    onChange={(e) => setEditAmount(Number(e.target.value))}
+                    min="100"
+                    max="100000"
+                    className="border-blue-200 focus:border-blue-400"
+                  />
+                  <p className="text-xs text-blue-600">
+                    Set the amount you want to invest with this bot (minimum $100)
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAmountEdit(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleAction('updateAmount')}
+                    disabled={loading || editAmount < 100}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {loading ? 'Updating...' : 'Update Amount'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Edit API Modal */}
+          {showAPIEdit && (
+            <div className="border border-green-200 rounded-lg p-4 bg-green-50">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2 text-green-600">
+                  <Key size={16} />
+                  <p className="font-medium">Update Exchange API</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="apikey">API Key</Label>
+                  <Input
+                    id="apikey"
+                    type="password"
+                    value={editAPIKey}
+                    onChange={(e) => setEditAPIKey(e.target.value)}
+                    placeholder="Enter your exchange API key"
+                    className="border-green-200 focus:border-green-400"
+                  />
+                  <p className="text-xs text-green-600">
+                    Enter your exchange API key to connect the bot to your trading account
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowAPIEdit(false);
+                      setEditAPIKey('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleAction('updateAPI')}
+                    disabled={loading || !editAPIKey.trim()}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {loading ? 'Updating...' : 'Update API'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Delete Confirmation */}
           {showDeleteConfirm && (
