@@ -241,21 +241,21 @@ const Portfolios = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#474545] dark:text-white">
-            {t('portfolios')}
+            Marketplace
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Ready-made investment portfolios
+            Ready-made investment portfolios and strategies
           </p>
         </div>
         <Button
           variant="outline"
           className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
           onClick={() => {
-            alert('Portfolio builder coming soon! (Mock action)');
+            alert('Product builder coming soon! (Mock action)');
           }}
         >
           <Plus size={16} className="mr-2" />
-          {t('createPortfolio')}
+          Create your product
         </Button>
       </div>
 
