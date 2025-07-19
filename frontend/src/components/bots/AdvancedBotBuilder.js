@@ -248,14 +248,37 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="basic">Basic</TabsTrigger>
-            <TabsTrigger value="pair">Pair</TabsTrigger>
-            <TabsTrigger value="deposit">Deposit</TabsTrigger>
-            <TabsTrigger value="entry">Entry</TabsTrigger>
-            <TabsTrigger value="exit">Exit</TabsTrigger>
-            <TabsTrigger value="test">Test</TabsTrigger>
+            {steps.map((step, index) => {
+              const isCompleted = index < getCurrentStepIndex();
+              const isCurrent = step === activeTab;
+              const isAccessible = index <= getCurrentStepIndex();
+              
+              return (
+                <TabsTrigger 
+                  key={step}
+                  value={step}
+                  disabled={!isAccessible}
+                  className={`relative ${
+                    isCompleted ? 'text-green-600' : isCurrent ? 'text-[#0097B2]' : ''
+                  }`}
+                  onClick={(e) => {
+                    // Only allow clicking on accessible steps
+                    if (!isAccessible) {
+                      e.preventDefault();
+                      return;
+                    }
+                    setActiveTab(step);
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    {isCompleted && <div className="w-2 h-2 bg-green-600 rounded-full" />}
+                    <span>{stepLabels[step]}</span>
+                  </div>
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
 
           {/* Basic Settings */}
