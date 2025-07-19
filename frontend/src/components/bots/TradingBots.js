@@ -522,10 +522,6 @@ const TradingBots = () => {
       <AdvancedBotBuilder 
         onClose={() => setShowAdvancedBuilder(false)}
         onSave={async (botData) => {
-          console.log('AdvancedBotBuilder onSave called with:', botData);
-          console.log('Current user:', user);
-          console.log('Database object:', database);
-          
           try {
             const success = await saveBot({
               ...botData,
@@ -539,15 +535,11 @@ const TradingBots = () => {
               type: 'advanced'
             });
             
-            console.log('saveBot result:', success);
-            
             if (success) {
-              console.log('Bot saved successfully, closing builder');
-              alert('Bot created successfully!');
+              alert('✅ Bot created successfully!');
               setShowAdvancedBuilder(false);
             } else {
-              console.log('Bot save failed');
-              alert('Failed to create bot. Please check console for errors.');
+              alert('❌ Failed to create bot. Please try again.');
             }
           } catch (error) {
             console.error('Error in onSave callback:', error);
