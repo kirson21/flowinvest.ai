@@ -180,6 +180,29 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
     'Custom timing'
   ];
 
+  // Exit step options
+  const minIndentOptions = [
+    { value: '0.1%', label: '0.1%' },
+    { value: '0.2%', label: '0.2%' },
+    { value: '0.5%', label: '0.5%' },
+    { value: '1.0%', label: '1.0%' },
+    { value: '2.0%', label: '2.0%' },
+    { value: '5.0%', label: '5.0%' }
+  ];
+
+  const indentTypeOptions = [
+    { value: 'From last order', label: 'From last order' },
+    { value: 'From first order', label: 'From first order' },
+    { value: 'From average price', label: 'From average price' },
+    { value: 'From current price', label: 'From current price' }
+  ];
+
+  const profitCurrencyOptions = [
+    { value: 'COIN', label: 'COIN' },
+    { value: 'USDT', label: 'USDT' },
+    { value: 'USDC', label: 'USDC' }
+  ];
+
   const validateForm = () => {
     const newErrors = {};
     
