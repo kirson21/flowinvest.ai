@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from backend.services.grok_service import GrokBotCreator
-from backend.supabase_client import supabase
+from services.grok_service import GrokBotCreator
+from supabase_client import supabase
 from typing import Optional, Dict, Any
 import uuid
 from datetime import datetime
