@@ -235,24 +235,19 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Create Bot button clicked!');
-    console.log('Current form data:', formData);
+    console.log('Creating bot with current configuration...');
     
-    // Temporary bypass for debugging - create bot with current data
-    console.log('Bypassing validation temporarily for debugging...');
     const botData = {
       ...formData,
-      botName: formData.botName || 'Test Bot',
+      botName: formData.botName || 'Advanced Trading Bot',
       tradingPair: `${formData.baseCoin}/${formData.quoteCoin}`,
       riskLevel: 'Medium',
       strategy: formData.tradingMode || 'Simple',
       exchange: mockApiKeys.find(k => k.id === formData.apiKey)?.exchange || 'Binance'
     };
-    console.log('Bot data to save:', botData);
     
     try {
       onSave(botData);
-      console.log('onSave called successfully');
     } catch (error) {
       console.error('Error calling onSave:', error);
       alert('Error creating bot: ' + error.message);
