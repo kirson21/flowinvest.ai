@@ -506,84 +506,85 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                 {showAdvanced && (
                   <div className="space-y-6 pt-4 border-t">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Overlapping Price Changes */}
                       <div className="space-y-2">
-                        <Label>Overlapping Price Changes</Label>
-                        <Select
+                        <Label htmlFor="overlappingPriceChanges">
+                          Overlapping Price Changes (%)
+                          <span className="text-xs text-gray-500 ml-2">Range: 0.5% - 99%</span>
+                        </Label>
+                        <Input
+                          id="overlappingPriceChanges"
+                          type="number"
+                          min="0.5"
+                          max="99"
+                          step="0.1"
                           value={formData.overlappingPriceChanges}
-                          onValueChange={(value) => handleInputChange('overlappingPriceChanges', value)}
-                        >
-                          <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
-                            <SelectValue placeholder="Select option" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {overlappingOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(e) => handleInputChange('overlappingPriceChanges', parseFloat(e.target.value))}
+                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                          placeholder="Enter percentage (0.5-99)"
+                        />
                       </div>
 
+                      {/* Grid of Orders */}
                       <div className="space-y-2">
-                        <Label>Grid of Orders</Label>
-                        <Select
+                        <Label htmlFor="gridOfOrders">
+                          Grid of Orders
+                          <span className="text-xs text-gray-500 ml-2">Range: 2 - 60</span>
+                        </Label>
+                        <Input
+                          id="gridOfOrders"
+                          type="number"
+                          min="2"
+                          max="60"
+                          step="1"
                           value={formData.gridOfOrders}
-                          onValueChange={(value) => handleInputChange('gridOfOrders', value)}
-                        >
-                          <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
-                            <SelectValue placeholder="Select grid size" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {gridOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(e) => handleInputChange('gridOfOrders', parseInt(e.target.value))}
+                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                          placeholder="Enter number (2-60)"
+                        />
                       </div>
 
+                      {/* % Martingale */}
                       <div className="space-y-2">
-                        <Label>Martingale</Label>
-                        <Select
+                        <Label htmlFor="martingale">
+                          % Martingale
+                          <span className="text-xs text-gray-500 ml-2">Range: 1% - 500%</span>
+                        </Label>
+                        <Input
+                          id="martingale"
+                          type="number"
+                          min="1"
+                          max="500"
+                          step="1"
                           value={formData.martingale}
-                          onValueChange={(value) => handleInputChange('martingale', value)}
-                        >
-                          <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
-                            <SelectValue placeholder="Select martingale" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {martingaleOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(e) => handleInputChange('martingale', parseInt(e.target.value))}
+                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                          placeholder="Enter percentage (1-500)"
+                        />
                       </div>
 
+                      {/* Indent */}
                       <div className="space-y-2">
-                        <Label>Indent</Label>
-                        <Select
+                        <Label htmlFor="indent">
+                          Indent (%)
+                          <span className="text-xs text-gray-500 ml-2">Range: 0.01% - 10%</span>
+                        </Label>
+                        <Input
+                          id="indent"
+                          type="number"
+                          min="0.01"
+                          max="10"
+                          step="0.01"
                           value={formData.indent}
-                          onValueChange={(value) => handleInputChange('indent', value)}
-                        >
-                          <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
-                            <SelectValue placeholder="Select indent" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {indentOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(e) => handleInputChange('indent', parseFloat(e.target.value))}
+                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                          placeholder="Enter percentage (0.01-10)"
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-4">
+                      {/* Logarithmic Distribution of Prices */}
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <Label>Logarithmic Distribution of Prices</Label>
@@ -595,29 +596,50 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                         />
                       </div>
 
+                      {formData.logarithmicDistribution && (
+                        <div className="space-y-2 ml-6">
+                          <Label htmlFor="logarithmicDistributionValue">
+                            Logarithmic Distribution Value
+                            <span className="text-xs text-gray-500 ml-2">Range: 0.1 - 2.9</span>
+                          </Label>
+                          <Input
+                            id="logarithmicDistributionValue"
+                            type="number"
+                            min="0.1"
+                            max="2.9"
+                            step="0.1"
+                            value={formData.logarithmicDistributionValue}
+                            onChange={(e) => handleInputChange('logarithmicDistributionValue', parseFloat(e.target.value))}
+                            className="border-[#0097B2]/20 focus:border-[#0097B2] max-w-xs"
+                            placeholder="Enter value (0.1-2.9)"
+                          />
+                        </div>
+                      )}
+
+                      {/* Pulling Up the Order Grid */}
                       <div className="space-y-2">
-                        <Label>Pulling up the Order Grid</Label>
-                        <Select
+                        <Label htmlFor="pullingUpOrderGrid">
+                          Pulling Up the Order Grid (%)
+                          <span className="text-xs text-gray-500 ml-2">Range: 0.1% - 200%</span>
+                        </Label>
+                        <Input
+                          id="pullingUpOrderGrid"
+                          type="number"
+                          min="0.1"
+                          max="200"
+                          step="0.1"
                           value={formData.pullingUpOrderGrid}
-                          onValueChange={(value) => handleInputChange('pullingUpOrderGrid', value)}
-                        >
-                          <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
-                            <SelectValue placeholder="Select pulling strategy" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {pullingUpOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(e) => handleInputChange('pullingUpOrderGrid', parseFloat(e.target.value))}
+                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                          placeholder="Enter percentage (0.1-200)"
+                        />
                       </div>
 
+                      {/* Stop Bot After Deals Completing */}
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <Label>Stop Bot After Deals Completing</Label>
-                          <p className="text-sm text-gray-500">Automatically stop bot after all deals are completed</p>
+                          <p className="text-sm text-gray-500">Automatically stop bot after specified number of deals</p>
                         </div>
                         <Switch
                           checked={formData.stopBotAfterDeals}
@@ -625,16 +647,143 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                         />
                       </div>
 
+                      {formData.stopBotAfterDeals && (
+                        <div className="space-y-2 ml-6">
+                          <Label htmlFor="stopBotAfterDealsValue">Number of Deals</Label>
+                          <Input
+                            id="stopBotAfterDealsValue"
+                            type="number"
+                            min="1"
+                            max="1000"
+                            step="1"
+                            value={formData.stopBotAfterDealsValue}
+                            onChange={(e) => handleInputChange('stopBotAfterDealsValue', parseInt(e.target.value))}
+                            className="border-[#0097B2]/20 focus:border-[#0097B2] max-w-xs"
+                            placeholder="Enter number of deals"
+                          />
+                        </div>
+                      )}
+
+                      {/* Trade Entry Conditions */}
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <Label>Trade Entry Conditions</Label>
-                          <p className="text-sm text-gray-500">Enable custom entry conditions and signals</p>
+                          <p className="text-sm text-gray-500">Enable custom entry conditions and signals (up to 5 filters)</p>
                         </div>
                         <Switch
                           checked={formData.tradeEntryConditions}
                           onCheckedChange={(checked) => handleInputChange('tradeEntryConditions', checked)}
                         />
                       </div>
+
+                      {formData.tradeEntryConditions && (
+                        <div className="space-y-4 ml-6 p-4 border border-[#0097B2]/20 rounded-lg bg-gray-50 dark:bg-gray-800">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-[#474545] dark:text-white">Entry Conditions</h4>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={addEntryCondition}
+                              disabled={formData.entryConditions.length >= 5}
+                              className="bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                            >
+                              Add Filter
+                            </Button>
+                          </div>
+
+                          {formData.entryConditions.map((condition, index) => (
+                            <div key={condition.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900">
+                              <div className="space-y-1">
+                                <Label className="text-xs text-gray-500">FILTER {index + 1}</Label>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-sm font-medium">Indicator</span>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeEntryCondition(condition.id)}
+                                    className="text-red-500 hover:text-red-700 p-1 h-auto"
+                                  >
+                                    ×
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-xs text-gray-500">INTERVAL</Label>
+                                <Select
+                                  value={condition.interval}
+                                  onValueChange={(value) => updateEntryCondition(condition.id, 'interval', value)}
+                                >
+                                  <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {timeIntervals.map((interval) => (
+                                      <SelectItem key={interval} value={interval}>
+                                        {interval}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-xs text-gray-500">TYPE</Label>
+                                <Select
+                                  value={condition.signalType}
+                                  onValueChange={(value) => updateEntryCondition(condition.id, 'signalType', value)}
+                                >
+                                  <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {signalTypes.map((type) => (
+                                      <SelectItem key={type} value={type}>
+                                        {type}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-xs text-gray-500">INDICATOR</Label>
+                                <Select
+                                  value={condition.indicator}
+                                  onValueChange={(value) => updateEntryCondition(condition.id, 'indicator', value)}
+                                >
+                                  <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {tradingIndicators.map((indicator) => (
+                                      <SelectItem key={indicator} value={indicator}>
+                                        {indicator}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          ))}
+
+                          {formData.entryConditions.length === 0 && (
+                            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                              <p className="text-sm">No entry conditions added yet.</p>
+                              <p className="text-xs mt-1">Click "Add Filter" to create your first condition.</p>
+                            </div>
+                          )}
+
+                          {formData.entryConditions.length >= 5 && (
+                            <div className="text-center py-2">
+                              <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                                Maximum of 5 entry conditions allowed
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
