@@ -289,6 +289,29 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
     ));
   };
 
+  // Helper functions for managing stop loss signal conditions
+  const addStopLossCondition = () => {
+    if (formData.stopLossSignalConditions.length < 5) {
+      const newCondition = {
+        id: Date.now(),
+        indicator: 'Bollinger Bands',
+        interval: '5 minutes',
+        signalType: 'At bar closing'
+      };
+      handleInputChange('stopLossSignalConditions', [...formData.stopLossSignalConditions, newCondition]);
+    }
+  };
+
+  const removeStopLossCondition = (id) => {
+    handleInputChange('stopLossSignalConditions', formData.stopLossSignalConditions.filter(condition => condition.id !== id));
+  };
+
+  const updateStopLossCondition = (id, field, value) => {
+    handleInputChange('stopLossSignalConditions', formData.stopLossSignalConditions.map(condition =>
+      condition.id === id ? { ...condition, [field]: value } : condition
+    ));
+  };
+
   return (
     <div className="p-4 pb-20 max-w-6xl mx-auto">
       <div className="flex items-center mb-6">
