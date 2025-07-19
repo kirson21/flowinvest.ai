@@ -225,14 +225,28 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      onSave({
+    console.log('Create Bot button clicked!');
+    console.log('Current form data:', formData);
+    console.log('Running form validation...');
+    
+    const isValid = validateForm();
+    console.log('Form validation result:', isValid);
+    console.log('Current errors:', errors);
+    
+    if (isValid) {
+      console.log('Form is valid, calling onSave...');
+      const botData = {
         ...formData,
         tradingPair: `${formData.baseCoin}/${formData.quoteCoin}`,
         riskLevel: 'Medium', // Default
         strategy: formData.tradingMode,
         exchange: mockApiKeys.find(k => k.id === formData.apiKey)?.exchange || 'Binance'
-      });
+      };
+      console.log('Bot data to save:', botData);
+      onSave(botData);
+    } else {
+      console.log('Form validation failed, cannot create bot');
+      alert('Please fill in all required fields before creating the bot.');
     }
   };
 
