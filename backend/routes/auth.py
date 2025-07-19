@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel, EmailStr
-from supabase_client import supabase, supabase_admin
+from backend.supabase_client import supabase, supabase_admin
 from typing import Optional
 import os
 
