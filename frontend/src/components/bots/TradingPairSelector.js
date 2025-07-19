@@ -25,8 +25,10 @@ const TradingPairSelector = ({ baseCoin, quoteCoin, onBaseChange, onQuoteChange 
   }, []);
 
   const quoteCoins = useMemo(() => {
+    // Limit quote coins to only USDT and USDC as per specification
+    const allowedQuoteCoins = ['USDT', 'USDC'];
     const coins = [...new Set(tradingPairs.map(pair => pair.quote))];
-    return coins.sort();
+    return coins.filter(coin => allowedQuoteCoins.includes(coin)).sort();
   }, []);
 
   // Filter pairs based on search and category
