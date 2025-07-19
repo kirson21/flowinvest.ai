@@ -206,19 +206,29 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.botName.trim()) {
+    console.log('Validating form fields...');
+    console.log('botName:', formData.botName);
+    console.log('apiKey:', formData.apiKey);
+    console.log('depositAmount:', formData.depositAmount);
+    
+    if (!formData.botName || !formData.botName.trim()) {
+      console.log('Bot name validation failed');
       newErrors.botName = 'Bot name is required';
     }
     if (!formData.apiKey) {
+      console.log('API key validation failed');
       newErrors.apiKey = 'API key selection is required';
     }
-    if (!formData.depositAmount || formData.depositAmount <= 0) {
+    if (!formData.depositAmount || parseFloat(formData.depositAmount) <= 0) {
+      console.log('Deposit amount validation failed');
       newErrors.depositAmount = 'Valid deposit amount is required';
     }
-    if (parseFloat(formData.depositAmount) > formData.exchangeBalance) {
+    if (formData.depositAmount && parseFloat(formData.depositAmount) > formData.exchangeBalance) {
+      console.log('Deposit amount exceeds balance');
       newErrors.depositAmount = 'Deposit amount exceeds available balance';
     }
 
+    console.log('Validation errors found:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
