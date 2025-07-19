@@ -786,26 +786,74 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
             >
               Cancel
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleTest}
-              disabled={availableTests === 0}
-              className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
-            >
-              <TestTube size={16} className="mr-2" />
-              Test ({availableTests} available)
-            </Button>
+            
+            {/* Previous Step Button (not shown on first step) */}
+            {!isFirstStep() && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={goToPreviousStep}
+                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+              >
+                <ArrowLeft size={16} className="mr-2" />
+                Previous Step
+              </Button>
+            )}
+            
+            {/* Test Button (only on test step) */}
+            {isLastStep() && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleTest}
+                disabled={availableTests === 0}
+                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+              >
+                <TestTube size={16} className="mr-2" />
+                Test ({availableTests} available)
+              </Button>
+            )}
           </div>
 
-          <Button
-            type="submit"
-            className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-8"
-            size="lg"
-          >
-            <Bot size={16} className="mr-2" />
-            Create Bot
-          </Button>
+          <div className="flex items-center space-x-4">
+            {/* Step Progress Indicator */}
+            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-500">
+              <span>Step {getCurrentStepIndex() + 1} of {steps.length}</span>
+              <div className="flex space-x-1">
+                {steps.map((step, index) => (
+                  <div
+                    key={step}
+                    className={`w-2 h-2 rounded-full ${
+                      index <= getCurrentStepIndex() ? 'bg-[#0097B2]' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            {/* Next Step or Create Bot Button */}
+            {!isLastStep() ? (
+              <Button
+                type="button"
+                onClick={goToNextStep}
+                disabled={!canGoNext()}
+                className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-8"
+                size="lg"
+              >
+                Next Step
+                <ArrowLeft size={16} className="ml-2 rotate-180" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-8"
+                size="lg"
+              >
+                <Bot size={16} className="mr-2" />
+                Create Bot
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </div>
