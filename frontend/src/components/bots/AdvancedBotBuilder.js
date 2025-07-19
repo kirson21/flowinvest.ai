@@ -111,10 +111,14 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
     
     // Exit Trade Settings
     takeProfitMode: 'Simple', // Simple, Own, Signal
-    profit: '',
-    profitCurrency: 'COIN',
+    profit: 2.5, // Range 0.2% to 1000%
+    profitCurrency: 'COIN', // COIN or USDT/USDC
     stopLoss: false,
+    stopLossValue: -1.0, // Range -0.05% to -99%
     stopLossBySignal: false,
+    stopLossSignalConditions: [], // Array of conditions similar to entry
+    minIndentPercent: '0.1%', // Dropdown with fixed options
+    indentType: 'From last order', // Dropdown (e.g., From last order)
     stopBotAfterStopLoss: false
   });
   
