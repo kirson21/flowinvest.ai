@@ -116,6 +116,9 @@ backend:
         - working: true
           agent: "main"
           comment: "Backend services running normally. No backend changes were needed for the Advanced Bot Builder UI enhancements."
+        - working: true
+          agent: "testing"
+          comment: "✅ BACKEND REGRESSION TESTING COMPLETED: Fixed import issues and verified core functionality. Server Health: GET /api/status ✅ working (200 OK). Webhook System: POST /api/ai_news_webhook ✅ working with OpenAI format. Core API Functionality: Authentication system ✅, User management ✅, Feed retrieval ✅, Language-aware feeds ✅. Minor issues found: Server root endpoint returns 500 (non-critical), Grok API key invalid (expected), Legacy webhook endpoint not implemented (not a regression). All critical endpoints for the Advanced Bot Builder frontend are functioning properly. No regressions introduced from frontend changes."
 
 frontend:
   - task: "Update Pair Step - Limit Quote Coin Options"
