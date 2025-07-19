@@ -62,7 +62,16 @@ const TradingBots = () => {
   };
 
   const saveBot = async (botData) => {
+    console.log('saveBot function called with:', botData);
+    console.log('Current user for bot creation:', user);
+    
     try {
+      if (!user || !user.id) {
+        console.error('No user found for bot creation');
+        alert('Please log in to create bots');
+        return false;
+      }
+
       const botToSave = {
         ...botData,
         user_id: user.id,
@@ -71,15 +80,24 @@ const TradingBots = () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+      
+      console.log('Bot data to save to database:', botToSave);
+      console.log('About to call database.createBot...');
 
       const savedBot = await database.createBot(botToSave);
+      console.log('database.createBot result:', savedBot);
+      
       if (savedBot) {
+        console.log('Bot saved successfully, refreshing bot list...');
         await loadUserBots(); // Refresh the list
         return true;
+      } else {
+        console.log('database.createBot returned falsy result');
+        return false;
       }
-      return false;
     } catch (error) {
       console.error('Error saving bot:', error);
+      alert('Error saving bot: ' + error.message);
       return false;
     }
   };
