@@ -1158,6 +1158,17 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Debug Information - Remove in production */}
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">Debug Info (Remove in production)</h4>
+                  <div className="text-sm space-y-1">
+                    <div>Bot Name: {formData.botName || 'NOT SET'}</div>
+                    <div>API Key: {formData.apiKey || 'NOT SET'}</div>
+                    <div>Deposit Amount: {formData.depositAmount || 'NOT SET'}</div>
+                    <div>Current Errors: {JSON.stringify(errors)}</div>
+                  </div>
+                </div>
+
                 <div className="text-center p-8 bg-gradient-to-br from-[#0097B2]/5 to-[#0097B2]/10 rounded-lg border border-[#0097B2]/20">
                   <TestTube className="mx-auto mb-4 text-[#0097B2]" size={48} />
                   <h3 className="text-xl font-semibold text-[#474545] dark:text-white mb-2">
