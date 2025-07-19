@@ -1,6 +1,12 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+import sys
+import os
+
+# Add the backend directory to Python path
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
 from routes import webhook, auth, ai_bots
 from dotenv import load_dotenv
 from pathlib import Path
