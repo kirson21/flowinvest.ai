@@ -132,39 +132,48 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
     { value: 'Signal', label: 'Signal', description: 'External signal integration' }
   ];
 
-  const overlappingOptions = [
-    { value: 'none', label: 'None' },
-    { value: 'conservative', label: 'Conservative' },
-    { value: 'moderate', label: 'Moderate' },
-    { value: 'aggressive', label: 'Aggressive' }
+  // Popular trading indicators for Trade Entry Conditions
+  const tradingIndicators = [
+    'Bollinger Bands',
+    'RSI',
+    'MACD',
+    'Moving Average (SMA)',
+    'Exponential Moving Average (EMA)',
+    'Stochastic',
+    'Williams %R',
+    'CCI (Commodity Channel Index)',
+    'ADX (Average Directional Index)',
+    'Parabolic SAR',
+    'Ichimoku Cloud',
+    'Volume Weighted Average Price (VWAP)',
+    'Money Flow Index (MFI)',
+    'Average True Range (ATR)',
+    'Fibonacci Retracement'
   ];
 
-  const gridOptions = [
-    { value: '5', label: '5 Orders' },
-    { value: '10', label: '10 Orders' },
-    { value: '15', label: '15 Orders' },
-    { value: '20', label: '20 Orders' }
+  // Time intervals for indicators
+  const timeIntervals = [
+    '1 minute',
+    '5 minutes',
+    '15 minutes',
+    '30 minutes',
+    '1 hour',
+    '2 hours',
+    '4 hours',
+    '8 hours',
+    '12 hours',
+    '1 day',
+    '3 days',
+    '1 week'
   ];
 
-  const martingaleOptions = [
-    { value: 'disabled', label: 'Disabled' },
-    { value: 'conservative', label: 'Conservative (1.5x)' },
-    { value: 'moderate', label: 'Moderate (2x)' },
-    { value: 'aggressive', label: 'Aggressive (3x)' }
-  ];
-
-  const indentOptions = [
-    { value: '0.5', label: '0.5%' },
-    { value: '1', label: '1%' },
-    { value: '2', label: '2%' },
-    { value: '5', label: '5%' }
-  ];
-
-  const pullingUpOptions = [
-    { value: 'disabled', label: 'Disabled' },
-    { value: 'after_profit', label: 'After Profit' },
-    { value: 'immediate', label: 'Immediate' },
-    { value: 'custom', label: 'Custom Logic' }
+  // Signal types
+  const signalTypes = [
+    'At bar closing',
+    'Once per minute',
+    'Immediately on signal',
+    'On next candle',
+    'Custom timing'
   ];
 
   const validateForm = () => {
