@@ -474,20 +474,36 @@ const TradingBots = () => {
       <AdvancedBotBuilder 
         onClose={() => setShowAdvancedBuilder(false)}
         onSave={async (botData) => {
-          const success = await saveBot({
-            ...botData,
-            name: botData.botName || 'Advanced Bot',
-            description: botData.description || 'Advanced trading bot configuration',
-            strategy: botData.tradingMode || 'advanced',
-            exchange: botData.exchange || 'binance',
-            trading_pair: botData.tradingPair || 'BTC/USDT',
-            risk_level: botData.riskLevel || 'medium',
-            config: botData,
-            type: 'advanced'
-          });
+          console.log('AdvancedBotBuilder onSave called with:', botData);
+          console.log('Current user:', user);
+          console.log('Database object:', database);
           
-          if (success) {
-            setShowAdvancedBuilder(false);
+          try {
+            const success = await saveBot({
+              ...botData,
+              name: botData.botName || 'Advanced Bot',
+              description: botData.description || 'Advanced trading bot configuration',
+              strategy: botData.tradingMode || 'advanced',
+              exchange: botData.exchange || 'binance',
+              trading_pair: botData.tradingPair || 'BTC/USDT',
+              risk_level: botData.riskLevel || 'medium',
+              config: botData,
+              type: 'advanced'
+            });
+            
+            console.log('saveBot result:', success);
+            
+            if (success) {
+              console.log('Bot saved successfully, closing builder');
+              alert('Bot created successfully!');
+              setShowAdvancedBuilder(false);
+            } else {
+              console.log('Bot save failed');
+              alert('Failed to create bot. Please check console for errors.');
+            }
+          } catch (error) {
+            console.error('Error in onSave callback:', error);
+            alert('Error creating bot: ' + error.message);
           }
         }}
       />
