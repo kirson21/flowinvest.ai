@@ -174,14 +174,6 @@ const TradingBots = () => {
       return false;
     }
   };
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error deleting bot:', error);
-      return false;
-    }
-  };
 
   const handleUpdateAPI = async (botId, apiData) => {
     try {
