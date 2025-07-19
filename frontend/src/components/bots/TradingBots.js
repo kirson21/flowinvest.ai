@@ -52,10 +52,32 @@ const TradingBots = () => {
   const loadUserBots = async () => {
     try {
       setLoadingBots(true);
-      const bots = await database.getUserBots(user.id, false); // Only user bots, not prebuilt
-      setUserBots(bots);
+      
+      // First try to load from localStorage (temporary solution)
+      console.log('Loading bots from localStorage...');
+      const localBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      console.log('Found bots in localStorage:', localBots.length);
+      
+      if (localBots.length > 0) {
+        setUserBots(localBots);
+        setLoadingBots(false);
+        return;
+      }
+      
+      // Fallback to database if user exists and no local bots
+      if (user?.id) {
+        console.log('No local bots, trying database...');
+        const bots = await database.getUserBots(user.id, false);
+        setUserBots(bots);
+      } else {
+        console.log('No user, using empty bot list');
+        setUserBots([]);
+      }
     } catch (error) {
       console.error('Error loading user bots:', error);
+      // Fallback to localStorage even on database error
+      const localBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      setUserBots(localBots);
     } finally {
       setLoadingBots(false);
     }
