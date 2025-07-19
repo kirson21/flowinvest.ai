@@ -847,7 +847,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
               <CardHeader>
                 <CardTitle className="flex items-center text-[#474545] dark:text-white">
                   <Target className="text-[#0097B2] mr-2" size={20} />
-                  Exit Trade Settings
+                  Exit Trade Settings (Trade Closing)
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -872,44 +872,48 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Profit */}
                   <div className="space-y-2">
-                    <Label htmlFor="profit">Profit (%)</Label>
+                    <Label htmlFor="profit">
+                      Profit (%)
+                      <span className="text-xs text-gray-500 ml-2">Range: 0.2% - 1000%</span>
+                    </Label>
                     <Input
                       id="profit"
                       type="number"
+                      min="0.2"
+                      max="1000"
+                      step="0.1"
                       value={formData.profit}
-                      onChange={(e) => handleInputChange('profit', e.target.value)}
-                      placeholder="Enter profit percentage"
+                      onChange={(e) => handleInputChange('profit', parseFloat(e.target.value))}
+                      placeholder="Enter profit percentage (0.2-1000)"
                       className="border-[#0097B2]/20 focus:border-[#0097B2]"
                     />
                   </div>
 
+                  {/* Profit Currency */}
                   <div className="space-y-2">
                     <Label>Profit Currency</Label>
-                    <div className="flex space-x-2">
-                      <Button
-                        type="button"
-                        variant={formData.profitCurrency === 'COIN' ? 'default' : 'outline'}
-                        onClick={() => handleInputChange('profitCurrency', 'COIN')}
-                        className={`flex-1 ${formData.profitCurrency === 'COIN' ? 'bg-[#0097B2] hover:bg-[#0097B2]/90' : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5'}`}
-                      >
-                        COIN
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={formData.profitCurrency === 'USDT' ? 'default' : 'outline'}
-                        onClick={() => handleInputChange('profitCurrency', 'USDT')}
-                        className={`flex-1 ${formData.profitCurrency === 'USDT' ? 'bg-[#0097B2] hover:bg-[#0097B2]/90' : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5'}`}
-                      >
-                        USDT
-                      </Button>
+                    <div className="grid grid-cols-3 gap-2">
+                      {profitCurrencyOptions.map((option) => (
+                        <Button
+                          key={option.value}
+                          type="button"
+                          variant={formData.profitCurrency === option.value ? 'default' : 'outline'}
+                          onClick={() => handleInputChange('profitCurrency', option.value)}
+                          className={`${formData.profitCurrency === option.value ? 'bg-[#0097B2] hover:bg-[#0097B2]/90' : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5'}`}
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
                     </div>
                   </div>
                 </div>
 
                 <Separator />
 
-                <div className="space-y-4">
+                <div className="space-y-6">
+                  {/* Stop Loss */}
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <Label>Stop Loss</Label>
@@ -921,6 +925,27 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                     />
                   </div>
 
+                  {formData.stopLoss && (
+                    <div className="space-y-2 ml-6">
+                      <Label htmlFor="stopLossValue">
+                        Stop Loss Value (%)
+                        <span className="text-xs text-gray-500 ml-2">Range: -0.05% to -99%</span>
+                      </Label>
+                      <Input
+                        id="stopLossValue"
+                        type="number"
+                        min="-99"
+                        max="-0.05"
+                        step="0.01"
+                        value={formData.stopLossValue}
+                        onChange={(e) => handleInputChange('stopLossValue', parseFloat(e.target.value))}
+                        className="border-[#0097B2]/20 focus:border-[#0097B2] max-w-xs"
+                        placeholder="Enter stop loss (-0.05 to -99)"
+                      />
+                    </div>
+                  )}
+
+                  {/* Stop Loss by Signal */}
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <Label>Stop Loss by Signal</Label>
@@ -932,6 +957,158 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                     />
                   </div>
 
+                  {formData.stopLossBySignal && (
+                    <div className="space-y-4 ml-6 p-4 border border-[#0097B2]/20 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-[#474545] dark:text-white">Stop Loss Signal Conditions</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={addStopLossCondition}
+                          disabled={formData.stopLossSignalConditions.length >= 5}
+                          className="bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                        >
+                          Add Filter
+                        </Button>
+                      </div>
+
+                      {formData.stopLossSignalConditions.map((condition, index) => (
+                        <div key={condition.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-500">FILTER {index + 1}</Label>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-medium">Indicator</span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeStopLossCondition(condition.id)}
+                                className="text-red-500 hover:text-red-700 p-1 h-auto"
+                              >
+                                ×
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-500">INTERVAL</Label>
+                            <Select
+                              value={condition.interval}
+                              onValueChange={(value) => updateStopLossCondition(condition.id, 'interval', value)}
+                            >
+                              <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {timeIntervals.map((interval) => (
+                                  <SelectItem key={interval} value={interval}>
+                                    {interval}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-500">TYPE</Label>
+                            <Select
+                              value={condition.signalType}
+                              onValueChange={(value) => updateStopLossCondition(condition.id, 'signalType', value)}
+                            >
+                              <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {signalTypes.map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-500">INDICATOR</Label>
+                            <Select
+                              value={condition.indicator}
+                              onValueChange={(value) => updateStopLossCondition(condition.id, 'indicator', value)}
+                            >
+                              <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {tradingIndicators.map((indicator) => (
+                                  <SelectItem key={indicator} value={indicator}>
+                                    {indicator}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      ))}
+
+                      {formData.stopLossSignalConditions.length === 0 && (
+                        <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                          <p className="text-sm">No stop loss conditions added yet.</p>
+                          <p className="text-xs mt-1">Click "Add Filter" to create your first condition.</p>
+                        </div>
+                      )}
+
+                      {formData.stopLossSignalConditions.length >= 5 && (
+                        <div className="text-center py-2">
+                          <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                            Maximum of 5 stop loss conditions allowed
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Min. Indent % */}
+                    <div className="space-y-2">
+                      <Label>Min. Indent %</Label>
+                      <Select
+                        value={formData.minIndentPercent}
+                        onValueChange={(value) => handleInputChange('minIndentPercent', value)}
+                      >
+                        <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {minIndentOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Indent Type */}
+                    <div className="space-y-2">
+                      <Label>Indent Type</Label>
+                      <Select
+                        value={formData.indentType}
+                        onValueChange={(value) => handleInputChange('indentType', value)}
+                      >
+                        <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {indentTypeOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Stop Bot After Stop Loss Execution */}
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <Label>Stop Bot After Stop Loss Execution</Label>
