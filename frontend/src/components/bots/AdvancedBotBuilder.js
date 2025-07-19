@@ -34,6 +34,55 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [availableTests, setAvailableTests] = useState(10);
   
+  // Step management
+  const steps = ['basic', 'pair', 'deposit', 'entry', 'exit', 'test'];
+  const stepLabels = {
+    basic: 'Basic',
+    pair: 'Pair', 
+    deposit: 'Deposit',
+    entry: 'Entry',
+    exit: 'Exit',
+    test: 'Test'
+  };
+  
+  const getCurrentStepIndex = () => steps.indexOf(activeTab);
+  const isFirstStep = () => getCurrentStepIndex() === 0;
+  const isLastStep = () => getCurrentStepIndex() === steps.length - 1;
+  const canGoNext = () => validateCurrentStep();
+  
+  const goToNextStep = () => {
+    const currentIndex = getCurrentStepIndex();
+    if (currentIndex < steps.length - 1) {
+      setActiveTab(steps[currentIndex + 1]);
+    }
+  };
+  
+  const goToPreviousStep = () => {
+    const currentIndex = getCurrentStepIndex();
+    if (currentIndex > 0) {
+      setActiveTab(steps[currentIndex - 1]);
+    }
+  };
+  
+  const validateCurrentStep = () => {
+    switch (activeTab) {
+      case 'basic':
+        return formData.botName.trim() !== '' && formData.apiKey !== '';
+      case 'pair':
+        return formData.baseCoin !== '' && formData.quoteCoin !== '';
+      case 'deposit':
+        return formData.depositAmount !== '' && parseFloat(formData.depositAmount) > 0;
+      case 'entry':
+        return formData.tradingMode !== '';
+      case 'exit':
+        return true; // Exit step is optional
+      case 'test':
+        return true; // Test step is final
+      default:
+        return false;
+    }
+  };
+  
   const [formData, setFormData] = useState({
     // Basic Settings
     botName: '',
