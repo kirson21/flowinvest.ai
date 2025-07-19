@@ -7,6 +7,13 @@ export const tradingPairs = [
   { base: 'XRP', quote: 'USDT', volume: 500000, category: 'major' },
   { base: 'ADA', quote: 'USDT', volume: 450000, category: 'major' },
   
+  // Major pairs with USDC
+  { base: 'BTC', quote: 'USDC', volume: 950000, category: 'major' },
+  { base: 'ETH', quote: 'USDC', volume: 750000, category: 'major' },
+  { base: 'BNB', quote: 'USDC', volume: 550000, category: 'major' },
+  { base: 'XRP', quote: 'USDC', volume: 450000, category: 'major' },
+  { base: 'ADA', quote: 'USDC', volume: 400000, category: 'major' },
+  
   // Popular altcoins
   { base: 'SOL', quote: 'USDT', volume: 400000, category: 'popular' },
   { base: 'DOT', quote: 'USDT', volume: 350000, category: 'popular' },
