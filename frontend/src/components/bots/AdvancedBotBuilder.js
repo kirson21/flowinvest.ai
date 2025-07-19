@@ -97,14 +97,17 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
     
     // Enter Trade Settings
     tradingMode: 'Simple', // Simple, Own, Signal
-    overlappingPriceChanges: '',
-    gridOfOrders: '',
-    martingale: '',
-    indent: '',
+    overlappingPriceChanges: 5.0, // Range 0.5% to 99%
+    gridOfOrders: 10, // Range 2 to 60
+    martingale: 100, // Range 1% to 500%
+    indent: 1.0, // Range 0.01% to 10%
     logarithmicDistribution: false,
-    pullingUpOrderGrid: '',
+    logarithmicDistributionValue: 1.2, // Range 0.1 to 2.9
+    pullingUpOrderGrid: 50.0, // Range 0.1% to 200%
     stopBotAfterDeals: false,
+    stopBotAfterDealsValue: 1, // Number of deals
     tradeEntryConditions: false,
+    entryConditions: [], // Array of up to 5 conditions
     
     // Exit Trade Settings
     takeProfitMode: 'Simple', // Simple, Own, Signal
