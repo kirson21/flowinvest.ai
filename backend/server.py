@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from routes import webhook, auth, ai_bots
+from backend.routes import webhook, auth, ai_bots
 from dotenv import load_dotenv
 from pathlib import Path
 import os
