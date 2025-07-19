@@ -1314,6 +1314,10 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
             ) : (
               <Button
                 type="submit"
+                onClick={(e) => {
+                  console.log('Create Bot button clicked directly!');
+                  // Let the form submission handle it, but add direct debugging
+                }}
                 className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-8"
                 size="lg"
               >
