@@ -239,6 +239,29 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
     handleInputChange('exchangeBalance', parseFloat(newBalance.toFixed(2)));
   };
 
+  // Helper functions for managing entry conditions
+  const addEntryCondition = () => {
+    if (formData.entryConditions.length < 5) {
+      const newCondition = {
+        id: Date.now(),
+        indicator: 'Bollinger Bands',
+        interval: '5 minutes',
+        signalType: 'At bar closing'
+      };
+      handleInputChange('entryConditions', [...formData.entryConditions, newCondition]);
+    }
+  };
+
+  const removeEntryCondition = (id) => {
+    handleInputChange('entryConditions', formData.entryConditions.filter(condition => condition.id !== id));
+  };
+
+  const updateEntryCondition = (id, field, value) => {
+    handleInputChange('entryConditions', formData.entryConditions.map(condition =>
+      condition.id === id ? { ...condition, [field]: value } : condition
+    ));
+  };
+
   return (
     <div className="p-4 pb-20 max-w-6xl mx-auto">
       <div className="flex items-center mb-6">
