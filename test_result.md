@@ -145,6 +145,42 @@ frontend:
           agent: "main"
           comment: "Completely refactored the Entry step advanced settings: 1) Replaced dropdown-based inputs with proper range inputs for all numerical fields, 2) Added Overlapping Price Changes (0.5-99%), Grid of Orders (2-60), % Martingale (1-500%), Indent (0.01-10%) with proper validation, 3) Enhanced Logarithmic Distribution with toggle and range input (0.1-2.9), 4) Added Pulling Up Order Grid input (0.1-200%), 5) Enhanced Stop Bot After Deals with toggle and number input, 6) Implemented comprehensive Trade Entry Conditions with up to 5 filters including 15 popular indicators (Bollinger Bands, RSI, MACD, etc.), 12 time intervals, and 5 signal types, 7) Added helper functions for managing entry conditions (add, remove, update), 8) Improved UI with proper labeling, range indicators, and validation."
 
+  - task: "Fix Create Bot Button Functionality"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/TradingBots.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Fixed the Create Bot button functionality by correcting the bot data mapping in the onSave callback. Updated to use 'botName' instead of 'name' field and ensured proper bot configuration is passed to the saveBot function."
+
+  - task: "Add USDC to Quote Coin Options"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/tradingPairs.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added major trading pairs with USDC as quote currency (BTC/USDC, ETH/USDC, BNB/USDC, XRP/USDC, ADA/USDC) to ensure USDC appears in the Quote Coin selection alongside USDT."
+
+  - task: "Enhanced Exit Step - Trade Closing Settings"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Completely enhanced the Exit step with comprehensive trade closing settings: 1) Profit range input (0.2% - 1000%) with proper validation, 2) Enhanced Profit Currency options (COIN, USDT, USDC), 3) Stop Loss toggle with value range (-0.05% to -99%), 4) Stop Loss by Signal with same filter structure as Entry conditions (up to 5 filters with indicators, intervals, signal types), 5) Min. Indent % dropdown with fixed options (0.1% to 5.0%), 6) Indent Type dropdown (From last order, From first order, From average price, From current price), 7) Stop Bot After Stop Loss Execution toggle, 8) Added helper functions for managing stop loss signal conditions, 9) Professional UI with conditional rendering and proper validation."
+
 metadata:
   created_by: "main_agent"
   version: "3.0"
