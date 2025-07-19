@@ -128,15 +128,17 @@ const TradingBots = () => {
     }
   };
 
-  // Bot management functions
+  // Bot management functions (using localStorage temporarily)
   const handlePauseBot = async (botId) => {
     try {
-      const result = await database.updateBot(botId, { is_active: false, status: 'paused' });
-      if (result) {
-        await loadUserBots();
-        return true;
-      }
-      return false;
+      console.log('Pausing bot:', botId);
+      const bots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      const updatedBots = bots.map(bot => 
+        bot.id === botId ? { ...bot, is_active: false, status: 'paused' } : bot
+      );
+      localStorage.setItem('user_bots', JSON.stringify(updatedBots));
+      await loadUserBots();
+      return true;
     } catch (error) {
       console.error('Error pausing bot:', error);
       return false;
@@ -145,12 +147,14 @@ const TradingBots = () => {
 
   const handleResumeBot = async (botId) => {
     try {
-      const result = await database.updateBot(botId, { is_active: true, status: 'running' });
-      if (result) {
-        await loadUserBots();
-        return true;
-      }
-      return false;
+      console.log('Resuming bot:', botId);
+      const bots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      const updatedBots = bots.map(bot => 
+        bot.id === botId ? { ...bot, is_active: true, status: 'running' } : bot
+      );
+      localStorage.setItem('user_bots', JSON.stringify(updatedBots));
+      await loadUserBots();
+      return true;
     } catch (error) {
       console.error('Error resuming bot:', error);
       return false;
@@ -159,9 +163,17 @@ const TradingBots = () => {
 
   const handleDeleteBot = async (botId) => {
     try {
-      const result = await database.deleteBot(botId);
-      if (result) {
-        await loadUserBots();
+      console.log('Deleting bot:', botId);
+      const bots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      const updatedBots = bots.filter(bot => bot.id !== botId);
+      localStorage.setItem('user_bots', JSON.stringify(updatedBots));
+      await loadUserBots();
+      return true;
+    } catch (error) {
+      console.error('Error deleting bot:', error);
+      return false;
+    }
+  };
         return true;
       }
       return false;
