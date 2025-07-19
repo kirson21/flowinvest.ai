@@ -476,9 +476,9 @@ const TradingBots = () => {
         onSave={async (botData) => {
           const success = await saveBot({
             ...botData,
-            name: botData.name || 'Advanced Bot',
-            description: botData.description || 'Advanced trading bot',
-            strategy: botData.strategy || 'advanced',
+            name: botData.botName || 'Advanced Bot',
+            description: botData.description || 'Advanced trading bot configuration',
+            strategy: botData.tradingMode || 'advanced',
             exchange: botData.exchange || 'binance',
             trading_pair: botData.tradingPair || 'BTC/USDT',
             risk_level: botData.riskLevel || 'medium',
