@@ -66,37 +66,41 @@ const TradingBots = () => {
     console.log('Current user for bot creation:', user);
     
     try {
-      if (!user || !user.id) {
-        console.error('No user found for bot creation');
-        alert('Please log in to create bots');
-        return false;
-      }
-
+      // Temporary localStorage solution while backend RLS issues are resolved
+      console.log('Using localStorage for bot storage (temporary solution)');
+      
+      const botId = Date.now().toString(); // Simple ID generation
       const botToSave = {
+        id: botId,
         ...botData,
-        user_id: user.id,
+        user_id: user?.id || 'temp_user',
         is_active: false,
         is_prebuilt: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        status: 'inactive'
       };
       
-      console.log('Bot data to save to database:', botToSave);
-      console.log('About to call database.createBot...');
-
-      const savedBot = await database.createBot(botToSave);
-      console.log('database.createBot result:', savedBot);
+      console.log('Bot data to save to localStorage:', botToSave);
       
-      if (savedBot) {
-        console.log('Bot saved successfully, refreshing bot list...');
-        await loadUserBots(); // Refresh the list
-        return true;
-      } else {
-        console.log('database.createBot returned falsy result');
-        return false;
-      }
+      // Get existing bots from localStorage
+      const existingBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      
+      // Add new bot
+      existingBots.push(botToSave);
+      
+      // Save back to localStorage
+      localStorage.setItem('user_bots', JSON.stringify(existingBots));
+      
+      console.log('Bot saved to localStorage successfully');
+      console.log('Total bots in storage:', existingBots.length);
+      
+      // Refresh the bot list
+      await loadUserBots();
+      
+      return true;
     } catch (error) {
-      console.error('Error saving bot:', error);
+      console.error('Error saving bot to localStorage:', error);
       alert('Error saving bot: ' + error.message);
       return false;
     }
