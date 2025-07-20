@@ -1245,13 +1245,13 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
         </Tabs>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 sm:mt-8 pt-4 sm:pt-6 border-t gap-3 sm:gap-0">
+          <div className="flex flex-wrap items-center gap-2 sm:space-x-4">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+              className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-sm px-3 sm:px-4"
             >
               Cancel
             </Button>
@@ -1262,10 +1262,11 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                 type="button"
                 variant="outline"
                 onClick={goToPreviousStep}
-                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-sm px-3 sm:px-4"
               >
-                <ArrowLeft size={16} className="mr-2" />
-                Previous Step
+                <ArrowLeft size={14} className="mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Previous Step</span>
+                <span className="sm:hidden">Previous</span>
               </Button>
             )}
             
@@ -1276,7 +1277,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                 variant="outline"
                 onClick={handleTest}
                 disabled={availableTests === 0}
-                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-sm px-3 sm:px-4"
               >
                 <TestTube size={16} className="mr-2" />
                 Test ({availableTests} available)
