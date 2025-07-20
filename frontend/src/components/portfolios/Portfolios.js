@@ -326,6 +326,13 @@ const Portfolios = () => {
         isOpen={isSellerModalOpen} 
         onClose={closeSellerModal} 
       />
+
+      {/* Product Creation Modal */}
+      <ProductCreationModal
+        isOpen={isProductCreationOpen}
+        onClose={() => setIsProductCreationOpen(false)}
+        onSave={handleProductSaved}
+      />
     </div>
   );
 };
