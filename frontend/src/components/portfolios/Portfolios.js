@@ -209,7 +209,10 @@ const Portfolios = () => {
           <p className="text-sm font-medium text-[#474545] dark:text-white mb-2">
             Seller Information
           </p>
-          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+          <button 
+            onClick={() => handleSellerClick(portfolio.seller)}
+            className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent hover:border-[#0097B2]/20"
+          >
             <div className="flex items-center space-x-3">
               <Avatar className="w-8 h-8">
                 <AvatarImage src={portfolio.seller.avatar} alt={portfolio.seller.name} />
@@ -217,14 +220,17 @@ const Portfolios = () => {
                   {portfolio.seller.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <div>
+              <div className="text-left">
                 <p className="text-sm font-medium text-[#474545] dark:text-white">
                   {portfolio.seller.name}
                 </p>
                 <div className="flex items-center space-x-1 mt-1">
-                  {Object.entries(portfolio.seller.socialLinks).map(([platform, url]) => (
+                  {Object.entries(portfolio.seller.socialLinks).slice(0, 3).map(([platform, url]) => (
                     <SocialIcon key={platform} platform={platform} url={url} />
                   ))}
+                  {Object.keys(portfolio.seller.socialLinks).length > 3 && (
+                    <span className="text-xs text-gray-500 ml-1">+{Object.keys(portfolio.seller.socialLinks).length - 3}</span>
+                  )}
                 </div>
               </div>
             </div>
