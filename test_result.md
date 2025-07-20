@@ -172,17 +172,17 @@ frontend:
           agent: "main"
           comment: "Added major trading pairs with USDC as quote currency (BTC/USDC, ETH/USDC, BNB/USDC, XRP/USDC, ADA/USDC) to ensure USDC appears in the Quote Coin selection alongside USDT."
 
-  - task: "Mobile Responsiveness - Advanced Bot Builder"
+  - task: "AI Creator Mobile Responsiveness - Generate Bot Button Fix"
     implemented: true
     working: true
-    file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
+    file: "/app/frontend/src/components/bots/GrokAIBotCreator.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
         - working: true
           agent: "main"  
-          comment: "COMPREHENSIVE MOBILE FIX: Resolved all mobile responsiveness issues in Advanced Bot Builder: 1) Fixed main container padding and typography for mobile (p-2 sm:p-4, text-lg sm:text-2xl), 2) Fixed tabs navigation with responsive grid (grid-cols-2 sm:grid-cols-3 lg:grid-cols-6, responsive text size), 3) Fixed action buttons layout (flex-col sm:flex-row, responsive spacing and sizing), 4) Fixed trading mode selection buttons (grid-cols-1 sm:grid-cols-3, responsive padding and text), 5) Fixed form input grids (md:grid-cols-2 to sm:grid-cols-2, responsive gaps), 6) Fixed profit currency buttons (responsive text and padding), 7) Fixed filter condition grids (md:grid-cols-4 to sm:grid-cols-2 lg:grid-cols-4), 8) Fixed test step layout (md:grid-cols-3 to sm:grid-cols-2 lg:grid-cols-3), 9) Added mobile-specific step progress indicators, 10) Enhanced button responsiveness with text truncation (Next/Previous Step to Next/Previous on mobile). All overlapping text, off-screen buttons, and layout issues resolved."
+          comment: "CRITICAL MOBILE FIX: Resolved invisible 'Generate Bot with AI' button on mobile: 1) Fixed main container layout (items-start for mobile, overflow-y-auto on container instead of card), 2) Made header responsive (flex-col sm:flex-row, responsive text sizes), 3) Fixed content area padding (p-3 sm:p-6), 4) Made Generate button sticky on mobile (sticky bottom-0 with proper background), 5) Added responsive text truncation (Generate Bot with AI → Generate Bot on mobile), 6) Fixed suggested prompts with max-height scrolling on mobile, 7) Fixed preview step grids (md:grid-cols-2 to sm:grid-cols-2), 8) Made action buttons stack on mobile (flex-col sm:flex-row), 9) Fixed success modal for mobile responsiveness. The Generate Bot button is now always visible and accessible on mobile devices."
 
 metadata:
   created_by: "main_agent"
