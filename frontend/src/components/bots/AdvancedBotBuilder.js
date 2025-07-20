@@ -247,8 +247,8 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
     e.preventDefault();
     
     // Only allow bot creation on the final "Test" step
-    if (!isLastStep()) {
-      console.log('Form submission blocked - not on final step');
+    if (activeTab !== 'test') {
+      console.log('Form submission blocked - not on test step, currently on:', activeTab);
       return;
     }
     
