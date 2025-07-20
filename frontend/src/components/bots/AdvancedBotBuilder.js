@@ -936,7 +936,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                           type="button"
                           variant={formData.profitCurrency === option.value ? 'default' : 'outline'}
                           onClick={() => handleInputChange('profitCurrency', option.value)}
-                          className={`${formData.profitCurrency === option.value ? 'bg-[#0097B2] hover:bg-[#0097B2]/90' : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5'}`}
+                          className={`text-xs sm:text-sm px-2 sm:px-4 py-2 ${formData.profitCurrency === option.value ? 'bg-[#0097B2] hover:bg-[#0097B2]/90' : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5'}`}
                         >
                           {option.label}
                         </Button>
