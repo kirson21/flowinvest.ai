@@ -172,17 +172,17 @@ frontend:
           agent: "main"
           comment: "Added major trading pairs with USDC as quote currency (BTC/USDC, ETH/USDC, BNB/USDC, XRP/USDC, ADA/USDC) to ensure USDC appears in the Quote Coin selection alongside USDT."
 
-  - task: "AI Creator Mobile Responsiveness - Generate Bot Button Fix"
+  - task: "Interactive Seller Profile Cards - Marketplace Enhancement"
     implemented: true
     working: true
-    file: "/app/frontend/src/components/bots/GrokAIBotCreator.js"
+    file: "/app/frontend/src/components/portfolios/Portfolios.js, /app/frontend/src/components/portfolios/SellerProfileModal.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
         - working: true
           agent: "main"  
-          comment: "CRITICAL MOBILE FIX: Resolved invisible 'Generate Bot with AI' button on mobile: 1) Fixed main container layout (items-start for mobile, overflow-y-auto on container instead of card), 2) Made header responsive (flex-col sm:flex-row, responsive text sizes), 3) Fixed content area padding (p-3 sm:p-6), 4) Made Generate button sticky on mobile (sticky bottom-0 with proper background), 5) Added responsive text truncation (Generate Bot with AI → Generate Bot on mobile), 6) Fixed suggested prompts with max-height scrolling on mobile, 7) Fixed preview step grids (md:grid-cols-2 to sm:grid-cols-2), 8) Made action buttons stack on mobile (flex-col sm:flex-row), 9) Fixed success modal for mobile responsiveness. The Generate Bot button is now always visible and accessible on mobile devices."
+          comment: "MARKETPLACE SELLER ENHANCEMENT COMPLETED: 1) Enhanced mock data with detailed seller profiles including bio, experience, specialties, comprehensive social links (Telegram, Twitter, Instagram, LinkedIn, YouTube, website), professional stats (total products, sales, success rate, member since), and realistic review system with verified users and ratings. 2) Created comprehensive SellerProfileModal.js component with responsive design including seller bio, stats cards, specialties badges, social media links, review system with verified badges, and action buttons (Contact Seller, View All Products). 3) Made seller information cards clickable buttons with hover effects and interactive states. 4) Added support for 6 social platforms with proper icons and links. 5) Implemented modal state management with open/close functionality. 6) Added mobile responsiveness throughout the modal. 7) Created realistic review system with user avatars, ratings, verification badges, and dates. All seller cards now provide detailed professional profiles when clicked."
 
 metadata:
   created_by: "main_agent"
