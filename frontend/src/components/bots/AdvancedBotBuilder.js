@@ -1285,8 +1285,22 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
             )}
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
             {/* Step Progress Indicator */}
+            <div className="flex sm:hidden items-center space-x-2 text-xs text-gray-500 mb-2">
+              <span>Step {getCurrentStepIndex() + 1} of {steps.length}</span>
+              <div className="flex space-x-1">
+                {steps.map((step, index) => (
+                  <div
+                    key={step}
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      index <= getCurrentStepIndex() ? 'bg-[#0097B2]' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            
             <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-500">
               <span>Step {getCurrentStepIndex() + 1} of {steps.length}</span>
               <div className="flex space-x-1">
@@ -1307,11 +1321,12 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                 type="button"
                 onClick={goToNextStep}
                 disabled={!canGoNext()}
-                className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-8"
-                size="lg"
+                className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-4 sm:px-8 w-full sm:w-auto text-sm sm:text-base"
+                size="default"
               >
-                Next Step
-                <ArrowLeft size={16} className="ml-2 rotate-180" />
+                <span className="sm:hidden">Next</span>
+                <span className="hidden sm:inline">Next Step</span>
+                <ArrowLeft size={14} className="ml-1 sm:ml-2 rotate-180" />
               </Button>
             ) : (
               <Button
@@ -1336,8 +1351,8 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                     alert('Error creating bot: ' + error.message);
                   }
                 }}
-                className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-8"
-                size="lg"
+                className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-4 sm:px-8 w-full sm:w-auto text-sm sm:text-base"
+                size="default"
               >
                 <Bot size={16} className="mr-2" />
                 Create Bot
