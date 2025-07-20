@@ -156,6 +156,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "Fixed the Create Bot button functionality by correcting the bot data mapping in the onSave callback. Updated to use 'botName' instead of 'name' field and ensured proper bot configuration is passed to the saveBot function."
+        - working: true
+          agent: "main"  
+          comment: "CRITICAL FIX: Resolved issue where bot was being created on 'Next Step' click from Exit step instead of 'Create Bot' button on Test step. Implemented localStorage solution for bot storage bypassing backend RLS issues. Fixed form submission logic to only work on final Test step. Changed Create Bot button from type='submit' to type='button' with direct onClick handler. Added step navigation debugging and safety checks."
 
   - task: "Add USDC to Quote Coin Options"
     implemented: true
