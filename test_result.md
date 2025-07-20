@@ -172,7 +172,7 @@ frontend:
           agent: "main"
           comment: "Added major trading pairs with USDC as quote currency (BTC/USDC, ETH/USDC, BNB/USDC, XRP/USDC, ADA/USDC) to ensure USDC appears in the Quote Coin selection alongside USDT."
 
-  - task: "Enhanced Exit Step - Trade Closing Settings"
+  - task: "Mobile Responsiveness - Advanced Bot Builder"
     implemented: true
     working: true
     file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
@@ -181,8 +181,8 @@ frontend:
     needs_retesting: true
     status_history:
         - working: true
-          agent: "main"
-          comment: "Completely enhanced the Exit step with comprehensive trade closing settings: 1) Profit range input (0.2% - 1000%) with proper validation, 2) Enhanced Profit Currency options (COIN, USDT, USDC), 3) Stop Loss toggle with value range (-0.05% to -99%), 4) Stop Loss by Signal with same filter structure as Entry conditions (up to 5 filters with indicators, intervals, signal types), 5) Min. Indent % dropdown with fixed options (0.1% to 5.0%), 6) Indent Type dropdown (From last order, From first order, From average price, From current price), 7) Stop Bot After Stop Loss Execution toggle, 8) Added helper functions for managing stop loss signal conditions, 9) Professional UI with conditional rendering and proper validation."
+          agent: "main"  
+          comment: "COMPREHENSIVE MOBILE FIX: Resolved all mobile responsiveness issues in Advanced Bot Builder: 1) Fixed main container padding and typography for mobile (p-2 sm:p-4, text-lg sm:text-2xl), 2) Fixed tabs navigation with responsive grid (grid-cols-2 sm:grid-cols-3 lg:grid-cols-6, responsive text size), 3) Fixed action buttons layout (flex-col sm:flex-row, responsive spacing and sizing), 4) Fixed trading mode selection buttons (grid-cols-1 sm:grid-cols-3, responsive padding and text), 5) Fixed form input grids (md:grid-cols-2 to sm:grid-cols-2, responsive gaps), 6) Fixed profit currency buttons (responsive text and padding), 7) Fixed filter condition grids (md:grid-cols-4 to sm:grid-cols-2 lg:grid-cols-4), 8) Fixed test step layout (md:grid-cols-3 to sm:grid-cols-2 lg:grid-cols-3), 9) Added mobile-specific step progress indicators, 10) Enhanced button responsiveness with text truncation (Next/Previous Step to Next/Previous on mobile). All overlapping text, off-screen buttons, and layout issues resolved."
 
 metadata:
   created_by: "main_agent"
