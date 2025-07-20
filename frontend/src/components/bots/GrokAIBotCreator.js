@@ -220,25 +220,25 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
           )}
 
           {step === 'preview' && generatedBot && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Bot Header */}
-              <div className="border-b pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold flex items-center space-x-2">
+              <div className="border-b pb-3 sm:pb-4">
+                <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
+                  <div className="flex-1">
+                    <h3 className="text-lg sm:text-xl font-semibold flex items-center space-x-2">
                       {getStrategyIcon(generatedBot.strategy)}
-                      <span>{generatedBot.name}</span>
+                      <span className="break-words">{generatedBot.name}</span>
                     </h3>
-                    <p className="text-gray-600 mt-1">{generatedBot.description}</p>
+                    <p className="text-gray-600 mt-1 text-xs sm:text-sm">{generatedBot.description}</p>
                   </div>
-                  <Badge className={getRiskColor(generatedBot.risk_level)}>
+                  <Badge className={`${getRiskColor(generatedBot.risk_level)} text-xs mt-2 sm:mt-0`}>
                     {generatedBot.risk_level} risk
                   </Badge>
                 </div>
               </div>
 
               {/* Configuration Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {/* Basic Settings */}
                 <Card>
                   <CardHeader className="pb-3">
