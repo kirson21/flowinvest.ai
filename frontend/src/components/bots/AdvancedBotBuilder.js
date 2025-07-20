@@ -590,7 +590,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
 
                 {showAdvanced && (
                   <div className="space-y-6 pt-4 border-t">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       {/* Overlapping Price Changes */}
                       <div className="space-y-2">
                         <Label htmlFor="overlappingPriceChanges">
