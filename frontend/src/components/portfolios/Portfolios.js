@@ -301,9 +301,7 @@ const Portfolios = () => {
         <Button
           variant="outline"
           className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 w-full sm:w-auto"
-          onClick={() => {
-            alert('Product builder coming soon! (Mock action)');
-          }}
+          onClick={handleCreateProduct}
         >
           <Plus size={16} className="mr-2 flex-shrink-0" />
           <span className="truncate">Create your product</span>
