@@ -888,18 +888,18 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <Label>Take Profit Mode</Label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {tradingModeOptions.map((mode) => (
                       <Button
                         key={mode.value}
                         type="button"
                         variant={formData.takeProfitMode === mode.value ? 'default' : 'outline'}
                         onClick={() => handleInputChange('takeProfitMode', mode.value)}
-                        className={`h-auto p-4 ${formData.takeProfitMode === mode.value ? 'bg-[#0097B2] hover:bg-[#0097B2]/90' : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5'}`}
+                        className={`h-auto p-3 sm:p-4 text-xs sm:text-sm ${formData.takeProfitMode === mode.value ? 'bg-[#0097B2] hover:bg-[#0097B2]/90' : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5'}`}
                       >
                         <div className="text-center">
                           <div className="font-medium">{mode.label}</div>
-                          <div className="text-xs opacity-70 mt-1">{mode.description}</div>
+                          <div className="text-xs opacity-70 mt-1 hidden sm:block">{mode.description}</div>
                         </div>
                       </Button>
                     ))}
