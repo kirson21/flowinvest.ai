@@ -30,6 +30,18 @@ const Portfolios = () => {
   const [portfolios, setPortfolios] = useState(mockPortfolios);
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
+  const [isProductCreationOpen, setIsProductCreationOpen] = useState(false);
+
+  // Load user-created portfolios from localStorage
+  useEffect(() => {
+    const loadPortfolios = () => {
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      const allPortfolios = [...mockPortfolios, ...userPortfolios];
+      setPortfolios(allPortfolios);
+    };
+    
+    loadPortfolios();
+  }, []);
 
   const handleSellerClick = (seller) => {
     setSelectedSeller(seller);
@@ -39,6 +51,18 @@ const Portfolios = () => {
   const closeSellerModal = () => {
     setIsSellerModalOpen(false);
     setSelectedSeller(null);
+  };
+
+  const handleCreateProduct = () => {
+    setIsProductCreationOpen(true);
+  };
+
+  const handleProductSaved = (newProduct) => {
+    // Refresh the portfolios list to include the new product
+    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+    const allPortfolios = [...mockPortfolios, ...userPortfolios];
+    setPortfolios(allPortfolios);
+    setIsProductCreationOpen(false);
   };
 
   const getRiskColor = (risk) => {
