@@ -95,7 +95,10 @@ const Portfolios = () => {
     const icons = {
       telegram: <MessageCircle size={16} className="text-blue-500" />,
       twitter: <Twitter size={16} className="text-blue-400" />,
-      instagram: <Instagram size={16} className="text-pink-500" />
+      instagram: <Instagram size={16} className="text-pink-500" />,
+      linkedin: <Linkedin size={16} className="text-blue-700" />,
+      youtube: <Youtube size={16} className="text-red-500" />,
+      website: <Globe size={16} className="text-gray-600" />
     };
     
     return (
