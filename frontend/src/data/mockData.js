@@ -290,11 +290,51 @@ export const mockPortfolios = [
     seller: {
       name: "Michael Rodriguez",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      bio: "Tech investment specialist and former Silicon Valley startup founder. Expert in emerging technologies, growth stocks, and high-risk/high-reward strategies. 10+ years in venture capital and tech investments.",
+      experience: "10+ years",
+      specialties: ["Tech Stocks", "Growth Investing", "Venture Capital", "Startup Analysis"],
       socialLinks: {
         telegram: "https://t.me/michaelrodriguez",
         twitter: "https://x.com/michaelrodriguez",
-        instagram: "https://instagram.com/michaelrodriguez"
-      }
+        instagram: "https://instagram.com/michaelrodriguez",
+        linkedin: "https://linkedin.com/in/michael-rodriguez",
+        website: "https://techportfolios.pro"
+      },
+      stats: {
+        totalProducts: 12,
+        totalSales: 892,
+        successRate: 89.5,
+        memberSince: "2022"
+      },
+      reviews: [
+        {
+          id: 1,
+          userName: "Emma T.",
+          userAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
+          rating: 5,
+          comment: "Amazing returns! Michael really understands tech trends. Perfect for aggressive growth seekers.",
+          date: "2024-01-14",
+          verified: true
+        },
+        {
+          id: 2,
+          userName: "James P.",
+          userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
+          rating: 4,
+          comment: "High volatility but impressive long-term results. Great for risk-tolerant investors.",
+          date: "2024-01-09",
+          verified: true
+        },
+        {
+          id: 3,
+          userName: "Ashley W.",
+          userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
+          rating: 5,
+          comment: "Fantastic insights on emerging tech companies. Made substantial profits following his strategies!",
+          date: "2024-01-03",
+          verified: true
+        }
+      ]
     },
     rating: 4.9,
     totalReviews: 456,
