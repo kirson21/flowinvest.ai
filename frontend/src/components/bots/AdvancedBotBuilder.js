@@ -777,7 +777,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                           </div>
 
                           {formData.entryConditions.map((condition, index) => (
-                            <div key={condition.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900">
+                            <div key={condition.id} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900">
                               <div className="space-y-1">
                                 <Label className="text-xs text-gray-500">FILTER {index + 1}</Label>
                                 <div className="flex items-center space-x-2">
