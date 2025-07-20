@@ -127,23 +127,23 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+    <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+      <Card className="w-full max-w-4xl my-2 sm:my-0 max-h-none sm:max-h-[90vh] overflow-visible sm:overflow-y-auto">
+        <CardHeader className="pb-3 sm:pb-6">
+          <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
             <div>
-              <CardTitle className="flex items-center space-x-2">
-                <Brain className="h-6 w-6 text-purple-600" />
+              <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                 <span>AI Bot Creator</span>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
                   Powered by Grok 4
                 </Badge>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm mt-1">
                 Describe your trading strategy in natural language and let AI create a perfect bot
               </CardDescription>
             </div>
-            <Button variant="ghost" onClick={onClose}>×</Button>
+            <Button variant="ghost" onClick={onClose} size="sm" className="self-end sm:self-auto">×</Button>
           </div>
         </CardHeader>
 
