@@ -110,11 +110,11 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
   if (step === 'saved') {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="pt-6 text-center p-4 sm:p-6">
+            <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Bot Created Successfully!</h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-4 text-sm sm:text-base">
               Your AI-generated trading bot "{generatedBot?.name}" has been saved and is ready for configuration.
             </p>
             <Button onClick={onClose} className="w-full">
