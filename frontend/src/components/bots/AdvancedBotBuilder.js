@@ -348,20 +348,20 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
   };
 
   return (
-    <div className="p-4 pb-20 max-w-6xl mx-auto">
-      <div className="flex items-center mb-6">
+    <div className="p-2 sm:p-4 pb-20 max-w-6xl mx-auto">
+      <div className="flex items-center mb-4 sm:mb-6">
         <Button
           variant="ghost"
           onClick={onClose}
-          className="mr-4 p-2"
+          className="mr-2 sm:mr-4 p-2"
         >
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-[#474545] dark:text-white">
+          <h1 className="text-lg sm:text-2xl font-bold text-[#474545] dark:text-white">
             Advanced Bot Builder
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">
             Professional trading bot configuration
           </p>
         </div>
