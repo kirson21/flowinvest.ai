@@ -27,6 +27,18 @@ import SellerProfileModal from './SellerProfileModal';
 const Portfolios = () => {
   const { t } = useApp();
   const [portfolios, setPortfolios] = useState(mockPortfolios);
+  const [selectedSeller, setSelectedSeller] = useState(null);
+  const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
+
+  const handleSellerClick = (seller) => {
+    setSelectedSeller(seller);
+    setIsSellerModalOpen(true);
+  };
+
+  const closeSellerModal = () => {
+    setIsSellerModalOpen(false);
+    setSelectedSeller(null);
+  };
 
   const getRiskColor = (risk) => {
     switch (risk.toLowerCase()) {
