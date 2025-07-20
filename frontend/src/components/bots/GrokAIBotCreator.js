@@ -194,7 +194,7 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
               </div>
 
               {/* Generate Button - Fixed at bottom for mobile */}
-              <div className="sticky bottom-0 bg-white pt-3 sm:pt-0 sm:static sm:bg-transparent">
+              <div className="sticky bottom-0 bg-white dark:bg-gray-900 pt-3 sm:pt-0 sm:static sm:bg-transparent border-t sm:border-t-0 border-gray-200 dark:border-gray-700 -mx-3 sm:mx-0 px-3 sm:px-0 sm:border-none">
                 <Button
                   onClick={handleGenerateBot}
                   disabled={isLoading || !prompt.trim()}
