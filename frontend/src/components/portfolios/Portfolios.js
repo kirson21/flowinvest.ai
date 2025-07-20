@@ -245,7 +245,7 @@ const Portfolios = () => {
                 {portfolio.totalReviews} reviews
               </p>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Price Button - Replaces Invest Button */}
