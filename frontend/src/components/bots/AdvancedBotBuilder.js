@@ -51,16 +51,26 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
   const canGoNext = () => validateCurrentStep();
   
   const goToNextStep = () => {
+    console.log(`Navigating from step ${activeTab} to next step`);
     const currentIndex = getCurrentStepIndex();
     if (currentIndex < steps.length - 1) {
-      setActiveTab(steps[currentIndex + 1]);
+      const nextStep = steps[currentIndex + 1];
+      console.log(`Moving to step: ${nextStep}`);
+      setActiveTab(nextStep);
+    } else {
+      console.log('Already on last step');
     }
   };
   
   const goToPreviousStep = () => {
+    console.log(`Navigating from step ${activeTab} to previous step`);
     const currentIndex = getCurrentStepIndex();
     if (currentIndex > 0) {
-      setActiveTab(steps[currentIndex - 1]);
+      const previousStep = steps[currentIndex - 1];
+      console.log(`Moving to step: ${previousStep}`);
+      setActiveTab(previousStep);
+    } else {
+      console.log('Already on first step');
     }
   };
   
