@@ -235,7 +235,14 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Creating bot with current configuration...');
+    
+    // Only allow bot creation on the final "Test" step
+    if (!isLastStep()) {
+      console.log('Form submission blocked - not on final step');
+      return;
+    }
+    
+    console.log('Creating bot from Test step...');
     
     const botData = {
       ...formData,
