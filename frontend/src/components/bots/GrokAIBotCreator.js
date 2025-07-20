@@ -147,26 +147,26 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-3 sm:p-6">
           {step === 'input' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Error Alert */}
               {error && (
                 <Alert className="border-red-500 bg-red-50">
-                  <AlertDescription className="text-red-700">{error}</AlertDescription>
+                  <AlertDescription className="text-red-700 text-xs sm:text-sm">{error}</AlertDescription>
                 </Alert>
               )}
 
               {/* Prompt Input */}
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-xs sm:text-sm font-medium mb-2">
                   Describe Your Trading Strategy
                 </label>
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Example: Create a Bitcoin trading bot that buys when RSI is below 30 and sells when it reaches 70, with 2% stop loss and conservative risk management..."
-                  className="h-32 border-[#0097B2]/20 focus:border-[#0097B2]"
+                  placeholder="Example: Create a Bitcoin trading bot that buys when RSI is below 30 and sells when it reaches 70..."
+                  className="h-24 sm:h-32 border-[#0097B2]/20 focus:border-[#0097B2] text-xs sm:text-sm"
                   disabled={isLoading}
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -176,15 +176,15 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
 
               {/* Suggested Prompts */}
               <div>
-                <label className="block text-sm font-medium mb-3">
+                <label className="block text-xs sm:text-sm font-medium mb-2 sm:mb-3">
                   Or try one of these suggestions:
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-32 sm:max-h-none overflow-y-auto sm:overflow-visible">
                   {suggestedPrompts.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => setPrompt(suggestion)}
-                      className="w-full p-3 text-left border border-gray-200 rounded-lg hover:border-[#0097B2] hover:bg-[#0097B2]/5 transition-colors text-sm"
+                      className="w-full p-2 sm:p-3 text-left border border-gray-200 rounded-lg hover:border-[#0097B2] hover:bg-[#0097B2]/5 transition-colors text-xs sm:text-sm"
                       disabled={isLoading}
                     >
                       {suggestion}
@@ -193,11 +193,14 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
                 </div>
               </div>
 
-              {/* Generate Button */}
-              <Button
-                onClick={handleGenerateBot}
-                disabled={isLoading || !prompt.trim()}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+              {/* Generate Button - Fixed at bottom for mobile */}
+              <div className="sticky bottom-0 bg-white pt-3 sm:pt-0 sm:static sm:bg-transparent">
+                <Button
+                  onClick={handleGenerateBot}
+                  disabled={isLoading || !prompt.trim()}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-3 sm:py-2"
+                  size="lg"
+                >
               >
                 {isLoading ? (
                   <>
