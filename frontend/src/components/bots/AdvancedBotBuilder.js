@@ -1304,10 +1304,26 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
               </Button>
             ) : (
               <Button
-                type="submit"
+                type="button"
                 onClick={(e) => {
-                  console.log('Create Bot button clicked directly!');
-                  // Let the form submission handle it, but add direct debugging
+                  e.preventDefault();
+                  console.log('Create Bot button clicked - Final step confirmed');
+                  
+                  const botData = {
+                    ...formData,
+                    botName: formData.botName || 'Advanced Trading Bot',
+                    tradingPair: `${formData.baseCoin}/${formData.quoteCoin}`,
+                    riskLevel: 'Medium',
+                    strategy: formData.tradingMode || 'Simple',
+                    exchange: mockApiKeys.find(k => k.id === formData.apiKey)?.exchange || 'Binance'
+                  };
+                  
+                  try {
+                    onSave(botData);
+                  } catch (error) {
+                    console.error('Error calling onSave:', error);
+                    alert('Error creating bot: ' + error.message);
+                  }
                 }}
                 className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-8"
                 size="lg"
