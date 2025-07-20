@@ -345,7 +345,7 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
                     <CardTitle className="text-sm">Trading Conditions</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <h4 className="font-medium text-sm mb-2 text-green-600">Entry Conditions</h4>
                         <ul className="space-y-1">
