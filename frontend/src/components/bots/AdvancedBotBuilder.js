@@ -369,7 +369,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
 
       <form onSubmit={handleSubmit}>
         <Tabs value={activeTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 sm:mb-6 gap-1 h-auto">
             {steps.map((step, index) => {
               const isCompleted = index < getCurrentStepIndex();
               const isCurrent = step === activeTab;
@@ -380,7 +380,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                   key={step}
                   value={step}
                   disabled={!isAccessible}
-                  className={`relative ${
+                  className={`relative text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2 h-auto min-h-[40px] sm:min-h-[48px] ${
                     isCompleted ? 'text-green-600' : isCurrent ? 'text-[#0097B2]' : ''
                   }`}
                   onClick={(e) => {
