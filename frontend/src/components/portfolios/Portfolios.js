@@ -296,6 +296,13 @@ const Portfolios = () => {
           More portfolios coming soon...
         </p>
       </div>
+
+      {/* Seller Profile Modal */}
+      <SellerProfileModal 
+        seller={selectedSeller} 
+        isOpen={isSellerModalOpen} 
+        onClose={closeSellerModal} 
+      />
     </div>
   );
 };
