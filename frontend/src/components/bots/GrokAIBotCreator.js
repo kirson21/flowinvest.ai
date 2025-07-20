@@ -201,19 +201,21 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
                   className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-3 sm:py-2"
                   size="lg"
                 >
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    AI is creating your bot...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="mr-2 h-4 w-4" />
-                    Generate Bot with AI
-                  </>
-                )}
-              </Button>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span className="hidden sm:inline">AI is creating your bot...</span>
+                      <span className="sm:hidden">Creating bot...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Generate Bot with AI</span>
+                      <span className="sm:hidden">Generate Bot</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           )}
 
