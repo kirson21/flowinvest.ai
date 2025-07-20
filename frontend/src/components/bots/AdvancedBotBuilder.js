@@ -1101,7 +1101,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {/* Min. Indent % */}
                     <div className="space-y-2">
                       <Label>Min. Indent %</Label>
