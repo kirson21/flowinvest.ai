@@ -1211,7 +1211,7 @@ const AdvancedBotBuilder = ({ onClose, onSave }) => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Card className="border-green-200 dark:border-green-800">
                     <CardContent className="p-4 text-center">
                       <div className="text-green-600 font-bold text-lg">Recommended</div>
