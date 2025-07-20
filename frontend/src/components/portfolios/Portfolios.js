@@ -15,9 +15,14 @@ import {
   MessageCircle,
   Instagram,
   Twitter,
-  ShoppingCart
+  ShoppingCart,
+  ExternalLink,
+  Youtube,
+  Globe,
+  Linkedin
 } from 'lucide-react';
 import { mockPortfolios } from '../../data/mockData';
+import SellerProfileModal from './SellerProfileModal';
 
 const Portfolios = () => {
   const { t } = useApp();
