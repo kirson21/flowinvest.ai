@@ -374,17 +374,17 @@ const GrokAIBotCreator = ({ onClose, onSave }) => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex space-x-3 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                 <Button
                   variant="outline"
                   onClick={() => setStep('input')}
-                  className="flex-1"
+                  className="w-full sm:flex-1 order-2 sm:order-1"
                 >
                   ← Back to Edit
                 </Button>
                 <Button
                   onClick={handleSaveBot}
-                  className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
+                  className="w-full sm:flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 order-1 sm:order-2"
                 >
                   Save Bot
                 </Button>
