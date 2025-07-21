@@ -132,11 +132,28 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     }
   };
 
-  const removeAttachment = (id) => {
-    setProductData(prev => ({
-      ...prev,
-      attachments: prev.attachments.filter(att => att.id !== id)
-    }));
+  const removeAttachment = async (attachment) => {
+    try {
+      // If the file has a path (uploaded to Supabase), delete it from storage
+      if (attachment.path && attachment.bucket) {
+        await FileUploadService.deleteFile(attachment.bucket, attachment.path);
+        console.log('File deleted from Supabase:', attachment.path);
+      }
+      
+      // Remove from local state
+      setProductData(prev => ({
+        ...prev,
+        attachments: prev.attachments.filter(att => att.id !== attachment.id)
+      }));
+      
+    } catch (error) {
+      console.error('Error removing file:', error);
+      // Still remove from UI even if Supabase deletion fails
+      setProductData(prev => ({
+        ...prev,
+        attachments: prev.attachments.filter(att => att.id !== attachment.id)
+      }));
+    }
   };
 
   const formatFileSize = (bytes) => {
