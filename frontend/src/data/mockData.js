@@ -145,7 +145,7 @@ export const mockPortfolios = [
     // Marketplace data
     seller: {
       name: "Alex Thompson",
-      avatar: "/api/placeholder/150/150", // Using placeholder instead of external URL
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
       bio: "Senior Portfolio Manager with 12+ years experience in quantitative finance and AI-driven investment strategies. Former Goldman Sachs analyst specializing in algorithmic trading and risk management. Certified CFA and FRM holder.",
       experience: "12+ years",
       specialties: ["Quantitative Finance", "AI Trading", "Risk Management", "Portfolio Optimization"],
@@ -166,7 +166,7 @@ export const mockPortfolios = [
         {
           id: 1,
           userName: "Michael R.",
-          userAvatar: "👤", // Using emoji instead of external URL
+          userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
           rating: 5,
           comment: "Outstanding portfolio! Alex's strategy delivered exactly what was promised. Great communication and support throughout.",
           date: "2024-01-15",
@@ -175,7 +175,7 @@ export const mockPortfolios = [
         {
           id: 2,
           userName: "Jennifer L.",
-          userAvatar: "👤", // Using emoji instead of external URL
+          userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
           rating: 5,
           comment: "Professional service, clear explanations, and consistent returns. Highly recommended for growth portfolios!",
           date: "2024-01-10",
@@ -184,7 +184,7 @@ export const mockPortfolios = [
         {
           id: 3,
           userName: "David K.",
-          userAvatar: "👤", // Using emoji instead of external URL
+          userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face",
           rating: 4,
           comment: "Solid performance and good risk management. Would like to see more frequent updates but overall satisfied.",
           date: "2024-01-08",
