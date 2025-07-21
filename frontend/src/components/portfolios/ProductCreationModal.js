@@ -32,7 +32,12 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     price: '',
     category: 'portfolio',
     tags: [],
-    attachments: []
+    attachments: [],
+    // New metadata fields
+    riskLevel: 'Medium',
+    expectedReturn: '',
+    assetAllocation: '',
+    minimumInvestment: ''
   });
 
   const [errors, setErrors] = useState({});
