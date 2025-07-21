@@ -200,10 +200,8 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         totalReviews: 0,
         totalInvestors: 0,
         featured: false,
-        // Store attachment count instead of full base64 data to save space
-        attachmentCount: productData.attachments.length,
-        // Only store file names, not the actual base64 data
-        attachmentNames: productData.attachments.map(att => att.name)
+        // Store attachment information (now Supabase URLs instead of base64)
+        attachments: productData.attachments,
       };
 
       // Get existing portfolios and check localStorage space
