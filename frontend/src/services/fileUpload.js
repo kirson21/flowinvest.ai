@@ -8,8 +8,23 @@ import { supabase } from '../lib/supabase';
 export class FileUploadService {
   static async uploadFile(file, bucket, folder = '') {
     try {
-      const user = supabase.auth.getUser ? await supabase.auth.getUser() : null;
-      const userId = user?.data?.user?.id || 'anonymous';
+      console.log('Starting file upload:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        bucket: bucket,
+        folder: folder
+      });
+
+      // Check Supabase connection
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('Current user:', user ? { id: user.id, email: user.email } : 'No user');
+      
+      if (userError) {
+        console.error('User authentication error:', userError);
+      }
+
+      const userId = user?.id || 'anonymous';
       
       // Generate unique filename
       const timestamp = Date.now();
@@ -22,7 +37,7 @@ export class FileUploadService {
         ? `${userId}/${folder}/${fileName}`
         : `${userId}/${fileName}`;
 
-      console.log(`Uploading file to ${bucket}/${filePath}`);
+      console.log(`Uploading to: ${bucket}/${filePath}`);
 
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
@@ -33,14 +48,24 @@ export class FileUploadService {
         });
 
       if (error) {
-        console.error('Upload error:', error);
+        console.error('Supabase upload error details:', {
+          error: error,
+          message: error.message,
+          statusCode: error.statusCode,
+          bucket: bucket,
+          filePath: filePath
+        });
         throw error;
       }
+
+      console.log('Upload successful:', data);
 
       // Get public URL
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
+
+      console.log('Public URL generated:', urlData.publicUrl);
 
       return {
         path: filePath,
@@ -52,7 +77,12 @@ export class FileUploadService {
       };
 
     } catch (error) {
-      console.error('File upload failed:', error);
+      console.error('File upload failed with details:', {
+        error: error,
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
       throw new Error(`Failed to upload file: ${error.message}`);
     }
   }
