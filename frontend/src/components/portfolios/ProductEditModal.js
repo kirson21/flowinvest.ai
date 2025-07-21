@@ -146,11 +146,24 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
     }
   };
 
-  const removeAttachment = (id) => {
-    setProductData(prev => ({
-      ...prev,
-      attachments: prev.attachments.filter(att => att.id !== id)
-    }));
+  const removeAttachment = async (attachment) => {
+    try {
+      if (attachment.path && attachment.bucket) {
+        await FileUploadService.deleteFile(attachment.bucket, attachment.path);
+      }
+      
+      setProductData(prev => ({
+        ...prev,
+        attachments: prev.attachments.filter(att => att.id !== attachment.id)
+      }));
+      
+    } catch (error) {
+      console.error('Error removing file:', error);
+      setProductData(prev => ({
+        ...prev,
+        attachments: prev.attachments.filter(att => att.id !== attachment.id)
+      }));
+    }
   };
 
   const formatFileSize = (bytes) => {
