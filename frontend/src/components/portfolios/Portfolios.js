@@ -313,10 +313,10 @@ const Portfolios = () => {
                   {portfolio.seller.name}
                 </p>
                 <div className="flex items-center space-x-1 mt-1">
-                  {Object.entries(portfolio.seller.socialLinks).slice(0, 3).map(([platform, url]) => (
+                  {portfolio.seller.socialLinks ? Object.entries(portfolio.seller.socialLinks).slice(0, 3).map(([platform, url]) => (
                     <SocialIcon key={platform} platform={platform} url={url} />
-                  ))}
-                  {Object.keys(portfolio.seller.socialLinks).length > 3 && (
+                  )) : null}
+                  {portfolio.seller.socialLinks && Object.keys(portfolio.seller.socialLinks).length > 3 && (
                     <span className="text-xs text-gray-500 ml-1">+{Object.keys(portfolio.seller.socialLinks).length - 3}</span>
                   )}
                 </div>
