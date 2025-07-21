@@ -195,12 +195,12 @@ const Portfolios = () => {
       
       {/* Edit Button - Only visible to creators */}
       {canEditProduct(portfolio) && (
-        <div className="absolute top-3 left-3 z-10">
+        <div className="absolute top-3 right-14 z-10">
           <Button
             size="sm"
             variant="outline"
             onClick={() => handleEditProduct(portfolio)}
-            className="bg-white/90 backdrop-blur-sm border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm"
           >
             <Edit size={12} className="mr-1" />
             Edit
