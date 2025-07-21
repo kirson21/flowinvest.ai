@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Check
 } from 'lucide-react';
+import FileUploadService from '../../services/fileUpload';
 
 const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   const { user } = useAuth();
