@@ -62,6 +62,16 @@ async def root():
         "status": "healthy"
     }
 
+# API Root endpoint
+@app.get("/api/")
+async def api_root():
+    return {
+        "message": "Flow Invest API - AI-Powered Investment Platform",
+        "version": "1.0.0",
+        "environment": ENVIRONMENT,
+        "status": "healthy"
+    }
+
 @app.get("/api/health")
 async def health_check():
     return {
