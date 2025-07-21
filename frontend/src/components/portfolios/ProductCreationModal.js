@@ -631,7 +631,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                 type="file"
                 multiple
                 accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'image')}
+                onChange={handleFileUpload}
                 className="hidden"
               />
               <input
@@ -639,7 +639,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                 type="file"
                 multiple
                 accept="video/*"
-                onChange={(e) => handleFileUpload(e, 'video')}
+                onChange={handleFileUpload}
                 className="hidden"
               />
               <input
@@ -647,7 +647,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                 type="file"
                 multiple
                 accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
-                onChange={(e) => handleFileUpload(e, 'document')}
+                onChange={handleFileUpload}
                 className="hidden"
               />
 
