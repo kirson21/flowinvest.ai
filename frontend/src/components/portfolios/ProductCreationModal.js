@@ -431,6 +431,83 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
             </div>
           </div>
 
+          {/* Optional Metadata Fields */}
+          <div>
+            <h3 className="text-lg font-semibold text-[#474545] dark:text-white mb-3">
+              Product Details (Optional)
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {/* Risk Level */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Risk Level</label>
+                <select
+                  value={productData.riskLevel}
+                  onChange={(e) => handleInputChange('riskLevel', e.target.value)}
+                  className="w-full p-2 border border-[#0097B2]/20 rounded-md focus:border-[#0097B2] focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+
+              {/* Expected Return */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Expected Return (%)</label>
+                <Input
+                  type="number"
+                  value={productData.expectedReturn}
+                  onChange={(e) => handleInputChange('expectedReturn', e.target.value)}
+                  placeholder="15"
+                  min="0"
+                  max="1000"
+                  step="0.1"
+                  className={`border-[#0097B2]/20 focus:border-[#0097B2] ${errors.expectedReturn ? 'border-red-500' : ''}`}
+                />
+                {errors.expectedReturn && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <AlertCircle size={12} className="mr-1" />
+                    {errors.expectedReturn}
+                  </p>
+                )}
+              </div>
+
+              {/* Minimum Investment */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Minimum Investment (USD)</label>
+                <div className="relative">
+                  <DollarSign size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="number"
+                    value={productData.minimumInvestment}
+                    onChange={(e) => handleInputChange('minimumInvestment', e.target.value)}
+                    placeholder="100"
+                    min="0.01"
+                    step="0.01"
+                    className={`pl-9 border-[#0097B2]/20 focus:border-[#0097B2] ${errors.minimumInvestment ? 'border-red-500' : ''}`}
+                  />
+                </div>
+                {errors.minimumInvestment && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <AlertCircle size={12} className="mr-1" />
+                    {errors.minimumInvestment}
+                  </p>
+                )}
+              </div>
+
+              {/* Asset Allocation */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Asset Allocation</label>
+                <Input
+                  value={productData.assetAllocation}
+                  onChange={(e) => handleInputChange('assetAllocation', e.target.value)}
+                  placeholder="60% stocks, 30% bonds, 10% crypto"
+                  className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Description */}
           <div>
             <label className="block text-sm font-medium mb-2">Short Description *</label>
