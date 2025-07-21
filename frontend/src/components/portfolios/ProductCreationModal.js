@@ -25,6 +25,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   const { user } = useAuth();
   const [step, setStep] = useState('create'); // 'create', 'preview', 'published'
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   
   const [productData, setProductData] = useState({
     title: '',
