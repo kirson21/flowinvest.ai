@@ -24,6 +24,7 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
   const { user } = useAuth();
   const [step, setStep] = useState('edit'); // 'edit', 'preview', 'updated'
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   
   const [productData, setProductData] = useState({
     title: '',
