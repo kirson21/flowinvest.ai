@@ -301,9 +301,11 @@ const Portfolios = () => {
           >
             <div className="flex items-center space-x-3">
               <Avatar className="w-8 h-8">
-                <AvatarImage src={portfolio.seller.avatar} alt={portfolio.seller.name} />
+                {portfolio.seller.avatar && portfolio.seller.avatar !== "👤" ? (
+                  <AvatarImage src={portfolio.seller.avatar} alt={portfolio.seller.name} />
+                ) : null}
                 <AvatarFallback className="bg-[#0097B2] text-white text-sm">
-                  {portfolio.seller.name.charAt(0)}
+                  {portfolio.seller.avatar === "👤" ? "👤" : portfolio.seller.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="text-left">
