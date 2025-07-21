@@ -71,6 +71,44 @@ const Portfolios = () => {
     setIsProductCreationOpen(false);
   };
 
+  const handleEditProduct = (product) => {
+    setSelectedProductForEdit(product);
+    setIsProductEditOpen(true);
+  };
+
+  const handleProductUpdated = (updatedProduct) => {
+    // Update the product in localStorage
+    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+    const updatedUserPortfolios = userPortfolios.map(p => 
+      p.id === updatedProduct.id ? updatedProduct : p
+    );
+    localStorage.setItem('user_portfolios', JSON.stringify(updatedUserPortfolios));
+    
+    // Refresh the portfolios list
+    const allPortfolios = [...mockPortfolios, ...updatedUserPortfolios];
+    setPortfolios(allPortfolios);
+    setIsProductEditOpen(false);
+    setSelectedProductForEdit(null);
+  };
+
+  const handleProductDeleted = (productId) => {
+    // Remove the product from localStorage
+    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+    const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
+    localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+    
+    // Refresh the portfolios list
+    const allPortfolios = [...mockPortfolios, ...filteredUserPortfolios];
+    setPortfolios(allPortfolios);
+    setIsProductEditOpen(false);
+    setSelectedProductForEdit(null);
+  };
+
+  const canEditProduct = (product) => {
+    // User can edit their own products
+    return user && product.createdBy === user.id;
+  };
+
   const getRiskColor = (risk) => {
     switch (risk.toLowerCase()) {
       case 'low': return 'bg-green-500';
