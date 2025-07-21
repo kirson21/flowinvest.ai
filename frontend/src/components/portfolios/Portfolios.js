@@ -193,87 +193,104 @@ const Portfolios = () => {
         </div>
       )}
       
-      <CardHeader className="pb-3 pr-20">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2">
-            <Briefcase className="text-[#0097B2]" size={20} />
-            <div>
-              <CardTitle className="text-lg text-[#474545] dark:text-white">
-                {portfolio.name}
-              </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {portfolio.description}
-              </p>
+      {/* Edit Button - Only visible to creators */}
+      {canEditProduct(portfolio) && (
+        <div className="absolute top-3 left-3 z-10">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleEditProduct(portfolio)}
+            className="bg-white/90 backdrop-blur-sm border-[#0097B2]/20 hover:bg-[#0097B2]/5"
+          >
+            <Edit size={12} className="mr-1" />
+            Edit
+          </Button>
+        </div>
+      )}
+      
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex-1">
+            {/* Product Title - Prominently displayed */}
+            <CardTitle className="text-xl font-bold text-[#474545] dark:text-white mb-2 leading-tight">
+              {portfolio.title || portfolio.name}
+            </CardTitle>
+            
+            {/* Short Description - Limited to 140 chars */}
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+              {portfolio.description}
+            </p>
+            
+            {/* Price and Category */}
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="flex items-center text-lg font-bold text-[#0097B2]">
+                <DollarSign size={16} className="mr-1" />
+                {portfolio.price || portfolio.minimumInvestment}
+              </div>
+              <Badge variant="outline" className="border-[#0097B2]/30 text-[#0097B2]">
+                {portfolio.category || 'Portfolio'}
+              </Badge>
             </div>
           </div>
         </div>
       </CardHeader>
       
       <CardContent>
+        {/* Enhanced Metadata Grid */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('riskLevel')}
+              Risk Level
             </p>
             <div className="flex items-center space-x-2">
               <div className={`w-2 h-2 rounded-full ${getRiskColor(portfolio.riskLevel)}`} />
               <span className={`text-sm font-medium ${getRiskTextColor(portfolio.riskLevel)}`}>
-                {t(portfolio.riskLevel.toLowerCase())}
+                {portfolio.riskLevel}
               </span>
             </div>
           </div>
+          
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('expectedReturn')}
+              Expected Return
             </p>
             <p className="text-sm font-medium text-[#474545] dark:text-white">
               {portfolio.expectedReturn}
             </p>
           </div>
+          
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              {t('minimumInvestment')}
+              Min. Investment
             </p>
             <p className="text-sm font-medium text-[#474545] dark:text-white">
-              ${portfolio.minimumInvestment.toLocaleString()}
+              ${portfolio.minimumInvestment}
             </p>
           </div>
+          
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
               Total Investors
             </p>
-            <div className="flex items-center space-x-1">
-              <Users size={14} className="text-gray-500" />
-              <span className="text-sm font-medium text-[#474545] dark:text-white">
-                {portfolio.totalInvestors.toLocaleString()}
-              </span>
-            </div>
+            <p className="text-sm font-medium text-[#474545] dark:text-white">
+              {portfolio.totalInvestors || 0}
+            </p>
           </div>
         </div>
 
-        <div className="mb-4">
-          <p className="text-sm font-medium text-[#474545] dark:text-white mb-2">
-            Asset Allocation
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {portfolio.assets.map((asset, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded"
-              >
-                <div className={`w-2 h-2 rounded-full ${getAssetTypeColor(asset.type)}`} />
-                <span className="text-xs font-medium text-[#474545] dark:text-white">
-                  {asset.symbol}
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {asset.allocation}%
-                </span>
-              </div>
-            ))}
+        {/* Asset Allocation - If available */}
+        {portfolio.assetAllocation && (
+          <div className="mb-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              Asset Allocation
+            </p>
+            <p className="text-sm text-[#474545] dark:text-white">
+              {portfolio.assetAllocation}
+            </p>
           </div>
-        </div>
+        )}
 
-        {/* Seller Information - Replaces Performance */}
+        {/* Seller Information - Clickable */}
         <div className="mb-4">
           <p className="text-sm font-medium text-[#474545] dark:text-white mb-2">
             Seller Information
@@ -317,15 +334,15 @@ const Portfolios = () => {
           </button>
         </div>
 
-        {/* Price Button - Replaces Invest Button */}
-        <Button
-          className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white font-medium"
+        {/* Purchase Button */}
+        <Button 
+          className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
           onClick={() => {
-            alert(`Purchase ${portfolio.name} for $${portfolio.price}! (Mock action)`);
+            alert(`Purchase ${portfolio.title || portfolio.name} for $${portfolio.price || portfolio.minimumInvestment}! (Mock action)`);
           }}
         >
           <ShoppingCart size={16} className="mr-2" />
-          Get started - ${portfolio.price}
+          Purchase Now
         </Button>
       </CardContent>
     </Card>
