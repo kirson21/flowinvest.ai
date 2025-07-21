@@ -69,12 +69,22 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     }
     if (!productData.description.trim()) {
       newErrors.description = 'Description is required';
+    } else if (productData.description.length > 140) {
+      newErrors.description = 'Description must be 140 characters or less';
     }
     if (!productData.content.trim()) {
       newErrors.content = 'Content is required';
     }
     if (!productData.price || parseFloat(productData.price) <= 0) {
       newErrors.price = 'Valid price is required';
+    }
+    // Validate minimum investment if provided
+    if (productData.minimumInvestment && parseFloat(productData.minimumInvestment) <= 0) {
+      newErrors.minimumInvestment = 'Minimum investment must be a positive number';
+    }
+    // Validate expected return if provided
+    if (productData.expectedReturn && (parseFloat(productData.expectedReturn) < 0 || parseFloat(productData.expectedReturn) > 1000)) {
+      newErrors.expectedReturn = 'Expected return must be between 0% and 1000%';
     }
 
     setErrors(newErrors);
