@@ -17,12 +17,49 @@ export const AuthProvider = ({ children }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Also try to get user if session exists
-        if (session?.user) {
+        // Development mode: create test user if no session exists
+        if (!session && process.env.NODE_ENV === 'development') {
+          const testUser = {
+            id: 'test-user-123',
+            email: 'test@example.com',
+            user_metadata: { 
+              name: 'Test User',
+              avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+            }
+          };
+          const testSession = {
+            user: testUser,
+            access_token: 'test-token',
+            expires_at: Date.now() + 3600000 // 1 hour from now
+          };
+          console.log('Development mode: Using test user');
+          setSession(testSession);
+          setUser(testUser);
+        } else if (session?.user) {
           console.log('User found in session:', session.user);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
+        
+        // Development fallback
+        if (process.env.NODE_ENV === 'development') {
+          const testUser = {
+            id: 'test-user-123',
+            email: 'test@example.com',
+            user_metadata: { 
+              name: 'Test User',
+              avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+            }
+          };
+          const testSession = {
+            user: testUser,
+            access_token: 'test-token',
+            expires_at: Date.now() + 3600000
+          };
+          console.log('Development fallback: Using test user');
+          setSession(testSession);
+          setUser(testUser);
+        }
       } finally {
         setLoading(false);
       }
