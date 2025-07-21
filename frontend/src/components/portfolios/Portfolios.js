@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -19,11 +20,13 @@ import {
   ExternalLink,
   Youtube,
   Globe,
-  Linkedin
+  Linkedin,
+  Edit
 } from 'lucide-react';
 import { mockPortfolios } from '../../data/mockData';
 import SellerProfileModal from './SellerProfileModal';
 import ProductCreationModal from './ProductCreationModal';
+import ProductEditModal from './ProductEditModal';
 
 const Portfolios = () => {
   const { t } = useApp();
