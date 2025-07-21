@@ -406,7 +406,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
               <select
                 value={productData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className="w-full p-2 border border-[#0097B2]/20 rounded-md focus:border-[#0097B2] focus:outline-none"
+                className="w-full p-2 border border-[#0097B2]/20 rounded-md focus:border-[#0097B2] focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="portfolio">Portfolio Strategy</option>
                 <option value="education">Educational Content</option>
