@@ -12,30 +12,6 @@ export const AuthProvider = ({ children }) => {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        // Always use test user for development/testing
-        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        
-        if (isDevelopment) {
-          const testUser = {
-            id: 'test-user-123',
-            email: 'test@example.com',
-            user_metadata: { 
-              name: 'Test User',
-              avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-            }
-          };
-          const testSession = {
-            user: testUser,
-            access_token: 'test-token',
-            expires_at: Date.now() + 3600000 // 1 hour from now
-          };
-          console.log('Development mode: Using test user');
-          setSession(testSession);
-          setUser(testUser);
-          setLoading(false);
-          return;
-        }
-
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Initial session:', session);
         setSession(session);
