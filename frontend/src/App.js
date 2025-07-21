@@ -23,14 +23,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Allow development mode access
-  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  if (isDevelopment && !user) {
-    // In development without auth, create a temporary user for testing
-    console.log('ProtectedRoute: Development mode - allowing access without auth');
-  }
-
-  return (user || isDevelopment) ? children : <Navigate to="/auth" replace />;
+  return user ? children : <Navigate to="/auth" replace />;
 };
 
 // Public Route Component (redirects to app if authenticated)
@@ -48,12 +41,6 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  // In development mode, don't redirect from auth page if no user
-  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  if (isDevelopment && !user) {
-    return children;
-  }
-
   return user ? <Navigate to="/app" replace /> : children;
 };
 
@@ -61,19 +48,8 @@ const PublicRoute = ({ children }) => {
 const AppWithAuth = () => {
   const { user } = useAuth();
   
-  // In development, provide a test user if none exists
-  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const effectiveUser = user || (isDevelopment ? {
-    id: 'test-user-123',
-    email: 'test@example.com',
-    user_metadata: { 
-      name: 'Test User',
-      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-    }
-  } : null);
-  
   return (
-    <AppProvider initialUser={effectiveUser}>
+    <AppProvider initialUser={user}>
       <MainApp />
     </AppProvider>
   );
