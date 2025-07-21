@@ -597,28 +597,31 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                   type="button"
                   variant="outline"
                   onClick={() => imageInputRef.current?.click()}
+                  disabled={uploadingFiles}
                   className="flex-1 border-[#0097B2]/20 hover:bg-[#0097B2]/5"
                 >
-                  <Image size={16} className="mr-2" />
-                  Add Images
+                  {uploadingFiles ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Image size={16} className="mr-2" />}
+                  {uploadingFiles ? 'Uploading...' : 'Add Images'}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => videoInputRef.current?.click()}
+                  disabled={uploadingFiles}
                   className="flex-1 border-[#0097B2]/20 hover:bg-[#0097B2]/5"
                 >
-                  <Video size={16} className="mr-2" />
-                  Add Videos
+                  {uploadingFiles ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Video size={16} className="mr-2" />}
+                  {uploadingFiles ? 'Uploading...' : 'Add Videos'}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingFiles}
                   className="flex-1 border-[#0097B2]/20 hover:bg-[#0097B2]/5"
                 >
-                  <FileText size={16} className="mr-2" />
-                  Add Files
+                  {uploadingFiles ? <Loader2 size={16} className="mr-2 animate-spin" /> : <FileText size={16} className="mr-2" />}
+                  {uploadingFiles ? 'Uploading...' : 'Add Files'}
                 </Button>
               </div>
 
