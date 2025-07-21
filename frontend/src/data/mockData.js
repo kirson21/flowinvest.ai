@@ -221,7 +221,7 @@ export const mockPortfolios = [
     // Marketplace data
     seller: {
       name: "Sarah Chen",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      avatar: "/api/placeholder/150/150", // Using placeholder instead of external URL
       bio: "Conservative investment specialist with expertise in income-generating assets and capital preservation. 8 years at Vanguard managing institutional portfolios. Focuses on sustainable long-term wealth building.",
       experience: "8+ years",
       specialties: ["Income Generation", "Conservative Investing", "Bond Analysis", "Dividend Strategies"],
@@ -241,7 +241,7 @@ export const mockPortfolios = [
         {
           id: 1,
           userName: "Robert H.",
-          userAvatar: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=50&h=50&fit=crop&crop=face",
+          userAvatar: "👤", // Using emoji instead of external URL
           rating: 5,
           comment: "Perfect for conservative investors. Sarah really knows how to balance risk and return. Very reliable!",
           date: "2024-01-12",
@@ -250,7 +250,7 @@ export const mockPortfolios = [
         {
           id: 2,
           userName: "Lisa M.",
-          userAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=50&h=50&fit=crop&crop=face",
+          userAvatar: "👤", // Using emoji instead of external URL
           rating: 5,
           comment: "Exactly what I needed for retirement planning. Great steady returns and excellent customer service.",
           date: "2024-01-05",
