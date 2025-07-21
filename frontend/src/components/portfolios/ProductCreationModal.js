@@ -510,13 +510,27 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium mb-2">Short Description *</label>
+            <label className="block text-sm font-medium mb-2">
+              Short Description * 
+              <span className="text-xs text-gray-500 ml-2">
+                ({productData.description.length}/140 characters)
+              </span>
+            </label>
             <Input
               value={productData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.length <= 140) {
+                  handleInputChange('description', value);
+                }
+              }}
               placeholder="A brief description of your product..."
+              maxLength={140}
               className={`border-[#0097B2]/20 focus:border-[#0097B2] ${errors.description ? 'border-red-500' : ''}`}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Keep it concise and engaging - this appears on your product card
+            </p>
             {errors.description && (
               <p className="text-red-500 text-xs mt-1 flex items-center">
                 <AlertCircle size={12} className="mr-1" />
