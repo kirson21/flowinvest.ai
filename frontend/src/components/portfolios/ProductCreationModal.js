@@ -140,63 +140,54 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     setIsLoading(true);
     
     try {
-      // Create the product object
+      // Create a more compact product object to avoid localStorage quota issues
       const newProduct = {
-        id: Date.now(),
-        ...productData,
-        createdBy: user?.id || 'anonymous', // Track ownership
-        seller: {
-          name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous User',
-          avatar: user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`,
-          bio: "Product creator and financial strategist. Passionate about sharing investment knowledge and strategies.",
-          experience: "2+ years",
-          specialties: ["Product Creation", "Investment Strategies", "Financial Planning"],
-          socialLinks: {
-            telegram: "https://t.me/creator",
-            twitter: "https://x.com/creator"
-          },
-          stats: {
-            totalProducts: 1,
-            totalSales: 0,
-            successRate: 100,
-            memberSince: new Date().getFullYear().toString()
-          },
-          reviews: []
-        },
-        rating: 5.0,
-        totalReviews: 0,
-        // Use the new metadata fields or fall back to defaults
+        id: Date.now() + Math.random(),
+        title: productData.title,
+        name: productData.title, // For compatibility with existing code
+        description: productData.description,
+        content: productData.content,
+        price: parseFloat(productData.price),
+        category: productData.category,
+        createdBy: user?.id || 'current-user',
+        createdAt: new Date().toISOString(),
+        // Optional metadata fields
         riskLevel: productData.riskLevel || 'Medium',
-        expectedReturn: productData.expectedReturn ? `${productData.expectedReturn}%` : '15-25%',
+        expectedReturn: productData.expectedReturn ? `${productData.expectedReturn}%` : null,
+        assetAllocation: productData.assetAllocation || null,
         minimumInvestment: parseFloat(productData.minimumInvestment) || parseFloat(productData.price),
-        assetAllocation: productData.assetAllocation || 'Diversified Portfolio',
-        assets: productData.category === 'portfolio' ? [
-          { symbol: 'DIVERSIFIED', allocation: 100, type: 'mixed' }
-        ] : [],
-        performance: {
-          "1D": 0,
-          "1W": 0,
-          "1M": 0,
-          "3M": 0,
-          "1Y": 0
+        // Simplified seller information
+        seller: {
+          name: user?.user_metadata?.name || user?.email || 'Anonymous',
+          avatar: "👤", // Using emoji to avoid external URL issues
+          bio: "Product creator on FlowInvestAI marketplace"
         },
+        rating: 0,
+        totalReviews: 0,
         totalInvestors: 0,
         featured: false,
-        createdAt: new Date().toISOString(),
-        status: 'published'
+        // Store attachment count instead of full base64 data to save space
+        attachmentCount: productData.attachments.length,
+        // Only store file names, not the actual base64 data
+        attachmentNames: productData.attachments.map(att => att.name)
       };
 
-      // Save to localStorage (extending the existing marketplace)
-      const existingProducts = JSON.parse(localStorage.getItem('marketplace_products') || '[]');
-      existingProducts.push(newProduct);
-      localStorage.setItem('marketplace_products', JSON.stringify(existingProducts));
-
-      // Also add to the main portfolios list for display
-      const existingPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      existingPortfolios.push(newProduct);
-      localStorage.setItem('user_portfolios', JSON.stringify(existingPortfolios));
-
-      console.log('Product created successfully:', newProduct);
+      // Get existing portfolios and check localStorage space
+      try {
+        const existingPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+        
+        // Limit to last 10 user products to avoid quota issues
+        const limitedPortfolios = existingPortfolios.slice(-9); // Keep last 9, add 1 new = 10 total
+        limitedPortfolios.push(newProduct);
+        
+        localStorage.setItem('user_portfolios', JSON.stringify(limitedPortfolios));
+        console.log('Product created successfully:', newProduct);
+        
+      } catch (storageError) {
+        console.warn('localStorage quota exceeded, clearing old products:', storageError);
+        // If still quota exceeded, keep only the new product
+        localStorage.setItem('user_portfolios', JSON.stringify([newProduct]));
+      }
       
       // Call onSave callback if provided
       if (onSave) {
@@ -216,7 +207,11 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
           price: '',
           category: 'portfolio',
           tags: [],
-          attachments: []
+          attachments: [],
+          riskLevel: 'Medium',
+          expectedReturn: '',
+          assetAllocation: '',
+          minimumInvestment: ''
         });
         setStep('create');
       }, 2000);
