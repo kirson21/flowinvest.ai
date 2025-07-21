@@ -48,6 +48,12 @@ const PublicRoute = ({ children }) => {
     );
   }
 
+  // In development mode, don't redirect from auth page if no user
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (isDevelopment && !user) {
+    return children;
+  }
+
   return user ? <Navigate to="/app" replace /> : children;
 };
 
