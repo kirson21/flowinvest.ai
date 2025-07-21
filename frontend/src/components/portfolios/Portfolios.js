@@ -29,11 +29,14 @@ import ProductCreationModal from './ProductCreationModal';
 import ProductEditModal from './ProductEditModal';
 
 const Portfolios = () => {
+  const { user } = useAuth();
   const { t } = useApp();
   const [portfolios, setPortfolios] = useState(mockPortfolios);
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
   const [isProductCreationOpen, setIsProductCreationOpen] = useState(false);
+  const [selectedProductForEdit, setSelectedProductForEdit] = useState(null);
+  const [isProductEditOpen, setIsProductEditOpen] = useState(false);
 
   // Load user-created portfolios from localStorage
   useEffect(() => {
