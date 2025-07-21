@@ -394,6 +394,18 @@ const Portfolios = () => {
         onClose={() => setIsProductCreationOpen(false)}
         onSave={handleProductSaved}
       />
+
+      {/* Product Edit Modal */}
+      <ProductEditModal
+        product={selectedProductForEdit}
+        isOpen={isProductEditOpen}
+        onClose={() => {
+          setIsProductEditOpen(false);
+          setSelectedProductForEdit(null);
+        }}
+        onSave={handleProductUpdated}
+        onDelete={handleProductDeleted}
+      />
     </div>
   );
 };
