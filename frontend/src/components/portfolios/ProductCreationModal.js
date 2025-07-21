@@ -93,28 +93,43 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleFileUpload = (event, type) => {
+  const handleFileUpload = async (event, type) => {
     const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    setUploadingFiles(true);
     
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const newAttachment = {
+    try {
+      const uploadPromises = files.map(async (file) => {
+        // Upload file to Supabase Storage
+        const uploadResult = await FileUploadService.uploadProductAttachment(file);
+        
+        return {
           id: Date.now() + Math.random(),
           name: file.name,
           size: file.size,
-          type: type,
-          url: e.target.result,
-          file: file
+          type: FileUploadService.getFileType(file.name),
+          url: uploadResult.publicUrl,
+          path: uploadResult.path,
+          bucket: uploadResult.bucket
         };
-        
-        setProductData(prev => ({
-          ...prev,
-          attachments: [...prev.attachments, newAttachment]
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
+      
+      setProductData(prev => ({
+        ...prev,
+        attachments: [...prev.attachments, ...uploadedFiles]
+      }));
+
+      console.log('Files uploaded successfully:', uploadedFiles);
+      
+    } catch (error) {
+      console.error('File upload error:', error);
+      alert('Error uploading files. Please try again.');
+    } finally {
+      setUploadingFiles(false);
+    }
   };
 
   const removeAttachment = (id) => {
