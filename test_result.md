@@ -119,6 +119,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ BACKEND REGRESSION TESTING COMPLETED: Fixed import issues and verified core functionality. Server Health: GET /api/status ✅ working (200 OK). Webhook System: POST /api/ai_news_webhook ✅ working with OpenAI format. Core API Functionality: Authentication system ✅, User management ✅, Feed retrieval ✅, Language-aware feeds ✅. Minor issues found: Server root endpoint returns 500 (non-critical), Grok API key invalid (expected), Legacy webhook endpoint not implemented (not a regression). All critical endpoints for the Advanced Bot Builder frontend are functioning properly. No regressions introduced from frontend changes."
+        - working: true
+          agent: "testing"
+          comment: "✅ MARKETPLACE ENHANCEMENT REGRESSION TESTING COMPLETED: Verified all critical backend endpoints after marketplace enhancements. Fixed minor API root endpoint issue (HTTP 500 → 200 OK). Core functionality confirmed: Server Health ✅, Authentication system ✅, Webhook system ✅, Feed retrieval ✅, Language-aware feeds ✅. All critical endpoints working properly: GET /api/status (200), GET /api/ (200), GET /api/auth/health (200), GET /api/feed_entries (200), POST /api/ai_news_webhook (200). Expected issues: Grok API key invalid (environment limitation), Legacy webhook not implemented (never existed). NO REGRESSIONS found from marketplace frontend enhancements. Backend is stable and ready to support all frontend features."
 
 frontend:
   - task: "Update Pair Step - Limit Quote Coin Options"
