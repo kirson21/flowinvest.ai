@@ -144,6 +144,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
       const newProduct = {
         id: Date.now(),
         ...productData,
+        createdBy: user?.id || 'anonymous', // Track ownership
         seller: {
           name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous User',
           avatar: user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`,
@@ -164,9 +165,11 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         },
         rating: 5.0,
         totalReviews: 0,
-        riskLevel: productData.category === 'portfolio' ? 'Medium' : 'Low',
-        expectedReturn: productData.category === 'portfolio' ? '15-25%' : 'N/A',
-        minimumInvestment: parseFloat(productData.price),
+        // Use the new metadata fields or fall back to defaults
+        riskLevel: productData.riskLevel || 'Medium',
+        expectedReturn: productData.expectedReturn ? `${productData.expectedReturn}%` : '15-25%',
+        minimumInvestment: parseFloat(productData.minimumInvestment) || parseFloat(productData.price),
+        assetAllocation: productData.assetAllocation || 'Diversified Portfolio',
         assets: productData.category === 'portfolio' ? [
           { symbol: 'DIVERSIFIED', allocation: 100, type: 'mixed' }
         ] : [],
