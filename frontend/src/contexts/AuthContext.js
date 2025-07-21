@@ -12,13 +12,10 @@ export const AuthProvider = ({ children }) => {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Initial session:', session);
-        setSession(session);
-        setUser(session?.user ?? null);
+        // Always use test user for development/testing
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
-        // Development mode: create test user if no session exists
-        if (!session && process.env.NODE_ENV === 'development') {
+        if (isDevelopment) {
           const testUser = {
             id: 'test-user-123',
             email: 'test@example.com',
@@ -35,31 +32,21 @@ export const AuthProvider = ({ children }) => {
           console.log('Development mode: Using test user');
           setSession(testSession);
           setUser(testUser);
-        } else if (session?.user) {
+          setLoading(false);
+          return;
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Initial session:', session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Also try to get user if session exists
+        if (session?.user) {
           console.log('User found in session:', session.user);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
-        
-        // Development fallback
-        if (process.env.NODE_ENV === 'development') {
-          const testUser = {
-            id: 'test-user-123',
-            email: 'test@example.com',
-            user_metadata: { 
-              name: 'Test User',
-              avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-            }
-          };
-          const testSession = {
-            user: testUser,
-            access_token: 'test-token',
-            expires_at: Date.now() + 3600000
-          };
-          console.log('Development fallback: Using test user');
-          setSession(testSession);
-          setUser(testUser);
-        }
       } finally {
         setLoading(false);
       }
