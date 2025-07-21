@@ -366,7 +366,7 @@ export const mockPortfolios = [
     // Marketplace data
     seller: {
       name: "CryptoKing",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
+      avatar: "https://ui-avatars.com/api/?name=CryptoKing&size=150&background=FF9800&color=ffffff",
       socialLinks: {
         telegram: "https://t.me/cryptoking",
         twitter: "https://x.com/cryptoking"
