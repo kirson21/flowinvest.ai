@@ -289,7 +289,7 @@ export const mockPortfolios = [
     // Marketplace data
     seller: {
       name: "Michael Rodriguez",
-      avatar: "/api/placeholder/150/150", // Using placeholder instead of external URL
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
       bio: "Tech investment specialist and former Silicon Valley startup founder. Expert in emerging technologies, growth stocks, and high-risk/high-reward strategies. 10+ years in venture capital and tech investments.",
       experience: "10+ years",
       specialties: ["Tech Stocks", "Growth Investing", "Venture Capital", "Startup Analysis"],
@@ -310,7 +310,7 @@ export const mockPortfolios = [
         {
           id: 1,
           userName: "Emma T.",
-          userAvatar: "👤", // Using emoji instead of external URL
+          userAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
           rating: 5,
           comment: "Amazing returns! Michael really understands tech trends. Perfect for aggressive growth seekers.",
           date: "2024-01-14",
@@ -319,7 +319,7 @@ export const mockPortfolios = [
         {
           id: 2,
           userName: "James P.",
-          userAvatar: "👤", // Using emoji instead of external URL
+          userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
           rating: 4,
           comment: "High volatility but impressive long-term results. Great for risk-tolerant investors.",
           date: "2024-01-09",
@@ -328,7 +328,7 @@ export const mockPortfolios = [
         {
           id: 3,
           userName: "Ashley W.",
-          userAvatar: "👤", // Using emoji instead of external URL
+          userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
           rating: 5,
           comment: "Fantastic insights on emerging tech companies. Made substantial profits following his strategies!",
           date: "2024-01-03",
