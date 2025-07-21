@@ -664,7 +664,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeAttachment(attachment.id)}
+                        onClick={() => removeAttachment(attachment)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <Trash2 size={16} />
