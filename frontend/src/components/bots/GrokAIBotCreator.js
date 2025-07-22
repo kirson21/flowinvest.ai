@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Loader2, Brain, TrendingUp, Shield, Zap, CheckCircle, Trash2 } from 'lucide-react';
 
-const GrokAIBotCreator = ({ onClose, onSave, editingBot }) => {
+const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   const { user } = useAuth();
   const [prompt, setPrompt] = useState(editingBot?.description || '');
   const [isLoading, setIsLoading] = useState(false);
