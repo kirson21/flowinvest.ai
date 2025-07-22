@@ -282,6 +282,24 @@ export const mockPortfolios = [
           comment: "Exactly what I needed for retirement planning. Great steady returns and excellent customer service.",
           date: "2024-01-05",
           verified: true
+        },
+        {
+          id: 3,
+          userName: "Tom R.",
+          userAvatar: "https://ui-avatars.com/api/?name=Tom+R&size=50&background=607D8B&color=ffffff",
+          rating: 5,
+          comment: "Sarah's conservative approach is perfect for my retirement portfolio. Steady growth with minimal risk. Excellent communication throughout.",
+          date: "2023-12-30",
+          verified: true
+        },
+        {
+          id: 4,
+          userName: "Anna P.",
+          userAvatar: "https://ui-avatars.com/api/?name=Anna+P&size=50&background=795548&color=ffffff",
+          rating: 4,
+          comment: "Great for income generation as advertised. The dividend strategy has been working well for my needs.",
+          date: "2023-12-20",
+          verified: false
         }
       ]
     },
