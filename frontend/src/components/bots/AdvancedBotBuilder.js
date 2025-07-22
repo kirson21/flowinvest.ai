@@ -29,7 +29,7 @@ import {
 import { tradingPairs, pairCategories, getTopPairs, searchPairs } from '../../data/tradingPairs';
 import TradingPairSelector from './TradingPairSelector';
 
-const AdvancedBotBuilder = ({ onClose, onSave, editingBot }) => {
+const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
   const { t } = useApp();
   const [activeTab, setActiveTab] = useState('basic');
   const [showAdvanced, setShowAdvanced] = useState(false);
