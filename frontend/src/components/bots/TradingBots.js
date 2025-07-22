@@ -550,19 +550,35 @@ const TradingBots = () => {
               trading_pair: botData.tradingPair || 'BTC/USDT',
               risk_level: botData.riskLevel || 'medium',
               config: botData,
-              type: 'advanced'
+              type: 'advanced',
+              id: editingBot?.id // Use existing ID if editing
             });
             
             if (success) {
-              alert('✅ Bot created successfully!');
+              alert(`✅ Bot ${editingBot ? 'updated' : 'created'} successfully!`);
               setShowAdvancedBuilder(false);
               setEditingBot(null); // Clear editing state
             } else {
-              alert('❌ Failed to create bot. Please try again.');
+              alert(`❌ Failed to ${editingBot ? 'update' : 'create'} bot. Please try again.`);
             }
           } catch (error) {
             console.error('Error in onSave callback:', error);
-            alert('Error creating bot: ' + error.message);
+            alert(`Error ${editingBot ? 'updating' : 'creating'} bot: ` + error.message);
+          }
+        }}
+        onDelete={async (botId) => {
+          try {
+            const success = await handleDeleteBot(botId);
+            if (success) {
+              alert('✅ Bot deleted successfully!');
+              setShowAdvancedBuilder(false);
+              setEditingBot(null);
+            } else {
+              alert('❌ Failed to delete bot. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error deleting bot:', error);
+            alert('Error deleting bot: ' + error.message);
           }
         }}
         editingBot={editingBot} // Pass the bot being edited
