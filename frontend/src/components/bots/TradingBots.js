@@ -519,14 +519,11 @@ const TradingBots = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
-                onClick={() => {
-                  setSelectedManageBot(bot);
-                  setManageBotType('user');
-                }}
+                className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                onClick={() => handleEditBot(bot)}
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
               </Button>
             </div>
           )}
