@@ -535,7 +535,10 @@ const TradingBots = () => {
   if (showAdvancedBuilder) {
     return (
       <AdvancedBotBuilder 
-        onClose={() => setShowAdvancedBuilder(false)}
+        onClose={() => {
+          setShowAdvancedBuilder(false);
+          setEditingBot(null); // Clear editing state
+        }}
         onSave={async (botData) => {
           try {
             const success = await saveBot({
@@ -553,6 +556,7 @@ const TradingBots = () => {
             if (success) {
               alert('✅ Bot created successfully!');
               setShowAdvancedBuilder(false);
+              setEditingBot(null); // Clear editing state
             } else {
               alert('❌ Failed to create bot. Please try again.');
             }
@@ -561,6 +565,7 @@ const TradingBots = () => {
             alert('Error creating bot: ' + error.message);
           }
         }}
+        editingBot={editingBot} // Pass the bot being edited
       />
     );
   }
