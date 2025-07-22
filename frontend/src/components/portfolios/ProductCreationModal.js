@@ -391,7 +391,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-4xl my-2 sm:my-0 max-h-none sm:max-h-[90vh] overflow-visible sm:overflow-y-auto">
+      <Card className="w-full max-w-4xl my-2 sm:my-0 max-h-none sm:max-h-[85vh] lg:max-h-[90vh] overflow-visible sm:overflow-y-auto mb-16 sm:mb-0">
         <CardHeader className="border-b">
           <div className="flex items-center justify-between">
             <div>
