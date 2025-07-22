@@ -189,6 +189,33 @@ export const mockPortfolios = [
           comment: "Solid performance and good risk management. Would like to see more frequent updates but overall satisfied.",
           date: "2024-01-08",
           verified: false
+        },
+        {
+          id: 4,
+          userName: "Maria S.",
+          userAvatar: "https://ui-avatars.com/api/?name=Maria+S&size=50&background=E91E63&color=ffffff",
+          rating: 5,
+          comment: "Outstanding results! Alex's deep market knowledge and strategic approach have exceeded my expectations. The portfolio allocation is perfectly balanced.",
+          date: "2024-01-03",
+          verified: true
+        },
+        {
+          id: 5,
+          userName: "James W.",
+          userAvatar: "https://ui-avatars.com/api/?name=James+W&size=50&background=3F51B5&color=ffffff",
+          rating: 5,
+          comment: "Professional service from start to finish. Great communication and transparent reporting. Highly recommend for long-term growth strategies.",
+          date: "2023-12-28",
+          verified: true
+        },
+        {
+          id: 6,
+          userName: "Sophie L.",
+          userAvatar: "https://ui-avatars.com/api/?name=Sophie+L&size=50&background=9C27B0&color=ffffff",
+          rating: 4,
+          comment: "Very knowledgeable advisor with proven track record. The investment approach is conservative but effective for my goals.",
+          date: "2023-12-22",
+          verified: true
         }
       ]
     },
