@@ -358,17 +358,24 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-            <Button 
-              className="w-full sm:flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
-              onClick={() => {
-                // TODO: Implement contact seller functionality
-                alert('Contact seller functionality coming soon!');
-              }}
-            >
-              <MessageCircle size={16} className="mr-2" />
-              Contact Seller
-            </Button>
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t pb-6 sm:pb-8">
+            {hasPurchasedFromSeller() ? (
+              <Button 
+                className="w-full sm:flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
+                onClick={() => setIsReviewModalOpen(true)}
+              >
+                <Edit3 size={16} className="mr-2" />
+                Leave a Review
+              </Button>
+            ) : (
+              <Button 
+                className="w-full sm:flex-1 bg-gray-400 cursor-not-allowed"
+                disabled
+              >
+                <Edit3 size={16} className="mr-2" />
+                Purchase to Review
+              </Button>
+            )}
             <Button 
               variant="outline"
               className="w-full sm:flex-1 border-[#0097B2]/20 hover:bg-[#0097B2]/5"
@@ -384,6 +391,117 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
         </CardContent>
       </Card>
     </div>
+
+    {/* Review Modal */}
+    {isReviewModalOpen && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800 max-h-[90vh] overflow-y-auto">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl text-[#474545] dark:text-white">
+                Leave a Review for {seller.name}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsReviewModalOpen(false);
+                  setReviewData({ rating: 5, comment: '' });
+                  setReviewErrors({});
+                }}
+                className="p-2"
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-6 pb-6">
+            {/* Star Rating */}
+            <div>
+              <label className="block text-sm font-medium text-[#474545] dark:text-white mb-3">
+                Rate this seller
+              </label>
+              <div className="flex items-center space-x-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewData(prev => ({ ...prev, rating: star }))}
+                    className="p-1 hover:scale-110 transition-transform"
+                  >
+                    <Star 
+                      className={`w-8 h-8 ${
+                        star <= reviewData.rating 
+                          ? 'fill-yellow-400 text-yellow-400' 
+                          : 'text-gray-300'
+                      }`} 
+                    />
+                  </button>
+                ))}
+                <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                  {reviewData.rating} star{reviewData.rating !== 1 ? 's' : ''}
+                </span>
+              </div>
+              {reviewErrors.rating && (
+                <div className="flex items-center space-x-2 mt-2 text-red-500 text-sm">
+                  <AlertCircle size={16} />
+                  <span>{reviewErrors.rating}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Review Comment */}
+            <div>
+              <label className="block text-sm font-medium text-[#474545] dark:text-white mb-2">
+                Your Review
+              </label>
+              <Textarea
+                placeholder="Share your experience with this seller..."
+                value={reviewData.comment}
+                onChange={(e) => setReviewData(prev => ({ ...prev, comment: e.target.value }))}
+                maxLength={300}
+                rows={4}
+                className="w-full border-gray-300 dark:border-gray-600 focus:border-[#0097B2] focus:ring-[#0097B2]"
+              />
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm text-gray-500">
+                  {reviewData.comment.length}/300 characters
+                </span>
+                {reviewErrors.comment && (
+                  <div className="flex items-center space-x-1 text-red-500 text-sm">
+                    <AlertCircle size={14} />
+                    <span>{reviewErrors.comment}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button
+                onClick={handleSubmitReview}
+                className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
+                disabled={!reviewData.comment.trim()}
+              >
+                Submit Review
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsReviewModalOpen(false);
+                  setReviewData({ rating: 5, comment: '' });
+                  setReviewErrors({});
+                }}
+                className="flex-1 border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
   );
 };
 
