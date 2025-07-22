@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
 import { 
   X,
@@ -18,7 +21,11 @@ import {
   Twitter,
   Youtube,
   Globe,
-  Linkedin
+  Linkedin,
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  AlertCircle
 } from 'lucide-react';
 
 const SellerProfileModal = ({ seller, isOpen, onClose }) => {
