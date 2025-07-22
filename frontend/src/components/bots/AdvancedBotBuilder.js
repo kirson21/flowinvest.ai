@@ -28,11 +28,83 @@ import {
 import { tradingPairs, pairCategories, getTopPairs, searchPairs } from '../../data/tradingPairs';
 import TradingPairSelector from './TradingPairSelector';
 
-const AdvancedBotBuilder = ({ onClose, onSave }) => {
+const AdvancedBotBuilder = ({ onClose, onSave, editingBot }) => {
   const { t } = useApp();
   const [activeTab, setActiveTab] = useState('basic');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [availableTests, setAvailableTests] = useState(10);
+  
+  // Initialize form data - use editingBot if available
+  const initializeFormData = () => {
+    if (editingBot) {
+      return {
+        // Basic settings
+        name: editingBot.name || '',
+        strategy: editingBot.strategy || 'DCA',
+        riskLevel: editingBot.riskLevel || 'medium',
+        
+        // Pair settings
+        selectedPair: editingBot.pair || editingBot.trading_pair || '',
+        
+        // Deposit settings
+        baseOrderSize: editingBot.baseOrderSize || 10,
+        safetyOrderSize: editingBot.safetyOrderSize || 20,
+        
+        // Entry settings - from config if available
+        overlappingPriceChanges: editingBot.config?.overlappingPriceChanges || 1.5,
+        gridOfOrders: editingBot.config?.gridOfOrders || 5,
+        martingalePercentage: editingBot.config?.martingalePercentage || 1.2,
+        indent: editingBot.config?.indent || 2.5,
+        logarithmicDistribution: editingBot.config?.logarithmicDistribution || false,
+        pullingUpOrderGrid: editingBot.config?.pullingUpOrderGrid || false,
+        stopBotAfterDeals: editingBot.config?.stopBotAfterDeals || 0,
+        tradeEntryConditions: editingBot.config?.tradeEntryConditions || [],
+        
+        // Exit settings
+        profit: editingBot.config?.profit || 3.0,
+        profitCurrency: editingBot.config?.profitCurrency || 'percentage',
+        stopLoss: editingBot.config?.stopLoss || 0,
+        stopLossBySignal: editingBot.config?.stopLossBySignal || false,
+        minIndent: editingBot.config?.minIndent || 1.0,
+        indentType: editingBot.config?.indentType || 'percentage',
+        stopBotAfterStopLoss: editingBot.config?.stopBotAfterStopLoss || false
+      };
+    }
+    
+    // Default values for new bot
+    return {
+      // Basic settings
+      name: '',
+      strategy: 'DCA',
+      riskLevel: 'medium',
+      
+      // Pair settings
+      selectedPair: '',
+      
+      // Deposit settings
+      baseOrderSize: 10,
+      safetyOrderSize: 20,
+      
+      // Entry settings
+      overlappingPriceChanges: 1.5,
+      gridOfOrders: 5,
+      martingalePercentage: 1.2,
+      indent: 2.5,
+      logarithmicDistribution: false,
+      pullingUpOrderGrid: false,
+      stopBotAfterDeals: 0,
+      tradeEntryConditions: [],
+      
+      // Exit settings
+      profit: 3.0,
+      profitCurrency: 'percentage',
+      stopLoss: 0,
+      stopLossBySignal: false,
+      minIndent: 1.0,
+      indentType: 'percentage',
+      stopBotAfterStopLoss: false
+    };
+  };
   
   // Step management
   const steps = ['basic', 'pair', 'deposit', 'entry', 'exit', 'test'];
