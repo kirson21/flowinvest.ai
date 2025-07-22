@@ -607,8 +607,26 @@ const TradingBots = () => {
           });
           
           if (success) {
+            alert(`✅ Bot ${editingBot ? 'updated' : 'created'} successfully!`);
             setShowAICreator(false);
             setEditingBot(null); // Clear editing state
+          } else {
+            alert(`❌ Failed to ${editingBot ? 'update' : 'create'} bot. Please try again.`);
+          }
+        }}
+        onDelete={async (botId) => {
+          try {
+            const success = await handleDeleteBot(botId);
+            if (success) {
+              alert('✅ Bot deleted successfully!');
+              setShowAICreator(false);
+              setEditingBot(null);
+            } else {
+              alert('❌ Failed to delete bot. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error deleting bot:', error);
+            alert('Error deleting bot: ' + error.message);
           }
         }}
         editingBot={editingBot} // Pass the bot being edited
