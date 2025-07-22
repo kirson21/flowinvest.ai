@@ -20,7 +20,8 @@ import {
   Settings,
   Loader2,
   Trash2,
-  Cog
+  Cog,
+  Edit
 } from 'lucide-react';
 import { mockTradingBots } from '../../data/mockData';
 import AdvancedBotBuilder from './AdvancedBotBuilder';
