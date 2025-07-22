@@ -169,9 +169,10 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-4xl my-2 sm:my-0 max-h-none sm:max-h-[90vh] overflow-visible sm:overflow-y-auto">
-        <CardHeader className="pb-3 sm:pb-6 border-b">
+    <>
+      <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+        <Card className="w-full max-w-4xl my-2 sm:my-0 max-h-none sm:max-h-[90vh] overflow-visible sm:overflow-y-auto">
+          <CardHeader className="pb-3 sm:pb-6 border-b">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
               <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
