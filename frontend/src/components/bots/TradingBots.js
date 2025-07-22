@@ -586,7 +586,8 @@ const TradingBots = () => {
             trading_pair: `${botData.base_coin || 'BTC'}/${botData.quote_coin || 'USDT'}`,
             risk_level: botData.risk_level || 'medium',
             config: botData,
-            type: 'ai_generated'
+            type: 'ai_generated',
+            id: editingBot?.id // Use existing ID if editing
           });
           
           if (success) {
