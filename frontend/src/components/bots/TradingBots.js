@@ -177,6 +177,22 @@ const TradingBots = () => {
     }
   };
 
+  const handleEditBot = (bot) => {
+    console.log('Editing bot:', bot);
+    setEditingBot(bot);
+    
+    // Determine bot creation method based on tags or properties
+    const isAIGenerated = bot.tags?.includes('ai_generated') || bot.creationMethod === 'ai';
+    
+    if (isAIGenerated) {
+      // Open AI Creator for editing
+      setShowAICreator(true);
+    } else {
+      // Open Advanced Bot Builder for editing
+      setShowAdvancedBuilder(true);
+    }
+  };
+
   const handleUpdateAPI = async (botId, apiData) => {
     try {
       const result = await database.updateBot(botId, { 
