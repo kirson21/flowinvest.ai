@@ -356,7 +356,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t pb-24 sm:pb-8">
               {hasPurchasedFromSeller() ? (
                 <Button 
                   className="w-full sm:flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
