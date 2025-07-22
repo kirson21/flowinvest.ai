@@ -678,7 +678,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t pb-24 sm:pb-8">
             <Button
               variant="outline"
               onClick={onClose}
