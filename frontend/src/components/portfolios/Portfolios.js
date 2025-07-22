@@ -208,9 +208,9 @@ const Portfolios = () => {
         </div>
       )}
       
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 pt-6">
         <div className="flex items-start justify-between mb-2">
-          <div className="flex-1">
+          <div className="flex-1 pr-2">
             {/* Product Title - Prominently displayed */}
             <CardTitle className="text-xl font-bold text-[#474545] dark:text-white mb-2 leading-tight">
               {portfolio.title || portfolio.name}
