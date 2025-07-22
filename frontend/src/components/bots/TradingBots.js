@@ -38,6 +38,7 @@ const TradingBots = () => {
   const [loadingBots, setLoadingBots] = useState(true);
   const [showAdvancedBuilder, setShowAdvancedBuilder] = useState(false);
   const [showAICreator, setShowAICreator] = useState(false);
+  const [editingBot, setEditingBot] = useState(null); // Bot being edited
   const [selectedRunBot, setSelectedRunBot] = useState(null);
   const [selectedDetailsBot, setSelectedDetailsBot] = useState(null);
   const [selectedManageBot, setSelectedManageBot] = useState(null);
