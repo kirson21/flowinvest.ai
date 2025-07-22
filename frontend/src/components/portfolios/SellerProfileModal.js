@@ -29,7 +29,89 @@ import {
 } from 'lucide-react';
 
 const SellerProfileModal = ({ seller, isOpen, onClose }) => {
+  const { user } = useAuth();
+  
+  // Pagination state for reviews
+  const [currentReviewPage, setCurrentReviewPage] = useState(0);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewData, setReviewData] = useState({
+    rating: 5,
+    comment: ''
+  });
+  const [reviewErrors, setReviewErrors] = useState({});
+  
+  const REVIEWS_PER_PAGE = 3;
+  
   if (!isOpen || !seller) return null;
+
+  // Check if user has purchased from this seller (mock logic for now)
+  const hasPurchasedFromSeller = () => {
+    // In a real app, this would check the user's purchase history
+    // For now, return true if user is authenticated
+    return !!user;
+  };
+
+  const totalReviews = seller.reviews?.length || 0;
+  const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE);
+  const startIndex = currentReviewPage * REVIEWS_PER_PAGE;
+  const currentReviews = seller.reviews?.slice(startIndex, startIndex + REVIEWS_PER_PAGE) || [];
+
+  const handleNextPage = () => {
+    if (currentReviewPage < totalPages - 1) {
+      setCurrentReviewPage(currentReviewPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentReviewPage > 0) {
+      setCurrentReviewPage(currentReviewPage - 1);
+    }
+  };
+
+  const validateReview = () => {
+    const errors = {};
+    
+    if (!reviewData.comment.trim()) {
+      errors.comment = 'Review comment is required';
+    } else if (reviewData.comment.length > 300) {
+      errors.comment = 'Review must be 300 characters or less';
+    }
+    
+    if (reviewData.rating < 1 || reviewData.rating > 5) {
+      errors.rating = 'Rating must be between 1 and 5 stars';
+    }
+    
+    setReviewErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmitReview = () => {
+    if (!validateReview()) return;
+    
+    // Mock review submission (in real app, this would call an API)
+    const newReview = {
+      id: Date.now(),
+      userName: user?.user_metadata?.name || user?.email || 'Anonymous',
+      userAvatar: user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user?.email}&size=50&background=0097B2&color=ffffff`,
+      rating: reviewData.rating,
+      comment: reviewData.comment,
+      date: new Date().toISOString(),
+      verified: true
+    };
+    
+    // Add to localStorage for demo (in real app, send to backend)
+    const reviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+    if (!reviews[seller.name]) reviews[seller.name] = [];
+    reviews[seller.name].unshift(newReview);
+    localStorage.setItem('seller_reviews', JSON.stringify(reviews));
+    
+    // Reset form and close modal
+    setReviewData({ rating: 5, comment: '' });
+    setReviewErrors({});
+    setIsReviewModalOpen(false);
+    
+    alert('Review submitted successfully! (In production, this would update the seller\'s reviews)');
+  };
 
   const renderStars = (rating) => {
     const stars = [];
