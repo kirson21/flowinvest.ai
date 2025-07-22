@@ -23,7 +23,8 @@ import {
   Zap,
   Target,
   DollarSign,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import { tradingPairs, pairCategories, getTopPairs, searchPairs } from '../../data/tradingPairs';
 import TradingPairSelector from './TradingPairSelector';
