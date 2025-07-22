@@ -367,7 +367,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t pb-24 sm:pb-8">
               <Button
                 variant="outline"
                 onClick={() => setStep('create')}
