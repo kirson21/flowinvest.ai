@@ -374,7 +374,27 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot }) => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 pb-6 sm:pb-8 border-t">
+                {/* Delete Button - Only show when editing */}
+                {editingBot && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete this bot? This action cannot be undone.')) {
+                        // Call delete functionality - we'll need this passed via props from parent
+                        if (onDelete) {
+                          onDelete(editingBot.id);
+                        }
+                      }
+                    }}
+                    className="w-full sm:w-auto border-red-200 text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 size={16} className="mr-2" />
+                    Delete Bot
+                  </Button>
+                )}
+
+                {/* Back to Edit Button */}
                 <Button
                   variant="outline"
                   onClick={() => setStep('input')}
@@ -382,11 +402,13 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot }) => {
                 >
                   ← Back to Edit
                 </Button>
+
+                {/* Save/Update Button */}
                 <Button
                   onClick={handleSaveBot}
                   className="w-full sm:flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 order-1 sm:order-2"
                 >
-                  Save Bot
+                  {editingBot ? 'Update Bot' : 'Save Bot'}
                 </Button>
               </div>
             </div>
