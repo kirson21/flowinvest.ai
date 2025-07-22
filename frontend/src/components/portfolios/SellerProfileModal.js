@@ -262,42 +262,17 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Reviews Section with Pagination */}
+            {/* Reviews Section - Airbnb Style */}
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-[#474545] dark:text-white">
-                  Recent Reviews ({totalReviews})
+                  Reviews ({totalReviews})
                 </h3>
-                {totalPages > 1 && (
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handlePrevPage}
-                      disabled={currentReviewPage === 0}
-                      className="p-2"
-                    >
-                      <ChevronLeft size={16} />
-                    </Button>
-                    <span className="text-sm text-gray-600 dark:text-gray-400 px-2">
-                      {currentReviewPage + 1} of {totalPages}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleNextPage}
-                      disabled={currentReviewPage >= totalPages - 1}
-                      className="p-2"
-                    >
-                      <ChevronRight size={16} />
-                    </Button>
-                  </div>
-                )}
               </div>
               
               <div className="space-y-4 min-h-[200px]">
-                {currentReviews.length > 0 ? (
-                  currentReviews.map((review) => (
+                {displayedReviews.length > 0 ? (
+                  displayedReviews.map((review) => (
                     <Card key={review.id} className="p-4 border-gray-200 dark:border-gray-700">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
@@ -338,6 +313,32 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
                   </div>
                 )}
               </div>
+
+              {/* Show All Reviews Button - Airbnb Style */}
+              {hasMoreReviews && !showAllReviews && (
+                <div className="mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAllReviews(true)}
+                    className="w-full sm:w-auto border-2 border-[#0097B2] text-[#0097B2] hover:bg-[#0097B2]/5 font-semibold py-3 px-6 rounded-lg"
+                  >
+                    Show all {totalReviews} reviews
+                  </Button>
+                </div>
+              )}
+
+              {/* Show Less Button */}
+              {showAllReviews && hasMoreReviews && (
+                <div className="mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAllReviews(false)}
+                    className="w-full sm:w-auto border-2 border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg"
+                  >
+                    Show less
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
