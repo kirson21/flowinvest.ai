@@ -7,13 +7,13 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Loader2, Brain, TrendingUp, Shield, Zap, CheckCircle } from 'lucide-react';
 
-const GrokAIBotCreator = ({ onClose, onSave }) => {
+const GrokAIBotCreator = ({ onClose, onSave, editingBot }) => {
   const { user } = useAuth();
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState(editingBot?.description || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [generatedBot, setGeneratedBot] = useState(null);
-  const [step, setStep] = useState('input'); // 'input', 'preview', 'saved'
+  const [generatedBot, setGeneratedBot] = useState(editingBot || null);
+  const [step, setStep] = useState(editingBot ? 'preview' : 'input'); // Start in preview if editing
 
   const suggestedPrompts = [
     "Create a conservative Bitcoin bot that buys during dips and sells at modest profits",
