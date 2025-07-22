@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Textarea } from '../ui/textarea';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
-import { Loader2, Brain, TrendingUp, Shield, Zap, CheckCircle } from 'lucide-react';
+import { Loader2, Brain, TrendingUp, Shield, Zap, CheckCircle, Trash2 } from 'lucide-react';
 
 const GrokAIBotCreator = ({ onClose, onSave, editingBot }) => {
   const { user } = useAuth();
