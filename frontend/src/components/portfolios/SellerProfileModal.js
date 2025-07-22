@@ -31,16 +31,14 @@ import {
 const SellerProfileModal = ({ seller, isOpen, onClose }) => {
   const { user } = useAuth();
   
-  // Pagination state for reviews
-  const [currentReviewPage, setCurrentReviewPage] = useState(0);
+  // Review display state (Airbnb style)
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewData, setReviewData] = useState({
     rating: 5,
     comment: ''
   });
   const [reviewErrors, setReviewErrors] = useState({});
-  
-  const REVIEWS_PER_PAGE = 3;
   
   if (!isOpen || !seller) return null;
 
@@ -52,21 +50,8 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
   };
 
   const totalReviews = seller.reviews?.length || 0;
-  const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE);
-  const startIndex = currentReviewPage * REVIEWS_PER_PAGE;
-  const currentReviews = seller.reviews?.slice(startIndex, startIndex + REVIEWS_PER_PAGE) || [];
-
-  const handleNextPage = () => {
-    if (currentReviewPage < totalPages - 1) {
-      setCurrentReviewPage(currentReviewPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentReviewPage > 0) {
-      setCurrentReviewPage(currentReviewPage - 1);
-    }
-  };
+  const displayedReviews = showAllReviews ? seller.reviews : seller.reviews?.slice(0, 3) || [];
+  const hasMoreReviews = totalReviews > 3;
 
   const validateReview = () => {
     const errors = {};
