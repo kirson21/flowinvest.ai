@@ -1362,7 +1362,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
         </Tabs>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 sm:mt-8 pt-4 sm:pt-6 border-t gap-3 sm:gap-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 sm:mt-8 pt-4 sm:pt-6 border-t gap-3 sm:gap-0 pb-8 sm:pb-12 lg:pb-16">
           <div className="flex flex-wrap items-center gap-2 sm:space-x-4">
             <Button
               type="button"
