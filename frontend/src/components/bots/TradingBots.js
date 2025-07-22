@@ -573,7 +573,10 @@ const TradingBots = () => {
   if (showAICreator) {
     return (
       <GrokAIBotCreator 
-        onClose={() => setShowAICreator(false)}
+        onClose={() => {
+          setShowAICreator(false);
+          setEditingBot(null); // Clear editing state
+        }}
         onSave={async (botData) => {
           const success = await saveBot({
             name: botData.name || 'AI Generated Bot',
@@ -588,8 +591,10 @@ const TradingBots = () => {
           
           if (success) {
             setShowAICreator(false);
+            setEditingBot(null); // Clear editing state
           }
         }}
+        editingBot={editingBot} // Pass the bot being edited
       />
     );
   }
