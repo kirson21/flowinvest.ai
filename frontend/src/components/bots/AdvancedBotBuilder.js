@@ -1449,7 +1449,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot }) => {
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  console.log('Create Bot button clicked - Final step confirmed');
+                  console.log(`${editingBot ? 'Update' : 'Create'} Bot button clicked - Final step confirmed`);
                   
                   const botData = {
                     ...formData,
@@ -1457,21 +1457,22 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot }) => {
                     tradingPair: `${formData.baseCoin}/${formData.quoteCoin}`,
                     riskLevel: 'Medium',
                     strategy: formData.tradingMode || 'Simple',
-                    exchange: mockApiKeys.find(k => k.id === formData.apiKey)?.exchange || 'Binance'
+                    exchange: mockApiKeys.find(k => k.id === formData.apiKey)?.exchange || 'Binance',
+                    id: editingBot?.id // Include ID if editing
                   };
                   
                   try {
                     onSave(botData);
                   } catch (error) {
                     console.error('Error calling onSave:', error);
-                    alert('Error creating bot: ' + error.message);
+                    alert(`Error ${editingBot ? 'updating' : 'creating'} bot: ` + error.message);
                   }
                 }}
                 className="bg-[#0097B2] hover:bg-[#0097B2]/90 px-4 sm:px-8 w-full sm:w-auto text-sm sm:text-base"
                 size="default"
               >
                 <Bot size={16} className="mr-2" />
-                Create Bot
+                {editingBot ? 'Update Bot' : 'Create Bot'}
               </Button>
             )}
           </div>
