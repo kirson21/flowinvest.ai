@@ -281,45 +281,79 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
 
           {/* Reviews Section */}
           <div>
-            <h3 className="text-lg font-semibold text-[#474545] dark:text-white mb-4">
-              Recent Reviews ({seller.reviews?.length || 0})
-            </h3>
-            <div className="space-y-4">
-              {seller.reviews?.map((review) => (
-                <Card key={review.id} className="p-4 border-gray-200 dark:border-gray-700">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={review.userAvatar} alt={review.userName} />
-                        <AvatarFallback className="bg-gray-300 text-gray-700 text-xs">
-                          {review.userName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm font-medium text-[#474545] dark:text-white">
-                            {review.userName}
-                          </span>
-                          {review.verified && (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <div className="flex items-center">
-                            {renderStars(review.rating)}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-[#474545] dark:text-white">
+                Recent Reviews ({totalReviews})
+              </h3>
+              {totalPages > 1 && (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handlePrevPage}
+                    disabled={currentReviewPage === 0}
+                    className="p-2"
+                  >
+                    <ChevronLeft size={16} />
+                  </Button>
+                  <span className="text-sm text-gray-600 dark:text-gray-400 px-2">
+                    {currentReviewPage + 1} of {totalPages}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleNextPage}
+                    disabled={currentReviewPage >= totalPages - 1}
+                    className="p-2"
+                  >
+                    <ChevronRight size={16} />
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-4 min-h-[200px]">
+              {currentReviews.length > 0 ? (
+                currentReviews.map((review) => (
+                  <Card key={review.id} className="p-4 border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={review.userAvatar} alt={review.userName} />
+                          <AvatarFallback className="bg-gray-300 text-gray-700 text-xs">
+                            {review.userName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm font-medium text-[#474545] dark:text-white">
+                              {review.userName}
+                            </span>
+                            {review.verified && (
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                            )}
                           </div>
-                          <span className="text-xs text-gray-500">
-                            {formatDate(review.date)}
-                          </span>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <div className="flex items-center">
+                              {renderStars(review.rating)}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(review.date)}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {review.comment}
-                  </p>
-                </Card>
-              ))}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      {review.comment}
+                    </p>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No reviews yet. Be the first to leave a review!
+                </div>
+              )}
             </div>
           </div>
 
