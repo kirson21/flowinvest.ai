@@ -465,7 +465,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
   };
 
   return (
-    <div className="p-2 sm:p-4 pb-20 max-w-6xl mx-auto">
+    <div className="p-2 sm:p-4 pb-24 sm:pb-32 lg:pb-40 max-w-6xl mx-auto">
       <div className="flex items-center mb-4 sm:mb-6">
         <Button
           variant="ghost"
