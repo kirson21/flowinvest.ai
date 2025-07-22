@@ -475,7 +475,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
               </div>
 
               {/* Submit Button */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 pb-24 sm:pb-8">
                 <Button
                   onClick={handleSubmitReview}
                   className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
