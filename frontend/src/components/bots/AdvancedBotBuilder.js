@@ -165,43 +165,87 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot }) => {
     }
   };
   
-  const [formData, setFormData] = useState({
-    // Basic Settings
-    botName: '',
-    apiKey: '',
-    tradeType: 'LONG', // LONG or SHORT
-    baseCoin: 'BTC',
-    quoteCoin: 'USDT',
+  const [formData, setFormData] = useState(() => {
+    if (editingBot) {
+      return {
+        // Basic Settings
+        botName: editingBot.name || '',
+        apiKey: '',
+        tradeType: 'LONG', // LONG or SHORT
+        baseCoin: editingBot.pair?.split('/')[0] || editingBot.trading_pair?.split('/')[0] || 'BTC',
+        quoteCoin: editingBot.pair?.split('/')[1] || editingBot.trading_pair?.split('/')[1] || 'USDT',
+        
+        // Deposit
+        depositAmount: editingBot.baseOrderSize || '',
+        exchangeBalance: 1250.50, // Mock balance
+        
+        // Enter Trade Settings
+        tradingMode: editingBot.strategy || 'Simple',
+        overlappingPriceChanges: editingBot.config?.overlappingPriceChanges || 5.0,
+        gridOfOrders: editingBot.config?.gridOfOrders || 10,
+        martingale: editingBot.config?.martingalePercentage ? (editingBot.config.martingalePercentage * 100) : 100,
+        indent: editingBot.config?.indent || 1.0,
+        logarithmicDistribution: editingBot.config?.logarithmicDistribution || false,
+        logarithmicDistributionValue: editingBot.config?.logarithmicDistributionValue || 1.2,
+        pullingUpOrderGrid: editingBot.config?.pullingUpOrderGrid || 50.0,
+        stopBotAfterDeals: editingBot.config?.stopBotAfterDeals || false,
+        stopBotAfterDealsValue: editingBot.config?.stopBotAfterDealsValue || 1,
+        tradeEntryConditions: editingBot.config?.tradeEntryConditions || false,
+        entryConditions: editingBot.config?.entryConditions || [],
+        
+        // Exit Trade Settings
+        takeProfitMode: editingBot.config?.takeProfitMode || 'Simple',
+        profit: editingBot.config?.profit || 2.5,
+        profitCurrency: editingBot.config?.profitCurrency || 'COIN',
+        stopLoss: editingBot.config?.stopLoss || false,
+        stopLossValue: editingBot.config?.stopLossValue || -1.0,
+        stopLossBySignal: editingBot.config?.stopLossBySignal || false,
+        stopLossSignalConditions: editingBot.config?.stopLossSignalConditions || [],
+        minIndentPercent: editingBot.config?.minIndentPercent || '0.1%',
+        indentType: editingBot.config?.indentType || 'From last order',
+        stopBotAfterStopLoss: editingBot.config?.stopBotAfterStopLoss || false
+      };
+    }
     
-    // Deposit
-    depositAmount: '',
-    exchangeBalance: 1250.50, // Mock balance
-    
-    // Enter Trade Settings
-    tradingMode: 'Simple', // Simple, Own, Signal
-    overlappingPriceChanges: 5.0, // Range 0.5% to 99%
-    gridOfOrders: 10, // Range 2 to 60
-    martingale: 100, // Range 1% to 500%
-    indent: 1.0, // Range 0.01% to 10%
-    logarithmicDistribution: false,
-    logarithmicDistributionValue: 1.2, // Range 0.1 to 2.9
-    pullingUpOrderGrid: 50.0, // Range 0.1% to 200%
-    stopBotAfterDeals: false,
-    stopBotAfterDealsValue: 1, // Number of deals
-    tradeEntryConditions: false,
-    entryConditions: [], // Array of up to 5 conditions
-    
-    // Exit Trade Settings
-    takeProfitMode: 'Simple', // Simple, Own, Signal
-    profit: 2.5, // Range 0.2% to 1000%
-    profitCurrency: 'COIN', // COIN or USDT/USDC
-    stopLoss: false,
-    stopLossValue: -1.0, // Range -0.05% to -99%
-    stopLossBySignal: false,
-    stopLossSignalConditions: [], // Array of conditions similar to entry
-    minIndentPercent: '0.1%', // Dropdown with fixed options
-    indentType: 'From last order', // Dropdown (e.g., From last order)
-    stopBotAfterStopLoss: false
+    // Default values for new bot
+    return {
+      // Basic Settings
+      botName: '',
+      apiKey: '',
+      tradeType: 'LONG', // LONG or SHORT
+      baseCoin: 'BTC',
+      quoteCoin: 'USDT',
+      
+      // Deposit
+      depositAmount: '',
+      exchangeBalance: 1250.50, // Mock balance
+      
+      // Enter Trade Settings
+      tradingMode: 'Simple', // Simple, Own, Signal
+      overlappingPriceChanges: 5.0, // Range 0.5% to 99%
+      gridOfOrders: 10, // Range 2 to 60
+      martingale: 100, // Range 1% to 500%
+      indent: 1.0, // Range 0.01% to 10%
+      logarithmicDistribution: false,
+      logarithmicDistributionValue: 1.2, // Range 0.1 to 2.9
+      pullingUpOrderGrid: 50.0, // Range 0.1% to 200%
+      stopBotAfterDeals: false,
+      stopBotAfterDealsValue: 1, // Number of deals
+      tradeEntryConditions: false,
+      entryConditions: [], // Array of up to 5 conditions
+      
+      // Exit Trade Settings
+      takeProfitMode: 'Simple', // Simple, Own, Signal
+      profit: 2.5, // Range 0.2% to 1000%
+      profitCurrency: 'COIN', // COIN or USDT/USDC
+      stopLoss: false,
+      stopLossValue: -1.0, // Range -0.05% to -99%
+      stopLossBySignal: false,
+      stopLossSignalConditions: [], // Array of conditions similar to entry
+      minIndentPercent: '0.1%', // Dropdown with fixed options
+      indentType: 'From last order', // Dropdown (e.g., From last order)
+      stopBotAfterStopLoss: false
+    };
   });
   
   const [errors, setErrors] = useState({});
