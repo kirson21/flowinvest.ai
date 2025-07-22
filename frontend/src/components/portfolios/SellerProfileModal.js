@@ -22,8 +22,6 @@ import {
   Youtube,
   Globe,
   Linkedin,
-  ChevronLeft,
-  ChevronRight,
   Edit3,
   AlertCircle
 } from 'lucide-react';
