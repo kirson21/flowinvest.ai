@@ -502,7 +502,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
           </CardContent>
         </Card>
       </div>
-    )}
+    </>
   );
 };
 
