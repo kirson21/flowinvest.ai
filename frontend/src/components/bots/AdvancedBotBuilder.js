@@ -490,7 +490,8 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
             {steps.map((step, index) => {
               const isCompleted = index < getCurrentStepIndex();
               const isCurrent = step === activeTab;
-              const isAccessible = index <= getCurrentStepIndex();
+              // In edit mode, make all steps accessible. In create mode, use sequential access
+              const isAccessible = editingBot ? true : index <= getCurrentStepIndex();
               
               return (
                 <TabsTrigger 
@@ -501,7 +502,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                     isCompleted ? 'text-green-600' : isCurrent ? 'text-[#0097B2]' : ''
                   }`}
                   onClick={(e) => {
-                    // Only allow clicking on accessible steps
+                    // In edit mode, allow clicking on any step. In create mode, only accessible steps
                     if (!isAccessible) {
                       e.preventDefault();
                       return;
@@ -510,7 +511,8 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                   }}
                 >
                   <div className="flex items-center space-x-2">
-                    {isCompleted && <div className="w-2 h-2 bg-green-600 rounded-full" />}
+                    {/* In edit mode, show all steps as accessible/completed */}
+                    {(isCompleted || editingBot) && <div className="w-2 h-2 bg-green-600 rounded-full" />}
                     <span>{stepLabels[step]}</span>
                   </div>
                 </TabsTrigger>
