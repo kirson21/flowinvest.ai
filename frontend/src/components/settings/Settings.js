@@ -178,6 +178,62 @@ const Settings = () => {
     }
   };
 
+  // Seller Mode Functions
+  const toggleSellerMode = () => {
+    const newSellerMode = !isSellerMode;
+    setIsSellerMode(newSellerMode);
+    localStorage.setItem(`seller_mode_${user?.id}`, newSellerMode.toString());
+    
+    if (newSellerMode) {
+      setMessage('Seller mode enabled! You can now add social links and specialties.');
+    } else {
+      setMessage('Seller mode disabled.');
+    }
+    
+    setTimeout(() => setMessage(''), 3000);
+  };
+
+  const handleSocialLinkChange = (platform, value) => {
+    setSellerData(prev => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [platform]: value
+      }
+    }));
+  };
+
+  const addSpecialty = () => {
+    if (sellerData.newSpecialty.trim() && !sellerData.specialties.includes(sellerData.newSpecialty.trim())) {
+      setSellerData(prev => ({
+        ...prev,
+        specialties: [...prev.specialties, prev.newSpecialty.trim()],
+        newSpecialty: ''
+      }));
+    }
+  };
+
+  const removeSpecialty = (index) => {
+    setSellerData(prev => ({
+      ...prev,
+      specialties: prev.specialties.filter((_, i) => i !== index)
+    }));
+  };
+
+  const saveSellerData = () => {
+    try {
+      localStorage.setItem(`seller_data_${user?.id}`, JSON.stringify({
+        socialLinks: sellerData.socialLinks,
+        specialties: sellerData.specialties
+      }));
+      setMessage('Seller profile updated successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error saving seller data:', error);
+      setError('Failed to save seller data');
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE MY ACCOUNT') {
       setError('Please type "DELETE MY ACCOUNT" to confirm');
