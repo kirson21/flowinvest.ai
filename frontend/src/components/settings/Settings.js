@@ -83,6 +83,7 @@ const Settings = () => {
   useEffect(() => {
     if (user) {
       loadUserProfile();
+      loadSellerData();
     }
   }, [user]);
 
@@ -111,6 +112,29 @@ const Settings = () => {
     } catch (error) {
       console.error('Error loading user profile:', error);
       setError('Failed to load profile');
+    }
+  };
+
+  const loadSellerData = () => {
+    try {
+      // Load seller data from localStorage
+      const savedSellerMode = localStorage.getItem(`seller_mode_${user?.id}`) === 'true';
+      const savedSellerData = JSON.parse(localStorage.getItem(`seller_data_${user?.id}`) || '{}');
+      
+      setIsSellerMode(savedSellerMode);
+      setSellerData({
+        socialLinks: {
+          instagram: savedSellerData.socialLinks?.instagram || '',
+          twitter: savedSellerData.socialLinks?.twitter || '',
+          linkedin: savedSellerData.socialLinks?.linkedin || '',
+          youtube: savedSellerData.socialLinks?.youtube || '',
+          website: savedSellerData.socialLinks?.website || ''
+        },
+        specialties: savedSellerData.specialties || [],
+        newSpecialty: ''
+      });
+    } catch (error) {
+      console.error('Error loading seller data:', error);
     }
   };
 
