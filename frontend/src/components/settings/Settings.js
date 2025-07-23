@@ -463,6 +463,174 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Seller Mode Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-[#474545] dark:text-white flex items-center">
+            <Store className="w-5 h-5 mr-2 text-[#0097B2]" />
+            Seller Mode
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Seller Mode Toggle */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <ShoppingBag className="text-[#0097B2]" size={20} />
+              <div>
+                <span className="text-[#474545] dark:text-white font-medium">Enable Seller Mode</span>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Create and sell investment products on the marketplace
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isSellerMode}
+              onCheckedChange={toggleSellerMode}
+              className="data-[state=checked]:bg-[#0097B2]"
+            />
+          </div>
+
+          {/* Seller Profile Fields - Only show when seller mode is enabled */}
+          {isSellerMode && (
+            <>
+              <Separator />
+              
+              {/* Social Media Links */}
+              <div className="space-y-4">
+                <h3 className="text-[#474545] dark:text-white font-medium flex items-center">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Social Media & Links
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="flex items-center text-sm">
+                      <Instagram className="w-4 h-4 mr-2" />
+                      Instagram
+                    </Label>
+                    <Input
+                      placeholder="https://instagram.com/yourusername"
+                      value={sellerData.socialLinks.instagram}
+                      onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center text-sm">
+                      <Twitter className="w-4 h-4 mr-2" />
+                      Twitter
+                    </Label>
+                    <Input
+                      placeholder="https://twitter.com/yourusername"
+                      value={sellerData.socialLinks.twitter}
+                      onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center text-sm">
+                      <Linkedin className="w-4 h-4 mr-2" />
+                      LinkedIn
+                    </Label>
+                    <Input
+                      placeholder="https://linkedin.com/in/yourusername"
+                      value={sellerData.socialLinks.linkedin}
+                      onChange={(e) => handleSocialLinkChange('linkedin', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center text-sm">
+                      <Youtube className="w-4 h-4 mr-2" />
+                      YouTube
+                    </Label>
+                    <Input
+                      placeholder="https://youtube.com/@yourusername"
+                      value={sellerData.socialLinks.youtube}
+                      onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label className="flex items-center text-sm">
+                      <Globe className="w-4 h-4 mr-2" />
+                      Website
+                    </Label>
+                    <Input
+                      placeholder="https://yourwebsite.com"
+                      value={sellerData.socialLinks.website}
+                      onChange={(e) => handleSocialLinkChange('website', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Specialties */}
+              <div className="space-y-4">
+                <h3 className="text-[#474545] dark:text-white font-medium flex items-center">
+                  <Tag className="w-4 h-4 mr-2" />
+                  Specialties & Expertise
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g., DeFi strategies, Low-risk portfolios"
+                      value={sellerData.newSpecialty}
+                      onChange={(e) => setSellerData(prev => ({ ...prev, newSpecialty: e.target.value }))}
+                      onKeyPress={(e) => e.key === 'Enter' && addSpecialty()}
+                    />
+                    <Button
+                      onClick={addSpecialty}
+                      variant="outline"
+                      size="sm"
+                      className="border-[#0097B2] text-[#0097B2] hover:bg-[#0097B2]/5"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  {sellerData.specialties.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {sellerData.specialties.map((specialty, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5 flex items-center gap-1"
+                        >
+                          {specialty}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeSpecialty(index)}
+                            className="h-auto p-0 ml-1 hover:bg-transparent"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Save Seller Data & Manage Products */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                <Button
+                  onClick={saveSellerData}
+                  className="bg-[#0097B2] hover:bg-[#0097B2]/90"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Seller Profile
+                </Button>
+                <Button
+                  onClick={() => setShowManageProducts(true)}
+                  variant="outline"
+                  className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                >
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Manage Products
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       {/* App Settings */}
       <Card className="mb-6">
         <CardHeader>
