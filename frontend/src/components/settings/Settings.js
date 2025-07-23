@@ -832,11 +832,37 @@ const Settings = () => {
 
     {/* Manage Products Modal */}
     {showManageProducts && (
-      <ManageProductsModal
-        isOpen={showManageProducts}
-        onClose={() => setShowManageProducts(false)}
-        user={user}
-      />
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="w-full max-w-4xl bg-white dark:bg-gray-800 max-h-[90vh] overflow-y-auto">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl text-[#474545] dark:text-white">
+                Manage Products
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowManageProducts(false)}
+                className="p-2"
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Manage products modal will be implemented here with your created products, edit/delete functionality.
+            </p>
+            <Button
+              onClick={() => setShowManageProducts(false)}
+              className="bg-[#0097B2] hover:bg-[#0097B2]/90"
+            >
+              Close
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     )}
   );
 };
