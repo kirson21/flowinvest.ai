@@ -829,6 +829,15 @@ const Settings = () => {
         </CardContent>
       </Card>
     </div>
+
+    {/* Manage Products Modal */}
+    {showManageProducts && (
+      <ManageProductsModal
+        isOpen={showManageProducts}
+        onClose={() => setShowManageProducts(false)}
+        user={user}
+      />
+    )}
   );
 };
 
