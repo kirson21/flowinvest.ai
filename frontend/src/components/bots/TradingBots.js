@@ -92,32 +92,60 @@ const TradingBots = () => {
     try {
       // Temporary localStorage solution while backend RLS issues are resolved
       console.log('Using localStorage for bot storage (temporary solution)');
-      
-      const botId = Date.now().toString(); // Simple ID generation
-      const botToSave = {
-        id: botId,
-        ...botData,
-        user_id: user?.id || 'temp_user',
-        is_active: false,
-        is_prebuilt: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        status: 'inactive'
-      };
-      
-      console.log('Bot data to save to localStorage:', botToSave);
+      console.log('Bot data received:', botData);
       
       // Get existing bots from localStorage
       const existingBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
       
-      // Add new bot
-      existingBots.push(botToSave);
+      // Check if this is an update (has existing ID) or new bot creation
+      const isUpdate = botData.id && existingBots.some(bot => bot.id === botData.id);
+      
+      let botToSave;
+      let updatedBots;
+      
+      if (isUpdate) {
+        console.log('Updating existing bot with ID:', botData.id);
+        // Update existing bot
+        botToSave = {
+          ...botData,
+          user_id: user?.id || 'temp_user',
+          is_active: false,
+          is_prebuilt: false,
+          updated_at: new Date().toISOString(),
+          // Keep original created_at
+          created_at: existingBots.find(bot => bot.id === botData.id)?.created_at || new Date().toISOString()
+        };
+        
+        // Replace the existing bot
+        updatedBots = existingBots.map(bot => 
+          bot.id === botData.id ? botToSave : bot
+        );
+      } else {
+        console.log('Creating new bot');
+        // Create new bot
+        const botId = botData.id || Date.now().toString(); // Use provided ID or generate new
+        botToSave = {
+          id: botId,
+          ...botData,
+          user_id: user?.id || 'temp_user',
+          is_active: false,
+          is_prebuilt: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          status: 'inactive'
+        };
+        
+        // Add new bot
+        updatedBots = [...existingBots, botToSave];
+      }
+      
+      console.log(isUpdate ? 'Bot data to update:' : 'Bot data to save:', botToSave);
       
       // Save back to localStorage
-      localStorage.setItem('user_bots', JSON.stringify(existingBots));
+      localStorage.setItem('user_bots', JSON.stringify(updatedBots));
       
-      console.log('Bot saved to localStorage successfully');
-      console.log('Total bots in storage:', existingBots.length);
+      console.log(`Bot ${isUpdate ? 'updated' : 'saved'} to localStorage successfully`);
+      console.log('Total bots in storage:', updatedBots.length);
       
       // Refresh the bot list
       await loadUserBots();
