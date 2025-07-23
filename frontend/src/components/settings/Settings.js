@@ -317,7 +317,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="p-4 pb-20 max-w-3xl mx-auto">
+    <>
+      <div className="p-4 pb-20 max-w-3xl mx-auto">
       <div className="flex items-center mb-6">
         <SettingsIcon className="text-[#0097B2] mr-3" size={24} />
         <div>
