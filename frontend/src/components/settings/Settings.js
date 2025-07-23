@@ -59,9 +59,26 @@ const Settings = () => {
     avatar_url: ''
   });
   
+  // Seller mode state
+  const [isSellerMode, setIsSellerMode] = useState(false);
+  const [sellerData, setSellerData] = useState({
+    socialLinks: {
+      instagram: '',
+      twitter: '',
+      linkedin: '',
+      youtube: '',
+      website: ''
+    },
+    specialties: [],
+    newSpecialty: ''
+  });
+  
   // Delete account state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  
+  // Manage products modal state
+  const [showManageProducts, setShowManageProducts] = useState(false);
 
   useEffect(() => {
     if (user) {
