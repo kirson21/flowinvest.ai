@@ -29,7 +29,17 @@ import {
   Save,
   X,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Store,
+  Tag,
+  ShoppingBag,
+  Plus,
+  Minus,
+  ExternalLink,
+  Instagram,
+  Twitter,
+  Linkedin,
+  Youtube
 } from 'lucide-react';
 
 const Settings = () => {
