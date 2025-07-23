@@ -476,10 +476,10 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
         </Button>
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-[#474545] dark:text-white">
-            Advanced Bot Builder
+            {editingBot ? `Edit Bot: ${editingBot.name}` : 'Advanced Bot Builder'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">
-            Professional trading bot configuration
+            {editingBot ? 'Modify your bot settings or delete the bot' : 'Professional trading bot configuration'}
           </p>
         </div>
       </div>
