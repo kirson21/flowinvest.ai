@@ -865,6 +865,7 @@ const Settings = () => {
         </Card>
       </div>
     )}
+    </>
   );
 };
 
