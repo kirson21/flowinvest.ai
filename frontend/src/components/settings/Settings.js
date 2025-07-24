@@ -40,7 +40,10 @@ import {
   Twitter,
   Linkedin,
   Youtube,
-  MessageCircle
+  MessageCircle,
+  FileText,
+  Star,
+  Edit3
 } from 'lucide-react';
 
 const Settings = () => {
