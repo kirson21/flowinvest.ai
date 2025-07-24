@@ -81,6 +81,8 @@ const Settings = () => {
   
   // Manage products modal state
   const [showManageProducts, setShowManageProducts] = useState(false);
+  const [userProducts, setUserProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -88,6 +90,56 @@ const Settings = () => {
       loadSellerData();
     }
   }, [user]);
+
+  // Load user products when manage products modal opens
+  useEffect(() => {
+    if (showManageProducts) {
+      loadUserProducts();
+    }
+  }, [showManageProducts]);
+
+  const loadUserProducts = () => {
+    try {
+      setLoadingProducts(true);
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      // Filter products created by current user
+      const currentUserProducts = userPortfolios.filter(product => product.createdBy === user?.id);
+      setUserProducts(currentUserProducts);
+    } catch (error) {
+      console.error('Error loading user products:', error);
+      setUserProducts([]);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const handleDeleteProduct = (productId) => {
+    if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+      try {
+        // Remove from localStorage
+        const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+        const filteredPortfolios = userPortfolios.filter(p => p.id !== productId);
+        localStorage.setItem('user_portfolios', JSON.stringify(filteredPortfolios));
+        
+        // Update local state
+        setUserProducts(filteredPortfolios.filter(product => product.createdBy === user?.id));
+        
+        setMessage('Product deleted successfully!');
+        setTimeout(() => setMessage(''), 3000);
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        setError('Failed to delete product');
+      }
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   const loadUserProfile = async () => {
     try {
