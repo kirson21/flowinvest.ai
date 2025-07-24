@@ -197,6 +197,21 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
     setIsLoading(true);
     
     try {
+      // Load updated seller data from localStorage
+      const savedSellerData = JSON.parse(localStorage.getItem(`seller_data_${user?.id}`) || '{}');
+      const isSellerMode = localStorage.getItem(`seller_mode_${user?.id}`) === 'true';
+      
+      // Update seller info with current data from settings
+      const updatedSellerInfo = {
+        ...product.seller,
+        name: user?.user_metadata?.name || user?.user_metadata?.display_name || user?.email || product.seller.name,
+        avatar: user?.user_metadata?.avatar_url || product.seller.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.name || user?.email || 'User')}&size=150&background=0097B2&color=ffffff`,
+        bio: isSellerMode && savedSellerData.bio ? savedSellerData.bio : product.seller.bio,
+        socialLinks: isSellerMode ? savedSellerData.socialLinks : (product.seller.socialLinks || {}),
+        specialties: isSellerMode ? savedSellerData.specialties || [] : (product.seller.specialties || []),
+        experience: isSellerMode ? savedSellerData.experience : product.seller.experience
+      };
+
       const updatedProduct = {
         ...product,
         ...productData,
@@ -204,6 +219,7 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
         expectedReturn: productData.expectedReturn ? `${productData.expectedReturn}%` : product.expectedReturn,
         minimumInvestment: parseFloat(productData.minimumInvestment) || parseFloat(productData.price),
         assetAllocation: productData.assetAllocation || product.assetAllocation,
+        seller: updatedSellerInfo, // Update seller info
         updatedAt: new Date().toISOString()
       };
 
