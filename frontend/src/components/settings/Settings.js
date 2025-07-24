@@ -39,7 +39,8 @@ import {
   Instagram,
   Twitter,
   Linkedin,
-  Youtube
+  Youtube,
+  MessageCircle
 } from 'lucide-react';
 
 const Settings = () => {
