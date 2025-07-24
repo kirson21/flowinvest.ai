@@ -14,12 +14,43 @@ export const AuthProvider = ({ children }) => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Initial session:', session);
-        setSession(session);
-        setUser(session?.user ?? null);
         
-        // Also try to get user if session exists
-        if (session?.user) {
-          console.log('User found in session:', session.user);
+        // Development mode test user - TEMPORARY for testing seller info fixes
+        if (process.env.NODE_ENV === 'development' && !session) {
+          const testUser = {
+            id: 'dev-test-user-123',
+            email: 'testuser@flowinvest.ai',
+            user_metadata: {
+              name: 'Kirson',
+              display_name: 'Kirson',
+              full_name: 'Kirson Test User',
+              avatar_url: 'https://ui-avatars.com/api/?name=Kirson&size=150&background=0097B2&color=ffffff'
+            },
+            app_metadata: {},
+            aud: 'authenticated',
+            created_at: new Date().toISOString()
+          };
+          
+          const testSession = {
+            user: testUser,
+            access_token: 'dev-test-token',
+            token_type: 'bearer',
+            expires_in: 3600,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            refresh_token: 'dev-refresh-token'
+          };
+
+          console.log('Development mode: Using test user', testUser);
+          setSession(testSession);
+          setUser(testUser);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          // Also try to get user if session exists
+          if (session?.user) {
+            console.log('User found in session:', session.user);
+          }
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
