@@ -318,6 +318,29 @@ const Portfolios = () => {
                     <span className="text-xs text-gray-500 ml-1">+{Object.keys(portfolio.seller.socialLinks).length - 3}</span>
                   )}
                 </div>
+                
+                {/* Seller Specialties */}
+                {portfolio.seller.specialties && portfolio.seller.specialties.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {portfolio.seller.specialties.slice(0, 2).map((specialty, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="text-xs border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5 px-1 py-0"
+                      >
+                        {specialty}
+                      </Badge>
+                    ))}
+                    {portfolio.seller.specialties.length > 2 && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs border-gray-300 text-gray-500 bg-gray-50 px-1 py-0"
+                      >
+                        +{portfolio.seller.specialties.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <div className="text-right">
