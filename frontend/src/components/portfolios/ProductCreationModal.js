@@ -174,6 +174,28 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     setIsLoading(true);
     
     try {
+      // Load seller data from localStorage
+      const savedSellerData = JSON.parse(localStorage.getItem(`seller_data_${user?.id}`) || '{}');
+      const isSellerMode = localStorage.getItem(`seller_mode_${user?.id}`) === 'true';
+      
+      // Create seller object with real data from settings
+      const sellerInfo = {
+        name: user?.user_metadata?.name || user?.user_metadata?.display_name || user?.email || 'Anonymous',
+        avatar: user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.name || user?.email || 'User')}&size=150&background=0097B2&color=ffffff`,
+        bio: isSellerMode && savedSellerData.bio ? savedSellerData.bio : "Product creator on FlowInvestAI marketplace",
+        // Add seller mode data if available
+        socialLinks: isSellerMode ? savedSellerData.socialLinks : {},
+        specialties: isSellerMode ? savedSellerData.specialties || [] : [],
+        experience: isSellerMode ? savedSellerData.experience : undefined,
+        // Mock stats for now
+        stats: {
+          totalProducts: 1,
+          totalSales: 0,
+          successRate: 100,
+          memberSince: new Date().getFullYear().toString()
+        }
+      };
+
       // Create a more compact product object to avoid localStorage quota issues
       const newProduct = {
         id: Date.now() + Math.random(),
@@ -190,12 +212,8 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         expectedReturn: productData.expectedReturn ? `${productData.expectedReturn}%` : null,
         assetAllocation: productData.assetAllocation || null,
         minimumInvestment: parseFloat(productData.minimumInvestment) || parseFloat(productData.price),
-        // Simplified seller information
-        seller: {
-          name: user?.user_metadata?.name || user?.email || 'Anonymous',
-          avatar: "👤", // Using emoji to avoid external URL issues
-          bio: "Product creator on FlowInvestAI marketplace"
-        },
+        // Real seller information from settings
+        seller: sellerInfo,
         rating: 0,
         totalReviews: 0,
         totalInvestors: 0,
