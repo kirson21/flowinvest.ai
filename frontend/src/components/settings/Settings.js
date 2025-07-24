@@ -899,13 +899,18 @@ const Settings = () => {
 
     {/* Manage Products Modal */}
     {showManageProducts && (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <Card className="w-full max-w-4xl bg-white dark:bg-gray-800 max-h-[90vh] overflow-y-auto">
-          <CardHeader className="pb-4">
+      <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+        <Card className="w-full max-w-6xl bg-white dark:bg-gray-800 max-h-[95vh] overflow-y-auto my-4">
+          <CardHeader className="pb-4 border-b sticky top-0 bg-white dark:bg-gray-800 z-10">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-[#474545] dark:text-white">
-                Manage Products
-              </CardTitle>
+              <div>
+                <CardTitle className="text-xl text-[#474545] dark:text-white">
+                  Manage Products
+                </CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  View, edit, and delete your marketplace products
+                </p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -917,16 +922,184 @@ const Settings = () => {
             </div>
           </CardHeader>
           
-          <CardContent className="space-y-4">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Manage products modal will be implemented here with your created products, edit/delete functionality.
-            </p>
-            <Button
-              onClick={() => setShowManageProducts(false)}
-              className="bg-[#0097B2] hover:bg-[#0097B2]/90"
-            >
-              Close
-            </Button>
+          <CardContent className="p-6">
+            {loadingProducts ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0097B2] mx-auto"></div>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">Loading your products...</p>
+              </div>
+            ) : userProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  No products yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  You haven't created any products yet. Start selling on the marketplace!
+                </p>
+                <Button
+                  onClick={() => setShowManageProducts(false)}
+                  className="bg-[#0097B2] hover:bg-[#0097B2]/90"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Product
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-[#474545] dark:text-white">
+                    Your Products ({userProducts.length})
+                  </h3>
+                </div>
+                
+                <div className="grid gap-6">
+                  {userProducts.map((product) => (
+                    <Card key={product.id} className="border border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col lg:flex-row lg:items-start lg:space-x-6 space-y-4 lg:space-y-0">
+                          {/* Product Info */}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <h4 className="text-lg font-semibold text-[#474545] dark:text-white">
+                                  {product.title || product.name}
+                                </h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  {product.description}
+                                </p>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <Badge variant="outline" className="text-xs">
+                                  {product.category}
+                                </Badge>
+                                {product.featured && (
+                                  <Badge className="bg-[#0097B2] text-white text-xs">
+                                    Featured
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Product Details Grid */}
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                              <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Price</p>
+                                <p className="text-sm font-medium text-[#474545] dark:text-white">
+                                  ${product.price}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Risk Level</p>
+                                <p className="text-sm font-medium text-[#474545] dark:text-white">
+                                  {product.riskLevel}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Rating</p>
+                                <div className="flex items-center space-x-1">
+                                  <Star size={12} className={product.rating > 0 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
+                                  <span className="text-sm font-medium text-[#474545] dark:text-white">
+                                    {product.rating || 0}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    ({product.totalReviews || 0} reviews)
+                                  </span>
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Created</p>
+                                <p className="text-sm font-medium text-[#474545] dark:text-white">
+                                  {new Date(product.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Optional metadata */}
+                            {(product.expectedReturn || product.assetAllocation || product.minimumInvestment) && (
+                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                {product.expectedReturn && (
+                                  <div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expected Return</p>
+                                    <p className="text-sm text-[#474545] dark:text-white">{product.expectedReturn}</p>
+                                  </div>
+                                )}
+                                {product.minimumInvestment && (
+                                  <div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Min. Investment</p>
+                                    <p className="text-sm text-[#474545] dark:text-white">${product.minimumInvestment}</p>
+                                  </div>
+                                )}
+                                {product.assetAllocation && (
+                                  <div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Asset Allocation</p>
+                                    <p className="text-sm text-[#474545] dark:text-white">{product.assetAllocation}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            {/* Attachments */}
+                            {product.attachments && product.attachments.length > 0 && (
+                              <div className="mb-4">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                  Attachments ({product.attachments.length})
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {product.attachments.slice(0, 3).map((attachment, index) => (
+                                    <div key={index} className="flex items-center space-x-2 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">
+                                      <FileText size={12} />
+                                      <span className="truncate max-w-20">{attachment.name}</span>
+                                      <span className="text-gray-500">({formatFileSize(attachment.size)})</span>
+                                    </div>
+                                  ))}
+                                  {product.attachments.length > 3 && (
+                                    <div className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">
+                                      +{product.attachments.length - 3} more
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Actions */}
+                          <div className="flex lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 lg:flex-none border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                            >
+                              <Edit3 size={14} className="mr-2" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="flex-1 lg:flex-none border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                            >
+                              <Trash2 size={14} className="mr-2" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="flex justify-center pt-4">
+                  <Button
+                    onClick={() => setShowManageProducts(false)}
+                    variant="outline"
+                    className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
