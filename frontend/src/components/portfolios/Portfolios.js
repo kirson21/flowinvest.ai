@@ -361,13 +361,13 @@ const Portfolios = () => {
             </div>
             <div className="text-right">
               <div className="flex items-center space-x-1 mb-1">
-                {renderStars(portfolio.rating)}
+                {renderStars(portfolio.rating || 0, portfolio.totalReviews || 0)}
                 <span className="text-sm font-medium text-[#474545] dark:text-white ml-1">
-                  {portfolio.rating}
+                  {(portfolio.totalReviews && portfolio.totalReviews > 0) ? portfolio.rating : 0}
                 </span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {portfolio.totalReviews} reviews
+                {portfolio.totalReviews || 0} reviews
               </p>
             </div>
           </button>
