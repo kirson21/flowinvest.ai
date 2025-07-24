@@ -139,7 +139,16 @@ const Portfolios = () => {
     }
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating, totalReviews = 0) => {
+    // If there are no reviews, show empty stars
+    if (!totalReviews || totalReviews === 0) {
+      const emptyStars = [];
+      for (let i = 0; i < 5; i++) {
+        emptyStars.push(<Star key={`empty-${i}`} size={14} className="text-gray-300" />);
+      }
+      return emptyStars;
+    }
+    
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
