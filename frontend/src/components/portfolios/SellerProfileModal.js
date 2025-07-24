@@ -40,6 +40,27 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
   
   if (!isOpen || !seller) return null;
 
+  // Get real bio from settings if this is current user's profile
+  const getSellerBio = () => {
+    // Check if this is the current user's seller profile
+    const isCurrentUserProfile = user && (
+      seller.name === (user.user_metadata?.display_name || user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0])
+    );
+    
+    if (isCurrentUserProfile) {
+      // Try to get bio from localStorage seller data
+      const savedSellerData = JSON.parse(localStorage.getItem(`seller_data_${user?.id}`) || '{}');
+      const isSellerMode = localStorage.getItem(`seller_mode_${user?.id}`) === 'true';
+      
+      if (isSellerMode && savedSellerData.bio && savedSellerData.bio.trim()) {
+        return savedSellerData.bio.trim();
+      }
+    }
+    
+    // Fallback to seller.bio or default message
+    return seller.bio || "Product creator on FlowInvestAI marketplace";
+  };
+
   // Check if user has purchased from this seller (mock logic for now)
   const hasPurchasedFromSeller = () => {
     // In a real app, this would check the user's purchase history
