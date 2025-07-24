@@ -199,6 +199,8 @@ test_plan:
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
     - "Fix Social Links Display to Show Only Connected Platforms"
+    - "Fix Seller Profile Modal Rating and Bio Display"
+    - "Implement Manage Products Functionality"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
