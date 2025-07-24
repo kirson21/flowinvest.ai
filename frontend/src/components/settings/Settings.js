@@ -68,6 +68,7 @@ const Settings = () => {
       twitter: '',
       linkedin: '',
       youtube: '',
+      telegram: '',
       website: ''
     },
     specialties: [],
