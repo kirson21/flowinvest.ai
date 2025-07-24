@@ -96,7 +96,16 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
     alert('Review submitted successfully! (In production, this would update the seller\'s reviews)');
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating, totalReviews = 0) => {
+    // If there are no reviews, show empty stars
+    if (!totalReviews || totalReviews === 0) {
+      const emptyStars = [];
+      for (let i = 0; i < 5; i++) {
+        emptyStars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
+      }
+      return emptyStars;
+    }
+    
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
