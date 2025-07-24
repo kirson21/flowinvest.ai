@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Continue implementing the Advanced Bot Builder enhancements: 1) Update 'Pair' Step to limit Quote Coin options to only USDT and USDC, 2) Update 'Entry' Step with advanced trading settings including range inputs for Overlapping Price Changes (0.5-99%), Grid of Orders (2-60), % Martingale (1-500%), Indent (0.01-10%), Logarithmic Distribution toggle (0.1-2.9), Pulling Up Order Grid (0.1-200%), Stop Bot After Deals toggle with number input, and Trade Entry Conditions with up to 5 filter conditions including Indicator, Interval, and Signal type options."
+user_problem_statement: "Continue fixing seller information display issues on marketplace product cards: 1) Fix seller name to display user's actual display name instead of hardcoded 'Hakuna Matata', 2) Fix 'About' information to pull from user's Bio field in settings, 3) Fix star ratings to show '0 stars' when no reviews exist instead of fake ratings, 4) Fix social links to only show connected platforms, not all social media icons. Solution should work for all users, not just specific user."
 
 backend:
   - task: "Backend Regression Testing"
@@ -124,70 +124,31 @@ backend:
           comment: "✅ MARKETPLACE ENHANCEMENT REGRESSION TESTING COMPLETED: Verified all critical backend endpoints after marketplace enhancements. Fixed minor API root endpoint issue (HTTP 500 → 200 OK). Core functionality confirmed: Server Health ✅, Authentication system ✅, Webhook system ✅, Feed retrieval ✅, Language-aware feeds ✅. All critical endpoints working properly: GET /api/status (200), GET /api/ (200), GET /api/auth/health (200), GET /api/feed_entries (200), POST /api/ai_news_webhook (200). Expected issues: Grok API key invalid (environment limitation), Legacy webhook not implemented (never existed). NO REGRESSIONS found from marketplace frontend enhancements. Backend is stable and ready to support all frontend features."
 
 frontend:
-  - task: "Update Pair Step - Limit Quote Coin Options"
+  - task: "Development Test User Implementation"
     implemented: true
     working: true
-    file: "/app/frontend/src/components/bots/TradingPairSelector.js"
+    file: "/app/frontend/src/contexts/AuthContext.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
         - working: true
           agent: "main"
-          comment: "Successfully updated TradingPairSelector.js to limit quote coin options to only USDT and USDC. Modified the quoteCoins useMemo to filter by allowedQuoteCoins array."
+          comment: "Added development mode test user with name 'Kirson' and proper metadata to AuthContext. This enables testing of seller info functionality without needing real authentication. Test user has id 'dev-test-user-123', email 'testuser@flowinvest.ai', and display name 'Kirson' as requested."
 
-  - task: "Update Entry Step - Advanced Trading Settings"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: true
-          agent: "main"
-          comment: "Completely refactored the Entry step advanced settings: 1) Replaced dropdown-based inputs with proper range inputs for all numerical fields, 2) Added Overlapping Price Changes (0.5-99%), Grid of Orders (2-60), % Martingale (1-500%), Indent (0.01-10%) with proper validation, 3) Enhanced Logarithmic Distribution with toggle and range input (0.1-2.9), 4) Added Pulling Up Order Grid input (0.1-200%), 5) Enhanced Stop Bot After Deals with toggle and number input, 6) Implemented comprehensive Trade Entry Conditions with up to 5 filters including 15 popular indicators (Bollinger Bands, RSI, MACD, etc.), 12 time intervals, and 5 signal types, 7) Added helper functions for managing entry conditions (add, remove, update), 8) Improved UI with proper labeling, range indicators, and validation."
-
-  - task: "Fix Create Bot Button Functionality"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/components/bots/TradingBots.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: true
-          agent: "main"
-          comment: "Fixed the Create Bot button functionality by correcting the bot data mapping in the onSave callback. Updated to use 'botName' instead of 'name' field and ensured proper bot configuration is passed to the saveBot function."
-        - working: true
-          agent: "main"  
-          comment: "CRITICAL FIX: Resolved issue where bot was being created on 'Next Step' click from Exit step instead of 'Create Bot' button on Test step. Implemented localStorage solution for bot storage bypassing backend RLS issues. Fixed form submission logic to only work on final Test step. Changed Create Bot button from type='submit' to type='button' with direct onClick handler. Added step navigation debugging and safety checks."
-
-  - task: "Add USDC to Quote Coin Options"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/data/tradingPairs.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-        - working: true
-          agent: "main"
-          comment: "Added major trading pairs with USDC as quote currency (BTC/USDC, ETH/USDC, BNB/USDC, XRP/USDC, ADA/USDC) to ensure USDC appears in the Quote Coin selection alongside USDT."
-
-  - task: "Category Field Dark Theme Fix - Product Creation Modal"
+  - task: "Fix Seller Information Display Logic"
     implemented: true
     working: true
     file: "/app/frontend/src/components/portfolios/ProductCreationModal.js"
     stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
         - working: true
-          agent: "main"  
-          comment: "DARK THEME CONSISTENCY FIX: Fixed Category dropdown field in product creation modal that was showing white background in dark mode. Updated select element styling to include proper dark theme classes: 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'. The Category field now seamlessly matches the dark theme styling of all other form elements, providing consistent visual experience across light and dark modes."
+          agent: "main"
+          comment: "Updated seller info creation logic to properly use user display_name field hierarchy (display_name → name → full_name → email username). Fixed bio field to use actual seller bio from settings when available and non-empty. Added filtering of social links to only include platforms with actual URLs provided by the user."
 
-  - task: "Product Card Display Improvements"
+  - task: "Fix Star Ratings Display for No Reviews"
     implemented: true
     working: true
     file: "/app/frontend/src/components/portfolios/Portfolios.js"
@@ -197,21 +158,9 @@ frontend:
     status_history:
         - working: true
           agent: "main"
-          comment: "Successfully implemented product title display fix and enhanced metadata fields display. Product titles are now prominently displayed on all cards. All optional metadata fields (Risk Level, Expected Return %, Asset Allocation, Minimum Investment Amount) are properly displayed with appropriate formatting and color coding for risk levels."
+          comment: "Modified renderStars function to accept totalReviews parameter and show empty stars when no reviews exist. Updated rating display logic to show '0' instead of fake ratings when totalReviews is 0. This addresses the issue where products showed '4.8 stars' even without any reviews."
 
-  - task: "ProductEditModal Implementation"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/components/portfolios/ProductEditModal.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: true
-          agent: "main"
-          comment: "Completed full ProductEditModal implementation with comprehensive functionality: 1) Complete form with all metadata fields including optional Risk Level, Expected Return, Asset Allocation, and Minimum Investment, 2) File attachment system, 3) Preview functionality, 4) Save/Update and Delete operations, 5) Form validation with error handling, 6) 140-character description limit validation, 7) Proper integration with Portfolios.js for state management."
-
-  - task: "Conditional Edit Button for Product Creators"
+  - task: "Fix Social Links Display to Show Only Connected Platforms"
     implemented: true
     working: true
     file: "/app/frontend/src/components/portfolios/Portfolios.js"
@@ -221,7 +170,7 @@ frontend:
     status_history:
         - working: true
           agent: "main"
-          comment: "Successfully implemented conditional Edit button that appears only for product creators. Added canEditProduct function that verifies user.id === product.createdBy for ownership validation. Edit button triggers ProductEditModal with proper state management for product updates and deletions."
+          comment: "Updated social links display logic to filter out platforms without URLs using filter(([platform, url]) => url && url.trim()). Now only shows social media icons for platforms that users have actually connected, instead of showing all possible platforms."
 
 metadata:
   created_by: "main_agent"
