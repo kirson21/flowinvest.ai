@@ -130,6 +130,7 @@ const Settings = () => {
           twitter: savedSellerData.socialLinks?.twitter || '',
           linkedin: savedSellerData.socialLinks?.linkedin || '',
           youtube: savedSellerData.socialLinks?.youtube || '',
+          telegram: savedSellerData.socialLinks?.telegram || '',
           website: savedSellerData.socialLinks?.website || ''
         },
         specialties: savedSellerData.specialties || [],
