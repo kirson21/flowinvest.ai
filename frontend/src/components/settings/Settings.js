@@ -550,6 +550,17 @@ const Settings = () => {
                       onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center text-sm">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Telegram
+                    </Label>
+                    <Input
+                      placeholder="https://t.me/yourusername"
+                      value={sellerData.socialLinks.telegram}
+                      onChange={(e) => handleSocialLinkChange('telegram', e.target.value)}
+                    />
+                  </div>
                   <div className="space-y-2 sm:col-span-2">
                     <Label className="flex items-center text-sm">
                       <Globe className="w-4 h-4 mr-2" />
