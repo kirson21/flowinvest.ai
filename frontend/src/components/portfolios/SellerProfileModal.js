@@ -176,8 +176,10 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
                   </p>
                   <div className="flex items-center space-x-4 mt-2">
                     <div className="flex items-center">
-                      {renderStars(4.8)}
-                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">4.8</span>
+                      {renderStars(seller.rating || 0, totalReviews)}
+                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                        {(seller.totalReviews && seller.totalReviews > 0) ? seller.rating : 0}
+                      </span>
                     </div>
                     <span className="text-sm text-gray-500">•</span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
