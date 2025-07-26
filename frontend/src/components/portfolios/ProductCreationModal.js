@@ -53,6 +53,11 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
 
   if (!isOpen) return null;
 
+  // Initialize content blocks when modal opens
+  React.useEffect(() => {
+    initializeContentBlocks();
+  }, [isOpen]);
+
   const handleInputChange = (field, value) => {
     setProductData(prev => ({
       ...prev,
