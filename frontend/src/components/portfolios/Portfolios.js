@@ -38,15 +38,33 @@ const Portfolios = () => {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState(null);
   const [isProductEditOpen, setIsProductEditOpen] = useState(false);
 
+  const loadProductsWithReviews = () => {
+    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+    const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+    
+    // Update products with real review data
+    const updatedUserPortfolios = userPortfolios.map(product => {
+      if (product.seller && product.seller.name) {
+        const productReviews = sellerReviews[product.seller.name] || [];
+        if (productReviews.length > 0) {
+          const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
+          return {
+            ...product,
+            rating: Math.round(avgRating * 10) / 10,
+            totalReviews: productReviews.length
+          };
+        }
+      }
+      return product;
+    });
+    
+    const allPortfolios = [...mockPortfolios, ...updatedUserPortfolios];
+    setPortfolios(allPortfolios);
+  };
+
   // Load user-created portfolios from localStorage
   useEffect(() => {
-    const loadPortfolios = () => {
-      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      const allPortfolios = [...mockPortfolios, ...userPortfolios];
-      setPortfolios(allPortfolios);
-    };
-    
-    loadPortfolios();
+    loadProductsWithReviews();
   }, []);
 
   const handleSellerClick = (seller) => {
@@ -64,10 +82,7 @@ const Portfolios = () => {
   };
 
   const handleProductSaved = (newProduct) => {
-    // Refresh the portfolios list to include the new product
-    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-    const allPortfolios = [...mockPortfolios, ...userPortfolios];
-    setPortfolios(allPortfolios);
+    loadProductsWithReviews(); // Reload with updated review data
     setIsProductCreationOpen(false);
   };
 
