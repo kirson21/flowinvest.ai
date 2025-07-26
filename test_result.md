@@ -215,6 +215,7 @@ test_plan:
     - "Implement Manage Products Functionality"
     - "Implement Edit Product Functionality in Manage Products"
     - "Fix Review Saving and Display System"
+    - "Fix React Error #310 in SellerProfileModal"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
