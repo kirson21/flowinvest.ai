@@ -94,8 +94,8 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
     return !!user;
   };
 
-  const totalReviews = seller.reviews?.length || 0;
-  const displayedReviews = showAllReviews ? seller.reviews : seller.reviews?.slice(0, 3) || [];
+  const totalReviews = allReviews.length;
+  const displayedReviews = showAllReviews ? allReviews : allReviews.slice(0, 3);
   const hasMoreReviews = totalReviews > 3;
 
   const validateReview = () => {
