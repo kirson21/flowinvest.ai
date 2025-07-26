@@ -1163,18 +1163,65 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
               
               {/* Add block at the end */}
               <div className="p-4 border-t border-gray-200 bg-gray-50/20">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setCurrentBlockIndex(productData.contentBlocks.length);
-                    setShowMediaMenu(!showMediaMenu);
-                  }}
-                  className="w-full border-dashed border-[#0097B2]/30 text-[#0097B2] hover:bg-[#0097B2]/5 transition-colors"
-                >
-                  <Plus size={16} className="mr-2" />
-                  Add More Content
-                </Button>
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handlePlusButtonClick(productData.contentBlocks.length - 1, 'end')}
+                    className="w-full border-dashed border-[#0097B2]/30 text-[#0097B2] hover:bg-[#0097B2]/5 transition-colors"
+                  >
+                    <Plus size={16} className="mr-2" />
+                    Add More Content
+                  </Button>
+                  
+                  {/* End menu */}
+                  {showMediaMenu && menuPosition === 'end' && (
+                    <div className="media-menu-container absolute left-0 top-12 bg-white border border-gray-200 rounded-lg shadow-xl py-2 min-w-[180px] z-20">
+                      <div className="px-3 py-1 text-xs text-gray-500 border-b">Add Content</div>
+                      <button
+                        type="button"
+                        onClick={() => addContentBlock('text', productData.contentBlocks.length - 1, 'after')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors"
+                      >
+                        <FileText size={16} className="text-blue-500" />
+                        <span>Text Paragraph</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => addContentBlock('image', productData.contentBlocks.length - 1, 'after')}
+                        disabled={attachmentCount >= MAX_ATTACHMENTS}
+                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                          attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <Image size={16} className="text-green-500" />
+                        <span>Image</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => addContentBlock('video', productData.contentBlocks.length - 1, 'after')}
+                        disabled={attachmentCount >= MAX_ATTACHMENTS}
+                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                          attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <Video size={16} className="text-purple-500" />
+                        <span>Video</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => addContentBlock('file', productData.contentBlocks.length - 1, 'after')}
+                        disabled={attachmentCount >= MAX_ATTACHMENTS}
+                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                          attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <FileText size={16} className="text-orange-500" />
+                        <span>Document</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             {errors.content && (
