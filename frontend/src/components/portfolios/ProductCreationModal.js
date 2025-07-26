@@ -835,49 +835,145 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
 
           {/* Rich Content Editor */}
           <div>
-            <label className="block text-sm font-medium mb-2">Content *</label>
-            <div className={`border rounded-lg ${errors.content ? 'border-red-500' : 'border-[#0097B2]/20'} min-h-[300px] relative`}>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium">Content *</label>
+              <div className="text-xs text-gray-500">
+                Attachments: {attachmentCount}/{MAX_ATTACHMENTS}
+              </div>
+            </div>
+            <div className={`border rounded-lg ${errors.content ? 'border-red-500' : 'border-[#0097B2]/20'} min-h-[300px] relative overflow-hidden`}>
               {productData.contentBlocks.map((block, index) => (
-                <div key={block.id} className="relative group">
+                <div key={block.id} className="relative group hover:bg-gray-50/30 transition-colors">
                   {/* Content Block */}
                   {block.type === 'text' ? (
                     <div className="relative">
                       <Textarea
+                        data-block-id={block.id}
                         value={block.content}
                         onChange={(e) => updateContentBlock(block.id, { content: e.target.value })}
-                        placeholder={index === 0 ? "Start writing your content here... Share your investment strategy, analysis, or educational material." : "Continue writing..."}
-                        className="border-0 resize-none focus:ring-0 min-h-[120px] w-full"
+                        onFocus={() => handleTextBlockFocus(block.id)}
+                        onKeyDown={(e) => handleTextBlockKeyDown(e, block.id, index)}
+                        placeholder={index === 0 ? "Start writing your content here... Press Enter to create new paragraphs, hover to see + button for adding media." : "Continue writing... Press Enter for new paragraph."}
+                        className="border-0 resize-none focus:ring-0 min-h-[120px] w-full bg-transparent"
                         style={{ boxShadow: 'none' }}
                       />
+                      
+                      {/* Dynamic Plus Button for Text Blocks */}
+                      <div className={`absolute -left-10 top-4 transition-opacity duration-200 ${
+                        activeBlockId === block.id || showMediaMenu && currentBlockIndex === index
+                          ? 'opacity-100' 
+                          : 'opacity-0 group-hover:opacity-100'
+                      }`}>
+                        <div className="relative">
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                              setCurrentBlockIndex(index);
+                              setActiveBlockId(block.id);
+                              setShowMediaMenu(!showMediaMenu);
+                            }}
+                            className="w-8 h-8 rounded-full bg-white border-2 border-[#0097B2] text-[#0097B2] hover:bg-[#0097B2] hover:text-white shadow-lg p-0 transition-all duration-200 hover:scale-110"
+                          >
+                            <Plus size={16} />
+                          </Button>
+                          
+                          {/* Interactive Media Menu */}
+                          {showMediaMenu && currentBlockIndex === index && (
+                            <div className="media-menu-container absolute left-10 top-0 bg-white border border-gray-200 rounded-lg shadow-xl py-2 min-w-[180px] z-20 animate-in fade-in-0 zoom-in-95 duration-200">
+                              <div className="px-3 py-1 text-xs text-gray-500 border-b">Add Content</div>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('text', index)}
+                                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors"
+                              >
+                                <FileText size={16} className="text-blue-500" />
+                                <span>Text Paragraph</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('image', index)}
+                                disabled={attachmentCount >= MAX_ATTACHMENTS}
+                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                                  attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                <Image size={16} className="text-green-500" />
+                                <div>
+                                  <div>Image</div>
+                                  {attachmentCount >= MAX_ATTACHMENTS && (
+                                    <div className="text-xs text-red-500">Limit reached</div>
+                                  )}
+                                </div>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('video', index)}
+                                disabled={attachmentCount >= MAX_ATTACHMENTS}
+                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                                  attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                <Video size={16} className="text-purple-500" />
+                                <div>
+                                  <div>Video</div>
+                                  {attachmentCount >= MAX_ATTACHMENTS && (
+                                    <div className="text-xs text-red-500">Limit reached</div>
+                                  )}
+                                </div>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('file', index)}
+                                disabled={attachmentCount >= MAX_ATTACHMENTS}
+                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                                  attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                <FileText size={16} className="text-orange-500" />
+                                <div>
+                                  <div>Document</div>
+                                  {attachmentCount >= MAX_ATTACHMENTS && (
+                                    <div className="text-xs text-red-500">Limit reached</div>
+                                  )}
+                                </div>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ) : block.type === 'image' ? (
-                    <div className="p-4 border-t border-gray-200">
+                    <div className="p-4 border-t border-gray-200 bg-gray-50/30">
                       {block.uploading ? (
-                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
-                          <Loader2 size={24} className="animate-spin mr-2" />
+                        <div className="flex items-center justify-center p-8 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                          <Loader2 size={24} className="animate-spin mr-2 text-[#0097B2]" />
                           <span>Uploading image...</span>
                         </div>
                       ) : block.file ? (
-                        <div className="relative">
+                        <div className="relative bg-white rounded-lg overflow-hidden shadow-sm">
                           <img 
                             src={block.file.url} 
                             alt={block.file.name}
-                            className="max-w-full h-auto rounded-lg shadow-sm"
+                            className="max-w-full h-auto rounded-lg"
                           />
                           <Button
                             type="button"
                             variant="destructive"
                             size="sm"
                             onClick={() => removeContentBlock(block.id)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                           >
                             <Trash2 size={14} />
                           </Button>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">
+                            {block.file.name}
+                          </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <div className="flex items-center justify-center p-8 bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-[#0097B2] transition-colors">
                           <div className="text-center">
-                            <Image size={32} className="mx-auto mb-2 text-gray-400" />
+                            <Image size={48} className="mx-auto mb-3 text-gray-400" />
                             <input
                               type="file"
                               accept="image/*"
@@ -885,41 +981,45 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                               className="hidden"
                               id={`image-${block.id}`}
                             />
-                            <label htmlFor={`image-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline">
+                            <label htmlFor={`image-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline font-medium">
                               Click to upload image
                             </label>
+                            <p className="text-xs text-gray-500 mt-1">Supports JPG, PNG, GIF, WebP</p>
                           </div>
                         </div>
                       )}
                     </div>
                   ) : block.type === 'video' ? (
-                    <div className="p-4 border-t border-gray-200">
+                    <div className="p-4 border-t border-gray-200 bg-gray-50/30">
                       {block.uploading ? (
-                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
-                          <Loader2 size={24} className="animate-spin mr-2" />
+                        <div className="flex items-center justify-center p-8 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                          <Loader2 size={24} className="animate-spin mr-2 text-[#0097B2]" />
                           <span>Uploading video...</span>
                         </div>
                       ) : block.file ? (
-                        <div className="relative">
+                        <div className="relative bg-white rounded-lg overflow-hidden shadow-sm">
                           <video 
                             src={block.file.url} 
                             controls
-                            className="max-w-full h-auto rounded-lg shadow-sm"
+                            className="max-w-full h-auto rounded-lg"
                           />
                           <Button
                             type="button"
                             variant="destructive"
                             size="sm"
                             onClick={() => removeContentBlock(block.id)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                           >
                             <Trash2 size={14} />
                           </Button>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">
+                            {block.file.name}
+                          </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <div className="flex items-center justify-center p-8 bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-[#0097B2] transition-colors">
                           <div className="text-center">
-                            <Video size={32} className="mx-auto mb-2 text-gray-400" />
+                            <Video size={48} className="mx-auto mb-3 text-gray-400" />
                             <input
                               type="file"
                               accept="video/*"
@@ -927,24 +1027,25 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                               className="hidden"
                               id={`video-${block.id}`}
                             />
-                            <label htmlFor={`video-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline">
+                            <label htmlFor={`video-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline font-medium">
                               Click to upload video
                             </label>
+                            <p className="text-xs text-gray-500 mt-1">Supports MP4, WebM, MOV</p>
                           </div>
                         </div>
                       )}
                     </div>
                   ) : block.type === 'file' ? (
-                    <div className="p-4 border-t border-gray-200">
+                    <div className="p-4 border-t border-gray-200 bg-gray-50/30">
                       {block.uploading ? (
-                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
-                          <Loader2 size={24} className="animate-spin mr-2" />
-                          <span>Uploading file...</span>
+                        <div className="flex items-center justify-center p-8 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                          <Loader2 size={24} className="animate-spin mr-2 text-[#0097B2]" />
+                          <span>Uploading document...</span>
                         </div>
                       ) : block.file ? (
-                        <div className="relative p-4 bg-gray-50 rounded-lg border">
+                        <div className="relative p-4 bg-white rounded-lg border hover:shadow-sm transition-shadow">
                           <div className="flex items-center space-x-3">
-                            <FileText size={24} className="text-gray-500" />
+                            <FileText size={32} className="text-gray-500" />
                             <div className="flex-1">
                               <p className="font-medium text-sm">{block.file.name}</p>
                               <p className="text-xs text-gray-500">{formatFileSize(block.file.size)}</p>
@@ -961,83 +1062,65 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <div className="flex items-center justify-center p-8 bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-[#0097B2] transition-colors">
                           <div className="text-center">
-                            <FileText size={32} className="mx-auto mb-2 text-gray-400" />
+                            <FileText size={48} className="mx-auto mb-3 text-gray-400" />
                             <input
                               type="file"
-                              accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                              accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx"
                               onChange={(e) => e.target.files[0] && handleContentMediaUpload(e.target.files[0], block.id)}
                               className="hidden"
                               id={`file-${block.id}`}
                             />
-                            <label htmlFor={`file-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline">
-                              Click to upload file
+                            <label htmlFor={`file-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline font-medium">
+                              Click to upload document
                             </label>
+                            <p className="text-xs text-gray-500 mt-1">Supports PDF, DOC, XLS, PPT, TXT</p>
                           </div>
                         </div>
                       )}
                     </div>
                   ) : null}
 
-                  {/* Plus Button - Patreon Style */}
-                  <div className="relative group">
-                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <div className="relative">
+                  {/* Block separator and plus button for between blocks */}
+                  {index < productData.contentBlocks.length - 1 && (
+                    <div className="relative h-4 flex items-center justify-center group hover:bg-gray-100/50">
+                      <div className="w-full h-px bg-gray-200"></div>
+                      <div className={`absolute transition-opacity duration-200 ${
+                        showMediaMenu && currentBlockIndex === index + 0.5 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                      }`}>
                         <Button
                           type="button"
                           size="sm"
                           onClick={() => {
-                            setCurrentBlockIndex(index);
+                            setCurrentBlockIndex(index + 0.5);
                             setShowMediaMenu(!showMediaMenu);
                           }}
-                          className="w-8 h-8 rounded-full bg-white border-2 border-[#0097B2] text-[#0097B2] hover:bg-[#0097B2] hover:text-white shadow-lg p-0"
+                          className="w-6 h-6 rounded-full bg-white border border-gray-300 text-gray-600 hover:border-[#0097B2] hover:text-[#0097B2] shadow-sm p-0 transition-all duration-200"
                         >
-                          <Plus size={16} />
+                          <Plus size={12} />
                         </Button>
-                        
-                        {/* Media Menu */}
-                        {showMediaMenu && currentBlockIndex === index && (
-                          <div className="media-menu-container absolute left-10 top-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[160px] z-20">
-                            <button
-                              type="button"
-                              onClick={() => addContentBlock('text', index)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                              <FileText size={16} className="text-gray-500" />
-                              <span>Add Text</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => addContentBlock('image', index)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                              <Image size={16} className="text-gray-500" />
-                              <span>Add Image</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => addContentBlock('video', index)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                              <Video size={16} className="text-gray-500" />
-                              <span>Add Video</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => addContentBlock('file', index)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                              <FileText size={16} className="text-gray-500" />
-                              <span>Add File</span>
-                            </button>
-                          </div>
-                        )}
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
+              
+              {/* Add block at the end */}
+              <div className="p-4 border-t border-gray-200 bg-gray-50/20">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setCurrentBlockIndex(productData.contentBlocks.length);
+                    setShowMediaMenu(!showMediaMenu);
+                  }}
+                  className="w-full border-dashed border-[#0097B2]/30 text-[#0097B2] hover:bg-[#0097B2]/5 transition-colors"
+                >
+                  <Plus size={16} className="mr-2" />
+                  Add More Content
+                </Button>
+              </div>
             </div>
             {errors.content && (
               <p className="text-red-500 text-xs mt-1 flex items-center">
@@ -1045,6 +1128,9 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                 {errors.content}
               </p>
             )}
+            <p className="text-xs text-gray-500 mt-2">
+              💡 <strong>Pro tip:</strong> Press Enter to create new paragraphs, hover over text to add media inline, maximum {MAX_ATTACHMENTS} attachments allowed.
+            </p>
           </div>
 
           {/* File Attachments */}
