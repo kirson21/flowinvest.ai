@@ -386,29 +386,44 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                               {review.userName.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-[#474545] dark:text-white">
-                                {review.userName}
-                              </span>
-                              {review.verified && (
-                                <CheckCircle className="w-4 h-4 text-green-500" />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-sm font-medium text-[#474545] dark:text-white">
+                                    {review.userName}
+                                  </span>
+                                  {review.verified && (
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                  )}
+                                </div>
+                                <div className="flex items-center space-x-2 mt-1">
+                                  <div className="flex items-center">
+                                    {renderStars(review.rating)}
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    {formatDate(review.date)}
+                                  </span>
+                                </div>
+                              </div>
+                              {/* Delete button for own reviews */}
+                              {user && review.userName === (user.user_metadata?.display_name || user.user_metadata?.name || user.email || 'Anonymous') && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteReview(review.id)}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
                               )}
                             </div>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <div className="flex items-center">
-                                {renderStars(review.rating)}
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {formatDate(review.date)}
-                              </span>
-                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mt-2">
+                              {review.comment}
+                            </p>
                           </div>
                         </div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                        {review.comment}
-                      </p>
                     </Card>
                   ))
                 ) : (
