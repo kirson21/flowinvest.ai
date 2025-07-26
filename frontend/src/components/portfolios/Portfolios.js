@@ -111,9 +111,8 @@ const Portfolios = () => {
     const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
     localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
     
-    // Refresh the portfolios list
-    const allPortfolios = [...mockPortfolios, ...filteredUserPortfolios];
-    setPortfolios(allPortfolios);
+    // Refresh the portfolios list with review data
+    loadProductsWithReviews();
     setIsProductEditOpen(false);
     setSelectedProductForEdit(null);
   };
