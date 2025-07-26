@@ -99,9 +99,8 @@ const Portfolios = () => {
     );
     localStorage.setItem('user_portfolios', JSON.stringify(updatedUserPortfolios));
     
-    // Refresh the portfolios list
-    const allPortfolios = [...mockPortfolios, ...updatedUserPortfolios];
-    setPortfolios(allPortfolios);
+    // Refresh the portfolios list with review data
+    loadProductsWithReviews();
     setIsProductEditOpen(false);
     setSelectedProductForEdit(null);
   };
