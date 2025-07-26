@@ -1095,19 +1095,66 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                     <div className="relative h-4 flex items-center justify-center group hover:bg-gray-100/50">
                       <div className="w-full h-px bg-gray-200"></div>
                       <div className={`absolute transition-opacity duration-200 ${
-                        showMediaMenu && currentBlockIndex === index + 0.5 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        showMediaMenu && currentBlockIndex === index && menuPosition === 'between' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                       }`}>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => {
-                            setCurrentBlockIndex(index + 0.5);
-                            setShowMediaMenu(!showMediaMenu);
-                          }}
-                          className="w-6 h-6 rounded-full bg-white border border-gray-300 text-gray-600 hover:border-[#0097B2] hover:text-[#0097B2] shadow-sm p-0 transition-all duration-200"
-                        >
-                          <Plus size={12} />
-                        </Button>
+                        <div className="relative">
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => handlePlusButtonClick(index, 'between')}
+                            className="w-6 h-6 rounded-full bg-white border border-gray-300 text-gray-600 hover:border-[#0097B2] hover:text-[#0097B2] shadow-sm p-0 transition-all duration-200"
+                          >
+                            <Plus size={12} />
+                          </Button>
+                          
+                          {/* Between blocks menu */}
+                          {showMediaMenu && currentBlockIndex === index && menuPosition === 'between' && (
+                            <div className="media-menu-container absolute left-8 top-0 bg-white border border-gray-200 rounded-lg shadow-xl py-2 min-w-[180px] z-20">
+                              <div className="px-3 py-1 text-xs text-gray-500 border-b">Insert Content</div>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('text', index, 'after')}
+                                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors"
+                              >
+                                <FileText size={16} className="text-blue-500" />
+                                <span>Text Paragraph</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('image', index, 'after')}
+                                disabled={attachmentCount >= MAX_ATTACHMENTS}
+                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                                  attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                <Image size={16} className="text-green-500" />
+                                <span>Image</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('video', index, 'after')}
+                                disabled={attachmentCount >= MAX_ATTACHMENTS}
+                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                                  attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                <Video size={16} className="text-purple-500" />
+                                <span>Video</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => addContentBlock('file', index, 'after')}
+                                disabled={attachmentCount >= MAX_ATTACHMENTS}
+                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-sm transition-colors ${
+                                  attachmentCount >= MAX_ATTACHMENTS ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                <FileText size={16} className="text-orange-500" />
+                                <span>Document</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
