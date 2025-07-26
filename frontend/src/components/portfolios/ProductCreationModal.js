@@ -51,11 +51,11 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   const videoInputRef = useRef(null);
   const contentRef = useRef(null);
 
-  if (!isOpen) return null;
-
   // Initialize content blocks when modal opens
   React.useEffect(() => {
-    initializeContentBlocks();
+    if (isOpen) {
+      initializeContentBlocks();
+    }
   }, [isOpen]);
 
   // Close media menu when clicking outside
@@ -71,6 +71,8 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showMediaMenu]);
+
+  if (!isOpen) return null;
 
   const handleInputChange = (field, value) => {
     setProductData(prev => ({
