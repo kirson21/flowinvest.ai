@@ -239,7 +239,9 @@ test_plan:
     - "Implement Manage Products Functionality"
     - "Implement Edit Product Functionality in Manage Products"
     - "Fix Review Saving and Display System"
-    - "Fix React Error #310 in SellerProfileModal"
+    - "Fix React Error #310 in ProductCreationModal"
+    - "Fix Star Ratings Display in Reviews"
+    - "Fix Star Ratings and Review Counts on Marketplace Cards"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
