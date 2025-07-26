@@ -155,9 +155,16 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     } else if (productData.description.length > 140) {
       newErrors.description = 'Description must be 140 characters or less';
     }
-    if (!productData.content.trim()) {
+    
+    // Validate content blocks
+    const hasContent = productData.contentBlocks.some(block => 
+      (block.type === 'text' && block.content.trim()) || 
+      (block.type !== 'text' && block.file)
+    );
+    if (!hasContent) {
       newErrors.content = 'Content is required';
     }
+    
     if (!productData.price || parseFloat(productData.price) <= 0) {
       newErrors.price = 'Valid price is required';
     }
