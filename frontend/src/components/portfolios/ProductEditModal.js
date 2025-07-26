@@ -216,6 +216,28 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
     }
   };
 
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Close media menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMediaMenu && !event.target.closest('.media-menu-container')) {
+        setShowMediaMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMediaMenu]);
+
   if (!isOpen || !product) return null;
 
   const handleInputChange = (field, value) => {
