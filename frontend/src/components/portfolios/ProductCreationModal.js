@@ -481,9 +481,45 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
               
               <CardContent>
                 <div className="prose prose-sm max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
-                    {productData.content}
-                  </div>
+                  {/* Rich Content Blocks Preview */}
+                  {productData.contentBlocks.map((block, index) => (
+                    <div key={block.id} className="mb-6">
+                      {block.type === 'text' && block.content.trim() && (
+                        <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+                          {block.content}
+                        </div>
+                      )}
+                      {block.type === 'image' && block.file && (
+                        <div className="my-4">
+                          <img 
+                            src={block.file.url} 
+                            alt={block.file.name}
+                            className="max-w-full h-auto rounded-lg shadow-sm"
+                          />
+                        </div>
+                      )}
+                      {block.type === 'video' && block.file && (
+                        <div className="my-4">
+                          <video 
+                            src={block.file.url} 
+                            controls
+                            className="max-w-full h-auto rounded-lg shadow-sm"
+                          />
+                        </div>
+                      )}
+                      {block.type === 'file' && block.file && (
+                        <div className="my-4 p-4 bg-gray-50 rounded-lg border">
+                          <div className="flex items-center space-x-3">
+                            <FileText size={24} className="text-gray-500" />
+                            <div>
+                              <p className="font-medium text-sm">{block.file.name}</p>
+                              <p className="text-xs text-gray-500">{formatFileSize(block.file.size)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
 
                 {productData.attachments.length > 0 && (
