@@ -694,15 +694,212 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
             )}
           </div>
 
-          {/* Content */}
+          {/* Rich Content Editor */}
           <div>
             <label className="block text-sm font-medium mb-2">Content *</label>
-            <Textarea
-              value={productData.content}
-              onChange={(e) => handleInputChange('content', e.target.value)}
-              placeholder="Start writing your content here... Share your investment strategy, analysis, or educational material."
-              className={`min-h-[200px] border-[#0097B2]/20 focus:border-[#0097B2] ${errors.content ? 'border-red-500' : ''}`}
-            />
+            <div className={`border rounded-lg ${errors.content ? 'border-red-500' : 'border-[#0097B2]/20'} min-h-[300px] relative`}>
+              {productData.contentBlocks.map((block, index) => (
+                <div key={block.id} className="relative group">
+                  {/* Content Block */}
+                  {block.type === 'text' ? (
+                    <div className="relative">
+                      <Textarea
+                        value={block.content}
+                        onChange={(e) => updateContentBlock(block.id, { content: e.target.value })}
+                        placeholder={index === 0 ? "Start writing your content here... Share your investment strategy, analysis, or educational material." : "Continue writing..."}
+                        className="border-0 resize-none focus:ring-0 min-h-[120px] w-full"
+                        style={{ boxShadow: 'none' }}
+                      />
+                    </div>
+                  ) : block.type === 'image' ? (
+                    <div className="p-4 border-t border-gray-200">
+                      {block.uploading ? (
+                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
+                          <Loader2 size={24} className="animate-spin mr-2" />
+                          <span>Uploading image...</span>
+                        </div>
+                      ) : block.file ? (
+                        <div className="relative">
+                          <img 
+                            src={block.file.url} 
+                            alt={block.file.name}
+                            className="max-w-full h-auto rounded-lg shadow-sm"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeContentBlock(block.id)}
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                          <div className="text-center">
+                            <Image size={32} className="mx-auto mb-2 text-gray-400" />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => e.target.files[0] && handleContentMediaUpload(e.target.files[0], block.id)}
+                              className="hidden"
+                              id={`image-${block.id}`}
+                            />
+                            <label htmlFor={`image-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline">
+                              Click to upload image
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : block.type === 'video' ? (
+                    <div className="p-4 border-t border-gray-200">
+                      {block.uploading ? (
+                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
+                          <Loader2 size={24} className="animate-spin mr-2" />
+                          <span>Uploading video...</span>
+                        </div>
+                      ) : block.file ? (
+                        <div className="relative">
+                          <video 
+                            src={block.file.url} 
+                            controls
+                            className="max-w-full h-auto rounded-lg shadow-sm"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeContentBlock(block.id)}
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                          <div className="text-center">
+                            <Video size={32} className="mx-auto mb-2 text-gray-400" />
+                            <input
+                              type="file"
+                              accept="video/*"
+                              onChange={(e) => e.target.files[0] && handleContentMediaUpload(e.target.files[0], block.id)}
+                              className="hidden"
+                              id={`video-${block.id}`}
+                            />
+                            <label htmlFor={`video-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline">
+                              Click to upload video
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : block.type === 'file' ? (
+                    <div className="p-4 border-t border-gray-200">
+                      {block.uploading ? (
+                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
+                          <Loader2 size={24} className="animate-spin mr-2" />
+                          <span>Uploading file...</span>
+                        </div>
+                      ) : block.file ? (
+                        <div className="relative p-4 bg-gray-50 rounded-lg border">
+                          <div className="flex items-center space-x-3">
+                            <FileText size={24} className="text-gray-500" />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{block.file.name}</p>
+                              <p className="text-xs text-gray-500">{formatFileSize(block.file.size)}</p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeContentBlock(block.id)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                          <div className="text-center">
+                            <FileText size={32} className="mx-auto mb-2 text-gray-400" />
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                              onChange={(e) => e.target.files[0] && handleContentMediaUpload(e.target.files[0], block.id)}
+                              className="hidden"
+                              id={`file-${block.id}`}
+                            />
+                            <label htmlFor={`file-${block.id}`} className="cursor-pointer text-[#0097B2] hover:underline">
+                              Click to upload file
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {/* Plus Button - Patreon Style */}
+                  <div className="relative group">
+                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <div className="relative">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentBlockIndex(index);
+                            setShowMediaMenu(!showMediaMenu);
+                          }}
+                          className="w-8 h-8 rounded-full bg-white border-2 border-[#0097B2] text-[#0097B2] hover:bg-[#0097B2] hover:text-white shadow-lg p-0"
+                        >
+                          <Plus size={16} />
+                        </Button>
+                        
+                        {/* Media Menu */}
+                        {showMediaMenu && currentBlockIndex === index && (
+                          <div className="absolute left-10 top-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[160px] z-20">
+                            <button
+                              type="button"
+                              onClick={() => addContentBlock('text', index)}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                            >
+                              <FileText size={16} className="text-gray-500" />
+                              <span>Add Text</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => addContentBlock('image', index)}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                            >
+                              <Image size={16} className="text-gray-500" />
+                              <span>Add Image</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => addContentBlock('video', index)}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                            >
+                              <Video size={16} className="text-gray-500" />
+                              <span>Add Video</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => addContentBlock('file', index)}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                            >
+                              <FileText size={16} className="text-gray-500" />
+                              <span>Add File</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
             {errors.content && (
               <p className="text-red-500 text-xs mt-1 flex items-center">
                 <AlertCircle size={12} className="mr-1" />
