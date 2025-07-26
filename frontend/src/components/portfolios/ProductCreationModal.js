@@ -47,10 +47,14 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   const [errors, setErrors] = useState({});
   const [showMediaMenu, setShowMediaMenu] = useState(false);
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
+  const [activeBlockId, setActiveBlockId] = useState(null);
+  const [attachmentCount, setAttachmentCount] = useState(0);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const contentRef = useRef(null);
+
+  const MAX_ATTACHMENTS = 30;
 
   // Initialize content blocks when modal opens
   React.useEffect(() => {
