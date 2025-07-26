@@ -286,13 +286,24 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         }
       };
 
+      // Convert content blocks to a combined content string for compatibility
+      const combinedContent = productData.contentBlocks.map(block => {
+        if (block.type === 'text') {
+          return block.content;
+        } else if (block.file) {
+          return `[${block.type.toUpperCase()}: ${block.file.name}]`;
+        }
+        return '';
+      }).filter(content => content.trim()).join('\n\n');
+
       // Create a more compact product object to avoid localStorage quota issues
       const newProduct = {
         id: Date.now() + Math.random(),
         title: productData.title,
         name: productData.title, // For compatibility with existing code
         description: productData.description,
-        content: productData.content,
+        content: combinedContent, // Backward compatibility
+        contentBlocks: productData.contentBlocks, // New rich content format
         price: parseFloat(productData.price),
         category: productData.category,
         createdBy: user?.id || 'current-user',
