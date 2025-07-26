@@ -506,9 +506,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
               <Button 
                 variant="outline"
                 className="w-full sm:flex-1 border-[#0097B2]/20 hover:bg-[#0097B2]/5"
-                onClick={() => {
-                  alert('View all products functionality coming soon!');
-                }}
+                onClick={() => setShowAllProducts(true)}
               >
                 <TrendingUp size={16} className="mr-2" />
                 View All Products
