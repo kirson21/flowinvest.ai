@@ -67,6 +67,83 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     }
   };
 
+  // Initialize content blocks if empty
+  const initializeContentBlocks = () => {
+    if (productData.contentBlocks.length === 0) {
+      setProductData(prev => ({
+        ...prev,
+        contentBlocks: [{ type: 'text', content: '', id: Date.now() }]
+      }));
+    }
+  };
+
+  // Add new content block
+  const addContentBlock = (type, afterIndex) => {
+    const newBlock = {
+      type: type, // 'text', 'image', 'video', 'file'
+      content: '',
+      id: Date.now() + Math.random(),
+      ...(type !== 'text' && { file: null, uploading: false })
+    };
+
+    const newBlocks = [...productData.contentBlocks];
+    newBlocks.splice(afterIndex + 1, 0, newBlock);
+    
+    setProductData(prev => ({
+      ...prev,
+      contentBlocks: newBlocks
+    }));
+    
+    setShowMediaMenu(false);
+  };
+
+  // Update content block
+  const updateContentBlock = (blockId, updates) => {
+    setProductData(prev => ({
+      ...prev,
+      contentBlocks: prev.contentBlocks.map(block =>
+        block.id === blockId ? { ...block, ...updates } : block
+      )
+    }));
+  };
+
+  // Remove content block
+  const removeContentBlock = (blockId) => {
+    setProductData(prev => ({
+      ...prev,
+      contentBlocks: prev.contentBlocks.filter(block => block.id !== blockId)
+    }));
+  };
+
+  // Handle media upload for content blocks
+  const handleContentMediaUpload = async (file, blockId) => {
+    if (!file) return;
+
+    // Set uploading state
+    updateContentBlock(blockId, { uploading: true });
+
+    try {
+      const uploadResult = await FileUploadService.uploadProductAttachment(file);
+      
+      updateContentBlock(blockId, {
+        file: {
+          name: file.name,
+          size: file.size,
+          type: FileUploadService.getFileType(file.name),
+          url: uploadResult.publicUrl,
+          path: uploadResult.path,
+          bucket: uploadResult.bucket
+        },
+        uploading: false
+      });
+
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      alert('Error uploading media. Please try again.');
+      updateContentBlock(blockId, { uploading: false });
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
