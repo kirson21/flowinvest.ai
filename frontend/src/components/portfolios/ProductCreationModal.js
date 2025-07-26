@@ -873,7 +873,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                         
                         {/* Media Menu */}
                         {showMediaMenu && currentBlockIndex === index && (
-                          <div className="media-menu-container absolute left-10 top-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[160px] z-20">
+                          <div className="media-menu-container absolute left-10 top-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[160px] z-20">>
                             <button
                               type="button"
                               onClick={() => addContentBlock('text', index)}
