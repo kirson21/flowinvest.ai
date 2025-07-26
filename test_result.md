@@ -175,7 +175,7 @@ frontend:
           agent: "main"
           comment: "Fixed SellerProfileModal rating display to show actual seller rating instead of hardcoded '4.8'. Updated renderStars function to accept totalReviews parameter and show empty stars when no reviews exist. Added getSellerBio function to pull real bio from user settings when viewing current user's seller profile, with proper fallback logic."
 
-  - task: "Implement Manage Products Functionality"
+  - task: "Implement Edit Product Functionality in Manage Products"
     implemented: true
     working: true
     file: "/app/frontend/src/components/settings/Settings.js"
@@ -185,7 +185,19 @@ frontend:
     status_history:
         - working: true
           agent: "main"
-          comment: "Replaced placeholder 'Manage Products' modal with full product management interface. Added loadUserProducts function to fetch user's created products from localStorage. Implemented comprehensive product display with metadata, attachments, ratings, and creation dates. Added delete product functionality with confirmation dialog. Created responsive grid layout showing product details, optional metadata (expected return, asset allocation, min investment), and attachment info. Added proper loading states and empty state handling."
+          comment: "Added ProductEditModal import and integrated edit functionality into Manage Products. Added selectedProductForEdit state and isProductEditOpen state management. Implemented handleEditProduct function to open edit modal with selected product. Added handleProductUpdated and handleProductDeleted functions to manage product changes and localStorage updates. Wired up Edit button onClick handler to trigger edit modal. Added ProductEditModal component at end of Settings component with proper props for editing and deleting products."
+
+  - task: "Fix Review Saving and Display System"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/portfolios/SellerProfileModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Fixed review system to properly save and display reviews. Added useEffect to load and merge reviews from localStorage with original seller reviews. Added allReviews state and sellerRating state for real-time updates. Modified handleSubmitReview to update local state immediately after saving to localStorage and recalculate average rating. Updated review display logic to use allReviews instead of static seller.reviews. Fixed rating display in header to show calculated sellerRating. Reviews now persist, display immediately, and update seller ratings dynamically."
 
 metadata:
   created_by: "main_agent"
