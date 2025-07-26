@@ -626,6 +626,124 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
           </Card>
         </div>
       )}
+
+      {/* All Products Modal */}
+      {showAllProducts && (
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+          <Card className="w-full max-w-6xl bg-white dark:bg-gray-800 max-h-[95vh] overflow-y-auto my-4">
+            <CardHeader className="pb-4 border-b sticky top-0 bg-white dark:bg-gray-800 z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl text-[#474545] dark:text-white">
+                    All Products by {seller.name}
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {sellerProducts.length} products found
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAllProducts(false)}
+                  className="p-2"
+                >
+                  <X size={16} />
+                </Button>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-6">
+              {sellerProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No products yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    This seller hasn't created any products yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {sellerProducts.map((product) => (
+                    <Card key={product.id} className="border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg font-bold text-[#474545] dark:text-white mb-2 leading-tight">
+                          {product.title || product.name}
+                        </CardTitle>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                          {product.description}
+                        </p>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center text-lg font-bold text-[#0097B2]">
+                            <DollarSign size={16} className="mr-1" />
+                            {product.price || product.minimumInvestment}
+                          </div>
+                          <Badge variant="outline" className="border-[#0097B2]/30 text-[#0097B2]">
+                            {product.category || 'Portfolio'}
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star 
+                                key={star} 
+                                size={14} 
+                                className={star <= (product.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} 
+                              />
+                            ))}
+                            <span className="text-sm font-medium text-[#474545] dark:text-white ml-1">
+                              {product.rating || 0}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {product.totalReviews || 0} reviews
+                          </span>
+                        </div>
+                        
+                        {/* Optional metadata */}
+                        {product.riskLevel && (
+                          <div className="mb-3">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Risk Level: </span>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${
+                                product.riskLevel === 'Low' ? 'border-green-200 text-green-700' :
+                                product.riskLevel === 'Medium' ? 'border-yellow-200 text-yellow-700' :
+                                'border-red-200 text-red-700'
+                              }`}
+                            >
+                              {product.riskLevel}
+                            </Badge>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Created {new Date(product.createdAt).toLocaleDateString()}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+              
+              <div className="flex justify-center mt-8">
+                <Button
+                  onClick={() => setShowAllProducts(false)}
+                  variant="outline"
+                  className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                >
+                  Close
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </>
   );
 };
