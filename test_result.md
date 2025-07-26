@@ -187,17 +187,17 @@ frontend:
           agent: "main"
           comment: "Added ProductEditModal import and integrated edit functionality into Manage Products. Added selectedProductForEdit state and isProductEditOpen state management. Implemented handleEditProduct function to open edit modal with selected product. Added handleProductUpdated and handleProductDeleted functions to manage product changes and localStorage updates. Wired up Edit button onClick handler to trigger edit modal. Added ProductEditModal component at end of Settings component with proper props for editing and deleting products."
 
-  - task: "Fix Review Saving and Display System"
+  - task: "Fix React Error #310 in SellerProfileModal"
     implemented: true
     working: true
     file: "/app/frontend/src/components/portfolios/SellerProfileModal.js"
     stuck_count: 0
-    priority: "high"
+    priority: "critical"
     needs_retesting: true
     status_history:
         - working: true
           agent: "main"
-          comment: "Fixed review system to properly save and display reviews. Added useEffect to load and merge reviews from localStorage with original seller reviews. Added allReviews state and sellerRating state for real-time updates. Modified handleSubmitReview to update local state immediately after saving to localStorage and recalculate average rating. Updated review display logic to use allReviews instead of static seller.reviews. Fixed rating display in header to show calculated sellerRating. Reviews now persist, display immediately, and update seller ratings dynamically."
+          comment: "CRITICAL FIX: Fixed React error #310 that was preventing seller info modal from loading. The issue was useEffect hook being called after an early return statement (if (!isOpen || !seller) return null), which violates the Rules of Hooks. Moved all hooks (useState, useEffect) to the top of the component before any conditional returns. This ensures hooks are always called in the same order and resolves the minified React error. Seller profile modals now load correctly without crashing."
 
 metadata:
   created_by: "main_agent"
