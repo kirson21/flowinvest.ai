@@ -115,7 +115,9 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   };
 
   // Add new content block with attachment limit check
-  const addContentBlock = (type, afterIndex) => {
+  const addContentBlock = (type, afterIndex, position = 'after') => {
+    console.log('Adding block:', { type, afterIndex, position, attachmentCount });
+    
     // Check attachment limit for media blocks
     if (type !== 'text' && attachmentCount >= MAX_ATTACHMENTS) {
       alert(`Maximum ${MAX_ATTACHMENTS} attachments allowed. Please remove some attachments before adding more.`);
@@ -131,7 +133,8 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     };
 
     const newBlocks = [...productData.contentBlocks];
-    newBlocks.splice(afterIndex + 1, 0, newBlock);
+    const insertIndex = position === 'after' ? afterIndex + 1 : afterIndex;
+    newBlocks.splice(insertIndex, 0, newBlock);
     
     setProductData(prev => ({
       ...prev,
@@ -143,6 +146,14 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     
     // Update attachment count
     setTimeout(updateAttachmentCount, 100);
+  };
+
+  // Handle plus button click
+  const handlePlusButtonClick = (index, position = 'after') => {
+    console.log('Plus button clicked:', { index, position });
+    setCurrentBlockIndex(index);
+    setMenuPosition(position);
+    setShowMediaMenu(!showMediaMenu);
   };
 
   // Update content block
