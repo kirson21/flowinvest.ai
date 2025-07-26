@@ -64,8 +64,29 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       } else {
         setSellerRating(0);
       }
+
+      // Load seller's products
+      loadSellerProducts();
     }
   }, [isOpen, seller]);
+
+  const loadSellerProducts = () => {
+    try {
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      const mockPortfolios = JSON.parse(localStorage.getItem('mock_portfolios') || '[]');
+      const allPortfolios = [...userPortfolios, ...mockPortfolios];
+      
+      // Filter products by seller name
+      const sellerPortfolios = allPortfolios.filter(product => 
+        product.seller && product.seller.name === seller.name
+      );
+      
+      setSellerProducts(sellerPortfolios);
+    } catch (error) {
+      console.error('Error loading seller products:', error);
+      setSellerProducts([]);
+    }
+  };
   
   // Early return after hooks
   if (!isOpen || !seller) return null;
