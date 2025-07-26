@@ -58,6 +58,20 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     initializeContentBlocks();
   }, [isOpen]);
 
+  // Close media menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMediaMenu && !event.target.closest('.media-menu-container')) {
+        setShowMediaMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMediaMenu]);
+
   const handleInputChange = (field, value) => {
     setProductData(prev => ({
       ...prev,
