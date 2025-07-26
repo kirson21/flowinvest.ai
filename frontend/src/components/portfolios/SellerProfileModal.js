@@ -39,8 +39,6 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
   const [reviewErrors, setReviewErrors] = useState({});
   const [allReviews, setAllReviews] = useState([]);
   const [sellerRating, setSellerRating] = useState(0);
-  
-  if (!isOpen || !seller) return null;
 
   // Load reviews from localStorage and merge with seller.reviews when modal opens
   useEffect(() => {
@@ -65,6 +63,9 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
       }
     }
   }, [isOpen, seller]);
+  
+  // Early return after hooks
+  if (!isOpen || !seller) return null;
 
   // Get real bio from settings if this is current user's profile
   const getSellerBio = () => {
