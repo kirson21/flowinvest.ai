@@ -424,6 +424,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                             </p>
                           </div>
                         </div>
+                      </div>
                     </Card>
                   ))
                 ) : (
