@@ -37,8 +37,34 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
     comment: ''
   });
   const [reviewErrors, setReviewErrors] = useState({});
+  const [allReviews, setAllReviews] = useState([]);
+  const [sellerRating, setSellerRating] = useState(0);
   
   if (!isOpen || !seller) return null;
+
+  // Load reviews from localStorage and merge with seller.reviews when modal opens
+  useEffect(() => {
+    if (isOpen && seller) {
+      const storedReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+      const sellerStoredReviews = storedReviews[seller.name] || [];
+      const originalReviews = seller.reviews || [];
+      
+      // Merge stored reviews with original reviews (avoid duplicates by id)
+      const existingIds = new Set(originalReviews.map(r => r.id));
+      const newReviews = sellerStoredReviews.filter(r => !existingIds.has(r.id));
+      const combinedReviews = [...newReviews, ...originalReviews];
+      
+      setAllReviews(combinedReviews);
+      
+      // Calculate average rating
+      if (combinedReviews.length > 0) {
+        const avgRating = combinedReviews.reduce((sum, review) => sum + review.rating, 0) / combinedReviews.length;
+        setSellerRating(Math.round(avgRating * 10) / 10); // Round to 1 decimal
+      } else {
+        setSellerRating(0);
+      }
+    }
+  }, [isOpen, seller]);
 
   // Get real bio from settings if this is current user's profile
   const getSellerBio = () => {
