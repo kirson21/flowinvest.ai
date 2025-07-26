@@ -213,6 +213,8 @@ test_plan:
     - "Fix Social Links Display to Show Only Connected Platforms"
     - "Fix Seller Profile Modal Rating and Bio Display"
     - "Implement Manage Products Functionality"
+    - "Implement Edit Product Functionality in Manage Products"
+    - "Fix Review Saving and Display System"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
