@@ -141,6 +141,57 @@ const Settings = () => {
     }
   };
 
+  const handleEditProduct = (product) => {
+    setSelectedProductForEdit(product);
+    setIsProductEditOpen(true);
+  };
+
+  const handleProductUpdated = (updatedProduct) => {
+    try {
+      // Update the product in localStorage
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      const updatedUserPortfolios = userPortfolios.map(p => 
+        p.id === updatedProduct.id ? updatedProduct : p
+      );
+      localStorage.setItem('user_portfolios', JSON.stringify(updatedUserPortfolios));
+      
+      // Update local state
+      setUserProducts(updatedUserPortfolios.filter(product => product.createdBy === user?.id));
+      
+      // Close modal
+      setIsProductEditOpen(false);
+      setSelectedProductForEdit(null);
+      
+      setMessage('Product updated successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating product:', error);
+      setError('Failed to update product');
+    }
+  };
+
+  const handleProductDeleted = (productId) => {
+    try {
+      // Remove from localStorage
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      const filteredPortfolios = userPortfolios.filter(p => p.id !== productId);
+      localStorage.setItem('user_portfolios', JSON.stringify(filteredPortfolios));
+      
+      // Update local state
+      setUserProducts(filteredPortfolios.filter(product => product.createdBy === user?.id));
+      
+      // Close modal
+      setIsProductEditOpen(false);
+      setSelectedProductForEdit(null);
+      
+      setMessage('Product deleted successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      setError('Failed to delete product');
+    }
+  };
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
