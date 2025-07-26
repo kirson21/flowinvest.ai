@@ -377,7 +377,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
               <div className="space-y-4 min-h-[200px]">
                 {displayedReviews.length > 0 ? (
                   displayedReviews.map((review) => (
-                    <Card key={review.id} className="p-4 border-gray-200 dark:border-gray-700">
+                    <Card key={review.id} className="p-4 border-gray-200 dark:border-gray-700 group">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
                           <Avatar className="w-8 h-8">
