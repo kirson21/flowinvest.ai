@@ -24,7 +24,8 @@ import {
   Linkedin,
   Edit3,
   AlertCircle,
-  Trash2
+  Trash2,
+  DollarSign
 } from 'lucide-react';
 
 const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
