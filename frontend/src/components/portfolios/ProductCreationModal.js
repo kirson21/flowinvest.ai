@@ -101,13 +101,30 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         contentBlocks: [{ type: 'text', content: '', id: Date.now() }]
       }));
     }
+    // Update attachment count
+    updateAttachmentCount();
   };
 
-  // Add new content block
+  // Update attachment count
+  const updateAttachmentCount = () => {
+    const mediaBlocks = productData.contentBlocks.filter(block => 
+      (block.type !== 'text') && block.file
+    );
+    setAttachmentCount(mediaBlocks.length);
+  };
+
+  // Add new content block with attachment limit check
   const addContentBlock = (type, afterIndex) => {
+    // Check attachment limit for media blocks
+    if (type !== 'text' && attachmentCount >= MAX_ATTACHMENTS) {
+      alert(`Maximum ${MAX_ATTACHMENTS} attachments allowed. Please remove some attachments before adding more.`);
+      setShowMediaMenu(false);
+      return;
+    }
+
     const newBlock = {
       type: type, // 'text', 'image', 'video', 'file'
-      content: '',
+      content: type === 'text' ? '' : null,
       id: Date.now() + Math.random(),
       ...(type !== 'text' && { file: null, uploading: false })
     };
@@ -121,6 +138,10 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     }));
     
     setShowMediaMenu(false);
+    setActiveBlockId(null);
+    
+    // Update attachment count
+    setTimeout(updateAttachmentCount, 100);
   };
 
   // Update content block
@@ -131,14 +152,75 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         block.id === blockId ? { ...block, ...updates } : block
       )
     }));
+    
+    // Update attachment count if file was added/removed
+    if (updates.file !== undefined) {
+      setTimeout(updateAttachmentCount, 100);
+    }
   };
 
   // Remove content block
   const removeContentBlock = (blockId) => {
+    if (productData.contentBlocks.length <= 1) {
+      alert('You must have at least one content block.');
+      return;
+    }
+
     setProductData(prev => ({
       ...prev,
       contentBlocks: prev.contentBlocks.filter(block => block.id !== blockId)
     }));
+    
+    // Update attachment count
+    setTimeout(updateAttachmentCount, 100);
+  };
+
+  // Handle text block focus and cursor position for dynamic '+' button
+  const handleTextBlockFocus = (blockId) => {
+    setActiveBlockId(blockId);
+  };
+
+  // Handle Enter key in text blocks to create new paragraph
+  const handleTextBlockKeyDown = (e, blockId, blockIndex) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      
+      // Get current cursor position
+      const textarea = e.target;
+      const cursorPosition = textarea.selectionStart;
+      const currentContent = textarea.value;
+      
+      // Split content at cursor position
+      const beforeCursor = currentContent.slice(0, cursorPosition);
+      const afterCursor = currentContent.slice(cursorPosition);
+      
+      // Update current block with content before cursor
+      updateContentBlock(blockId, { content: beforeCursor });
+      
+      // Create new text block with content after cursor
+      const newBlock = {
+        type: 'text',
+        content: afterCursor,
+        id: Date.now() + Math.random()
+      };
+      
+      const newBlocks = [...productData.contentBlocks];
+      newBlocks.splice(blockIndex + 1, 0, newBlock);
+      
+      setProductData(prev => ({
+        ...prev,
+        contentBlocks: newBlocks
+      }));
+      
+      // Focus on the new block after a short delay
+      setTimeout(() => {
+        const newTextarea = document.querySelector(`[data-block-id="${newBlock.id}"]`);
+        if (newTextarea) {
+          newTextarea.focus();
+          newTextarea.setSelectionRange(0, 0);
+        }
+      }, 50);
+    }
   };
 
   // Handle media upload for content blocks
