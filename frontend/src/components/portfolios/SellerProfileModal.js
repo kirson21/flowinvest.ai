@@ -158,6 +158,38 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
     alert('Review submitted successfully! The seller\'s rating has been updated.');
   };
 
+  const handleDeleteReview = (reviewId) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) {
+      return;
+    }
+
+    // Remove from localStorage
+    const reviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+    if (reviews[seller.name]) {
+      reviews[seller.name] = reviews[seller.name].filter(review => review.id !== reviewId);
+      localStorage.setItem('seller_reviews', JSON.stringify(reviews));
+    }
+
+    // Update local state
+    const updatedReviews = allReviews.filter(review => review.id !== reviewId);
+    setAllReviews(updatedReviews);
+
+    // Recalculate rating
+    if (updatedReviews.length > 0) {
+      const avgRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0) / updatedReviews.length;
+      setSellerRating(Math.round(avgRating * 10) / 10);
+    } else {
+      setSellerRating(0);
+    }
+
+    // Trigger refresh of marketplace products
+    if (onReviewAdded) {
+      onReviewAdded();
+    }
+
+    alert('Review deleted successfully!');
+  };
+
   const renderStars = (rating, totalReviews = null) => {
     // For individual reviews (when totalReviews is null), always show stars based on rating
     // For seller overall rating, check if there are reviews
