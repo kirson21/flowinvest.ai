@@ -59,9 +59,10 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
   useEffect(() => {
     if (product && isOpen) {
       setProductData({
-        title: product.title || '',
+        title: product.title || product.name || '',
         description: product.description || '',
         content: product.content || '',
+        contentBlocks: product.contentBlocks || [{ type: 'text', content: product.content || '', id: Date.now() }],
         price: product.price?.toString() || '',
         category: product.category || 'portfolio',
         tags: product.tags || [],
@@ -73,8 +74,147 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
       });
       setStep('edit');
       setErrors({});
+      // Update attachment count
+      setTimeout(updateAttachmentCount, 100);
     }
   }, [product, isOpen]);
+
+  // Rich content editor functions
+  const updateAttachmentCount = () => {
+    const mediaBlocks = productData.contentBlocks.filter(block => 
+      (block.type !== 'text') && block.file
+    );
+    setAttachmentCount(mediaBlocks.length);
+  };
+
+  const addContentBlock = (type, afterIndex, position = 'after') => {
+    if (type !== 'text' && attachmentCount >= MAX_ATTACHMENTS) {
+      alert(`Maximum ${MAX_ATTACHMENTS} attachments allowed. Please remove some attachments before adding more.`);
+      setShowMediaMenu(false);
+      return;
+    }
+
+    const newBlock = {
+      type: type,
+      content: type === 'text' ? '' : null,
+      id: Date.now() + Math.random(),
+      ...(type !== 'text' && { file: null, uploading: false })
+    };
+
+    const newBlocks = [...productData.contentBlocks];
+    const insertIndex = position === 'after' ? afterIndex + 1 : afterIndex;
+    newBlocks.splice(insertIndex, 0, newBlock);
+    
+    setProductData(prev => ({
+      ...prev,
+      contentBlocks: newBlocks
+    }));
+    
+    setShowMediaMenu(false);
+    setActiveBlockId(null);
+    setTimeout(updateAttachmentCount, 100);
+  };
+
+  const updateContentBlock = (blockId, updates) => {
+    setProductData(prev => ({
+      ...prev,
+      contentBlocks: prev.contentBlocks.map(block =>
+        block.id === blockId ? { ...block, ...updates } : block
+      )
+    }));
+    
+    if (updates.file !== undefined) {
+      setTimeout(updateAttachmentCount, 100);
+    }
+  };
+
+  const removeContentBlock = (blockId) => {
+    if (productData.contentBlocks.length <= 1) {
+      alert('You must have at least one content block.');
+      return;
+    }
+
+    setProductData(prev => ({
+      ...prev,
+      contentBlocks: prev.contentBlocks.filter(block => block.id !== blockId)
+    }));
+    
+    setTimeout(updateAttachmentCount, 100);
+  };
+
+  const handlePlusButtonClick = (index, position = 'after') => {
+    setCurrentBlockIndex(index);
+    setMenuPosition(position);
+    setShowMediaMenu(!showMediaMenu);
+  };
+
+  const handleTextBlockFocus = (blockId) => {
+    setActiveBlockId(blockId);
+  };
+
+  const handleTextBlockKeyDown = (e, blockId, blockIndex) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      
+      const textarea = e.target;
+      const cursorPosition = textarea.selectionStart;
+      const currentContent = textarea.value;
+      
+      const beforeCursor = currentContent.slice(0, cursorPosition);
+      const afterCursor = currentContent.slice(cursorPosition);
+      
+      updateContentBlock(blockId, { content: beforeCursor });
+      
+      const newBlock = {
+        type: 'text',
+        content: afterCursor,
+        id: Date.now() + Math.random()
+      };
+      
+      const newBlocks = [...productData.contentBlocks];
+      newBlocks.splice(blockIndex + 1, 0, newBlock);
+      
+      setProductData(prev => ({
+        ...prev,
+        contentBlocks: newBlocks
+      }));
+      
+      setTimeout(() => {
+        const newTextarea = document.querySelector(`[data-block-id="${newBlock.id}"]`);
+        if (newTextarea) {
+          newTextarea.focus();
+          newTextarea.setSelectionRange(0, 0);
+        }
+      }, 50);
+    }
+  };
+
+  const handleContentMediaUpload = async (file, blockId) => {
+    if (!file) return;
+
+    updateContentBlock(blockId, { uploading: true });
+
+    try {
+      const uploadResult = await FileUploadService.uploadProductAttachment(file);
+      
+      updateContentBlock(blockId, {
+        file: {
+          name: file.name,
+          size: file.size,
+          type: FileUploadService.getFileType(file.name),
+          url: uploadResult.publicUrl,
+          path: uploadResult.path,
+          bucket: uploadResult.bucket
+        },
+        uploading: false
+      });
+
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      alert('Error uploading media. Please try again.');
+      updateContentBlock(blockId, { uploading: false });
+    }
+  };
 
   if (!isOpen || !product) return null;
 
