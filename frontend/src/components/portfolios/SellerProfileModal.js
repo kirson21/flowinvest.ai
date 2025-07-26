@@ -118,29 +118,37 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
   const handleSubmitReview = () => {
     if (!validateReview()) return;
     
-    // Mock review submission (in real app, this would call an API)
+    // Create new review
     const newReview = {
       id: Date.now(),
-      userName: user?.user_metadata?.name || user?.email || 'Anonymous',
-      userAvatar: user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user?.email}&size=50&background=0097B2&color=ffffff`,
+      userName: user?.user_metadata?.display_name || user?.user_metadata?.name || user?.email || 'Anonymous',
+      userAvatar: user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.display_name || user?.email || 'User')}&size=50&background=0097B2&color=ffffff`,
       rating: reviewData.rating,
       comment: reviewData.comment,
       date: new Date().toISOString(),
       verified: true
     };
     
-    // Add to localStorage for demo (in real app, send to backend)
+    // Add to localStorage
     const reviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
     if (!reviews[seller.name]) reviews[seller.name] = [];
     reviews[seller.name].unshift(newReview);
     localStorage.setItem('seller_reviews', JSON.stringify(reviews));
+    
+    // Update local state immediately
+    const updatedReviews = [newReview, ...allReviews];
+    setAllReviews(updatedReviews);
+    
+    // Recalculate rating
+    const avgRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0) / updatedReviews.length;
+    setSellerRating(Math.round(avgRating * 10) / 10);
     
     // Reset form and close modal
     setReviewData({ rating: 5, comment: '' });
     setReviewErrors({});
     setIsReviewModalOpen(false);
     
-    alert('Review submitted successfully! (In production, this would update the seller\'s reviews)');
+    alert('Review submitted successfully! The seller\'s rating has been updated.');
   };
 
   const renderStars = (rating, totalReviews = 0) => {
