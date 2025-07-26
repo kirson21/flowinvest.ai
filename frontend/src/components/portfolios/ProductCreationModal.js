@@ -31,6 +31,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     title: '',
     description: '',
     content: '',
+    contentBlocks: [], // New: for rich content with media
     price: '',
     category: 'portfolio',
     tags: [],
@@ -43,9 +44,12 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [showMediaMenu, setShowMediaMenu] = useState(false);
+  const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
+  const contentRef = useRef(null);
 
   if (!isOpen) return null;
 
