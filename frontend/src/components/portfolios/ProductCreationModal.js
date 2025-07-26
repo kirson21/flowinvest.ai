@@ -47,6 +47,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   const [errors, setErrors] = useState({});
   const [showMediaMenu, setShowMediaMenu] = useState(false);
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
+  const [menuPosition, setMenuPosition] = useState('after'); // 'after' or 'before'
   const [activeBlockId, setActiveBlockId] = useState(null);
   const [attachmentCount, setAttachmentCount] = useState(0);
   const fileInputRef = useRef(null);
