@@ -23,7 +23,8 @@ import {
   Globe,
   Linkedin,
   Edit3,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 
 const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
