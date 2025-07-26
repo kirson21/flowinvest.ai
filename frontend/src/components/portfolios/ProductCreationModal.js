@@ -17,7 +17,8 @@ import {
   Check,
   Loader2,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import FileUploadService from '../../services/fileUpload';
 
