@@ -242,6 +242,7 @@ test_plan:
     - "Fix React Error #310 in ProductCreationModal"
     - "Fix Star Ratings Display in Reviews"
     - "Fix Star Ratings and Review Counts on Marketplace Cards"
+    - "Fix Plus Icon Import Error in ProductCreationModal"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
