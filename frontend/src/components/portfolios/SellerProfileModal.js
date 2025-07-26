@@ -40,6 +40,8 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
   const [reviewErrors, setReviewErrors] = useState({});
   const [allReviews, setAllReviews] = useState([]);
   const [sellerRating, setSellerRating] = useState(0);
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [sellerProducts, setSellerProducts] = useState([]);
 
   // Load reviews from localStorage and merge with seller.reviews when modal opens
   useEffect(() => {
