@@ -32,6 +32,7 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
     title: '',
     description: '',
     content: '',
+    contentBlocks: [], // Rich content blocks
     price: '',
     category: 'portfolio',
     tags: [],
@@ -43,9 +44,16 @@ const ProductEditModal = ({ product, isOpen, onClose, onSave, onDelete }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [showMediaMenu, setShowMediaMenu] = useState(false);
+  const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
+  const [menuPosition, setMenuPosition] = useState('after');
+  const [activeBlockId, setActiveBlockId] = useState(null);
+  const [attachmentCount, setAttachmentCount] = useState(0);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
+
+  const MAX_ATTACHMENTS = 30;
 
   // Initialize form data when product changes
   useEffect(() => {
