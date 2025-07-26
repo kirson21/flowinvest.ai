@@ -87,6 +87,10 @@ const Settings = () => {
   const [showManageProducts, setShowManageProducts] = useState(false);
   const [userProducts, setUserProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  
+  // Product edit modal state
+  const [selectedProductForEdit, setSelectedProductForEdit] = useState(null);
+  const [isProductEditOpen, setIsProductEditOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
