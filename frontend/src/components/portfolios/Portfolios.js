@@ -437,7 +437,8 @@ const Portfolios = () => {
       <SellerProfileModal 
         seller={selectedSeller} 
         isOpen={isSellerModalOpen} 
-        onClose={closeSellerModal} 
+        onClose={closeSellerModal}
+        onReviewAdded={loadProductsWithReviews} // Add callback to refresh products when review is added
       />
 
       {/* Product Creation Modal */}
