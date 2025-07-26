@@ -149,6 +149,11 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
     setReviewErrors({});
     setIsReviewModalOpen(false);
     
+    // Trigger refresh of marketplace products
+    if (onReviewAdded) {
+      onReviewAdded();
+    }
+    
     alert('Review submitted successfully! The seller\'s rating has been updated.');
   };
 
