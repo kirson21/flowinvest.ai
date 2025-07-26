@@ -61,7 +61,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
     if (isOpen) {
       initializeContentBlocks();
     }
-  }, [isOpen]);
+  }, [isOpen, productData.contentBlocks]);
 
   // Close media menu when clicking outside
   React.useEffect(() => {
