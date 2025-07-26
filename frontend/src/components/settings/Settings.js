@@ -1164,6 +1164,18 @@ const Settings = () => {
         </Card>
       </div>
     )}
+
+    {/* Product Edit Modal */}
+    <ProductEditModal
+      product={selectedProductForEdit}
+      isOpen={isProductEditOpen}
+      onClose={() => {
+        setIsProductEditOpen(false);
+        setSelectedProductForEdit(null);
+      }}
+      onSave={handleProductUpdated}
+      onDelete={handleProductDeleted}
+    />
     </>
   );
 };
