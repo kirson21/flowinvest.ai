@@ -1127,6 +1127,7 @@ const Settings = () => {
                             <Button
                               size="sm"
                               variant="outline"
+                              onClick={() => handleEditProduct(product)}
                               className="flex-1 lg:flex-none border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
                             >
                               <Edit3 size={14} className="mr-2" />
