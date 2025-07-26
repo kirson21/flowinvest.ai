@@ -152,9 +152,10 @@ const SellerProfileModal = ({ seller, isOpen, onClose }) => {
     alert('Review submitted successfully! The seller\'s rating has been updated.');
   };
 
-  const renderStars = (rating, totalReviews = 0) => {
-    // If there are no reviews, show empty stars
-    if (!totalReviews || totalReviews === 0) {
+  const renderStars = (rating, totalReviews = null) => {
+    // For individual reviews (when totalReviews is null), always show stars based on rating
+    // For seller overall rating, check if there are reviews
+    if (totalReviews !== null && (!totalReviews || totalReviews === 0)) {
       const emptyStars = [];
       for (let i = 0; i < 5; i++) {
         emptyStars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
