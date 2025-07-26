@@ -26,7 +26,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const SellerProfileModal = ({ seller, isOpen, onClose }) => {
+const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
   const { user } = useAuth();
   
   // Review display state (Airbnb style)
