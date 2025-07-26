@@ -355,6 +355,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
           title: '',
           description: '',
           content: '',
+          contentBlocks: [{ type: 'text', content: '', id: Date.now() }],
           price: '',
           category: 'portfolio',
           tags: [],
