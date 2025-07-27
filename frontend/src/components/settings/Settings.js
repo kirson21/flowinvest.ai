@@ -101,8 +101,41 @@ const Settings = () => {
     if (user) {
       loadUserProfile();
       loadSellerData();
+      loadAccountBalance();
     }
   }, [user]);
+
+  const loadAccountBalance = () => {
+    try {
+      // Load balance from localStorage (in a real app, this would come from backend/database)
+      const savedBalance = localStorage.getItem(`account_balance_${user?.id}`);
+      setAccountBalance(savedBalance ? parseFloat(savedBalance) : 0);
+    } catch (error) {
+      console.error('Error loading account balance:', error);
+      setAccountBalance(0);
+    }
+  };
+
+  const handleTopUp = () => {
+    if (!topUpAmount || parseFloat(topUpAmount) <= 0) {
+      alert('Please enter a valid amount to top up.');
+      return;
+    }
+
+    const amount = parseFloat(topUpAmount);
+    const newBalance = accountBalance + amount;
+    
+    // Update balance in localStorage
+    localStorage.setItem(`account_balance_${user?.id}`, newBalance.toString());
+    setAccountBalance(newBalance);
+    
+    // Reset and close modal
+    setTopUpAmount('');
+    setShowTopUpModal(false);
+    
+    setMessage(`Successfully topped up $${amount.toFixed(2)}! Your new balance is $${newBalance.toFixed(2)}`);
+    setTimeout(() => setMessage(''), 4000);
+  };
 
   // Load user products when manage products modal opens
   useEffect(() => {
