@@ -759,7 +759,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                         type="button"
                         variant={formData.marginType === 'cross' ? 'default' : 'outline'}
                         onClick={() => handleInputChange('marginType', 'cross')}
-                        className={`h-auto p-4 text-sm ${
+                        className={`h-auto p-3 sm:p-4 text-sm ${
                           formData.marginType === 'cross' 
                             ? 'bg-[#0097B2] hover:bg-[#0097B2]/90 text-white' 
                             : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-[#474545] dark:text-white'
@@ -767,7 +767,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                       >
                         <div className="text-center">
                           <div className="font-medium">Cross</div>
-                          <div className="text-xs opacity-70 mt-1">
+                          <div className="text-xs opacity-70 mt-1 leading-tight">
                             Share margin across positions
                           </div>
                         </div>
@@ -776,7 +776,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                         type="button"
                         variant={formData.marginType === 'isolated' ? 'default' : 'outline'}
                         onClick={() => handleInputChange('marginType', 'isolated')}
-                        className={`h-auto p-4 text-sm ${
+                        className={`h-auto p-3 sm:p-4 text-sm ${
                           formData.marginType === 'isolated' 
                             ? 'bg-[#0097B2] hover:bg-[#0097B2]/90 text-white' 
                             : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-[#474545] dark:text-white'
@@ -784,7 +784,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                       >
                         <div className="text-center">
                           <div className="font-medium">Isolated</div>
-                          <div className="text-xs opacity-70 mt-1">
+                          <div className="text-xs opacity-70 mt-1 leading-tight">
                             Limit risk to this position only
                           </div>
                         </div>
