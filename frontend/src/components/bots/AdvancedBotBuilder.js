@@ -1561,7 +1561,15 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                       riskLevel: 'Medium',
                       strategy: formData.tradingMode || 'Simple',
                       exchange: mockApiKeys.find(k => k.id === formData.apiKey)?.exchange || 'Binance',
-                      id: editingBot?.id // Include ID if editing
+                      id: editingBot?.id, // Include ID if editing
+                      // Ensure leverage and margin type are explicitly included
+                      leverage: formData.leverage,
+                      marginType: formData.marginType,
+                      config: {
+                        ...formData,
+                        leverage: formData.leverage,
+                        marginType: formData.marginType
+                      }
                     };
                     
                     try {
