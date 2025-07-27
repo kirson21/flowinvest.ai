@@ -555,6 +555,34 @@ const Settings = () => {
               )}
             </div>
 
+            {/* Account Balance Section */}
+            <div className="bg-gradient-to-r from-[#0097B2]/5 to-[#0097B2]/10 p-4 rounded-lg border border-[#0097B2]/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Account Balance
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <DollarSign className="w-5 h-5 text-[#0097B2]" />
+                    <span className="text-2xl font-bold text-[#0097B2]">
+                      {accountBalance.toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Available for transactions and purchases
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowTopUpModal(true)}
+                  className="bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Top Up
+                </Button>
+              </div>
+            </div>
+
             {/* Profile Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
