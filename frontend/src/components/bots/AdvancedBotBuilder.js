@@ -667,6 +667,79 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                     <RefreshCw size={16} />
                   </Button>
                 </div>
+
+                {/* Leverage Settings */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="leverage">Leverage: {formData.leverage}x</Label>
+                    <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <input
+                        id="leverage"
+                        type="range"
+                        min="1"
+                        max="100"
+                        step="1"
+                        value={formData.leverage}
+                        onChange={(e) => handleInputChange('leverage', parseInt(e.target.value))}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #0097B2 0%, #0097B2 ${(formData.leverage - 1) * 100 / 99}%, #e5e7eb ${(formData.leverage - 1) * 100 / 99}%, #e5e7eb 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>1x</span>
+                        <span className="text-[#0097B2] font-medium">{formData.leverage}x</span>
+                        <span>100x</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Higher leverage increases both potential profits and risks
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Margin Type</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        type="button"
+                        variant={formData.marginType === 'cross' ? 'default' : 'outline'}
+                        onClick={() => handleInputChange('marginType', 'cross')}
+                        className={`h-auto p-4 text-sm ${
+                          formData.marginType === 'cross' 
+                            ? 'bg-[#0097B2] hover:bg-[#0097B2]/90 text-white' 
+                            : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-[#474545] dark:text-white'
+                        }`}
+                      >
+                        <div className="text-center">
+                          <div className="font-medium">Cross</div>
+                          <div className="text-xs opacity-70 mt-1">
+                            Share margin across positions
+                          </div>
+                        </div>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={formData.marginType === 'isolated' ? 'default' : 'outline'}
+                        onClick={() => handleInputChange('marginType', 'isolated')}
+                        className={`h-auto p-4 text-sm ${
+                          formData.marginType === 'isolated' 
+                            ? 'bg-[#0097B2] hover:bg-[#0097B2]/90 text-white' 
+                            : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-[#474545] dark:text-white'
+                        }`}
+                      >
+                        <div className="text-center">
+                          <div className="font-medium">Isolated</div>
+                          <div className="text-xs opacity-70 mt-1">
+                            Limit risk to this position only
+                          </div>
+                        </div>
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Cross margin uses all available balance, Isolated limits risk to the deposited amount
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
