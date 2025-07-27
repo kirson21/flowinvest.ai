@@ -92,6 +92,11 @@ const Settings = () => {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState(null);
   const [isProductEditOpen, setIsProductEditOpen] = useState(false);
 
+  // Account balance state
+  const [accountBalance, setAccountBalance] = useState(0);
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState('');
+
   useEffect(() => {
     if (user) {
       loadUserProfile();
