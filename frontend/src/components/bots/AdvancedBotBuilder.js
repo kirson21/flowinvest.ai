@@ -830,7 +830,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                 </div>
 
                 {/* Trading Mode Presets - Only show when Simple mode is selected */}
-                {formData.tradingMode === 'simple' && (
+                {formData.tradingMode === 'Simple' && (
                   <div className="space-y-3">
                     <Label className="text-sm text-gray-700 dark:text-gray-300">Quick Setup Presets</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
