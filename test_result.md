@@ -223,6 +223,33 @@ frontend:
           agent: "main"
           comment: "CRITICAL FIX: Fixed ReferenceError 'Can't find variable: Plus' in Create Your Product functionality. The Plus icon from lucide-react was used in the rich content editor but not imported. Added Plus to the lucide-react imports. The Patreon-style rich content editor now works without reference errors, allowing users to add content blocks using the '+' button interface."
 
+  - task: "Fix Trading Mode Preset Buttons Visibility"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reports: 'I can't see these three buttons in settings (Conservative, Modest, Aggressive options)' even when Simple mode is selected. The preset buttons are not visible in the Advanced Bot Builder."
+        - working: false
+          agent: "main"
+          comment: "DEBUGGING: Identified the issue - case sensitivity bug where condition checks for 'simple' but actual value is 'Simple' (capital S). Line 833: {formData.tradingMode === 'simple' && ( should be {formData.tradingMode === 'Simple' && (. Also need to fix mobile responsiveness issue with margin type text extending beyond buttons."
+
+  - task: "Fix Mobile Responsiveness for Margin Type Buttons"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reports: 'for now in 'deposit configuration' 'margin type' the text is extends beyond the buttons' - mobile responsiveness issue where margin type description text extends beyond button boundaries."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
