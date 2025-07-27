@@ -258,6 +258,8 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Fix Trading Mode Preset Buttons Visibility"
+    - "Fix Mobile Responsiveness for Margin Type Buttons"
     - "Development Test User Implementation"
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
