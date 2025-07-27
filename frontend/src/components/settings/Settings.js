@@ -1242,6 +1242,105 @@ const Settings = () => {
       onSave={handleProductUpdated}
       onDelete={handleProductDeleted}
     />
+
+    {/* Top Up Modal */}
+    {showTopUpModal && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl text-[#474545] dark:text-white">
+                Top Up Account
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowTopUpModal(false);
+                  setTopUpAmount('');
+                }}
+                className="p-2"
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <div className="text-center p-4 bg-[#0097B2]/5 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Current Balance</p>
+              <div className="flex items-center justify-center space-x-2">
+                <DollarSign className="w-6 h-6 text-[#0097B2]" />
+                <span className="text-3xl font-bold text-[#0097B2]">
+                  {accountBalance.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="topup-amount">Top Up Amount ($)</Label>
+              <Input
+                id="topup-amount"
+                type="number"
+                min="1"
+                step="0.01"
+                value={topUpAmount}
+                onChange={(e) => setTopUpAmount(e.target.value)}
+                placeholder="Enter amount to add"
+                className="border-[#0097B2]/20 focus:border-[#0097B2]"
+              />
+            </div>
+
+            {topUpAmount && parseFloat(topUpAmount) > 0 && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Current Balance:</span>
+                  <span className="font-medium">${accountBalance.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Top Up Amount:</span>
+                  <span className="font-medium text-[#0097B2]">+${parseFloat(topUpAmount || 0).toFixed(2)}</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between items-center font-semibold">
+                  <span className="text-[#474545] dark:text-white">New Balance:</span>
+                  <span className="text-[#0097B2] text-lg">
+                    ${(accountBalance + parseFloat(topUpAmount || 0)).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex space-x-3 pt-4">
+              <Button
+                onClick={() => {
+                  setShowTopUpModal(false);
+                  setTopUpAmount('');
+                }}
+                variant="outline"
+                className="flex-1 border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleTopUp}
+                disabled={!topUpAmount || parseFloat(topUpAmount) <= 0}
+                className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Top Up
+              </Button>
+            </div>
+
+            <div className="text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                💡 Funds will be added instantly to your account
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
     </>
   );
 };
