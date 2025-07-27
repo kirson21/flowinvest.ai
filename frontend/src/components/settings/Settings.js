@@ -916,7 +916,7 @@ const Settings = () => {
             className="w-full justify-start border-[#0097B2]/20 hover:bg-[#0097B2]/5"
           >
             <CreditCard size={16} className="mr-2" />
-            Payment Methods
+            Manage Subscription & Payments
           </Button>
         </CardContent>
       </Card>
