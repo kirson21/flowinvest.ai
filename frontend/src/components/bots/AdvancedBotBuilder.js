@@ -820,6 +820,52 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                   </div>
                 </div>
 
+                {/* Trading Mode Presets - Only show when Simple mode is selected */}
+                {formData.tradingMode === 'simple' && (
+                  <div className="space-y-3">
+                    <Label className="text-sm text-gray-700 dark:text-gray-300">Quick Setup Presets</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {Object.entries(tradingModePresets).map(([key, preset]) => (
+                        <Button
+                          key={key}
+                          type="button"
+                          variant="outline"
+                          onClick={() => applyTradingModePreset(key)}
+                          className="h-auto p-4 border-2 border-gray-200 hover:border-[#0097B2] hover:bg-[#0097B2]/5 transition-all"
+                        >
+                          <div className="text-center w-full">
+                            <div className="font-semibold text-[#474545] dark:text-white mb-2">
+                              {preset.label}
+                            </div>
+                            
+                            <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                              <div className="flex justify-between">
+                                <span>OVERLAP</span>
+                                <span className="font-medium text-[#0097B2]">{preset.overlappingPriceChanges}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>MARTINGALE</span>
+                                <span className="font-medium text-[#0097B2]">{preset.martingalePercentage}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>ORDER GRID</span>
+                                <span className="font-medium text-[#0097B2]">{preset.gridOfOrders}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-xs text-gray-500 mt-2 italic">
+                              {preset.description}
+                            </div>
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 text-center">
+                      💡 Select a preset to automatically configure advanced settings
+                    </p>
+                  </div>
+                )}
+
                 <Button
                   type="button"
                   variant="outline"
