@@ -511,6 +511,15 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
       
       // Show advanced settings to display the applied values
       setShowAdvanced(true);
+      
+      // Provide visual feedback
+      console.log(`Applied ${preset.label} trading mode preset:`, {
+        overlappingPriceChanges: preset.overlappingPriceChanges,
+        gridOfOrders: preset.gridOfOrders,
+        martingalePercentage: preset.martingalePercentage,
+        indent: preset.indent,
+        pullingUpOrderGrid: preset.pullingUpOrderGrid
+      });
     }
   };
 
