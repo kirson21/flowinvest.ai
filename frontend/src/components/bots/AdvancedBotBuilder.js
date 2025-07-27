@@ -87,6 +87,8 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
       // Deposit settings
       baseOrderSize: 10,
       safetyOrderSize: 20,
+      leverage: 1,
+      marginType: 'cross',
       
       // Entry settings
       overlappingPriceChanges: 1.5,
