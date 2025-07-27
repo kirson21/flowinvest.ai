@@ -224,8 +224,8 @@ frontend:
           comment: "CRITICAL FIX: Fixed ReferenceError 'Can't find variable: Plus' in Create Your Product functionality. The Plus icon from lucide-react was used in the rich content editor but not imported. Added Plus to the lucide-react imports. The Patreon-style rich content editor now works without reference errors, allowing users to add content blocks using the '+' button interface."
 
   - task: "Fix Trading Mode Preset Buttons Visibility"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
     stuck_count: 0
     priority: "high"
@@ -237,10 +237,13 @@ frontend:
         - working: false
           agent: "main"
           comment: "DEBUGGING: Identified the issue - case sensitivity bug where condition checks for 'simple' but actual value is 'Simple' (capital S). Line 833: {formData.tradingMode === 'simple' && ( should be {formData.tradingMode === 'Simple' && (. Also need to fix mobile responsiveness issue with margin type text extending beyond buttons."
+        - working: true
+          agent: "main"
+          comment: "FIXED: Changed line 833 from {formData.tradingMode === 'simple' && ( to {formData.tradingMode === 'Simple' && ( to fix case sensitivity issue. The Conservative, Modest, and Aggressive preset buttons should now be visible when Simple trading mode is selected."
 
   - task: "Fix Mobile Responsiveness for Margin Type Buttons"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
     stuck_count: 0
     priority: "medium"
@@ -249,6 +252,9 @@ frontend:
         - working: false
           agent: "user"
           comment: "User reports: 'for now in 'deposit configuration' 'margin type' the text is extends beyond the buttons' - mobile responsiveness issue where margin type description text extends beyond button boundaries."
+        - working: true
+          agent: "main"
+          comment: "FIXED: Improved mobile responsiveness by changing padding from p-4 to p-3 sm:p-4 for better spacing on mobile devices and added leading-tight class to the description text (lines 761-762 and 779-780) to prevent text from extending beyond button boundaries on smaller screens."
 
 metadata:
   created_by: "main_agent"
