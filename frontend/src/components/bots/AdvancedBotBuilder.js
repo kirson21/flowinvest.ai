@@ -468,6 +468,52 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
     ));
   };
 
+  // Trading mode presets
+  const tradingModePresets = {
+    conservative: {
+      overlappingPriceChanges: 40,
+      gridOfOrders: 20,
+      martingalePercentage: 5,
+      indent: 1,
+      pullingUpOrderGrid: 0.5,
+      label: 'Conservative',
+      description: 'Lower risk, steady growth'
+    },
+    modest: {
+      overlappingPriceChanges: 25,
+      gridOfOrders: 15,
+      martingalePercentage: 5,
+      indent: 1.5,
+      pullingUpOrderGrid: 1,
+      label: 'Modest',
+      description: 'Balanced risk and reward'
+    },
+    aggressive: {
+      overlappingPriceChanges: 15,
+      gridOfOrders: 10,
+      martingalePercentage: 5,
+      indent: 2,
+      pullingUpOrderGrid: 2,
+      label: 'Aggressive',
+      description: 'Higher risk, faster profits'
+    }
+  };
+
+  const applyTradingModePreset = (presetKey) => {
+    const preset = tradingModePresets[presetKey];
+    if (preset) {
+      // Apply all preset values to form data
+      handleInputChange('overlappingPriceChanges', preset.overlappingPriceChanges);
+      handleInputChange('gridOfOrders', preset.gridOfOrders);
+      handleInputChange('martingalePercentage', preset.martingalePercentage);
+      handleInputChange('indent', preset.indent);
+      handleInputChange('pullingUpOrderGrid', preset.pullingUpOrderGrid);
+      
+      // Show advanced settings to display the applied values
+      setShowAdvanced(true);
+    }
+  };
+
   return (
     <div className="p-2 sm:p-4 pb-24 sm:pb-32 lg:pb-40 max-w-6xl mx-auto">
       <div className="flex items-center mb-4 sm:mb-6">
