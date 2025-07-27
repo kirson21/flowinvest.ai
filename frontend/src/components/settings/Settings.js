@@ -36,6 +36,7 @@ import {
   ShoppingBag,
   Plus,
   Minus,
+  DollarSign,
   ExternalLink,
   Instagram,
   Twitter,
