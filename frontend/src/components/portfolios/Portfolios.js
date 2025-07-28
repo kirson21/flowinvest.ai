@@ -75,9 +75,12 @@ const Portfolios = () => {
         }
       }
       
-      // Update vote data
+      // Update vote data - ensure votes object exists
       if (productVotes[product.id]) {
         updatedProduct.votes = productVotes[product.id];
+      } else {
+        // Initialize votes for user-created products
+        updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
       }
       
       return updatedProduct;
