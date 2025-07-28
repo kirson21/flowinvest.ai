@@ -511,7 +511,12 @@ export const mockPortfolios = [
     },
     rating: 4.8,
     totalReviews: 423,
-    assetAllocation: "Market Research & Analysis"
+    assetAllocation: "Market Research & Analysis",
+    votes: {
+      upvotes: 298,
+      downvotes: 52,
+      totalVotes: 350
+    }
   },
   {
     id: 7,
