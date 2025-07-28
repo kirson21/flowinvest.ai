@@ -309,6 +309,7 @@ test_plan:
     - "Fix Trading Mode Preset Buttons Visibility"
     - "Fix Mobile Responsiveness for Margin Type Buttons"
     - "Fix Martingale Preset Value Application"
+    - "Enhance View All Products Modal in SellerProfileModal"
     - "Development Test User Implementation"
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
