@@ -45,7 +45,9 @@ import {
   MessageCircle,
   FileText,
   Star,
-  Edit3
+  Edit3,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 const Settings = () => {
