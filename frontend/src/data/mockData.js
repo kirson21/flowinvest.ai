@@ -313,6 +313,7 @@ export const mockPortfolios = [
     id: 3,
     name: "Aggressive Tech Portfolio",
     description: "High-growth portfolio concentrated in technology and emerging markets",
+    category: "Portfolio Strategies",
     riskLevel: "High",
     expectedReturn: "20-35%",
     minimumInvestment: 2000,
