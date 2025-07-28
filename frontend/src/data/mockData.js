@@ -550,7 +550,12 @@ export const mockPortfolios = [
     },
     rating: 4.6,
     totalReviews: 234,
-    assetAllocation: "Software Tool"
+    assetAllocation: "Software Tool",
+    votes: {
+      upvotes: 178,
+      downvotes: 89,
+      totalVotes: 267
+    }
   },
   {
     id: 8,
