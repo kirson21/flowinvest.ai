@@ -42,6 +42,7 @@ const Portfolios = () => {
   const [isProductCreationOpen, setIsProductCreationOpen] = useState(false);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState(null);
   const [isProductEditOpen, setIsProductEditOpen] = useState(false);
+  const [userVotes, setUserVotes] = useState({});
 
   // Filter options
   const filterOptions = [
