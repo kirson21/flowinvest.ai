@@ -439,6 +439,12 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         totalReviews: 0,
         totalInvestors: 0,
         featured: false,
+        // Initialize voting structure
+        votes: {
+          upvotes: 0,
+          downvotes: 0,
+          totalVotes: 0
+        },
         // Store attachment information (now Supabase URLs instead of base64)
         attachments: productData.attachments,
       };
