@@ -1161,15 +1161,30 @@ const Settings = () => {
                                 </p>
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Rating</p>
-                                <div className="flex items-center space-x-1">
-                                  <Star size={12} className={product.rating > 0 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
-                                  <span className="text-sm font-medium text-[#474545] dark:text-white">
-                                    {product.rating || 0}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    ({product.totalReviews || 0} reviews)
-                                  </span>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Community Votes</p>
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex items-center space-x-1">
+                                    <ChevronUp size={12} className="text-green-600" />
+                                    <span className="text-sm font-medium text-green-600">
+                                      {product.votes?.upvotes || 0}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <ChevronDown size={12} className="text-red-600" />
+                                    <span className="text-sm font-medium text-red-600">
+                                      {product.votes?.downvotes || 0}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <span className="text-xs text-gray-500">Score:</span>
+                                    <span className={`text-sm font-bold ${
+                                      calculateVoteScore(product.votes) > 0 ? 'text-green-600' : 
+                                      calculateVoteScore(product.votes) < 0 ? 'text-red-600' : 
+                                      'text-gray-500'
+                                    }`}>
+                                      {calculateVoteScore(product.votes) > 0 ? '+' : ''}{calculateVoteScore(product.votes).toFixed(1)}%
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                               <div>
