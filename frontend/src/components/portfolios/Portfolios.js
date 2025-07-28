@@ -21,7 +21,8 @@ import {
   Youtube,
   Globe,
   Linkedin,
-  Edit
+  Edit,
+  Filter
 } from 'lucide-react';
 import { mockPortfolios } from '../../data/mockData';
 import SellerProfileModal from './SellerProfileModal';
