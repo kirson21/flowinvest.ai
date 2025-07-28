@@ -85,13 +85,24 @@ const Portfolios = () => {
     
     switch (filter) {
       case 'Most Popular':
-        // Sort by total reviews and rating (featured products first)
+        // Sort by vote score first, then by engagement (featured products get slight boost)
         filtered = portfoliosToFilter.sort((a, b) => {
+          const aVoteScore = calculateVoteScore(a.votes);
+          const bVoteScore = calculateVoteScore(b.votes);
+          
+          // Primary sort: by vote score
+          if (aVoteScore !== bVoteScore) {
+            return bVoteScore - aVoteScore;
+          }
+          
+          // Secondary sort: featured products get priority
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
-          const aPopularity = (a.totalReviews || 0) * (a.rating || 0);
-          const bPopularity = (b.totalReviews || 0) * (b.rating || 0);
-          return bPopularity - aPopularity;
+          
+          // Tertiary sort: by traditional engagement metrics
+          const aEngagement = (a.totalReviews || 0) * (a.rating || 0);
+          const bEngagement = (b.totalReviews || 0) * (b.rating || 0);
+          return bEngagement - aEngagement;
         });
         break;
       case 'Portfolio Strategies':
