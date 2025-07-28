@@ -25,7 +25,8 @@ import {
   Edit3,
   AlertCircle,
   Trash2,
-  DollarSign
+  DollarSign,
+  ShoppingCart
 } from 'lucide-react';
 
 const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
