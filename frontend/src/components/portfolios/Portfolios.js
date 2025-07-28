@@ -381,7 +381,53 @@ const Portfolios = () => {
     );
   };
 
-  const PortfolioCard = ({ portfolio }) => (
+  const PortfolioCard = ({ portfolio }) => {
+    // Voting component
+    const VotingButtons = ({ productId, votes }) => {
+      const userVote = userVotes[productId];
+      const voteScore = calculateVoteScore(votes);
+      
+      return (
+        <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-2">
+          <button
+            onClick={() => handleVote(productId, 'upvote')}
+            className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+              userVote === 'upvote' 
+                ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' 
+                : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            <ChevronUp size={16} />
+            <span className="text-sm font-medium">{votes?.upvotes || 0}</span>
+          </button>
+          
+          <div className="flex flex-col items-center px-2">
+            <span className="text-xs text-gray-500 dark:text-gray-400">Score</span>
+            <span className={`text-sm font-bold ${
+              voteScore > 0 ? 'text-green-600 dark:text-green-400' : 
+              voteScore < 0 ? 'text-red-600 dark:text-red-400' : 
+              'text-gray-500 dark:text-gray-400'
+            }`}>
+              {voteScore > 0 ? '+' : ''}{voteScore.toFixed(1)}%
+            </span>
+          </div>
+          
+          <button
+            onClick={() => handleVote(productId, 'downvote')}
+            className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+              userVote === 'downvote' 
+                ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' 
+                : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            <ChevronDown size={16} />
+            <span className="text-sm font-medium">{votes?.downvotes || 0}</span>
+          </button>
+        </div>
+      );
+    };
+
+    return (
     <Card className="hover:shadow-lg transition-all duration-200 group relative">
       {portfolio.featured && (
         <div className="absolute top-2 right-2 z-10">
