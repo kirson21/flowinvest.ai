@@ -22,7 +22,9 @@ import {
   Globe,
   Linkedin,
   Edit,
-  Filter
+  Filter,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { mockPortfolios } from '../../data/mockData';
 import SellerProfileModal from './SellerProfileModal';
