@@ -122,6 +122,26 @@ const Settings = () => {
     }
   };
 
+  // Load user votes from localStorage (sync with marketplace)
+  const loadUserVotes = () => {
+    const savedVotes = localStorage.getItem(`user_votes_${user?.id || 'guest'}`);
+    if (savedVotes) {
+      setUserVotes(JSON.parse(savedVotes));
+    }
+  };
+
+  // Calculate vote score using the same formula as marketplace
+  const calculateVoteScore = (votes) => {
+    if (!votes || votes.totalVotes === 0) return 0;
+    return ((votes.upvotes - votes.downvotes) / votes.totalVotes) * 100;
+  };
+
+  // Load votes from localStorage (sync with marketplace)
+  const loadProductVotes = () => {
+    const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+    return productVotes;
+  };
+
   const handleTopUp = () => {
     if (!topUpAmount || parseFloat(topUpAmount) <= 0) {
       alert('Please enter a valid amount to top up.');
