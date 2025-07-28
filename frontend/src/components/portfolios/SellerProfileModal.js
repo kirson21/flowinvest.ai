@@ -775,7 +775,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                             alert(`Purchase ${product.title || product.name} for $${product.price || product.minimumInvestment}! (Mock action)`);
                           }}
                         >
-                          <DollarSign size={16} className="mr-2" />
+                          <ShoppingCart size={16} className="mr-2" />
                           Purchase Now
                         </Button>
                       </CardContent>
