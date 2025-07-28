@@ -343,6 +343,21 @@ frontend:
           agent: "main"
           comment: "FIXED VOTING AND FILTERING ISSUES: User reported multiple issues: 1) Fixed category filter matching - updated filtering logic to match both old format ('portfolio', 'education', 'analysis', 'tools') and new format ('Portfolio Strategies', 'Educational Content', 'Market Analysis', 'Trading Tools') so user-created products appear in correct filters, 2) Fixed multiple voting issue - added proper user vote tracking and toggle functionality, 3) Fixed downvote counting - ensured all products have proper votes structure with Math.max(0, ...) to prevent negative votes, 4) Added votes initialization for user-created products in ProductCreationModal.js, 5) Added debug logging to track voting issues, 6) Enhanced vote data safety with fallback values to prevent display errors. The system now properly restricts one vote per user per product and correctly counts both upvotes and downvotes."
 
+  - task: "Replace Rating with Votes Statistics in Settings and SellerProfileModal"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/settings/Settings.js, /app/frontend/src/components/portfolios/SellerProfileModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User requests: 'Now in settings in 'manage products' button please display votes statistics instead of rating. Synchronise this statistic with marketplace please. Do the same at sellers' 'view all products' section in marketplace. Display votes statistics and synchronise this statistic with marketplace please.'"
+        - working: true
+          agent: "main"
+          comment: "IMPLEMENTED: Successfully replaced rating displays with votes statistics in both Settings and SellerProfileModal: 1) SETTINGS MANAGE PRODUCTS - Added voting functions (loadUserVotes, calculateVoteScore, loadProductVotes) to Settings.js, updated loadUserProducts to merge vote data from localStorage (sync with marketplace), replaced rating display with comprehensive vote statistics showing upvotes (green), downvotes (red), and vote score percentage, 2) SELLER PROFILE VIEW ALL PRODUCTS - Added same voting functions to SellerProfileModal.js, updated loadSellerProducts to include vote data synchronization, added Community Votes section to product metadata grid with upvotes/downvotes counts and score percentage, 3) MARKETPLACE SYNCHRONIZATION - Both sections now read from same localStorage keys ('product_votes', 'user_votes') ensuring complete synchronization with marketplace voting system, 4) VISUAL CONSISTENCY - Used same icons (ChevronUp/ChevronDown) and color coding (green for upvotes, red for downvotes) as marketplace. All vote statistics are now live-synchronized across Settings, SellerProfileModal, and main Marketplace."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
