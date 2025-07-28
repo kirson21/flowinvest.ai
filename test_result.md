@@ -243,6 +243,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "FIXED: Changed line 833 from {formData.tradingMode === 'simple' && ( to {formData.tradingMode === 'Simple' && ( to fix case sensitivity issue. The Conservative, Modest, and Aggressive preset buttons should now be visible when Simple trading mode is selected."
+        - working: true
+          agent: "main"
+          comment: "ADDITIONAL FIX: Fixed martingale preset value application. Changed line 508 from handleInputChange('martingalePercentage', preset.martingalePercentage) to handleInputChange('martingale', preset.martingalePercentage) to correctly update the martingale field when presets are applied. Also updated console.log on line 519 to reflect correct field name."
 
   - task: "Fix Mobile Responsiveness for Margin Type Buttons"
     implemented: true
