@@ -100,6 +100,9 @@ const Settings = () => {
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
 
+  // Voting state
+  const [userVotes, setUserVotes] = useState({});
+
   useEffect(() => {
     if (user) {
       loadUserProfile();
