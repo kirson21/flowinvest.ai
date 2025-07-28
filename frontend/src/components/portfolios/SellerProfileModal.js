@@ -83,11 +83,22 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
       const mockPortfolios = JSON.parse(localStorage.getItem('mock_portfolios') || '[]');
       const allPortfolios = [...userPortfolios, ...mockPortfolios];
+      const productVotes = loadProductVotes();
       
-      // Filter products by seller name
+      // Filter products by seller name and merge with vote data
       const sellerPortfolios = allPortfolios.filter(product => 
         product.seller && product.seller.name === seller.name
-      );
+      ).map(product => {
+        // Merge with vote data from localStorage (sync with marketplace)
+        const updatedProduct = { ...product };
+        if (productVotes[product.id]) {
+          updatedProduct.votes = productVotes[product.id];
+        } else {
+          // Initialize votes if they don't exist
+          updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
+        }
+        return updatedProduct;
+      });
       
       setSellerProducts(sellerPortfolios);
     } catch (error) {
