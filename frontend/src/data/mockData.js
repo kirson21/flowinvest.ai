@@ -228,6 +228,7 @@ export const mockPortfolios = [
     id: 2,
     name: "Conservative Income Portfolio",
     description: "Low-risk portfolio designed for steady income generation",
+    category: "Portfolio Strategies",
     riskLevel: "Low",
     expectedReturn: "6-9%",
     minimumInvestment: 500,
