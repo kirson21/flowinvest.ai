@@ -32,11 +32,22 @@ const Portfolios = () => {
   const { user } = useAuth();
   const { t } = useApp();
   const [portfolios, setPortfolios] = useState(mockPortfolios);
+  const [filteredPortfolios, setFilteredPortfolios] = useState(mockPortfolios);
+  const [selectedFilter, setSelectedFilter] = useState('Most Popular');
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
   const [isProductCreationOpen, setIsProductCreationOpen] = useState(false);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState(null);
   const [isProductEditOpen, setIsProductEditOpen] = useState(false);
+
+  // Filter options
+  const filterOptions = [
+    'Most Popular',
+    'Portfolio Strategies',
+    'Educational Content',
+    'Market Analysis',
+    'Trading Tools'
+  ];
 
   const loadProductsWithReviews = () => {
     const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
