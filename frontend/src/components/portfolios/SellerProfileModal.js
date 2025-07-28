@@ -72,6 +72,9 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
 
       // Load seller's products
       loadSellerProducts();
+      
+      // Load user votes
+      loadUserVotes();
     }
   }, [isOpen, seller]);
 
