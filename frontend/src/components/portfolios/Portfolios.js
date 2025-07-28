@@ -479,7 +479,7 @@ const Portfolios = () => {
       </div>
 
       <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-        {portfolios.map((portfolio) => (
+        {filteredPortfolios.map((portfolio) => (
           <PortfolioCard key={portfolio.id} portfolio={portfolio} />
         ))}
       </div>
