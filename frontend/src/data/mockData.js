@@ -424,6 +424,143 @@ export const mockPortfolios = [
     rating: 4.7,
     totalReviews: 289,
     price: 125
+  },
+  {
+    id: 5,
+    title: "Complete Options Trading Course",
+    name: "Complete Options Trading Course",
+    description: "Comprehensive guide to options trading strategies, risk management, and advanced techniques",
+    category: "Educational Content",
+    riskLevel: "Medium",
+    expectedReturn: "Educational",
+    minimumInvestment: 50,
+    price: 50,
+    featured: false,
+    totalInvestors: 1245,
+    seller: {
+      name: "Dr. Lisa Wang",
+      avatar: "https://ui-avatars.com/api/?name=Dr.+Lisa+Wang&size=150&background=2196F3&color=ffffff",
+      bio: "PhD in Finance, former university professor and author of 'Options Trading Made Simple'. 15+ years teaching derivatives and risk management.",
+      experience: "15+ years",
+      specialties: ["Options Trading", "Risk Management", "Financial Education", "Derivatives"],
+      socialLinks: {
+        twitter: "https://x.com/drlisamwang",
+        linkedin: "https://linkedin.com/in/dr-lisa-wang",
+        website: "https://optionsmastery.com"
+      },
+      stats: {
+        totalProducts: 6,
+        totalSales: 3456,
+        successRate: 98.5,
+        memberSince: "2021"
+      }
+    },
+    rating: 4.9,
+    totalReviews: 567,
+    assetAllocation: "100% Educational Content"
+  },
+  {
+    id: 6,
+    title: "Weekly Market Analysis Report",
+    name: "Weekly Market Analysis Report",
+    description: "Professional weekly market analysis with actionable insights and trading opportunities",
+    category: "Market Analysis",
+    riskLevel: "Low",
+    expectedReturn: "Informational",
+    minimumInvestment: 25,
+    price: 25,
+    featured: true,
+    totalInvestors: 892,
+    seller: {
+      name: "Market Insights Pro",
+      avatar: "https://ui-avatars.com/api/?name=Market+Insights+Pro&size=150&background=4CAF50&color=ffffff",
+      bio: "Team of professional analysts providing institutional-grade market research and trading insights. Former Wall Street analysts with 20+ years combined experience.",
+      experience: "20+ years",
+      specialties: ["Market Analysis", "Technical Analysis", "Fundamental Analysis", "Trading Signals"],
+      socialLinks: {
+        telegram: "https://t.me/marketinsightspro",
+        twitter: "https://x.com/marketinsightspro",
+        website: "https://marketinsights.pro"
+      },
+      stats: {
+        totalProducts: 4,
+        totalSales: 2341,
+        successRate: 96.8,
+        memberSince: "2022"
+      }
+    },
+    rating: 4.8,
+    totalReviews: 423,
+    assetAllocation: "Market Research & Analysis"
+  },
+  {
+    id: 7,
+    title: "AI Trading Bot Builder",
+    name: "AI Trading Bot Builder",
+    description: "Advanced tool for creating custom AI-powered trading bots with backtesting capabilities",
+    category: "Trading Tools",
+    riskLevel: "High",
+    expectedReturn: "Tool Access",
+    minimumInvestment: 200,
+    price: 200,
+    featured: true,
+    totalInvestors: 456,
+    seller: {
+      name: "TechTrader AI",
+      avatar: "https://ui-avatars.com/api/?name=TechTrader+AI&size=150&background=9C27B0&color=ffffff",
+      bio: "AI development team specializing in algorithmic trading solutions. Creators of award-winning trading platforms used by institutional investors.",
+      experience: "8+ years",
+      specialties: ["AI Development", "Algorithmic Trading", "Backtesting", "Trading Platforms"],
+      socialLinks: {
+        telegram: "https://t.me/techtrader",
+        twitter: "https://x.com/techtraderai",
+        website: "https://techtrader.ai"
+      },
+      stats: {
+        totalProducts: 3,
+        totalSales: 789,
+        successRate: 94.2,
+        memberSince: "2023"
+      }
+    },
+    rating: 4.6,
+    totalReviews: 234,
+    assetAllocation: "Software Tool"
+  },
+  {
+    id: 8,
+    title: "Cryptocurrency Fundamentals Course",
+    name: "Cryptocurrency Fundamentals Course",
+    description: "Learn the basics of cryptocurrency investing, blockchain technology, and digital assets",
+    category: "Educational Content",
+    riskLevel: "Low",
+    expectedReturn: "Educational",
+    minimumInvestment: 75,
+    price: 75,
+    featured: false,
+    totalInvestors: 2341,
+    seller: {
+      name: "Crypto Academy",
+      avatar: "https://ui-avatars.com/api/?name=Crypto+Academy&size=150&background=FF5722&color=ffffff",
+      bio: "Leading cryptocurrency education platform with certified instructors and comprehensive curriculum. Trusted by over 50,000 students worldwide.",
+      experience: "6+ years",
+      specialties: ["Cryptocurrency", "Blockchain Technology", "Digital Assets", "Investment Education"],
+      socialLinks: {
+        telegram: "https://t.me/cryptoacademy",
+        twitter: "https://x.com/cryptoacademy",
+        youtube: "https://youtube.com/@cryptoacademy",
+        website: "https://crypto-academy.com"
+      },
+      stats: {
+        totalProducts: 12,
+        totalSales: 8765,
+        successRate: 99.1,
+        memberSince: "2020"
+      }
+    },
+    rating: 4.7,
+    totalReviews: 1234,
+    assetAllocation: "100% Educational Content"
   }
 ];
 
