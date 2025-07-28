@@ -392,6 +392,7 @@ export const mockPortfolios = [
     id: 4,
     name: "Crypto DeFi Strategy",
     description: "Advanced DeFi portfolio with yield farming and staking strategies",
+    category: "Trading Tools",
     riskLevel: "High",
     expectedReturn: "25-40%",
     minimumInvestment: 3000,
