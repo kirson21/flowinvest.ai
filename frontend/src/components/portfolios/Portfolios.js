@@ -478,6 +478,31 @@ const Portfolios = () => {
         </Button>
       </div>
 
+      {/* Filter System */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          {filterOptions.map((filter) => (
+            <Button
+              key={filter}
+              variant={selectedFilter === filter ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleFilterChange(filter)}
+              className={`text-xs sm:text-sm px-3 sm:px-4 py-2 transition-all ${
+                selectedFilter === filter
+                  ? 'bg-[#0097B2] hover:bg-[#0097B2]/90 text-white border-[#0097B2]'
+                  : 'border-[#0097B2]/20 text-[#474545] dark:text-white hover:bg-[#0097B2]/5 hover:border-[#0097B2]/40'
+              }`}
+            >
+              {filter}
+            </Button>
+          ))}
+        </div>
+        <div className="mt-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          Showing {filteredPortfolios.length} product{filteredPortfolios.length !== 1 ? 's' : ''} 
+          {selectedFilter !== 'Most Popular' ? ` in ${selectedFilter}` : ''}
+        </div>
+      </div>
+
       <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
         {filteredPortfolios.map((portfolio) => (
           <PortfolioCard key={portfolio.id} portfolio={portfolio} />
