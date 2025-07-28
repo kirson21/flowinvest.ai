@@ -71,6 +71,47 @@ const Portfolios = () => {
     
     const allPortfolios = [...mockPortfolios, ...updatedUserPortfolios];
     setPortfolios(allPortfolios);
+    
+    // Apply current filter to updated portfolios
+    applyFilter(selectedFilter, allPortfolios);
+  };
+
+  const applyFilter = (filter, portfoliosToFilter = portfolios) => {
+    let filtered = [];
+    
+    switch (filter) {
+      case 'Most Popular':
+        // Sort by total reviews and rating (featured products first)
+        filtered = portfoliosToFilter.sort((a, b) => {
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          const aPopularity = (a.totalReviews || 0) * (a.rating || 0);
+          const bPopularity = (b.totalReviews || 0) * (b.rating || 0);
+          return bPopularity - aPopularity;
+        });
+        break;
+      case 'Portfolio Strategies':
+        filtered = portfoliosToFilter.filter(p => p.category === 'Portfolio Strategies');
+        break;
+      case 'Educational Content':
+        filtered = portfoliosToFilter.filter(p => p.category === 'Educational Content');
+        break;
+      case 'Market Analysis':
+        filtered = portfoliosToFilter.filter(p => p.category === 'Market Analysis');
+        break;
+      case 'Trading Tools':
+        filtered = portfoliosToFilter.filter(p => p.category === 'Trading Tools');
+        break;
+      default:
+        filtered = portfoliosToFilter;
+    }
+    
+    setFilteredPortfolios(filtered);
+  };
+
+  const handleFilterChange = (filter) => {
+    setSelectedFilter(filter);
+    applyFilter(filter);
   };
 
   // Load user-created portfolios from localStorage
