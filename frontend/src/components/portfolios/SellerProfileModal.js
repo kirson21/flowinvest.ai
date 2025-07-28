@@ -218,6 +218,26 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
     alert('Review deleted successfully!');
   };
 
+  // Load user votes from localStorage (sync with marketplace)
+  const loadUserVotes = () => {
+    const savedVotes = localStorage.getItem(`user_votes_${user?.id || 'guest'}`);
+    if (savedVotes) {
+      setUserVotes(JSON.parse(savedVotes));
+    }
+  };
+
+  // Calculate vote score using the same formula as marketplace
+  const calculateVoteScore = (votes) => {
+    if (!votes || votes.totalVotes === 0) return 0;
+    return ((votes.upvotes - votes.downvotes) / votes.totalVotes) * 100;
+  };
+
+  // Load votes from localStorage (sync with marketplace)
+  const loadProductVotes = () => {
+    const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+    return productVotes;
+  };
+
   const renderStars = (rating, totalReviews = null) => {
     // For individual reviews (when totalReviews is null), always show stars based on rating
     // For seller overall rating, check if there are reviews
