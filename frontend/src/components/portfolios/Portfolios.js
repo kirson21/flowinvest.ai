@@ -124,16 +124,16 @@ const Portfolios = () => {
         });
         break;
       case 'Portfolio Strategies':
-        filtered = portfoliosToFilter.filter(p => p.category === 'Portfolio Strategies');
+        filtered = portfoliosToFilter.filter(p => p.category === 'Portfolio Strategies' || p.category === 'portfolio');
         break;
       case 'Educational Content':
-        filtered = portfoliosToFilter.filter(p => p.category === 'Educational Content');
+        filtered = portfoliosToFilter.filter(p => p.category === 'Educational Content' || p.category === 'education');
         break;
       case 'Market Analysis':
-        filtered = portfoliosToFilter.filter(p => p.category === 'Market Analysis');
+        filtered = portfoliosToFilter.filter(p => p.category === 'Market Analysis' || p.category === 'analysis');
         break;
       case 'Trading Tools':
-        filtered = portfoliosToFilter.filter(p => p.category === 'Trading Tools');
+        filtered = portfoliosToFilter.filter(p => p.category === 'Trading Tools' || p.category === 'tools');
         break;
       default:
         filtered = portfoliosToFilter;
