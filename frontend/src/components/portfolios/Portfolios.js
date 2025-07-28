@@ -218,7 +218,8 @@ const Portfolios = () => {
   // Load user-created portfolios from localStorage
   useEffect(() => {
     loadProductsWithReviews();
-  }, []);
+    loadUserVotes();
+  }, [user]);
 
   // Apply default filter when portfolios are loaded
   useEffect(() => {
