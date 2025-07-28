@@ -261,6 +261,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "FIXED: Improved mobile responsiveness by changing padding from p-4 to p-3 sm:p-4 for better spacing on mobile devices and added leading-tight class to the description text (lines 761-762 and 779-780) to prevent text from extending beyond button boundaries on smaller screens."
+        - working: true
+          agent: "main"
+          comment: "ADDITIONAL MOBILE FIX: Further improved mobile responsiveness after user reported text still extending beyond buttons on mobile. Changed padding to p-2 sm:p-3 md:p-4, added text-xs sm:text-sm for responsive text sizing, added w-full and break-words classes, and implemented conditional text display - shorter text on mobile (Cross: 'Share margin across', Isolated: 'Limit risk to position') and full text on larger screens."
 
   - task: "Fix Martingale Preset Value Application"
     implemented: true
