@@ -667,65 +667,116 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {sellerProducts.map((product) => (
-                    <Card key={product.id} className="border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg font-bold text-[#474545] dark:text-white mb-2 leading-tight">
-                          {product.title || product.name}
-                        </CardTitle>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {product.description}
-                        </p>
-                      </CardHeader>
-                      
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center text-lg font-bold text-[#0097B2]">
-                            <DollarSign size={16} className="mr-1" />
-                            {product.price || product.minimumInvestment}
-                          </div>
-                          <Badge variant="outline" className="border-[#0097B2]/30 text-[#0097B2]">
-                            {product.category || 'Portfolio'}
+                    <Card key={product.id} className="hover:shadow-lg transition-all duration-200 group relative">
+                      {product.featured && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Badge className="bg-[#0097B2] text-white shadow-lg text-xs">
+                            <Star size={10} className="mr-1" />
+                            Featured
                           </Badge>
                         </div>
-                        
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star} 
-                                size={14} 
-                                className={star <= (product.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} 
-                              />
-                            ))}
-                            <span className="text-sm font-medium text-[#474545] dark:text-white ml-1">
-                              {product.rating || 0}
-                            </span>
+                      )}
+                      
+                      <CardHeader className="pb-3 pt-6">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 pr-2">
+                            {/* Product Title - Prominently displayed */}
+                            <CardTitle className="text-xl font-bold text-[#474545] dark:text-white mb-2 leading-tight">
+                              {product.title || product.name}
+                            </CardTitle>
+                            
+                            {/* Short Description - Limited to 140 chars */}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                              {product.description}
+                            </p>
+                            
+                            {/* Price and Category */}
+                            <div className="flex items-center space-x-3 mb-3">
+                              <div className="flex items-center text-lg font-bold text-[#0097B2]">
+                                <DollarSign size={16} className="mr-1" />
+                                {product.price || product.minimumInvestment}
+                              </div>
+                              <Badge variant="outline" className="border-[#0097B2]/30 text-[#0097B2]">
+                                {product.category || 'Portfolio'}
+                              </Badge>
+                            </div>
                           </div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {product.totalReviews || 0} reviews
-                          </span>
                         </div>
-                        
-                        {/* Optional metadata */}
-                        {product.riskLevel && (
-                          <div className="mb-3">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">Risk Level: </span>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${
-                                product.riskLevel === 'Low' ? 'border-green-200 text-green-700' :
-                                product.riskLevel === 'Medium' ? 'border-yellow-200 text-yellow-700' :
-                                'border-red-200 text-red-700'
-                              }`}
-                            >
-                              {product.riskLevel}
-                            </Badge>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        {/* Enhanced Metadata Grid */}
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Risk Level
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              <div className={`w-2 h-2 rounded-full ${
+                                product.riskLevel === 'Low' ? 'bg-green-500' :
+                                product.riskLevel === 'Medium' ? 'bg-yellow-500' :
+                                'bg-red-500'
+                              }`} />
+                              <span className={`text-sm font-medium ${
+                                product.riskLevel === 'Low' ? 'text-green-600' :
+                                product.riskLevel === 'Medium' ? 'text-yellow-600' :
+                                'text-red-600'
+                              }`}>
+                                {product.riskLevel || 'Medium'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Expected Return
+                            </p>
+                            <p className="text-sm font-medium text-[#474545] dark:text-white">
+                              {product.expectedReturn || 'N/A'}
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Min. Investment
+                            </p>
+                            <p className="text-sm font-medium text-[#474545] dark:text-white">
+                              ${product.minimumInvestment || product.price || 'N/A'}
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Total Investors
+                            </p>
+                            <p className="text-sm font-medium text-[#474545] dark:text-white">
+                              {product.totalInvestors || 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Asset Allocation - If available */}
+                        {product.assetAllocation && (
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Asset Allocation
+                            </p>
+                            <p className="text-sm text-[#474545] dark:text-white">
+                              {product.assetAllocation}
+                            </p>
                           </div>
                         )}
-                        
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          Created {new Date(product.createdAt).toLocaleDateString()}
-                        </div>
+
+                        {/* Purchase Button */}
+                        <Button 
+                          className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                          onClick={() => {
+                            alert(`Purchase ${product.title || product.name} for $${product.price || product.minimumInvestment}! (Mock action)`);
+                          }}
+                        >
+                          <DollarSign size={16} className="mr-2" />
+                          Purchase Now
+                        </Button>
                       </CardContent>
                     </Card>
                   ))}
