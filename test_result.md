@@ -347,6 +347,7 @@ test_plan:
     - "Fix Martingale Preset Value Application"
     - "Enhance View All Products Modal in SellerProfileModal"
     - "Add Filtering System to Marketplace"
+    - "Add Reddit-style Voting System and Vote-based Sorting"
     - "Development Test User Implementation"
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
