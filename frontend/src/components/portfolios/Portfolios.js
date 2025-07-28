@@ -207,15 +207,19 @@ const Portfolios = () => {
   const updateProductVotes = (productId, voteType, change) => {
     const updatedPortfolios = portfolios.map(portfolio => {
       if (portfolio.id === productId) {
-        const newVotes = { ...portfolio.votes };
+        // Ensure votes object exists with default values
+        const currentVotes = portfolio.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 };
+        const newVotes = { ...currentVotes };
         
         if (voteType === 'upvote') {
-          newVotes.upvotes += change;
-        } else {
-          newVotes.downvotes += change;
+          newVotes.upvotes = Math.max(0, newVotes.upvotes + change);
+        } else if (voteType === 'downvote') {
+          newVotes.downvotes = Math.max(0, newVotes.downvotes + change);
         }
         
         newVotes.totalVotes = newVotes.upvotes + newVotes.downvotes;
+        
+        console.log(`Vote update for product ${productId}: ${voteType} ${change > 0 ? '+' : ''}${change}`, newVotes);
         
         return { ...portfolio, votes: newVotes };
       }
