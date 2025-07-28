@@ -122,6 +122,7 @@ export const mockPortfolios = [
     id: 1,
     name: "FlowinvestAI Growth Portfolio",
     description: "Balanced portfolio focused on long-term growth with AI-optimized asset allocation",
+    category: "Portfolio Strategies",
     riskLevel: "Medium",
     expectedReturn: "12-18%",
     minimumInvestment: 1000,
