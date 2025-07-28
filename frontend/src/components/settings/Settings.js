@@ -175,8 +175,21 @@ const Settings = () => {
     try {
       setLoadingProducts(true);
       const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      // Filter products created by current user
-      const currentUserProducts = userPortfolios.filter(product => product.createdBy === user?.id);
+      const productVotes = loadProductVotes();
+      
+      // Filter products created by current user and merge with vote data
+      const currentUserProducts = userPortfolios.filter(product => product.createdBy === user?.id).map(product => {
+        // Merge with vote data from localStorage (sync with marketplace)
+        const updatedProduct = { ...product };
+        if (productVotes[product.id]) {
+          updatedProduct.votes = productVotes[product.id];
+        } else {
+          // Initialize votes if they don't exist
+          updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
+        }
+        return updatedProduct;
+      });
+      
       setUserProducts(currentUserProducts);
     } catch (error) {
       console.error('Error loading user products:', error);
