@@ -177,14 +177,16 @@ const Portfolios = () => {
     }
 
     const currentVote = userVotes[productId];
+    console.log(`Voting: productId=${productId}, voteType=${voteType}, currentVote=${currentVote}`);
     
-    // If user already voted the same way, remove the vote
+    // If user already voted the same way, remove the vote (toggle off)
     if (currentVote === voteType) {
       const newUserVotes = { ...userVotes };
       delete newUserVotes[productId];
       setUserVotes(newUserVotes);
       saveUserVotes(newUserVotes);
       
+      console.log(`Removing ${voteType} vote for product ${productId}`);
       // Update product votes
       updateProductVotes(productId, voteType, -1);
       return;
@@ -198,10 +200,12 @@ const Portfolios = () => {
     // Update product votes
     if (currentVote) {
       // Remove previous vote and add new vote
+      console.log(`Changing vote from ${currentVote} to ${voteType} for product ${productId}`);
       updateProductVotes(productId, currentVote, -1);
       updateProductVotes(productId, voteType, 1);
     } else {
       // Add new vote
+      console.log(`Adding new ${voteType} vote for product ${productId}`);
       updateProductVotes(productId, voteType, 1);
     }
   };
