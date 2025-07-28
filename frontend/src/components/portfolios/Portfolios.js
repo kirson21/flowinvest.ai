@@ -609,6 +609,9 @@ const Portfolios = () => {
           </button>
         </div>
 
+        {/* Voting System */}
+        <VotingButtons productId={portfolio.id} votes={portfolio.votes} />
+
         {/* Purchase Button */}
         <Button 
           className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
@@ -621,7 +624,8 @@ const Portfolios = () => {
         </Button>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   return (
     <div className="p-4 pb-20 max-w-4xl mx-auto">
