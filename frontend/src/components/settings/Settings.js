@@ -108,6 +108,7 @@ const Settings = () => {
       loadUserProfile();
       loadSellerData();
       loadAccountBalance();
+      loadUserVotes();
     }
   }, [user]);
 
