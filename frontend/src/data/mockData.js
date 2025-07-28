@@ -472,7 +472,12 @@ export const mockPortfolios = [
     },
     rating: 4.9,
     totalReviews: 567,
-    assetAllocation: "100% Educational Content"
+    assetAllocation: "100% Educational Content",
+    votes: {
+      upvotes: 423,
+      downvotes: 31,
+      totalVotes: 454
+    }
   },
   {
     id: 6,
