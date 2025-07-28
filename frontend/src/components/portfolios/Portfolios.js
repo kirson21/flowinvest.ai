@@ -119,6 +119,11 @@ const Portfolios = () => {
     loadProductsWithReviews();
   }, []);
 
+  // Apply default filter when portfolios are loaded
+  useEffect(() => {
+    applyFilter(selectedFilter);
+  }, [portfolios]);
+
   const handleSellerClick = (seller) => {
     setSelectedSeller(seller);
     setIsSellerModalOpen(true);
