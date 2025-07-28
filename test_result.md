@@ -372,6 +372,7 @@ test_plan:
     - "Enhance View All Products Modal in SellerProfileModal"
     - "Add Filtering System to Marketplace"
     - "Add Reddit-style Voting System and Vote-based Sorting"
+    - "Replace Rating with Votes Statistics in Settings and SellerProfileModal"
     - "Development Test User Implementation"
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
