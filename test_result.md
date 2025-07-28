@@ -328,6 +328,7 @@ test_plan:
     - "Fix Mobile Responsiveness for Margin Type Buttons"
     - "Fix Martingale Preset Value Application"
     - "Enhance View All Products Modal in SellerProfileModal"
+    - "Add Filtering System to Marketplace"
     - "Development Test User Implementation"
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
