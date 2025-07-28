@@ -262,6 +262,21 @@ frontend:
           agent: "main"
           comment: "FIXED: Improved mobile responsiveness by changing padding from p-4 to p-3 sm:p-4 for better spacing on mobile devices and added leading-tight class to the description text (lines 761-762 and 779-780) to prevent text from extending beyond button boundaries on smaller screens."
 
+  - task: "Fix Martingale Preset Value Application"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reports: 'Quick Setup Presets' work properly, exact martingale. In presets the value of martingale is 5%, but for some reason the settings indicate 100%' - the martingale preset value is not being applied correctly to the form field."
+        - working: true
+          agent: "main"
+          comment: "FIXED: Changed line 508 from handleInputChange('martingalePercentage', preset.martingalePercentage) to handleInputChange('martingale', preset.martingalePercentage) to correctly update the martingale field when presets are applied. The issue was that the form field name is 'martingale' but the preset function was calling 'martingalePercentage'. Also updated console.log on line 519 to reflect correct field name."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
