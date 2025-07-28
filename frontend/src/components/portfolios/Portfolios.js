@@ -396,7 +396,8 @@ const Portfolios = () => {
     // Voting component
     const VotingButtons = ({ productId, votes }) => {
       const userVote = userVotes[productId];
-      const voteScore = calculateVoteScore(votes);
+      const safeVotes = votes || { upvotes: 0, downvotes: 0, totalVotes: 0 };
+      const voteScore = calculateVoteScore(safeVotes);
       
       return (
         <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-2">
@@ -409,7 +410,7 @@ const Portfolios = () => {
             }`}
           >
             <ChevronUp size={16} />
-            <span className="text-sm font-medium">{votes?.upvotes || 0}</span>
+            <span className="text-sm font-medium">{safeVotes.upvotes || 0}</span>
           </button>
           
           <div className="flex flex-col items-center px-2">
@@ -432,7 +433,7 @@ const Portfolios = () => {
             }`}
           >
             <ChevronDown size={16} />
-            <span className="text-sm font-medium">{votes?.downvotes || 0}</span>
+            <span className="text-sm font-medium">{safeVotes.downvotes || 0}</span>
           </button>
         </div>
       );
