@@ -505,7 +505,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
       // Apply all preset values to form data
       handleInputChange('overlappingPriceChanges', preset.overlappingPriceChanges);
       handleInputChange('gridOfOrders', preset.gridOfOrders);
-      handleInputChange('martingalePercentage', preset.martingalePercentage);
+      handleInputChange('martingale', preset.martingalePercentage);
       handleInputChange('indent', preset.indent);
       handleInputChange('pullingUpOrderGrid', preset.pullingUpOrderGrid);
       
