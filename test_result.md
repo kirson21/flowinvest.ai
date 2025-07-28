@@ -283,6 +283,21 @@ frontend:
           agent: "main"
           comment: "FIXED: Changed line 508 from handleInputChange('martingalePercentage', preset.martingalePercentage) to handleInputChange('martingale', preset.martingalePercentage) to correctly update the martingale field when presets are applied. The issue was that the form field name is 'martingale' but the preset function was calling 'martingalePercentage'. Also updated console.log on line 519 to reflect correct field name."
 
+  - task: "Enhance View All Products Modal in SellerProfileModal"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/portfolios/SellerProfileModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User requests: 'Let's improve seller's 'view all products' (button) section in marketplace. When the user clicks on the button 'view all products' - display all the seller's products in the same style as the product cards in the marketplace, only without information about the seller and his rating. And also with a 'purchase now' button.'"
+        - working: true
+          agent: "main"
+          comment: "ENHANCED: Completely revamped the View All Products modal to display products in full marketplace-style cards without seller information. Changes include: 1) Replaced simple card layout with full marketplace card structure (CardHeader with product title, description, price, category), 2) Added Enhanced Metadata Grid (Risk Level, Expected Return, Min. Investment, Total Investors) with proper styling and color coding, 3) Added Asset Allocation section if available, 4) Added Purchase Now button with ShoppingCart icon, 5) Removed seller information section as requested, 6) Added proper responsive grid layout (1 column on mobile, 2 on tablet, 3 on desktop), 7) Added Featured badge support, 8) Improved visual styling with hover effects and transitions. The modal now displays products exactly like the marketplace but focused on the products themselves without seller context."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
