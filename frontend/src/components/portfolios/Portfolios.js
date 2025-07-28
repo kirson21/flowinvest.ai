@@ -56,24 +56,42 @@ const Portfolios = () => {
   const loadProductsWithReviews = () => {
     const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
     const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+    const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
     
-    // Update products with real review data
+    // Update products with real review data and votes
     const updatedUserPortfolios = userPortfolios.map(product => {
+      let updatedProduct = { ...product };
+      
+      // Update review data
       if (product.seller && product.seller.name) {
         const productReviews = sellerReviews[product.seller.name] || [];
         if (productReviews.length > 0) {
           const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
-          return {
-            ...product,
+          updatedProduct = {
+            ...updatedProduct,
             rating: Math.round(avgRating * 10) / 10,
             totalReviews: productReviews.length
           };
         }
       }
+      
+      // Update vote data
+      if (productVotes[product.id]) {
+        updatedProduct.votes = productVotes[product.id];
+      }
+      
+      return updatedProduct;
+    });
+    
+    // Update mock portfolios with saved votes
+    const updatedMockPortfolios = mockPortfolios.map(product => {
+      if (productVotes[product.id]) {
+        return { ...product, votes: productVotes[product.id] };
+      }
       return product;
     });
     
-    const allPortfolios = [...mockPortfolios, ...updatedUserPortfolios];
+    const allPortfolios = [...updatedMockPortfolios, ...updatedUserPortfolios];
     setPortfolios(allPortfolios);
     
     // Apply current filter to updated portfolios
