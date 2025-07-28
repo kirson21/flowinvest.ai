@@ -759,16 +759,17 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                         type="button"
                         variant={formData.marginType === 'cross' ? 'default' : 'outline'}
                         onClick={() => handleInputChange('marginType', 'cross')}
-                        className={`h-auto p-3 sm:p-4 text-sm ${
+                        className={`h-auto p-2 sm:p-3 md:p-4 text-xs sm:text-sm ${
                           formData.marginType === 'cross' 
                             ? 'bg-[#0097B2] hover:bg-[#0097B2]/90 text-white' 
                             : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-[#474545] dark:text-white'
                         }`}
                       >
-                        <div className="text-center">
+                        <div className="text-center w-full">
                           <div className="font-medium">Cross</div>
-                          <div className="text-xs opacity-70 mt-1 leading-tight">
-                            Share margin across positions
+                          <div className="text-xs opacity-70 mt-1 leading-tight break-words">
+                            <span className="hidden sm:inline">Share margin across positions</span>
+                            <span className="sm:hidden">Share margin across</span>
                           </div>
                         </div>
                       </Button>
@@ -776,16 +777,17 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                         type="button"
                         variant={formData.marginType === 'isolated' ? 'default' : 'outline'}
                         onClick={() => handleInputChange('marginType', 'isolated')}
-                        className={`h-auto p-3 sm:p-4 text-sm ${
+                        className={`h-auto p-2 sm:p-3 md:p-4 text-xs sm:text-sm ${
                           formData.marginType === 'isolated' 
                             ? 'bg-[#0097B2] hover:bg-[#0097B2]/90 text-white' 
                             : 'border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-[#474545] dark:text-white'
                         }`}
                       >
-                        <div className="text-center">
+                        <div className="text-center w-full">
                           <div className="font-medium">Isolated</div>
-                          <div className="text-xs opacity-70 mt-1 leading-tight">
-                            Limit risk to this position only
+                          <div className="text-xs opacity-70 mt-1 leading-tight break-words">
+                            <span className="hidden sm:inline">Limit risk to this position only</span>
+                            <span className="sm:hidden">Limit risk to position</span>
                           </div>
                         </div>
                       </Button>
