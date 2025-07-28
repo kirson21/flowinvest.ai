@@ -516,7 +516,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
       console.log(`Applied ${preset.label} trading mode preset:`, {
         overlappingPriceChanges: preset.overlappingPriceChanges,
         gridOfOrders: preset.gridOfOrders,
-        martingalePercentage: preset.martingalePercentage,
+        martingale: preset.martingalePercentage,
         indent: preset.indent,
         pullingUpOrderGrid: preset.pullingUpOrderGrid
       });
