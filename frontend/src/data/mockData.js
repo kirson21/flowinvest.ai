@@ -391,7 +391,12 @@ export const mockPortfolios = [
     },
     rating: 4.9,
     totalReviews: 456,
-    price: 100
+    price: 100,
+    votes: {
+      upvotes: 342,
+      downvotes: 45,
+      totalVotes: 387
+    }
   },
   {
     id: 4,
