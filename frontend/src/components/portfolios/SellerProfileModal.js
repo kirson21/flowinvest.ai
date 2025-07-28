@@ -26,7 +26,9 @@ import {
   AlertCircle,
   Trash2,
   DollarSign,
-  ShoppingCart
+  ShoppingCart,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
