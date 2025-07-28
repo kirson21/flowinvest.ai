@@ -319,6 +319,21 @@ frontend:
           agent: "main"
           comment: "IMPLEMENTED: Added comprehensive filtering system to marketplace with the following features: 1) Added 5 filter buttons (Most Popular, Portfolio Strategies, Educational Content, Market Analysis, Trading Tools) with Most Popular as default, 2) Added category field to all products in mockData.js, 3) Created 4 additional mock products covering all categories (educational course, market analysis, trading tools, crypto course), 4) Implemented filtering logic in applyFilter function that handles category-based filtering and popularity sorting, 5) Added responsive filter UI with active/inactive states and proper styling, 6) Added product count display showing filtered results, 7) Integrated filtering with existing review system to maintain data consistency, 8) Added useEffect to apply default filter on component load. The system properly groups products by category and shows relevant products when filters are selected."
 
+  - task: "Add Reddit-style Voting System and Vote-based Sorting"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/portfolios/Portfolios.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User requests: 'Reddit-style Voting System' with upvote/downvote arrows, vote tracking per user, backend storage, and 'Marketplace Sorting by Engagement (Voting Ranking)' using vote score formula: (Upvotes - Downvotes) / Total Votes × 100"
+        - working: true
+          agent: "main"
+          comment: "IMPLEMENTED: Comprehensive Reddit-style voting system with the following features: 1) Added voting data structure to all products in mockData.js with upvotes, downvotes, and totalVotes, 2) Implemented VotingButtons component with up/down arrows showing vote counts and calculated score, 3) Added user vote tracking with localStorage persistence to prevent multiple votes per user, 4) Implemented vote score calculation using formula: (Upvotes - Downvotes) / Total Votes × 100, 5) Updated 'Most Popular' filter to sort by vote score as primary criteria, then featured status, then engagement metrics, 6) Added visual feedback for user's vote state (green for upvoted, red for downvoted), 7) Integrated voting system with existing review system and filtering, 8) Added real-time vote updates with localStorage persistence, 9) Implemented vote persistence and loading from localStorage for consistent state across sessions. The system encourages quality content through community voting and provides dynamic engagement-based sorting."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
