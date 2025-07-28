@@ -118,6 +118,92 @@ const Portfolios = () => {
     applyFilter(filter);
   };
 
+  // Load user votes from localStorage
+  const loadUserVotes = () => {
+    const savedVotes = localStorage.getItem(`user_votes_${user?.id || 'guest'}`);
+    if (savedVotes) {
+      setUserVotes(JSON.parse(savedVotes));
+    }
+  };
+
+  // Save user votes to localStorage
+  const saveUserVotes = (votes) => {
+    localStorage.setItem(`user_votes_${user?.id || 'guest'}`, JSON.stringify(votes));
+  };
+
+  // Calculate vote score using the formula: (Upvotes - Downvotes) / Total Votes × 100
+  const calculateVoteScore = (votes) => {
+    if (!votes || votes.totalVotes === 0) return 0;
+    return ((votes.upvotes - votes.downvotes) / votes.totalVotes) * 100;
+  };
+
+  // Handle voting
+  const handleVote = (productId, voteType) => {
+    if (!user) {
+      alert('Please log in to vote');
+      return;
+    }
+
+    const currentVote = userVotes[productId];
+    
+    // If user already voted the same way, remove the vote
+    if (currentVote === voteType) {
+      const newUserVotes = { ...userVotes };
+      delete newUserVotes[productId];
+      setUserVotes(newUserVotes);
+      saveUserVotes(newUserVotes);
+      
+      // Update product votes
+      updateProductVotes(productId, voteType, -1);
+      return;
+    }
+    
+    // If user voted differently, update the vote
+    const newUserVotes = { ...userVotes, [productId]: voteType };
+    setUserVotes(newUserVotes);
+    saveUserVotes(newUserVotes);
+    
+    // Update product votes
+    if (currentVote) {
+      // Remove previous vote and add new vote
+      updateProductVotes(productId, currentVote, -1);
+      updateProductVotes(productId, voteType, 1);
+    } else {
+      // Add new vote
+      updateProductVotes(productId, voteType, 1);
+    }
+  };
+
+  // Update product votes in portfolios
+  const updateProductVotes = (productId, voteType, change) => {
+    const updatedPortfolios = portfolios.map(portfolio => {
+      if (portfolio.id === productId) {
+        const newVotes = { ...portfolio.votes };
+        
+        if (voteType === 'upvote') {
+          newVotes.upvotes += change;
+        } else {
+          newVotes.downvotes += change;
+        }
+        
+        newVotes.totalVotes = newVotes.upvotes + newVotes.downvotes;
+        
+        return { ...portfolio, votes: newVotes };
+      }
+      return portfolio;
+    });
+    
+    setPortfolios(updatedPortfolios);
+    
+    // Save updated votes to localStorage
+    const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+    productVotes[productId] = updatedPortfolios.find(p => p.id === productId)?.votes;
+    localStorage.setItem('product_votes', JSON.stringify(productVotes));
+    
+    // Apply current filter to updated portfolios
+    applyFilter(selectedFilter, updatedPortfolios);
+  };
+
   // Load user-created portfolios from localStorage
   useEffect(() => {
     loadProductsWithReviews();
