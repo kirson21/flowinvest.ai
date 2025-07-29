@@ -218,7 +218,16 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
         stopLossSignalConditions: editingBot.config?.stopLossSignalConditions || [],
         minIndentPercent: editingBot.config?.minIndentPercent || '0.1%',
         indentType: editingBot.config?.indentType || 'From last order',
-        stopBotAfterStopLoss: editingBot.config?.stopBotAfterStopLoss || false
+        stopBotAfterStopLoss: editingBot.config?.stopBotAfterStopLoss || false,
+        
+        // Exit Orders for Own mode
+        exitOrders: editingBot.config?.exitOrders || [
+          { indent: 1, volume: 20 },
+          { indent: 5, volume: 40 },
+          { indent: 10, volume: 40 }
+        ],
+        exitPartialPlacement: editingBot.config?.exitPartialPlacement || 50,
+        exitPullingUp: editingBot.config?.exitPullingUp || 1
       };
     }
     
