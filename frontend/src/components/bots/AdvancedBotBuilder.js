@@ -195,7 +195,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
           { indent: 5, volume: 40 },
           { indent: 10, volume: 40 }
         ],
-        entryPartialPlacement: editingBot.config?.entryPartialPlacement || 50,
+        entryPartialPlacement: editingBot.config?.entryPartialPlacement || 1,
         entryPullingUp: editingBot.config?.entryPullingUp || 1,
         gridOfOrders: editingBot.config?.gridOfOrders || 10,
         martingale: editingBot.config?.martingalePercentage ? (editingBot.config.martingalePercentage * 100) : 100,
