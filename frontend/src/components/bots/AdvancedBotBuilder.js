@@ -1169,16 +1169,17 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                     <div className="space-y-4">
                       {/* Hide Logarithmic Distribution of Prices for Own strategy */}
                       {formData.tradingMode !== 'Own' && (
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <Label>Logarithmic Distribution of Prices</Label>
-                          <p className="text-sm text-gray-500">Optimize order distribution using logarithmic scaling</p>
-                        </div>
-                        <Switch
-                          checked={formData.logarithmicDistribution}
-                          onCheckedChange={(checked) => handleInputChange('logarithmicDistribution', checked)}
-                        />
-                      </div>
+                        <>
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <Label>Logarithmic Distribution of Prices</Label>
+                              <p className="text-sm text-gray-500">Optimize order distribution using logarithmic scaling</p>
+                            </div>
+                            <Switch
+                              checked={formData.logarithmicDistribution}
+                              onCheckedChange={(checked) => handleInputChange('logarithmicDistribution', checked)}
+                            />
+                          </div>
 
                           {formData.logarithmicDistribution && (
                             <div className="space-y-2 ml-6">
@@ -1199,7 +1200,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                               />
                             </div>
                           )}
-                        </div>
+                        </>
                       )}
 
                       {/* Pulling Up the Order Grid */}
