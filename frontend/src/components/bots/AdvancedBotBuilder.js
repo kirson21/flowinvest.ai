@@ -1085,89 +1085,93 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
 
                 {showAdvanced && (
                   <div className="space-y-6 pt-4 border-t">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                      {/* Overlapping Price Changes */}
-                      <div className="space-y-2">
-                        <Label htmlFor="overlappingPriceChanges">
-                          Overlapping Price Changes (%)
-                          <span className="text-xs text-gray-500 ml-2">Range: 0.5% - 99%</span>
-                        </Label>
-                        <Input
-                          id="overlappingPriceChanges"
-                          type="number"
-                          min="0.5"
-                          max="99"
-                          step="0.1"
-                          value={formData.overlappingPriceChanges}
-                          onChange={(e) => handleInputChange('overlappingPriceChanges', parseFloat(e.target.value))}
-                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
-                          placeholder="Enter percentage (0.5-99)"
-                        />
-                      </div>
+                    {/* Hide these settings for Own strategy */}
+                    {formData.tradingMode !== 'Own' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        {/* Overlapping Price Changes */}
+                        <div className="space-y-2">
+                          <Label htmlFor="overlappingPriceChanges">
+                            Overlapping Price Changes (%)
+                            <span className="text-xs text-gray-500 ml-2">Range: 0.5% - 99%</span>
+                          </Label>
+                          <Input
+                            id="overlappingPriceChanges"
+                            type="number"
+                            min="0.5"
+                            max="99"
+                            step="0.1"
+                            value={formData.overlappingPriceChanges}
+                            onChange={(e) => handleInputChange('overlappingPriceChanges', parseFloat(e.target.value))}
+                            className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                            placeholder="Enter percentage (0.5-99)"
+                          />
+                        </div>
 
-                      {/* Grid of Orders */}
-                      <div className="space-y-2">
-                        <Label htmlFor="gridOfOrders">
-                          Grid of Orders
-                          <span className="text-xs text-gray-500 ml-2">Range: 2 - 60</span>
-                        </Label>
-                        <Input
-                          id="gridOfOrders"
-                          type="number"
-                          min="2"
-                          max="60"
-                          step="1"
-                          value={formData.gridOfOrders}
-                          onChange={(e) => handleInputChange('gridOfOrders', parseInt(e.target.value))}
-                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
-                          placeholder="Enter number (2-60)"
-                        />
-                      </div>
+                        {/* Grid of Orders */}
+                        <div className="space-y-2">
+                          <Label htmlFor="gridOfOrders">
+                            Grid of Orders
+                            <span className="text-xs text-gray-500 ml-2">Range: 2 - 60</span>
+                          </Label>
+                          <Input
+                            id="gridOfOrders"
+                            type="number"
+                            min="2"
+                            max="60"
+                            step="1"
+                            value={formData.gridOfOrders}
+                            onChange={(e) => handleInputChange('gridOfOrders', parseInt(e.target.value))}
+                            className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                            placeholder="Enter number (2-60)"
+                          />
+                        </div>
 
-                      {/* % Martingale */}
-                      <div className="space-y-2">
-                        <Label htmlFor="martingale">
-                          % Martingale
-                          <span className="text-xs text-gray-500 ml-2">Range: 1% - 500%</span>
-                        </Label>
-                        <Input
-                          id="martingale"
-                          type="number"
-                          min="1"
-                          max="500"
-                          step="1"
-                          value={formData.martingale}
-                          onChange={(e) => handleInputChange('martingale', parseInt(e.target.value))}
-                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
-                          placeholder="Enter percentage (1-500)"
-                        />
-                      </div>
+                        {/* % Martingale */}
+                        <div className="space-y-2">
+                          <Label htmlFor="martingale">
+                            % Martingale
+                            <span className="text-xs text-gray-500 ml-2">Range: 1% - 500%</span>
+                          </Label>
+                          <Input
+                            id="martingale"
+                            type="number"
+                            min="1"
+                            max="500"
+                            step="1"
+                            value={formData.martingale}
+                            onChange={(e) => handleInputChange('martingale', parseInt(e.target.value))}
+                            className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                            placeholder="Enter percentage (1-500)"
+                          />
+                        </div>
 
-                      {/* Indent */}
-                      <div className="space-y-2">
-                        <Label htmlFor="indent">
-                          Indent (%)
-                          <span className="text-xs text-gray-500 ml-2">Range: 0.01% - 10%</span>
-                        </Label>
-                        <Input
-                          id="indent"
-                          type="number"
-                          min="0.01"
-                          max="10"
-                          step="0.01"
-                          value={formData.indent}
-                          onChange={(e) => handleInputChange('indent', parseFloat(e.target.value))}
-                          className="border-[#0097B2]/20 focus:border-[#0097B2]"
-                          placeholder="Enter percentage (0.01-10)"
-                        />
+                        {/* Indent */}
+                        <div className="space-y-2">
+                          <Label htmlFor="indent">
+                            Indent (%)
+                            <span className="text-xs text-gray-500 ml-2">Range: 0.01% - 10%</span>
+                          </Label>
+                          <Input
+                            id="indent"
+                            type="number"
+                            min="0.01"
+                            max="10"
+                            step="0.01"
+                            value={formData.indent}
+                            onChange={(e) => handleInputChange('indent', parseFloat(e.target.value))}
+                            className="border-[#0097B2]/20 focus:border-[#0097B2]"
+                            placeholder="Enter percentage (0.01-10)"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="space-y-4">
-                      {/* Logarithmic Distribution of Prices */}
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <Label>Logarithmic Distribution of Prices</Label>
+                      {/* Hide Logarithmic Distribution of Prices for Own strategy */}
+                      {formData.tradingMode !== 'Own' && (
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <Label>Logarithmic Distribution of Prices</Label>
                           <p className="text-sm text-gray-500">Optimize order distribution using logarithmic scaling</p>
                         </div>
                         <Switch
