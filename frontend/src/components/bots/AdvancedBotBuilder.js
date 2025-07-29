@@ -264,7 +264,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
         { indent: 5, volume: 40 },
         { indent: 10, volume: 40 }
       ],
-      entryPartialPlacement: 50, // Percentage for partial placement
+      entryPartialPlacement: 1, // Number of orders for partial placement
       entryPullingUp: 1, // Percentage for pulling up order grid
       
       // Exit Trade Settings
