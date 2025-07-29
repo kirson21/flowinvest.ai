@@ -239,6 +239,15 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
       tradeEntryConditions: false,
       entryConditions: [], // Array of up to 5 conditions
       
+      // Entry Orders for Own mode
+      entryOrders: [
+        { indent: 1, volume: 20 },
+        { indent: 5, volume: 40 },
+        { indent: 10, volume: 40 }
+      ],
+      entryPartialPlacement: 50, // Percentage for partial placement
+      entryPullingUp: 1, // Percentage for pulling up order grid
+      
       // Exit Trade Settings
       takeProfitMode: 'Simple', // Simple, Own, Signal
       profit: 2.5, // Range 0.2% to 1000%
