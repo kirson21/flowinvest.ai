@@ -263,8 +263,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
 
   const tradingModeOptions = [
     { value: 'Simple', label: 'Simple', description: 'Basic buy/sell operations' },
-    { value: 'Own', label: 'Own', description: 'Custom strategy implementation' },
-    { value: 'Signal', label: 'Signal', description: 'External signal integration' }
+    { value: 'Own', label: 'Own', description: 'Custom strategy implementation' }
   ];
 
   // Popular trading indicators for Trade Entry Conditions
