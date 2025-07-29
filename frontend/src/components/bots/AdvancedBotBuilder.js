@@ -1596,14 +1596,18 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                       </Label>
                       <Input
                         id="stopLossValue"
-                        type="number"
-                        min="-99"
-                        max="-0.05"
-                        step="0.01"
-                        value={formData.stopLossValue}
-                        onChange={(e) => handleInputChange('stopLossValue', parseFloat(e.target.value))}
+                        type="text"
+                        value={formData.stopLossValue === 0 ? '' : formData.stopLossValue}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow typing minus sign, numbers, and decimal points
+                          if (value === '' || value === '-' || /^-?\d*\.?\d*$/.test(value)) {
+                            const numValue = value === '' || value === '-' ? '' : parseFloat(value);
+                            handleInputChange('stopLossValue', numValue);
+                          }
+                        }}
                         className="border-[#0097B2]/20 focus:border-[#0097B2] max-w-xs"
-                        placeholder="Enter stop loss (-0.05 to -99)"
+                        placeholder="Enter stop loss (e.g., -10)"
                       />
                     </div>
                   )}
