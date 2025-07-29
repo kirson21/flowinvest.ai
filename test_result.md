@@ -361,6 +361,21 @@ frontend:
           agent: "main"
           comment: "IMPLEMENTED: Successfully replaced rating displays with votes statistics in both Settings and SellerProfileModal: 1) SETTINGS MANAGE PRODUCTS - Added voting functions (loadUserVotes, calculateVoteScore, loadProductVotes) to Settings.js, updated loadUserProducts to merge vote data from localStorage (sync with marketplace), replaced rating display with comprehensive vote statistics showing upvotes (green), downvotes (red), and vote score percentage, 2) SELLER PROFILE VIEW ALL PRODUCTS - Added same voting functions to SellerProfileModal.js, updated loadSellerProducts to include vote data synchronization, added Community Votes section to product metadata grid with upvotes/downvotes counts and score percentage, 3) MARKETPLACE SYNCHRONIZATION - Both sections now read from same localStorage keys ('product_votes', 'user_votes') ensuring complete synchronization with marketplace voting system, 4) VISUAL CONSISTENCY - Used same icons (ChevronUp/ChevronDown) and color coding (green for upvotes, red for downvotes) as marketplace. All vote statistics are now live-synchronized across Settings, SellerProfileModal, and main Marketplace."
 
+  - task: "Upgrade Advanced Bot Builder Own Strategy Settings"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/bots/AdvancedBotBuilder.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User requests: 'Let's upgrade the advanced settings for bots creation. For Entry and Exit sections for 'Own' strategy please copy settings from the screenshot. Add ability to distribute 100% of user's deposit volume to orders (for entry and exit) + leave the same settings for TRADE ENTRY CONDITIONS. 'Signal' strategy delete it pls. We don't need it now. Don't forget to do the same for Edit mode.'"
+        - working: true
+          agent: "main"
+          comment: "IMPLEMENTED: Successfully upgraded Advanced Bot Builder with Own strategy settings as requested: 1) REMOVED SIGNAL STRATEGY - Updated tradingModeOptions to only include 'Simple' and 'Own' modes, 2) ADDED ORDER DISTRIBUTION SYSTEM - Implemented comprehensive order management with entryOrders and exitOrders arrays, each order having indent% and volume% fields, 3) 100% DEPOSIT VALIDATION - Added calculateRemainingDeposit function to ensure orders total exactly 100% of deposit volume with visual warnings when incomplete, 4) ENTRY OWN MODE - Created full UI with order grid (up to 40 orders), add/remove order functionality, partial placement slider, and pulling up order grid dropdown, 5) EXIT OWN MODE - Implemented identical order distribution system for exit trades with same UI components and validation, 6) ORDER MANAGEMENT FUNCTIONS - Added addEntryOrder, removeEntryOrder, updateEntryOrder, addExitOrder, removeExitOrder, updateExitOrder functions for complete order lifecycle management, 7) UI COMPONENTS - Added proper grid layout with indent%/volume%/action columns, trash icons for order removal, plus button for adding orders, and range sliders for advanced settings. Both Entry and Exit sections now support Own strategy with complete order distribution matching the screenshot requirements."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
