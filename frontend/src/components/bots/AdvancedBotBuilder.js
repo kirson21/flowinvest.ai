@@ -258,7 +258,16 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
       stopLossSignalConditions: [], // Array of conditions similar to entry
       minIndentPercent: '0.1%', // Dropdown with fixed options
       indentType: 'From last order', // Dropdown (e.g., From last order)
-      stopBotAfterStopLoss: false
+      stopBotAfterStopLoss: false,
+      
+      // Exit Orders for Own mode
+      exitOrders: [
+        { indent: 1, volume: 20 },
+        { indent: 5, volume: 40 },
+        { indent: 10, volume: 40 }
+      ],
+      exitPartialPlacement: 50, // Percentage for partial placement
+      exitPullingUp: 1 // Percentage for pulling up order grid
     };
   });
   
