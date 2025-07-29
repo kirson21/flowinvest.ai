@@ -226,7 +226,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
           { indent: 5, volume: 40 },
           { indent: 10, volume: 40 }
         ],
-        exitPartialPlacement: editingBot.config?.exitPartialPlacement || 50,
+        exitPartialPlacement: editingBot.config?.exitPartialPlacement || 1,
         exitPullingUp: editingBot.config?.exitPullingUp || 1
       };
     }
