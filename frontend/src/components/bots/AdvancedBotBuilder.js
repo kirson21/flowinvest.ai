@@ -1397,6 +1397,125 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                   </div>
                 </div>
 
+                {/* Own Strategy Order Distribution for Exit - Only show when Own mode is selected */}
+                {formData.takeProfitMode === 'Own' && (
+                  <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium text-[#474545] dark:text-white">Exit Orders Distribution</h3>
+                      <div className="text-sm">
+                        <span className="text-gray-500">Orders: </span>
+                        <span className="font-medium text-[#0097B2]">{formData.exitOrders.length}/40</span>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Deposit Remaining:</span>
+                        <span className={`font-bold ${
+                          calculateRemainingDeposit(formData.exitOrders) === 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {calculateRemainingDeposit(formData.exitOrders)}%
+                        </span>
+                      </div>
+                      {calculateRemainingDeposit(formData.exitOrders) > 0 && (
+                        <p className="text-xs text-red-600 italic">
+                          ⚠️ You must distribute 100% of your deposit volume to orders.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-2 text-xs font-medium text-gray-500 pb-2">
+                        <span>Indent %</span>
+                        <span>Volume %</span>
+                        <span>Action</span>
+                      </div>
+                      
+                      {formData.exitOrders.map((order, index) => (
+                        <div key={index} className="grid grid-cols-3 gap-2 items-center">
+                          <Input
+                            type="number"
+                            min="0.01"
+                            max="100"
+                            step="0.01"
+                            value={order.indent}
+                            onChange={(e) => updateExitOrder(index, 'indent', e.target.value)}
+                            className="text-sm"
+                            placeholder="1.5"
+                          />
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="1"
+                            value={order.volume}
+                            onChange={(e) => updateExitOrder(index, 'volume', e.target.value)}
+                            className="text-sm"
+                            placeholder="20"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeExitOrder(index)}
+                            className="text-red-600 hover:bg-red-50"
+                            disabled={formData.exitOrders.length <= 1}
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      ))}
+
+                      {formData.exitOrders.length < 40 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={addExitOrder}
+                          className="w-full border-dashed border-[#0097B2]/30 text-[#0097B2] hover:bg-[#0097B2]/5"
+                        >
+                          <Plus size={16} className="mr-2" />
+                          Add an order
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="space-y-2">
+                        <Label>Partial Placement of a Grid of Orders (%)</Label>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="range"
+                            min="1"
+                            max="100"
+                            value={formData.exitPartialPlacement}
+                            onChange={(e) => handleInputChange('exitPartialPlacement', parseInt(e.target.value))}
+                            className="flex-1"
+                          />
+                          <span className="text-sm font-medium text-[#0097B2] min-w-[3rem]">
+                            {formData.exitPartialPlacement}%
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Pulling Up the Order Grid</Label>
+                        <Select value={formData.exitPullingUp.toString()} onValueChange={(value) => handleInputChange('exitPullingUp', parseInt(value))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select percentage" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1%</SelectItem>
+                            <SelectItem value="2">2%</SelectItem>
+                            <SelectItem value="3">3%</SelectItem>
+                            <SelectItem value="5">5%</SelectItem>
+                            <SelectItem value="10">10%</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {/* Profit */}
                   <div className="space-y-2">
