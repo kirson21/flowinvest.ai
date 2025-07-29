@@ -188,6 +188,15 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
         // Enter Trade Settings
         tradingMode: editingBot.strategy || 'Simple',
         overlappingPriceChanges: editingBot.config?.overlappingPriceChanges || 5.0,
+        
+        // Entry Orders for Own mode
+        entryOrders: editingBot.config?.entryOrders || [
+          { indent: 1, volume: 20 },
+          { indent: 5, volume: 40 },
+          { indent: 10, volume: 40 }
+        ],
+        entryPartialPlacement: editingBot.config?.entryPartialPlacement || 50,
+        entryPullingUp: editingBot.config?.entryPullingUp || 1,
         gridOfOrders: editingBot.config?.gridOfOrders || 10,
         martingale: editingBot.config?.martingalePercentage ? (editingBot.config.martingalePercentage * 100) : 100,
         indent: editingBot.config?.indent || 1.0,
