@@ -352,6 +352,61 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
     { value: 'USDC', label: 'USDC' }
   ];
 
+  // Order management functions
+  const addEntryOrder = () => {
+    const newOrder = { indent: 1, volume: 0 };
+    setFormData(prev => ({
+      ...prev,
+      entryOrders: [...prev.entryOrders, newOrder]
+    }));
+  };
+
+  const removeEntryOrder = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      entryOrders: prev.entryOrders.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateEntryOrder = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      entryOrders: prev.entryOrders.map((order, i) => 
+        i === index ? { ...order, [field]: parseFloat(value) || 0 } : order
+      )
+    }));
+  };
+
+  const addExitOrder = () => {
+    const newOrder = { indent: 1, volume: 0 };
+    setFormData(prev => ({
+      ...prev,
+      exitOrders: [...prev.exitOrders, newOrder]
+    }));
+  };
+
+  const removeExitOrder = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      exitOrders: prev.exitOrders.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateExitOrder = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      exitOrders: prev.exitOrders.map((order, i) => 
+        i === index ? { ...order, [field]: parseFloat(value) || 0 } : order
+      )
+    }));
+  };
+
+  // Calculate remaining deposit percentage
+  const calculateRemainingDeposit = (orders) => {
+    const totalVolume = orders.reduce((sum, order) => sum + (order.volume || 0), 0);
+    return Math.max(0, 100 - totalVolume);
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
