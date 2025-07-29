@@ -1729,47 +1729,7 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    {/* Min. Indent % */}
-                    <div className="space-y-2">
-                      <Label>Min. Indent %</Label>
-                      <Select
-                        value={formData.minIndentPercent}
-                        onValueChange={(value) => handleInputChange('minIndentPercent', value)}
-                      >
-                        <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {minIndentOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
 
-                    {/* Indent Type */}
-                    <div className="space-y-2">
-                      <Label>Indent Type</Label>
-                      <Select
-                        value={formData.indentType}
-                        onValueChange={(value) => handleInputChange('indentType', value)}
-                      >
-                        <SelectTrigger className="border-[#0097B2]/20 focus:border-[#0097B2]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {indentTypeOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
 
                   {/* Stop Bot After Stop Loss Execution */}
                   <div className="flex items-center justify-between">
