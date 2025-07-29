@@ -391,6 +391,7 @@ test_plan:
     - "Add Filtering System to Marketplace"
     - "Add Reddit-style Voting System and Vote-based Sorting"
     - "Replace Rating with Votes Statistics in Settings and SellerProfileModal"
+    - "Upgrade Advanced Bot Builder Own Strategy Settings"
     - "Development Test User Implementation"
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
