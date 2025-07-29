@@ -1492,34 +1492,20 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
 
                     <div className="space-y-4 pt-4 border-t">
                       <div className="space-y-2">
-                        <Label>Partial Placement of a Grid of Orders (%)</Label>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="range"
-                            min="1"
-                            max="100"
-                            value={formData.exitPartialPlacement}
-                            onChange={(e) => handleInputChange('exitPartialPlacement', parseInt(e.target.value))}
-                            className="flex-1"
-                          />
-                          <span className="text-sm font-medium text-[#0097B2] min-w-[3rem]">
-                            {formData.exitPartialPlacement}%
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Pulling Up the Order Grid</Label>
-                        <Select value={formData.exitPullingUp.toString()} onValueChange={(value) => handleInputChange('exitPullingUp', parseInt(value))}>
+                        <Label>Partial Placement of a Grid of Orders</Label>
+                        <Select 
+                          value={formData.exitPartialPlacement.toString()} 
+                          onValueChange={(value) => handleInputChange('exitPartialPlacement', parseInt(value))}
+                        >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select percentage" />
+                            <SelectValue placeholder="Select number of orders" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="1">1%</SelectItem>
-                            <SelectItem value="2">2%</SelectItem>
-                            <SelectItem value="3">3%</SelectItem>
-                            <SelectItem value="5">5%</SelectItem>
-                            <SelectItem value="10">10%</SelectItem>
+                            {Array.from({ length: formData.exitOrders.length }, (_, i) => i + 1).map((num) => (
+                              <SelectItem key={num} value={num.toString()}>
+                                {num} order{num > 1 ? 's' : ''}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
