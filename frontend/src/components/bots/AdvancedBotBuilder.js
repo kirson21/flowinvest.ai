@@ -1180,23 +1180,25 @@ const AdvancedBotBuilder = ({ onClose, onSave, editingBot, onDelete }) => {
                         />
                       </div>
 
-                      {formData.logarithmicDistribution && (
-                        <div className="space-y-2 ml-6">
-                          <Label htmlFor="logarithmicDistributionValue">
-                            Logarithmic Distribution Value
-                            <span className="text-xs text-gray-500 ml-2">Range: 0.1 - 2.9</span>
-                          </Label>
-                          <Input
-                            id="logarithmicDistributionValue"
-                            type="number"
-                            min="0.1"
-                            max="2.9"
-                            step="0.1"
-                            value={formData.logarithmicDistributionValue}
-                            onChange={(e) => handleInputChange('logarithmicDistributionValue', parseFloat(e.target.value))}
-                            className="border-[#0097B2]/20 focus:border-[#0097B2] max-w-xs"
-                            placeholder="Enter value (0.1-2.9)"
-                          />
+                          {formData.logarithmicDistribution && (
+                            <div className="space-y-2 ml-6">
+                              <Label htmlFor="logarithmicDistributionValue">
+                                Logarithmic Distribution Value
+                                <span className="text-xs text-gray-500 ml-2">Range: 0.1 - 2.9</span>
+                              </Label>
+                              <Input
+                                id="logarithmicDistributionValue"
+                                type="number"
+                                min="0.1"
+                                max="2.9"
+                                step="0.1"
+                                value={formData.logarithmicDistributionValue}
+                                onChange={(e) => handleInputChange('logarithmicDistributionValue', parseFloat(e.target.value))}
+                                className="border-[#0097B2]/20 focus:border-[#0097B2] max-w-xs"
+                                placeholder="Enter value (0.1-2.9)"
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
 
