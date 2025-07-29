@@ -24,7 +24,8 @@ import {
   Target,
   DollarSign,
   RefreshCw,
-  Trash2
+  Trash2,
+  Plus
 } from 'lucide-react';
 import { tradingPairs, pairCategories, getTopPairs, searchPairs } from '../../data/tradingPairs';
 import TradingPairSelector from './TradingPairSelector';
