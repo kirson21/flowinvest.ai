@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Continue fixing seller information display issues on marketplace product cards: 1) Fix seller name to display user's actual display name instead of hardcoded 'Hakuna Matata', 2) Fix 'About' information to pull from user's Bio field in settings, 3) Fix star ratings to show '0 stars' when no reviews exist instead of fake ratings, 4) Fix social links to only show connected platforms, not all social media icons. Solution should work for all users, not just specific user."
+user_problem_statement: "Delete the 'featured' badge from the marketplace, remove the language choice in settings, and delete any unnecessary Railway-related files."
 
 backend:
   - task: "Backend Regression Testing"
