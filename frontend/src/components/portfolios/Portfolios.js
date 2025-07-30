@@ -56,8 +56,7 @@ const Portfolios = () => {
     'Portfolio Strategies',
     'Educational Content',
     'Market Analysis',
-    'Trading Tools',
-    'My Purchases'
+    'Trading Tools'
   ];
 
   const loadProductsWithReviews = () => {
