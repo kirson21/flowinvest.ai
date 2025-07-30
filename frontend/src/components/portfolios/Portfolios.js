@@ -203,6 +203,16 @@ const Portfolios = () => {
     setIsPurchasedProductModalOpen(true);
   };
 
+  // Handle showing My Purchases section
+  const handleShowMyPurchases = () => {
+    setShowMyPurchases(true);
+  };
+
+  // Handle going back to main marketplace
+  const handleBackToMarketplace = () => {
+    setShowMyPurchases(false);
+  };
+
   // Load user votes from localStorage
   const loadUserVotes = () => {
     const savedVotes = localStorage.getItem(`user_votes_${user?.id || 'guest'}`);
