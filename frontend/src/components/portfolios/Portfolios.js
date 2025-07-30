@@ -142,6 +142,10 @@ const Portfolios = () => {
       case 'Trading Tools':
         filtered = portfoliosToFilter.filter(p => p.category === 'Trading Tools' || p.category === 'tools');
         break;
+      case 'My Purchases':
+        // Show only products the user has purchased
+        filtered = userPurchases;
+        break;
       default:
         filtered = portfoliosToFilter;
     }
