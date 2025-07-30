@@ -706,14 +706,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {sellerProducts.map((product) => (
                     <Card key={product.id} className="hover:shadow-lg transition-all duration-200 group relative">
-                      {product.featured && (
-                        <div className="absolute top-2 right-2 z-10">
-                          <Badge className="bg-[#0097B2] text-white shadow-lg text-xs">
-                            <Star size={10} className="mr-1" />
-                            Featured
-                          </Badge>
-                        </div>
-                      )}
+
                       
                       <CardHeader className="pb-3 pt-6">
                         <div className="flex items-start justify-between mb-2">
