@@ -564,7 +564,6 @@ export const mockPortfolios = [
     expectedReturn: "Educational",
     minimumInvestment: 75,
     price: 75,
-    featured: false,
     totalInvestors: 2341,
     seller: {
       name: "Crypto Academy",
