@@ -808,4 +808,212 @@ const Portfolios = () => {
   );
 };
 
+// PurchasedProductModal Component
+const PurchasedProductModal = ({ product, isOpen, onClose }) => {
+  if (!product) return null;
+
+  const renderContentBlock = (block, index) => {
+    switch (block.type) {
+      case 'text':
+        return (
+          <div key={index} className="mb-4">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              {block.content}
+            </p>
+          </div>
+        );
+      case 'image':
+        return (
+          <div key={index} className="mb-4">
+            <img 
+              src={block.url} 
+              alt={block.caption || 'Product content'} 
+              className="w-full rounded-lg shadow-md max-h-96 object-cover"
+            />
+            {block.caption && (
+              <p className="text-sm text-gray-500 mt-2 text-center italic">
+                {block.caption}
+              </p>
+            )}
+          </div>
+        );
+      case 'video':
+        return (
+          <div key={index} className="mb-4">
+            <video 
+              controls 
+              className="w-full rounded-lg shadow-md max-h-96"
+              src={block.url}
+            >
+              Your browser does not support the video tag.
+            </video>
+            {block.caption && (
+              <p className="text-sm text-gray-500 mt-2 text-center italic">
+                {block.caption}
+              </p>
+            )}
+          </div>
+        );
+      case 'file':
+        return (
+          <div key={index} className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <FileText size={20} className="text-[#0097B2]" />
+              <div>
+                <a 
+                  href={block.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[#0097B2] hover:underline font-medium"
+                >
+                  {block.name}
+                </a>
+                <p className="text-xs text-gray-500 mt-1">
+                  Click to download or view
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <DialogTitle className="text-xl font-bold text-[#474545] dark:text-white mb-2">
+                {product.title || product.name}
+              </DialogTitle>
+              <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center space-x-1">
+                  <CheckCircle size={14} className="text-green-600" />
+                  <span>Purchased</span>
+                </div>
+                <span>•</span>
+                <span>
+                  {new Date(product.purchasedAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Product Details */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Category</p>
+              <p className="text-sm font-medium">{product.category}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Price Paid</p>
+              <p className="text-sm font-medium text-green-600">
+                ${product.price || product.minimumInvestment}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Risk Level</p>
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  product.riskLevel === 'Low' ? 'bg-green-500' :
+                  product.riskLevel === 'Medium' ? 'bg-yellow-500' :
+                  'bg-red-500'
+                }`} />
+                <span className={`text-sm font-medium ${
+                  product.riskLevel === 'Low' ? 'text-green-600' :
+                  product.riskLevel === 'Medium' ? 'text-yellow-600' :
+                  'text-red-600'
+                }`}>
+                  {product.riskLevel || 'Medium'}
+                </span>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expected Return</p>
+              <p className="text-sm font-medium">{product.expectedReturn || 'N/A'}</p>
+            </div>
+          </div>
+
+          {/* Full Product Content */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-[#474545] dark:text-white">
+              Product Content
+            </h3>
+            
+            {/* Basic description */}
+            <div className="mb-4">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+
+            {/* Rich content blocks */}
+            {product.contentBlocks && product.contentBlocks.length > 0 && (
+              <div className="space-y-4">
+                {product.contentBlocks.map((block, index) => renderContentBlock(block, index))}
+              </div>
+            )}
+
+            {/* Attachments */}
+            {product.attachments && product.attachments.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-md font-semibold text-[#474545] dark:text-white">
+                  Attachments
+                </h4>
+                {product.attachments.map((attachment, index) => (
+                  <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <FileText size={18} className="text-[#0097B2]" />
+                      <div>
+                        <a 
+                          href={attachment.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[#0097B2] hover:underline font-medium text-sm"
+                        >
+                          {attachment.name}
+                        </a>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {attachment.type} - Click to access
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Asset Allocation */}
+            {product.assetAllocation && (
+              <div>
+                <h4 className="text-md font-semibold text-[#474545] dark:text-white mb-2">
+                  Asset Allocation
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {product.assetAllocation}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Seller Information */}
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <h4 className="text-md font-semibold text-[#474545] dark:text-white mb-2">
+              Created by {product.seller?.name}
+            </h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {product.seller?.bio || 'Professional content creator'}
+            </p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default Portfolios;
