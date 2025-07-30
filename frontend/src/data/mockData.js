@@ -448,7 +448,6 @@ export const mockPortfolios = [
     expectedReturn: "Educational",
     minimumInvestment: 50,
     price: 50,
-    featured: false,
     totalInvestors: 1245,
     seller: {
       name: "Dr. Lisa Wang",
