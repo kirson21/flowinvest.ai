@@ -878,14 +878,14 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                       
                       {/* Delete Button for Text Blocks */}
                       {productData.contentBlocks.length > 1 && (
-                        <div className={`absolute -right-10 top-4 transition-opacity duration-200 ${
-                          activeBlockId === block.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        <div className={`absolute right-2 top-2 transition-opacity duration-200 ${
+                          activeBlockId === block.id ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
                         }`}>
                           <Button
                             type="button"
                             size="sm"
                             onClick={() => removeContentBlock(block.id)}
-                            className="w-8 h-8 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white shadow-lg p-0 transition-all duration-200 hover:scale-110"
+                            className="w-8 h-8 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white shadow-lg p-0 transition-all duration-200 hover:scale-110 z-10"
                             title="Delete this paragraph"
                           >
                             <Trash2 size={14} />
