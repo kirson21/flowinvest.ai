@@ -1138,11 +1138,7 @@ const Settings = () => {
                                 <Badge variant="outline" className="text-xs">
                                   {product.category}
                                 </Badge>
-                                {product.featured && (
-                                  <Badge className="bg-[#0097B2] text-white text-xs">
-                                    Featured
-                                  </Badge>
-                                )}
+
                               </div>
                             </div>
                             
