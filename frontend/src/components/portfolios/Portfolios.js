@@ -679,16 +679,32 @@ const Portfolios = () => {
         {/* Voting System */}
         <VotingButtons productId={portfolio.id} votes={portfolio.votes} />
 
-        {/* Purchase Button */}
-        <Button 
-          className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
-          onClick={() => {
-            alert(`Purchase ${portfolio.title || portfolio.name} for $${portfolio.price || portfolio.minimumInvestment}! (Mock action)`);
-          }}
-        >
-          <ShoppingCart size={16} className="mr-2" />
-          Purchase Now
-        </Button>
+        {/* Purchase/Access Button */}
+        {isPurchased(portfolio.id) ? (
+          <Button 
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => handleViewPurchasedProduct(portfolio)}
+          >
+            <ExternalLink size={16} className="mr-2" />
+            Access Content
+          </Button>
+        ) : selectedFilter === 'My Purchases' ? (
+          <Button 
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => handleViewPurchasedProduct(portfolio)}
+          >
+            <ExternalLink size={16} className="mr-2" />
+            Access Content
+          </Button>
+        ) : (
+          <Button 
+            className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+            onClick={() => handlePurchase(portfolio)}
+          >
+            <ShoppingCart size={16} className="mr-2" />
+            Purchase Now
+          </Button>
+        )}
       </CardContent>
     </Card>
     );
