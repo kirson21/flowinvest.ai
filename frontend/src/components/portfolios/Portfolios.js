@@ -302,6 +302,7 @@ const Portfolios = () => {
   useEffect(() => {
     loadProductsWithReviews();
     loadUserVotes();
+    loadUserPurchases();
   }, [user]);
 
   // Apply default filter when portfolios are loaded
