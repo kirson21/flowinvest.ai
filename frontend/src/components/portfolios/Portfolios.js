@@ -505,14 +505,7 @@ const Portfolios = () => {
 
     return (
     <Card className="hover:shadow-lg transition-all duration-200 group relative">
-      {portfolio.featured && (
-        <div className="absolute top-2 right-2 z-10">
-          <Badge className="bg-[#0097B2] text-white shadow-lg text-xs">
-            <Star size={10} className="mr-1" />
-            Featured
-          </Badge>
-        </div>
-      )}
+
       
       {/* Edit Button - Only visible to creators */}
       {canEditProduct(portfolio) && (
