@@ -274,8 +274,8 @@ class FocusedRegressionTester:
         """Test GET /api/bots/user/{user_id} - User bots retrieval"""
         print("\n🤖 Testing User Bots Retrieval")
         
-        # Use a test user ID (this should work even if user doesn't exist)
-        test_user_id = "test-user-id-123"
+        # Use a proper UUID format for test user ID
+        test_user_id = str(uuid.uuid4())
         
         try:
             response = self.session.get(f"{API_BASE}/bots/user/{test_user_id}")
