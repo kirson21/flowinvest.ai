@@ -400,7 +400,7 @@ frontend:
     file: "/app/frontend/src/components/portfolios/Portfolios.js, /app/frontend/src/components/portfolios/ProductCreationModal.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "user"
