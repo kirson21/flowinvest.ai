@@ -792,9 +792,33 @@ const Portfolios = () => {
       </div>
 
       <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-        {filteredPortfolios.map((portfolio) => (
-          <PortfolioCard key={portfolio.id} portfolio={portfolio} />
-        ))}
+        {showMyPurchases ? (
+          userPurchases.length > 0 ? (
+            userPurchases.map((portfolio) => (
+              <PortfolioCard key={portfolio.purchaseId || portfolio.id} portfolio={portfolio} />
+            ))
+          ) : (
+            <div className="col-span-2 text-center py-12">
+              <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No purchases yet
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Start exploring our marketplace to find products you'd like to purchase.
+              </p>
+              <Button
+                onClick={handleBackToMarketplace}
+                className="bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+              >
+                Browse Marketplace
+              </Button>
+            </div>
+          )
+        ) : (
+          filteredPortfolios.map((portfolio) => (
+            <PortfolioCard key={portfolio.id} portfolio={portfolio} />
+          ))
+        )}
       </div>
 
       <div className="mt-8 text-center">
