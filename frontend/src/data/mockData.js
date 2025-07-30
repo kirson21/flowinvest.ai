@@ -245,7 +245,6 @@ export const mockPortfolios = [
       "1Y": 8.90
     },
     totalInvestors: 1523,
-    featured: false,
     // Marketplace data
     seller: {
       name: "Sarah Chen",
