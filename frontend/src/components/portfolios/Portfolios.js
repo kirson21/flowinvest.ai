@@ -24,7 +24,9 @@ import {
   Edit,
   Filter,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  CheckCircle,
+  FileText
 } from 'lucide-react';
 import { mockPortfolios } from '../../data/mockData';
 import SellerProfileModal from './SellerProfileModal';
