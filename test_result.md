@@ -140,12 +140,13 @@ backend:
         - working: true
           agent: "main"
           comment: "Successfully deleted all unused Railway-related files: railway.toml, railway-frontend.toml, backend/requirements-railway.txt, backend/railway-start.sh, frontend/railway-start.sh, RAILWAY_DEPLOYMENT_GUIDE.md, RAILWAY_DEPLOYMENT_CHECKLIST.md, RAILWAY_FIX_CD_ERROR.md, RAILWAY_ERROR_FIX.md. Verified these files were not referenced in current supervisor configuration which uses standard uvicorn and yarn commands."
+  - task: "Backend Regression Testing"
     implemented: true
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "main"
