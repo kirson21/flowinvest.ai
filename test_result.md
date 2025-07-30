@@ -105,7 +105,41 @@
 user_problem_statement: "Delete the 'featured' badge from the marketplace, remove the language choice in settings, and delete any unnecessary Railway-related files."
 
 backend:
-  - task: "Backend Regression Testing"
+  - task: "Remove Featured Badges from Marketplace"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/portfolios/Portfolios.js, /app/frontend/src/components/settings/Settings.js, /app/frontend/src/components/portfolios/SellerProfileModal.js, /app/frontend/src/data/mockData.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Successfully removed all featured badges from marketplace cards, settings manage products, and seller profile modal. Removed featured property from mockData.js and ProductCreationModal.js. Updated sorting logic to remove featured products priority. Featured badges no longer display anywhere in the application."
+
+  - task: "Remove Language Choice from Settings"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/settings/Settings.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Successfully removed language selection UI from Settings component. Removed Globe icon, language display, and toggle button. Cleaned up unused imports and variables (language, toggleLanguage). Settings now only shows dark mode toggle and notifications."
+
+  - task: "Delete Railway-related Files"
+    implemented: true
+    working: true
+    file: "Multiple Railway files deleted"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Successfully deleted all unused Railway-related files: railway.toml, railway-frontend.toml, backend/requirements-railway.txt, backend/railway-start.sh, frontend/railway-start.sh, RAILWAY_DEPLOYMENT_GUIDE.md, RAILWAY_DEPLOYMENT_CHECKLIST.md, RAILWAY_FIX_CD_ERROR.md, RAILWAY_ERROR_FIX.md. Verified these files were not referenced in current supervisor configuration which uses standard uvicorn and yarn commands."
     implemented: true
     working: true
     file: "/app/backend/server.py"
