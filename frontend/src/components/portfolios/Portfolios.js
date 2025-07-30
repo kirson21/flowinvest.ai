@@ -43,6 +43,9 @@ const Portfolios = () => {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState(null);
   const [isProductEditOpen, setIsProductEditOpen] = useState(false);
   const [userVotes, setUserVotes] = useState({});
+  const [userPurchases, setUserPurchases] = useState([]);
+  const [selectedPurchasedProduct, setSelectedPurchasedProduct] = useState(null);
+  const [isPurchasedProductModalOpen, setIsPurchasedProductModalOpen] = useState(false);
 
   // Filter options
   const filterOptions = [
