@@ -872,9 +872,26 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
                         onFocus={() => handleTextBlockFocus(block.id)}
                         onKeyDown={(e) => handleTextBlockKeyDown(e, block.id, index)}
                         placeholder={index === 0 ? "Start writing your content here... Press Enter to create new paragraphs, hover to see + button for adding media." : "Continue writing... Press Enter for new paragraph."}
-                        className="border-0 resize-none focus:ring-0 min-h-[120px] w-full bg-transparent"
+                        className="border-0 resize-none focus:ring-0 min-h-[120px] w-full bg-transparent pr-12"
                         style={{ boxShadow: 'none' }}
                       />
+                      
+                      {/* Delete Button for Text Blocks */}
+                      {productData.contentBlocks.length > 1 && (
+                        <div className={`absolute -right-10 top-4 transition-opacity duration-200 ${
+                          activeBlockId === block.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        }`}>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => removeContentBlock(block.id)}
+                            className="w-8 h-8 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white shadow-lg p-0 transition-all duration-200 hover:scale-110"
+                            title="Delete this paragraph"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      )}
                       
                       {/* Dynamic Plus Button for Text Blocks */}
                       <div className={`absolute -left-10 top-4 transition-opacity duration-200 ${
