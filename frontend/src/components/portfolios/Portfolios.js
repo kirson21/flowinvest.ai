@@ -154,6 +154,52 @@ const Portfolios = () => {
     applyFilter(filter);
   };
 
+  // Load user purchases from localStorage
+  const loadUserPurchases = () => {
+    if (!user) return;
+    const savedPurchases = localStorage.getItem(`user_purchases_${user.id}`);
+    if (savedPurchases) {
+      setUserPurchases(JSON.parse(savedPurchases));
+    }
+  };
+
+  // Save user purchases to localStorage
+  const saveUserPurchases = (purchases) => {
+    if (!user) return;
+    localStorage.setItem(`user_purchases_${user.id}`, JSON.stringify(purchases));
+    setUserPurchases(purchases);
+  };
+
+  // Handle product purchase
+  const handlePurchase = (product) => {
+    if (!user) {
+      alert('Please log in to make a purchase');
+      return;
+    }
+
+    const purchaseData = {
+      ...product,
+      purchasedAt: new Date().toISOString(),
+      purchaseId: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
+
+    const updatedPurchases = [...userPurchases, purchaseData];
+    saveUserPurchases(updatedPurchases);
+    
+    alert(`Successfully purchased ${product.title || product.name}!`);
+  };
+
+  // Check if user has purchased a product
+  const isPurchased = (productId) => {
+    return userPurchases.some(purchase => purchase.id === productId);
+  };
+
+  // Handle viewing purchased product content
+  const handleViewPurchasedProduct = (product) => {
+    setSelectedPurchasedProduct(product);
+    setIsPurchasedProductModalOpen(true);
+  };
+
   // Load user votes from localStorage
   const loadUserVotes = () => {
     const savedVotes = localStorage.getItem(`user_votes_${user?.id || 'guest'}`);
