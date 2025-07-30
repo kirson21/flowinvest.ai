@@ -689,15 +689,7 @@ const Portfolios = () => {
         <VotingButtons productId={portfolio.id} votes={portfolio.votes} />
 
         {/* Purchase/Access Button */}
-        {isPurchased(portfolio.id) ? (
-          <Button 
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => handleViewPurchasedProduct(portfolio)}
-          >
-            <ExternalLink size={16} className="mr-2" />
-            Access Content
-          </Button>
-        ) : selectedFilter === 'My Purchases' ? (
+        {isPurchased(portfolio.id) || showMyPurchases ? (
           <Button 
             className="w-full bg-green-600 hover:bg-green-700 text-white"
             onClick={() => handleViewPurchasedProduct(portfolio)}
