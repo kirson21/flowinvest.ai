@@ -438,7 +438,6 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         rating: 0,
         totalReviews: 0,
         totalInvestors: 0,
-        featured: false,
         // Initialize voting structure
         votes: {
           upvotes: 0,
