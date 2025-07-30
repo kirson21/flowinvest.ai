@@ -522,7 +522,6 @@ export const mockPortfolios = [
     expectedReturn: "Tool Access",
     minimumInvestment: 200,
     price: 200,
-    featured: true,
     totalInvestors: 456,
     seller: {
       name: "TechTrader AI",
