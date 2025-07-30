@@ -422,6 +422,7 @@ test_plan:
     - "Add Reddit-style Voting System and Vote-based Sorting"
     - "Replace Rating with Votes Statistics in Settings and SellerProfileModal"
     - "Upgrade Advanced Bot Builder Own Strategy Settings"
+    - "Add My Purchases Section and Fix Product Editor Deletion"
     - "Development Test User Implementation"
     - "Fix Seller Information Display Logic"
     - "Fix Star Ratings Display for No Reviews"
