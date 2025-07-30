@@ -418,7 +418,6 @@ export const mockPortfolios = [
       "1Y": 123.45
     },
     totalInvestors: 567,
-    featured: true,
     // Marketplace data
     seller: {
       name: "CryptoKing",
