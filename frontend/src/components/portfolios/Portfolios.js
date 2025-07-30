@@ -724,20 +724,46 @@ const Portfolios = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#474545] dark:text-white">
-            Marketplace
+            {showMyPurchases ? 'My Purchases' : 'Marketplace'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Ready-made investment portfolios and strategies
+            {showMyPurchases 
+              ? 'Your purchased products and content' 
+              : 'Ready-made investment portfolios and strategies'
+            }
           </p>
         </div>
-        <Button
-          variant="outline"
-          className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 w-full sm:w-auto"
-          onClick={handleCreateProduct}
-        >
-          <Plus size={16} className="mr-2 flex-shrink-0" />
-          <span className="truncate">Create your product</span>
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          {showMyPurchases ? (
+            <Button
+              variant="outline"
+              className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 w-full sm:w-auto"
+              onClick={handleBackToMarketplace}
+            >
+              <ChevronDown size={16} className="mr-2 flex-shrink-0 rotate-90" />
+              <span className="truncate">Back to Marketplace</span>
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 w-full sm:w-auto"
+                onClick={handleCreateProduct}
+              >
+                <Plus size={16} className="mr-2 flex-shrink-0" />
+                <span className="truncate">Create your product</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 w-full sm:w-auto"
+                onClick={handleShowMyPurchases}
+              >
+                <ShoppingCart size={16} className="mr-2 flex-shrink-0" />
+                <span className="truncate">My Purchases ({userPurchases.length})</span>
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Filter System */}
