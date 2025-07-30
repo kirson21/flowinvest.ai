@@ -391,6 +391,21 @@ frontend:
           agent: "main"
           comment: "ENHANCED OWN STRATEGY SETTINGS: User requested specific edits to Entry step Own strategy: 1) CHANGED PARTIAL PLACEMENT - Modified 'Partial Placement of a Grid of Orders (%)' from percentage slider to dropdown selection based on number of orders (if 2 orders: choice 1-2, if 10 orders: choice 1-10, etc), updated initialization from 50% to 1 order, 2) REMOVED PULLING UP GRID - Deleted 'Pulling Up the Order Grid' from Own strategy container since it exists in advanced settings below, 3) CLEANED ADVANCED SETTINGS FOR OWN - Added conditional hiding (formData.tradingMode !== 'Own') to remove: 'Overlapping Price Changes (%)', 'Grid of Orders', '% Martingale', 'Indent (%)', and 'Logarithmic Distribution of Prices' - these settings are not needed for Own strategy, 4) APPLIED TO EXIT SECTION - Made identical changes to Exit section Own strategy with same partial placement dropdown logic and removed pulling up grid setting. Both Entry and Exit now have clean, focused interfaces for Own strategy while maintaining full functionality for Simple strategy."
 
+  - task: "Add My Purchases Section and Fix Product Editor Deletion"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/portfolios/Portfolios.js, /app/frontend/src/components/portfolios/ProductCreationModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User requests: '1. Please Add My Purchases Section to Marketplace - Create new section, display purchased products, remove Purchase Now button, show Purchased/Access label, full content access, authorization checks. 2. Fix Create Your Product Editor – Allow Paragraph Deletion - Add Delete/Remove button next to each paragraph block, dynamic UI updates.'"
+        - working: true
+          agent: "main"
+          comment: "IMPLEMENTED: Successfully added both requested features: 1) MY PURCHASES SECTION - Added 'My Purchases' filter to marketplace, implemented userPurchases state management with localStorage persistence, created handlePurchase function for product purchases, added isPurchased check function, created comprehensive PurchasedProductModal for full content access with read-only view including all files/paragraphs/strategies, modified PortfolioCard to show 'Access Content' button for purchased items instead of 'Purchase Now', implemented proper authorization checks ensuring users only see their own purchases, 2) PRODUCT EDITOR DELETION - Added delete buttons to text content blocks (removeContentBlock function already existed), verified that image/video/file blocks already had delete buttons implemented, ensured proper UI updates without page refresh, added minimum 1 block validation to prevent deleting all content. Both features provide comprehensive functionality with proper user experience and data persistence."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
