@@ -50,7 +50,7 @@ import {
 } from 'lucide-react';
 
 const Settings = () => {
-  const { t, isDarkMode, toggleTheme, language, toggleLanguage } = useApp();
+  const { t, isDarkMode, toggleTheme } = useApp();
   const { user, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
