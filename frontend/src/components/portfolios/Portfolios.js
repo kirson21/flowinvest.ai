@@ -113,7 +113,7 @@ const Portfolios = () => {
     
     switch (filter) {
       case 'Most Popular':
-        // Sort by vote score first, then by engagement (featured products get slight boost)
+        // Sort by vote score first, then by engagement
         filtered = portfoliosToFilter.sort((a, b) => {
           const aVoteScore = calculateVoteScore(a.votes);
           const bVoteScore = calculateVoteScore(b.votes);
@@ -123,11 +123,7 @@ const Portfolios = () => {
             return bVoteScore - aVoteScore;
           }
           
-          // Secondary sort: featured products get priority
-          if (a.featured && !b.featured) return -1;
-          if (!a.featured && b.featured) return 1;
-          
-          // Tertiary sort: by traditional engagement metrics
+          // Secondary sort: by traditional engagement metrics
           const aEngagement = (a.totalReviews || 0) * (a.rating || 0);
           const bEngagement = (b.totalReviews || 0) * (b.rating || 0);
           return bEngagement - aEngagement;
