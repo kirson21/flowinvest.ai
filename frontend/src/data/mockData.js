@@ -142,7 +142,6 @@ export const mockPortfolios = [
       "1Y": 45.67
     },
     totalInvestors: 2847,
-    featured: true,
     // Marketplace data
     seller: {
       name: "Alex Thompson",
