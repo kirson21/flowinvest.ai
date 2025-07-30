@@ -794,6 +794,16 @@ const Portfolios = () => {
         onSave={handleProductUpdated}
         onDelete={handleProductDeleted}
       />
+
+      {/* Purchased Product Content Modal */}
+      <PurchasedProductModal
+        product={selectedPurchasedProduct}
+        isOpen={isPurchasedProductModalOpen}
+        onClose={() => {
+          setIsPurchasedProductModalOpen(false);
+          setSelectedPurchasedProduct(null);
+        }}
+      />
     </div>
   );
 };
