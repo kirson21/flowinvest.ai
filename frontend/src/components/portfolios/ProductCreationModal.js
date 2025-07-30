@@ -686,7 +686,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
           </div>
         </CardHeader>
 
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="p-6 space-y-6 pb-32">
           {/* Title */}
           <div>
             <label className="block text-sm font-medium mb-2">Product Title *</label>
