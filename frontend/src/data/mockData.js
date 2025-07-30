@@ -484,7 +484,6 @@ export const mockPortfolios = [
     expectedReturn: "Informational",
     minimumInvestment: 25,
     price: 25,
-    featured: true,
     totalInvestors: 892,
     seller: {
       name: "Market Insights Pro",
