@@ -17,7 +17,6 @@ import {
   Settings as SettingsIcon,
   Moon,
   Sun,
-  Globe,
   User,
   LogOut,
   Shield,
