@@ -458,27 +458,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix Trading Mode Preset Buttons Visibility"
-    - "Fix Mobile Responsiveness for Margin Type Buttons"
-    - "Fix Martingale Preset Value Application"
-    - "Enhance View All Products Modal in SellerProfileModal"
-    - "Add Filtering System to Marketplace"
-    - "Add Reddit-style Voting System and Vote-based Sorting"
-    - "Replace Rating with Votes Statistics in Settings and SellerProfileModal"
-    - "Upgrade Advanced Bot Builder Own Strategy Settings"
-    - "Add My Purchases Section and Fix Product Editor Deletion"
-    - "Development Test User Implementation"
-    - "Fix Seller Information Display Logic"
-    - "Fix Star Ratings Display for No Reviews"
-    - "Fix Social Links Display to Show Only Connected Platforms"
-    - "Fix Seller Profile Modal Rating and Bio Display"
-    - "Implement Manage Products Functionality"
-    - "Implement Edit Product Functionality in Manage Products"
-    - "Fix Review Saving and Display System"
-    - "Fix React Error #310 in ProductCreationModal"
-    - "Fix Star Ratings Display in Reviews"
-    - "Fix Star Ratings and Review Counts on Marketplace Cards"
-    - "Fix Plus Icon Import Error in ProductCreationModal"
+    - "Remove Featured Badges from Marketplace"
+    - "Remove Language Choice from Settings"
+    - "Delete Railway-related Files"
+    - "Backend Regression Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
