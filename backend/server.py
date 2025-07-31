@@ -48,6 +48,7 @@ api_router = APIRouter()
 api_router.include_router(webhook.router, prefix="", tags=["webhook"])
 api_router.include_router(auth.router, prefix="", tags=["auth"])
 api_router.include_router(ai_bots.router, prefix="", tags=["ai_bots"])
+api_router.include_router(verification.router, prefix="", tags=["verification"])
 
 # Mount API router
 app.include_router(api_router, prefix="/api")
