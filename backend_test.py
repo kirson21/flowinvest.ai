@@ -792,11 +792,13 @@ class FlowInvestTester:
         
         # Categorize results
         auth_tests = [r for r in self.test_results if 'auth' in r['test'].lower() or 'sign' in r['test'].lower() or 'user' in r['test'].lower()]
+        verification_tests = [r for r in self.test_results if 'verification' in r['test'].lower() or 'admin' in r['test'].lower()]
         bot_tests = [r for r in self.test_results if 'bot' in r['test'].lower() or 'grok' in r['test'].lower()]
         webhook_tests = [r for r in self.test_results if 'webhook' in r['test'].lower() or 'feed' in r['test'].lower()]
         
         print(f"\n📊 Results by Category:")
         print(f"🔐 Authentication: {sum(1 for r in auth_tests if r['success'])}/{len(auth_tests)} passed")
+        print(f"🔒 Verification System: {sum(1 for r in verification_tests if r['success'])}/{len(verification_tests)} passed")
         print(f"🤖 Bot Management: {sum(1 for r in bot_tests if r['success'])}/{len(bot_tests)} passed")
         print(f"📡 Webhook System: {sum(1 for r in webhook_tests if r['success'])}/{len(webhook_tests)} passed")
         
