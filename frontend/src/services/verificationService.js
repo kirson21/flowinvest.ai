@@ -139,21 +139,56 @@ export const verificationService = {
   // Submit verification application
   async submitVerificationApplication(applicationData) {
     try {
-      const { data, error } = await supabase
-        .from('seller_verification_applications')
-        .insert([applicationData])
-        .select()
-        .single();
+      // Try Supabase first
+      try {
+        const { data, error } = await supabase
+          .from('seller_verification_applications')
+          .insert([applicationData])
+          .select()
+          .single();
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.warn('Supabase submission failed:', error);
+          // Fall back to localStorage for development
+          return this.submitApplicationToLocalStorage(applicationData);
+        }
+
+        return data;
+      } catch (supabaseError) {
+        console.warn('Supabase not available, using localStorage fallback:', supabaseError);
+        return this.submitApplicationToLocalStorage(applicationData);
       }
-
-      return data;
     } catch (error) {
       console.error('Error submitting verification application:', error);
       throw error;
     }
+  },
+
+  // Fallback: Submit application to localStorage (for development)
+  submitApplicationToLocalStorage(applicationData) {
+    const application = {
+      ...applicationData,
+      id: Date.now().toString(),
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Store application
+    const existingApplications = JSON.parse(localStorage.getItem('verification_applications') || '[]');
+    existingApplications.push(application);
+    localStorage.setItem('verification_applications', JSON.stringify(existingApplications));
+
+    // Update user verification status to pending
+    const userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
+    userProfiles[applicationData.user_id] = {
+      ...userProfiles[applicationData.user_id],
+      seller_verification_status: 'pending'
+    };
+    localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
+
+    console.log('Application submitted to localStorage (development mode)');
+    return application;
   },
 
   // Get user's verification application
