@@ -744,6 +744,15 @@ class FlowInvestTester:
         self.test_get_user_profile()
         self.test_user_signout()
         
+        # Test seller verification system
+        print("\n" + "=" * 50)
+        print("🔐 SELLER VERIFICATION SYSTEM TESTS")
+        print("=" * 50)
+        
+        self.test_verification_storage_setup()
+        self.test_verification_system_integration()
+        self.test_super_admin_access_control()
+        
         # Test AI bot creation and management
         print("\n" + "=" * 50)
         print("🤖 AI BOT CREATION & MANAGEMENT TESTS")
