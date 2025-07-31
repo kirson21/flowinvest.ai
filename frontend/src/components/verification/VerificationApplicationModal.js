@@ -558,7 +558,7 @@ const VerificationApplicationModal = ({ isOpen, onClose, onSuccess }) => {
           )}
 
           {/* Actions */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-4 pt-6 pb-8">
             <Button
               type="button"
               variant="outline"
@@ -577,6 +577,7 @@ const VerificationApplicationModal = ({ isOpen, onClose, onSuccess }) => {
             </Button>
           </div>
         </form>
+        <div className="pb-4"></div> {/* Extra bottom spacing */}
       </div>
     </div>
   );
