@@ -34,9 +34,6 @@ import { mockPortfolios } from '../../data/mockData';
 import SellerProfileModal from './SellerProfileModal';
 import ProductCreationModal from './ProductCreationModal';
 import ProductEditModal from './ProductEditModal';
-import PurchasedProductModal from './PurchasedProductModal';
-import VerificationRequiredModal from '../verification/VerificationRequiredModal';
-import { verificationService } from '../../services/verificationService';
 
 const Portfolios = () => {
   const { user } = useAuth();
