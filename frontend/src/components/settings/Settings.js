@@ -988,6 +988,116 @@ const Settings = () => {
 
           <Separator />
 
+          {/* Verification Notifications */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <Mail className="text-[#0097B2]" size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1 min-w-[16px] h-4 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <div>
+                <p className="font-medium text-[#474545] dark:text-white">
+                  Messages & Notifications
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Verification updates and system messages
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+            >
+              {showNotifications ? 'Hide' : 'View'}
+            </Button>
+          </div>
+
+          {/* Notifications Panel */}
+          {showNotifications && (
+            <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <Mail size={32} className="mx-auto mb-2 opacity-50" />
+                  <p>No notifications yet</p>
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`p-3 rounded-lg border ${
+                      notification.is_read 
+                        ? 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' 
+                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className={`font-medium text-sm ${
+                          notification.is_read 
+                            ? 'text-gray-700 dark:text-gray-300' 
+                            : 'text-blue-800 dark:text-blue-200'
+                        }`}>
+                          {notification.title}
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-2">
+                          {formatNotificationDate(notification.created_at)}
+                        </p>
+                      </div>
+                      {!notification.is_read && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => markNotificationAsRead(notification.id)}
+                          className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1"
+                        >
+                          Mark as read
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Super Admin Verification Management */}
+          {isSuperAdmin() && (
+            <>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Shield className="text-yellow-600" size={20} />
+                  <div>
+                    <p className="font-medium text-[#474545] dark:text-white">
+                      Seller Verification Management
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Review and manage seller verification applications
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setIsVerificationManagementOpen(true)}
+                  size="sm"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  Manage Applications
+                </Button>
+              </div>
+            </>
+          )}
+
+          <Separator />
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Bell className="text-[#0097B2]" size={20} />
