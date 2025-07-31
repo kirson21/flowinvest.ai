@@ -372,8 +372,27 @@ const Portfolios = () => {
   };
 
   const canEditProduct = (product) => {
-    // User can edit their own products
-    return user && product.createdBy === user.id;
+    // Super admin can edit any product, or user can edit their own products
+    return isSuperAdmin() || (user && product.createdBy === user.id);
+  };
+
+  // Super admin function to delete any portfolio
+  const handleSuperAdminDelete = (productId) => {
+    if (!isSuperAdmin()) {
+      alert('❌ Only super admin can delete any portfolio');
+      return;
+    }
+    
+    if (window.confirm('Are you sure you want to delete this portfolio? This action cannot be undone.')) {
+      // Remove from user portfolios
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
+      localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+      
+      // Refresh the portfolios list
+      loadProductsWithReviews();
+      alert('✅ Portfolio deleted successfully by super admin');
+    }
   };
 
   const getRiskColor = (risk) => {
