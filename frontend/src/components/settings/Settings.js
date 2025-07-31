@@ -53,7 +53,6 @@ import {
   ChevronDown,
   Mail
 } from 'lucide-react';
-} from 'lucide-react';
 
 const Settings = () => {
   const { t, isDarkMode, toggleTheme } = useApp();
