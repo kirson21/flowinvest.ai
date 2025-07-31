@@ -1,46 +1,43 @@
 import { supabase } from '../lib/supabase';
 
 export const verificationService = {
-  // Check if user is verified seller
-  async isVerifiedSeller(userId) {
-    try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('seller_verification_status')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error checking seller verification:', error);
-        return false;
-      }
-
-      return data?.seller_verification_status === 'verified';
-    } catch (error) {
-      console.error('Error in isVerifiedSeller:', error);
-      return false;
-    }
-  },
-
   // Get user verification status
   async getVerificationStatus(userId) {
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('seller_verification_status')
-        .eq('user_id', userId)
-        .single();
+      // Try Supabase first
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('seller_verification_status')
+          .eq('user_id', userId)
+          .single();
 
-      if (error) {
-        console.error('Error getting verification status:', error);
-        return 'unverified';
+        if (error && error.code !== 'PGRST116') {
+          console.warn('Supabase verification status check failed:', error);
+          return this.getVerificationStatusFromLocalStorage(userId);
+        }
+
+        return data?.seller_verification_status || 'unverified';
+      } catch (supabaseError) {
+        console.warn('Supabase not available, checking localStorage:', supabaseError);
+        return this.getVerificationStatusFromLocalStorage(userId);
       }
-
-      return data?.seller_verification_status || 'unverified';
     } catch (error) {
       console.error('Error in getVerificationStatus:', error);
       return 'unverified';
     }
+  },
+
+  // Check if user is verified seller
+  async isVerifiedSeller(userId) {
+    const status = await this.getVerificationStatus(userId);
+    return status === 'verified';
+  },
+
+  // Fallback: Get verification status from localStorage 
+  getVerificationStatusFromLocalStorage(userId) {
+    const userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
+    return userProfiles[userId]?.seller_verification_status || 'unverified';
   },
 
   // Upload verification file to Supabase Storage
