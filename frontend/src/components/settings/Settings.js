@@ -84,6 +84,27 @@ const Settings = () => {
     specialties: [],
     newSpecialty: ''
   });
+
+  // Verification state
+  const [isVerificationRequiredOpen, setIsVerificationRequiredOpen] = useState(false);
+  const [isVerificationManagementOpen, setIsVerificationManagementOpen] = useState(false);
+  const [isVerifiedSeller, setIsVerifiedSeller] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState('unverified');
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Super Admin Check
+  const isSuperAdmin = () => {
+    const SUPER_ADMIN_UID = 'cd0e9717-f85d-4726-81e9-f260394ead58';
+    return user?.id === SUPER_ADMIN_UID;
+  };
+
+  // Check if user can access seller features
+  const canAccessSellerFeatures = () => {
+    return isSuperAdmin() || isVerifiedSeller;
+  };
+  });
   
   // Delete account state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
