@@ -18,12 +18,12 @@ export const AuthProvider = ({ children }) => {
         // Development mode test user - TEMPORARY for testing seller info fixes
         if (process.env.NODE_ENV === 'development' && !session) {
           const testUser = {
-            id: 'dev-test-user-123',
-            email: 'testuser@flowinvest.ai',
+            id: 'cd0e9717-f85d-4726-81e9-f260394ead58', // Use super admin UID for testing
+            email: 'kirillpopolitov@gmail.com',
             user_metadata: {
               name: 'Kirson',
               display_name: 'Kirson',
-              full_name: 'Kirson Test User',
+              full_name: 'Kirson Super Admin',
               avatar_url: 'https://ui-avatars.com/api/?name=Kirson&size=150&background=0097B2&color=ffffff'
             },
             app_metadata: {},
