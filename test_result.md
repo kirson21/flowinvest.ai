@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Delete the 'featured' badge from the marketplace, remove the language choice in settings, and delete any unnecessary Railway-related files."
+user_problem_statement: "Feature Request – Super Admin Role and Pre-Built Bot Management: 1. Create a Super Admin Role with elevated privileges for User UID: cd0e9717-f85d-4726-81e9-f260394ead58 (Kirson, kirillpopolitov@gmail.com). 2. Full Management of User Portfolios - super admin can view, edit, and delete any user's portfolios. 3. Full Control of Pre-Built Bots - super admin can edit, delete, or update pre-built bots and publish new ones. 4. Ability to Move Bots Between My Bots and Pre-Built Bots sections with proper visibility control."
 
 backend:
   - task: "Remove Featured Badges from Marketplace"
