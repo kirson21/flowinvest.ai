@@ -211,6 +211,102 @@ const TradingBots = () => {
     }
   };
 
+  // Super Admin Functions for Bot Management
+  const handleMoveToPreBuilt = async (bot) => {
+    if (!isSuperAdmin()) {
+      alert('❌ Only super admin can move bots to pre-built section');
+      return false;
+    }
+    
+    try {
+      console.log('Moving bot to pre-built:', bot);
+      
+      // Create pre-built bot version
+      const preBuiltBot = {
+        id: Date.now(), // New ID for pre-built version
+        name: bot.name,
+        description: bot.description,
+        strategy: bot.strategy,
+        exchange: bot.exchange,
+        tradingPair: bot.trading_pair || bot.tradingPair,
+        riskLevel: bot.risk_level || bot.riskLevel,
+        dailyPnL: bot.daily_pnl || 0,
+        weeklyPnL: bot.weekly_pnl || 0,
+        monthlyPnL: bot.monthly_pnl || 0,
+        winRate: bot.win_rate || 75,
+        is_prebuilt: true,
+        original_creator: user?.id,
+        created_at: new Date().toISOString()
+      };
+      
+      // Add to pre-built bots
+      const updatedPreBuiltBots = [...preBuiltBots, preBuiltBot];
+      setPreBuiltBots(updatedPreBuiltBots);
+      
+      // Store in localStorage for persistence
+      localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
+      
+      alert('✅ Bot moved to Pre-Built Bots successfully!');
+      return true;
+    } catch (error) {
+      console.error('Error moving bot to pre-built:', error);
+      alert('❌ Failed to move bot to pre-built section');
+      return false;
+    }
+  };
+
+  const handleMoveToMyBots = async (preBuiltBot) => {
+    if (!isSuperAdmin()) {
+      alert('❌ Only super admin can move bots from pre-built section');
+      return false;
+    }
+    
+    try {
+      console.log('Moving bot to my bots:', preBuiltBot);
+      
+      // Create user bot version
+      const userBot = {
+        id: Date.now().toString(), // New ID for user version
+        name: preBuiltBot.name,
+        description: preBuiltBot.description,
+        strategy: preBuiltBot.strategy,
+        exchange: preBuiltBot.exchange,
+        trading_pair: preBuiltBot.tradingPair,
+        risk_level: preBuiltBot.riskLevel,
+        daily_pnl: preBuiltBot.dailyPnL || 0,
+        weekly_pnl: preBuiltBot.weeklyPnL || 0,
+        monthly_pnl: preBuiltBot.monthlyPnL || 0,
+        win_rate: preBuiltBot.winRate || 75,
+        user_id: user?.id,
+        is_active: false,
+        is_prebuilt: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        status: 'inactive'
+      };
+      
+      // Add to user bots
+      const existingUserBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      const updatedUserBots = [...existingUserBots, userBot];
+      localStorage.setItem('user_bots', JSON.stringify(updatedUserBots));
+      
+      // Remove from pre-built bots
+      const updatedPreBuiltBots = preBuiltBots.filter(bot => bot.id !== preBuiltBot.id);
+      setPreBuiltBots(updatedPreBuiltBots);
+      localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
+      
+      // Refresh user bots
+      await loadUserBots();
+      
+      alert('✅ Bot moved to My Bots successfully!');
+      return true;
+    } catch (error) {
+      console.error('Error moving bot to my bots:', error);
+      alert('❌ Failed to move bot to my bots section');
+      return false;
+    }
+  };
+
   const handleEditBot = (bot) => {
     console.log('Editing bot:', bot);
     setEditingBot(bot);
