@@ -307,18 +307,58 @@ const VerificationApplicationModal = ({ isOpen, onClose, onSuccess }) => {
               </div>
 
               <div>
-                <Label htmlFor="address">Full Address *</Label>
-                <Textarea
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your complete residential address"
-                  rows={3}
+                <Label htmlFor="addressLine1">Address Line 1 (Street/Avenue) *</Label>
+                <Input
+                  id="addressLine1"
+                  value={formData.addressLine1}
+                  onChange={(e) => handleInputChange('addressLine1', e.target.value)}
+                  placeholder="Street name, house number"
                   disabled={isSubmitting}
                 />
-                {errors.address && (
-                  <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                {errors.addressLine1 && (
+                  <p className="text-red-500 text-sm mt-1">{errors.addressLine1}</p>
                 )}
+              </div>
+
+              <div>
+                <Label htmlFor="addressLine2">Address Line 2 (Apartment/House)</Label>
+                <Input
+                  id="addressLine2"
+                  value={formData.addressLine2}
+                  onChange={(e) => handleInputChange('addressLine2', e.target.value)}
+                  placeholder="Apartment, suite, building (optional)"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="city">City/Town/Village *</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange('city', e.target.value)}
+                    placeholder="Your city"
+                    disabled={isSubmitting}
+                  />
+                  {errors.city && (
+                    <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="postcode">Postcode *</Label>
+                  <Input
+                    id="postcode"
+                    value={formData.postcode}
+                    onChange={(e) => handleInputChange('postcode', e.target.value)}
+                    placeholder="Postal/ZIP code"
+                    disabled={isSubmitting}
+                  />
+                  {errors.postcode && (
+                    <p className="text-red-500 text-sm mt-1">{errors.postcode}</p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
