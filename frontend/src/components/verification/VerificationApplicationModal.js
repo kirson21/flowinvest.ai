@@ -128,8 +128,16 @@ const VerificationApplicationModal = ({ isOpen, onClose, onSuccess }) => {
       newErrors.country = 'Country is required';
     }
 
-    if (!formData.address.trim()) {
-      newErrors.address = 'Address is required';
+    if (!formData.addressLine1.trim()) {
+      newErrors.addressLine1 = 'Address Line 1 is required';
+    }
+
+    if (!formData.city.trim()) {
+      newErrors.city = 'City is required';
+    }
+
+    if (!formData.postcode.trim()) {
+      newErrors.postcode = 'Postcode is required';
     }
 
     if (!nationalIdFile) {
