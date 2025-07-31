@@ -226,6 +226,25 @@ export const verificationService = {
     }
   },
 
+  // Create signed URL for secure document viewing (admin panel)
+  async createSignedUrlForDocument(filePath) {
+    try {
+      const { data, error } = await supabase.storage
+        .from('verification-documents')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        throw error;
+      }
+
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error in createSignedUrlForDocument:', error);
+      throw error;
+    }
+  },
+
   // Get all verification applications (super admin only)
   async getAllApplications() {
     try {
