@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from backend.supabase_client import supabase_client
+from supabase_client import supabase
 import logging
 
 router = APIRouter()
@@ -13,12 +13,12 @@ async def setup_verification_storage():
         bucket_name = "verification-documents"
         
         # Check if bucket exists
-        existing_buckets = supabase_client.storage.list_buckets()
+        existing_buckets = supabase.storage.list_buckets()
         bucket_exists = any(bucket.name == bucket_name for bucket in existing_buckets)
         
         if not bucket_exists:
             # Create bucket
-            result = supabase_client.storage.create_bucket(
+            result = supabase.storage.create_bucket(
                 bucket_name,
                 public=True,
                 allowed_mime_types=[
