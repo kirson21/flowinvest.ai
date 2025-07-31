@@ -50,7 +50,9 @@ import {
   Star,
   Edit3,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Mail
+} from 'lucide-react';
 } from 'lucide-react';
 
 const Settings = () => {
