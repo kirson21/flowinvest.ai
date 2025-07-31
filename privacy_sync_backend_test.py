@@ -33,7 +33,7 @@ class PrivacySyncTester:
         self.session = requests.Session()
         self.test_results = []
         self.super_admin_id = "cd0e9717-f85d-4726-81e9-f260394ead58"  # From test_result.md
-        self.regular_user_id = f"test-user-{uuid.uuid4().hex[:8]}"
+        self.regular_user_id = str(uuid.uuid4())  # Generate proper UUID format
         self.test_bot_ids = []
         
     def log_test(self, test_name, success, details=""):
