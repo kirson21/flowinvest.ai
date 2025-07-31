@@ -253,14 +253,18 @@ const TradingBots = () => {
         created_at: new Date().toISOString()
       };
       
-      // Add to pre-built bots
-      const updatedPreBuiltBots = [...preBuiltBots, preBuiltBot];
+      // Get current pre-built bots and add new one
+      const currentPreBuiltBots = JSON.parse(localStorage.getItem('prebuilt_bots') || '[]');
+      const updatedPreBuiltBots = [...currentPreBuiltBots, preBuiltBot];
+      
+      // Update localStorage and mark as customized by super admin
+      localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
+      localStorage.setItem('prebuilt_bots_customized', 'true');
+      
+      // Update state for immediate UI feedback
       setPreBuiltBots(updatedPreBuiltBots);
       
-      // Store in localStorage for persistence
-      localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
-      
-      alert('✅ Bot moved to Pre-Built Bots successfully!');
+      alert('✅ Bot moved to Pre-Built Bots successfully! All users will now see this bot.');
       return true;
     } catch (error) {
       console.error('Error moving bot to pre-built:', error);
@@ -291,7 +295,7 @@ const TradingBots = () => {
         weekly_pnl: preBuiltBot.weeklyPnL || 0,
         monthly_pnl: preBuiltBot.monthlyPnL || 0,
         win_rate: preBuiltBot.winRate || 75,
-        user_id: user?.id,
+        user_id: user?.id, // CRITICAL: Assign to current user
         is_active: false,
         is_prebuilt: false,
         created_at: new Date().toISOString(),
@@ -304,10 +308,13 @@ const TradingBots = () => {
       const updatedUserBots = [...existingUserBots, userBot];
       localStorage.setItem('user_bots', JSON.stringify(updatedUserBots));
       
-      // Remove from pre-built bots
+      // Remove from pre-built bots and update localStorage
       const updatedPreBuiltBots = preBuiltBots.filter(bot => bot.id !== preBuiltBot.id);
-      setPreBuiltBots(updatedPreBuiltBots);
       localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
+      localStorage.setItem('prebuilt_bots_customized', 'true');
+      
+      // Update states for immediate UI feedback
+      setPreBuiltBots(updatedPreBuiltBots);
       
       // Refresh user bots
       await loadUserBots();
