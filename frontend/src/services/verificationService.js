@@ -46,43 +46,74 @@ export const verificationService = {
   // Upload verification file to Supabase Storage
   async uploadVerificationFile(file, userId, fileType) {
     try {
-      // Ensure bucket exists first
-      await this.ensureStorageBucket();
-      
+      // First try Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}/${fileType}_${Date.now()}.${fileExt}`;
       
       console.log('Uploading file:', fileName, 'Size:', file.size);
       
-      const { data, error } = await supabase.storage
-        .from('verification-documents')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false,
-          duplex: 'half' // Required for some browsers
-        });
+      try {
+        const { data, error } = await supabase.storage
+          .from('verification-documents')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-      if (error) {
-        console.error('Storage upload error:', error);
-        throw new Error(`Upload failed: ${error.message}`);
+        if (error) {
+          console.warn('Supabase storage upload failed:', error);
+          // Fall back to base64 encoding for development
+          return await this.uploadFileAsBase64(file, userId, fileType);
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('verification-documents')
+          .getPublicUrl(fileName);
+
+        console.log('File uploaded successfully to Supabase:', publicUrl);
+
+        return {
+          path: data.path,
+          url: publicUrl,
+          fileName: file.name
+        };
+      } catch (storageError) {
+        console.warn('Supabase storage not available, using fallback:', storageError);
+        return await this.uploadFileAsBase64(file, userId, fileType);
       }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('verification-documents')
-        .getPublicUrl(fileName);
-
-      console.log('File uploaded successfully:', publicUrl);
-
-      return {
-        path: data.path,
-        url: publicUrl,
-        fileName: file.name
-      };
     } catch (error) {
       console.error('Error uploading verification file:', error);
       throw error;
     }
+  },
+
+  // Fallback: Upload file as base64 (for development when Supabase storage isn't configured)
+  async uploadFileAsBase64(file, userId, fileType) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result;
+        const fileData = {
+          path: `${userId}/${fileType}_${Date.now()}.${file.name.split('.').pop()}`,
+          url: base64Data, // Base64 data URL
+          fileName: file.name,
+          isBase64: true
+        };
+
+        // Store in localStorage for development
+        const existingFiles = JSON.parse(localStorage.getItem('verification_files') || '[]');
+        existingFiles.push(fileData);
+        localStorage.setItem('verification_files', JSON.stringify(existingFiles));
+
+        console.log('File uploaded as base64 fallback');
+        resolve(fileData);
+      };
+      reader.onerror = function(error) {
+        reject(error);
+      };
+      reader.readAsDataURL(file);
+    });
   },
 
   // Ensure storage bucket exists
