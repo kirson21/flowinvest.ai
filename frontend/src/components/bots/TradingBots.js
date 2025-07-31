@@ -52,6 +52,12 @@ const TradingBots = () => {
 
   // Load user bots from Supabase
   useEffect(() => {
+    // Load pre-built bots from localStorage if available
+    const savedPreBuiltBots = JSON.parse(localStorage.getItem('prebuilt_bots') || '[]');
+    if (savedPreBuiltBots.length > 0) {
+      setPreBuiltBots([...mockTradingBots, ...savedPreBuiltBots]);
+    }
+    
     if (user) {
       loadUserBots();
     }
