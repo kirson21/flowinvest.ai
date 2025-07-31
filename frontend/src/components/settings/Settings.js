@@ -126,14 +126,49 @@ const Settings = () => {
   // Voting state
   const [userVotes, setUserVotes] = useState({});
 
+  // Load user data on component mount
   useEffect(() => {
     if (user) {
       loadUserProfile();
       loadSellerData();
       loadAccountBalance();
       loadUserVotes();
+      loadVerificationStatus();
+      loadNotifications();
     }
   }, [user]);
+
+  // Load verification status
+  const loadVerificationStatus = async () => {
+    if (user?.id) {
+      try {
+        const verified = await verificationService.isVerifiedSeller(user.id);
+        const status = await verificationService.getVerificationStatus(user.id);
+        setIsVerifiedSeller(verified);
+        setVerificationStatus(status);
+      } catch (error) {
+        console.error('Error loading verification status:', error);
+        setIsVerifiedSeller(false);
+        setVerificationStatus('unverified');
+      }
+    }
+  };
+
+  // Load notifications
+  const loadNotifications = async () => {
+    if (user?.id) {
+      try {
+        const userNotifications = await verificationService.getUserNotifications(user.id);
+        const unreadCount = await verificationService.getUnreadNotificationCount(user.id);
+        setNotifications(userNotifications);
+        setUnreadCount(unreadCount);
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    }
+  };
 
   const loadAccountBalance = () => {
     try {
