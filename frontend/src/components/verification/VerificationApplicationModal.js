@@ -19,7 +19,10 @@ const VerificationApplicationModal = ({ isOpen, onClose, onSuccess }) => {
     fullName: '',
     contactEmail: user?.email || '',
     country: '',
-    address: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    postcode: '',
     nationalIdType: 'national_id'
   });
 
