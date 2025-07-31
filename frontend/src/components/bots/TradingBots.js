@@ -659,42 +659,76 @@ const TradingBots = () => {
             </div>
           </div>
 
-          {/* Different buttons based on connection status */}
+          {/* Different buttons based on connection status and super admin */}
           {isConnected ? (
-            // Connected bots: Manage button only
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
-              onClick={() => {
-                setSelectedManageBot(bot);
-                setManageBotType('user');
-              }}
-            >
-              <Cog className="w-4 h-4 mr-2" />
-              Manage Bot
-            </Button>
+            // Connected bots: Manage button and super admin controls
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => {
+                  setSelectedManageBot(bot);
+                  setManageBotType('user');
+                }}
+              >
+                <Cog className="w-4 h-4 mr-2" />
+                Manage Bot
+              </Button>
+              {isSuperAdmin() && (
+                <Button
+                  onClick={() => {
+                    if (window.confirm('Move this bot to Pre-Built Bots? It will become available to all users.')) {
+                      handleMoveToPreBuilt(bot);
+                    }
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                >
+                  <Bot size={16} className="mr-2" />
+                  Move to Pre-Built Bots
+                </Button>
+              )}
+            </div>
           ) : (
-            // Not connected bots: Run Bot AND Delete Bot buttons
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
-                onClick={() => setSelectedRunBot(bot)}
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Run Bot
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
-                onClick={() => handleEditBot(bot)}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
+            // Not connected bots: Run Bot, Edit Bot, and super admin controls
+            <div className="space-y-2">
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                  onClick={() => setSelectedRunBot(bot)}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Run Bot
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                  onClick={() => handleEditBot(bot)}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+              {isSuperAdmin() && (
+                <Button
+                  onClick={() => {
+                    if (window.confirm('Move this bot to Pre-Built Bots? It will become available to all users.')) {
+                      handleMoveToPreBuilt(bot);
+                    }
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                >
+                  <Bot size={16} className="mr-2" />
+                  Move to Pre-Built Bots
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
