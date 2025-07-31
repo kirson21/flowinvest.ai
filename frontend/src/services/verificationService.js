@@ -63,17 +63,33 @@ export const verificationService = {
           return await this.uploadFileAsBase64(file, userId, fileType);
         }
 
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
+        // Get signed URL for secure access (expires in 1 hour)
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('verification-documents')
-          .getPublicUrl(fileName);
+          .createSignedUrl(fileName, 3600);
 
-        console.log('File uploaded successfully to Supabase:', publicUrl);
+        if (signedUrlError) {
+          console.warn('Failed to create signed URL, using public URL as fallback');
+          // Fallback to public URL if signed URL fails
+          const { data: { publicUrl } } = supabase.storage
+            .from('verification-documents')
+            .getPublicUrl(fileName);
+          
+          return {
+            path: data.path,
+            url: publicUrl,
+            fileName: file.name,
+            isSecure: false
+          };
+        }
+
+        console.log('File uploaded successfully with signed URL');
 
         return {
           path: data.path,
-          url: publicUrl,
-          fileName: file.name
+          url: signedUrlData.signedUrl,
+          fileName: file.name,
+          isSecure: true
         };
       } catch (storageError) {
         console.warn('Supabase storage not available, using fallback:', storageError);
