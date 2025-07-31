@@ -46,24 +46,33 @@ export const verificationService = {
   // Upload verification file to Supabase Storage
   async uploadVerificationFile(file, userId, fileType) {
     try {
+      // Ensure bucket exists first
+      await this.ensureStorageBucket();
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}/${fileType}_${Date.now()}.${fileExt}`;
+      
+      console.log('Uploading file:', fileName, 'Size:', file.size);
       
       const { data, error } = await supabase.storage
         .from('verification-documents')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          duplex: 'half' // Required for some browsers
         });
 
       if (error) {
-        throw error;
+        console.error('Storage upload error:', error);
+        throw new Error(`Upload failed: ${error.message}`);
       }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('verification-documents')
         .getPublicUrl(fileName);
+
+      console.log('File uploaded successfully:', publicUrl);
 
       return {
         path: data.path,
@@ -72,6 +81,26 @@ export const verificationService = {
       };
     } catch (error) {
       console.error('Error uploading verification file:', error);
+      throw error;
+    }
+  },
+
+  // Ensure storage bucket exists
+  async ensureStorageBucket() {
+    try {
+      // Try to list files in bucket to check if it exists
+      const { data, error } = await supabase.storage
+        .from('verification-documents')
+        .list('', { limit: 1 });
+
+      if (error && error.message.includes('Bucket not found')) {
+        console.log('Storage bucket not found, will use localStorage fallback for development');
+        throw new Error('Storage bucket not configured. Please contact administrator.');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Storage bucket check failed:', error);
       throw error;
     }
   },
