@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from supabase_client import supabase
+from supabase_client import supabase, supabase_admin
 import logging
 
 router = APIRouter()
@@ -12,13 +12,14 @@ async def setup_verification_storage():
         # Create verification-documents bucket if it doesn't exist
         bucket_name = "verification-documents"
         
+        # Use admin client for storage operations to bypass RLS
         # Check if bucket exists
-        existing_buckets = supabase.storage.list_buckets()
+        existing_buckets = supabase_admin.storage.list_buckets()
         bucket_exists = any(bucket.name == bucket_name for bucket in existing_buckets)
         
         if not bucket_exists:
             # Create bucket (updated API - removed 'public' parameter)
-            result = supabase.storage.create_bucket(
+            result = supabase_admin.storage.create_bucket(
                 bucket_name,
                 options={
                     "public": True,
