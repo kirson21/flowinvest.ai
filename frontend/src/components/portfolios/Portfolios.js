@@ -363,6 +363,10 @@ const Portfolios = () => {
   };
 
   const handleCreateProduct = () => {
+    if (!canAccessSellerFeatures()) {
+      setIsVerificationRequiredOpen(true);
+      return;
+    }
     setIsProductCreationOpen(true);
   };
 
