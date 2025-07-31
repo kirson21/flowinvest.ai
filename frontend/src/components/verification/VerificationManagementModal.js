@@ -232,7 +232,7 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => openFileInNewTab(selectedApplication.national_id_file_url)}
+                    onClick={() => openFileInNewTab(selectedApplication.national_id_file_url, selectedApplication.national_id_file_path)}
                     className="flex items-center"
                   >
                     <Eye size={16} className="mr-2" />
