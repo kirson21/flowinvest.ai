@@ -930,6 +930,12 @@ const Portfolios = () => {
           setSelectedPurchasedProduct(null);
         }}
       />
+
+      {/* Seller Verification Required Modal */}
+      <VerificationRequiredModal
+        isOpen={isVerificationRequiredOpen}
+        onClose={() => setIsVerificationRequiredOpen(false)}
+      />
     </div>
   );
 };
