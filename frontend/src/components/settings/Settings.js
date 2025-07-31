@@ -13,6 +13,9 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Alert, AlertDescription } from '../ui/alert';
 import ProductEditModal from '../portfolios/ProductEditModal';
+import VerificationRequiredModal from '../verification/VerificationRequiredModal';
+import VerificationManagementModal from '../verification/VerificationManagementModal';
+import { verificationService } from '../../services/verificationService';
 import { 
   Settings as SettingsIcon,
   Moon,
