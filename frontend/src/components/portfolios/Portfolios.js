@@ -320,6 +320,26 @@ const Portfolios = () => {
     applyFilter(selectedFilter, updatedPortfolios);
   };
 
+  // Load verification status on mount
+  useEffect(() => {
+    const loadVerificationStatus = async () => {
+      if (user?.id) {
+        try {
+          const verified = await verificationService.isVerifiedSeller(user.id);
+          const status = await verificationService.getVerificationStatus(user.id);
+          setIsVerifiedSeller(verified);
+          setVerificationStatus(status);
+        } catch (error) {
+          console.error('Error loading verification status:', error);
+          setIsVerifiedSeller(false);
+          setVerificationStatus('unverified');
+        }
+      }
+    };
+
+    loadVerificationStatus();
+  }, [user?.id]);
+
   // Load user-created portfolios from localStorage
   useEffect(() => {
     loadProductsWithReviews();
