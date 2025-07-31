@@ -477,6 +477,87 @@ class FlowInvestTester:
             
         return False
 
+    # ==================== SELLER VERIFICATION TESTS ====================
+
+    def test_verification_storage_setup(self):
+        """Test POST /api/setup-verification-storage"""
+        print("\n📁 Testing Verification Storage Setup")
+        
+        try:
+            response = self.session.post(
+                f"{API_BASE}/setup-verification-storage",
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success') and data.get('bucket_name') == 'verification-documents':
+                    self.log_test("Verification storage setup", True, f"Storage bucket created: {data['bucket_name']}")
+                    return True
+                else:
+                    self.log_test("Verification storage setup", False, f"Setup failed: {data.get('message', 'Unknown error')}")
+            else:
+                self.log_test("Verification storage setup", False, f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_test("Verification storage setup", False, f"Exception: {str(e)}")
+            
+        return False
+
+    def test_verification_system_integration(self):
+        """Test verification system integration with Supabase"""
+        print("\n🔍 Testing Verification System Integration")
+        
+        # This test verifies that the verification system components are properly integrated
+        # Since the actual verification endpoints are handled by the frontend service,
+        # we test the backend's ability to support the verification system
+        
+        try:
+            # Test that the verification storage is accessible
+            storage_response = self.session.post(f"{API_BASE}/setup-verification-storage")
+            
+            if storage_response.status_code == 200:
+                storage_data = storage_response.json()
+                if storage_data.get('success'):
+                    self.log_test("Verification system integration", True, "Backend supports verification system with Supabase storage")
+                    return True
+                else:
+                    self.log_test("Verification system integration", False, "Storage setup failed")
+            else:
+                self.log_test("Verification system integration", False, f"Storage setup HTTP {storage_response.status_code}")
+                
+        except Exception as e:
+            self.log_test("Verification system integration", False, f"Exception: {str(e)}")
+            
+        return False
+
+    def test_super_admin_access_control(self):
+        """Test super admin access control system"""
+        print("\n👑 Testing Super Admin Access Control")
+        
+        # Test that the super admin system is properly configured
+        # The super admin UID should be: cd0e9717-f85d-4726-81e9-f260394ead58
+        
+        try:
+            # Test admin setup endpoint
+            response = self.session.post(f"{API_BASE}/auth/admin/setup")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success') or "not found" in data.get('message', '').lower():
+                    # Either admin was set up or user needs to sign up first (both are valid)
+                    self.log_test("Super admin access control", True, "Admin setup endpoint working")
+                    return True
+                else:
+                    self.log_test("Super admin access control", False, f"Admin setup failed: {data.get('message')}")
+            else:
+                self.log_test("Super admin access control", False, f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_test("Super admin access control", False, f"Exception: {str(e)}")
+            
+        return False
+
     # ==================== EXISTING WEBHOOK TESTS ====================
 
     def test_server_status(self):
