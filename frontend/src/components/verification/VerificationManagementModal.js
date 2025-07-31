@@ -117,8 +117,21 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
     });
   };
 
-  const openFileInNewTab = (url) => {
-    window.open(url, '_blank');
+  const openFileInNewTab = async (url, filePath) => {
+    try {
+      // If it's a stored file path, create a fresh signed URL for secure access
+      if (filePath && !url.startsWith('data:') && !url.startsWith('http')) {
+        const signedUrl = await verificationService.createSignedUrlForDocument(filePath);
+        window.open(signedUrl, '_blank');
+      } else {
+        // Use the provided URL (for base64 or already signed URLs)
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening file:', error);
+      // Fallback to original URL
+      window.open(url, '_blank');
+    }
   };
 
   if (!isOpen) return null;
