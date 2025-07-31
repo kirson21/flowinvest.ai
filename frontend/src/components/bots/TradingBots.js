@@ -44,6 +44,12 @@ const TradingBots = () => {
   const [selectedManageBot, setSelectedManageBot] = useState(null);
   const [manageBotType, setManageBotType] = useState('user'); // 'user' or 'prebuilt'
 
+  // Super Admin Check
+  const isSuperAdmin = () => {
+    const SUPER_ADMIN_UID = 'cd0e9717-f85d-4726-81e9-f260394ead58';
+    return user?.id === SUPER_ADMIN_UID;
+  };
+
   // Load user bots from Supabase
   useEffect(() => {
     if (user) {
