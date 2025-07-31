@@ -1571,6 +1571,18 @@ const Settings = () => {
         </Card>
       </div>
     )}
+
+    {/* Seller Verification Required Modal */}
+    <VerificationRequiredModal
+      isOpen={isVerificationRequiredOpen}
+      onClose={() => setIsVerificationRequiredOpen(false)}
+    />
+
+    {/* Super Admin Verification Management Modal */}
+    <VerificationManagementModal
+      isOpen={isVerificationManagementOpen}
+      onClose={() => setIsVerificationManagementOpen(false)}
+    />
     </>
   );
 };
