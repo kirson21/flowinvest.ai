@@ -450,6 +450,34 @@ const Settings = () => {
     setTimeout(() => setMessage(''), 3000);
   };
 
+  // Notification Functions
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      await verificationService.markNotificationAsRead(notificationId);
+      await loadNotifications(); // Reload notifications
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const formatNotificationDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now - date) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+  };
+
   const handleSocialLinkChange = (platform, value) => {
     setSellerData(prev => ({
       ...prev,
