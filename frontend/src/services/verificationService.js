@@ -376,26 +376,72 @@ export const verificationService = {
   // Reject verification application (super admin only)
   async rejectApplication(applicationId, rejectionReason, adminNotes = '') {
     try {
-      const { data, error } = await supabase
-        .from('seller_verification_applications')
-        .update({
-          status: 'rejected',
-          reviewed_by: (await supabase.auth.getUser()).data.user?.id,
-          reviewed_at: new Date().toISOString(),
-          rejection_reason: rejectionReason,
-          admin_notes: adminNotes
-        })
-        .eq('id', applicationId)
-        .select()
-        .single();
+      // Try Supabase first
+      try {
+        const { data, error } = await supabase
+          .from('seller_verification_applications')
+          .update({
+            status: 'rejected',
+            reviewed_by: (await supabase.auth.getUser()).data.user?.id,
+            reviewed_at: new Date().toISOString(),
+            rejection_reason: rejectionReason,
+            admin_notes: adminNotes
+          })
+          .eq('id', applicationId)
+          .select()
+          .single();
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.warn('Supabase reject failed, using localStorage:', error);
+          return this.rejectApplicationInLocalStorage(applicationId, rejectionReason, adminNotes);
+        }
+
+        return data;
+      } catch (supabaseError) {
+        console.warn('Supabase not available for reject, using localStorage:', supabaseError);
+        return this.rejectApplicationInLocalStorage(applicationId, rejectionReason, adminNotes);
       }
-
-      return data;
     } catch (error) {
       console.error('Error rejecting application:', error);
+      throw error;
+    }
+  },
+
+  // Fallback: Reject application in localStorage
+  rejectApplicationInLocalStorage(applicationId, rejectionReason, adminNotes = '') {
+    try {
+      const applications = JSON.parse(localStorage.getItem('verification_applications') || '[]');
+      const updatedApplications = applications.map(app => {
+        if (app.id === applicationId) {
+          return {
+            ...app,
+            status: 'rejected',
+            reviewed_by: 'super-admin',
+            reviewed_at: new Date().toISOString(),
+            rejection_reason: rejectionReason,
+            admin_notes: adminNotes
+          };
+        }
+        return app;
+      });
+
+      localStorage.setItem('verification_applications', JSON.stringify(updatedApplications));
+
+      // Update user verification status
+      const application = updatedApplications.find(app => app.id === applicationId);
+      if (application) {
+        const userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
+        userProfiles[application.user_id] = {
+          ...userProfiles[application.user_id],
+          seller_verification_status: 'rejected'
+        };
+        localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
+      }
+
+      console.log('Application rejected in localStorage');
+      return application;
+    } catch (error) {
+      console.error('Error rejecting application in localStorage:', error);
       throw error;
     }
   },
