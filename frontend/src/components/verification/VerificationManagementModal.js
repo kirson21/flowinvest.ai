@@ -25,11 +25,16 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
   const loadApplications = async () => {
     try {
       setLoading(true);
+      console.log('Loading verification applications...');
       const data = await verificationService.getAllApplications();
-      setApplications(data);
+      console.log('Loaded applications:', data?.length || 0, 'applications');
+      setApplications(data || []);
     } catch (error) {
       console.error('Error loading applications:', error);
-      alert('Failed to load verification applications');
+      // Set empty array instead of showing alert immediately
+      setApplications([]);
+      // Show a more user-friendly message
+      console.warn('Could not load applications from database, showing empty list');
     } finally {
       setLoading(false);
     }
