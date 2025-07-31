@@ -528,7 +528,7 @@ const Portfolios = () => {
     <Card className="hover:shadow-lg transition-all duration-200 group relative">
 
       
-      {/* Edit Button - Only visible to creators */}
+      {/* Edit Button - Only visible to creators and super admin */}
       {canEditProduct(portfolio) && (
         <div className="absolute top-2 right-16 z-10">
           <Button
@@ -539,6 +539,21 @@ const Portfolios = () => {
           >
             <Edit size={12} className="mr-1" />
             Edit
+          </Button>
+        </div>
+      )}
+
+      {/* Super Admin Delete Button - Only visible to super admin */}
+      {isSuperAdmin() && !canEditProduct(portfolio) && (
+        <div className="absolute top-2 right-2 z-10">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleSuperAdminDelete(portfolio.id)}
+            className="bg-red-50 dark:bg-red-900 border-red-300 dark:border-red-600 text-red-700 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-800 shadow-sm"
+          >
+            <Trash2 size={12} className="mr-1" />
+            Delete
           </Button>
         </div>
       )}
