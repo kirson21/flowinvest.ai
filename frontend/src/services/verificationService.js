@@ -248,25 +248,57 @@ export const verificationService = {
   // Get all verification applications (super admin only)
   async getAllApplications() {
     try {
-      const { data, error } = await supabase
-        .from('seller_verification_applications')
-        .select(`
-          *,
-          user_profiles!seller_verification_applications_user_id_fkey(
-            display_name,
-            email
-          )
-        `)
-        .order('created_at', { ascending: false });
+      // Try Supabase first
+      try {
+        const { data, error } = await supabase
+          .from('seller_verification_applications')
+          .select(`
+            *,
+            user_profiles!seller_verification_applications_user_id_fkey(
+              display_name,
+              email
+            )
+          `)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.warn('Supabase getAllApplications failed:', error);
+          // Fall back to localStorage
+          return this.getAllApplicationsFromLocalStorage();
+        }
+
+        return data;
+      } catch (supabaseError) {
+        console.warn('Supabase not available for getAllApplications, using localStorage:', supabaseError);
+        return this.getAllApplicationsFromLocalStorage();
       }
-
-      return data;
     } catch (error) {
       console.error('Error getting all applications:', error);
-      throw error;
+      // Final fallback - return empty array to prevent UI crash
+      return [];
+    }
+  },
+
+  // Fallback: Get all applications from localStorage (for development)
+  getAllApplicationsFromLocalStorage() {
+    try {
+      const applications = JSON.parse(localStorage.getItem('verification_applications') || '[]');
+      const userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
+      
+      // Enhance applications with user profile data
+      const enhancedApplications = applications.map(app => ({
+        ...app,
+        user_profiles: {
+          display_name: userProfiles[app.user_id]?.display_name || 'Unknown User',
+          email: userProfiles[app.user_id]?.email || app.contact_email
+        }
+      }));
+
+      console.log('Loaded applications from localStorage:', enhancedApplications.length);
+      return enhancedApplications;
+    } catch (error) {
+      console.error('Error loading applications from localStorage:', error);
+      return [];
     }
   },
 
