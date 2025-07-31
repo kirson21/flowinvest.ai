@@ -247,25 +247,34 @@ async def setup_admin_account():
     """Set up admin account - for initial setup only"""
     try:
         admin_email = "kirillpopolitov@gmail.com"
+        super_admin_uid = "cd0e9717-f85d-4726-81e9-f260394ead58"
         
-        # Check if admin already exists
-        existing_user = supabase.table('users').select('*').eq('email', admin_email).execute()
+        # Check if admin already exists in auth.users
+        try:
+            # Try to get user from Supabase auth
+            user_response = supabase_admin.auth.admin.get_user_by_id(super_admin_uid)
+            if user_response.user:
+                return {
+                    "success": True, 
+                    "message": f"Super admin already configured: {admin_email}",
+                    "user_id": super_admin_uid
+                }
+        except:
+            pass
         
-        if existing_user.data:
-            # Update existing user to admin
-            response = supabase_admin.table('users').update({
-                "role": "admin"
-            }).eq('email', admin_email).execute()
-            
+        # Check if user exists in user_profiles table
+        existing_profile = supabase.table('user_profiles').select('*').eq('email', admin_email).execute()
+        
+        if existing_profile.data:
             return {
                 "success": True, 
-                "message": f"Admin role granted to {admin_email}",
-                "user": response.data[0] if response.data else None
+                "message": f"User profile exists for {admin_email}. Super admin privileges are handled by UID: {super_admin_uid}",
+                "user": existing_profile.data[0]
             }
         else:
             return {
                 "success": False,
-                "message": f"User {admin_email} not found. Please sign up first."
+                "message": f"User {admin_email} not found. Please sign up first. Super admin UID should be: {super_admin_uid}"
             }
             
     except Exception as e:
