@@ -17,19 +17,21 @@ async def setup_verification_storage():
         bucket_exists = any(bucket.name == bucket_name for bucket in existing_buckets)
         
         if not bucket_exists:
-            # Create bucket
+            # Create bucket (updated API - removed 'public' parameter)
             result = supabase.storage.create_bucket(
                 bucket_name,
-                public=True,
-                allowed_mime_types=[
-                    "image/jpeg",
-                    "image/png", 
-                    "image/jpg",
-                    "application/pdf",
-                    "text/plain",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                ]
+                options={
+                    "public": True,
+                    "allowedMimeTypes": [
+                        "image/jpeg",
+                        "image/png", 
+                        "image/jpg",
+                        "application/pdf",
+                        "text/plain",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    ]
+                }
             )
             logger.info(f"Created verification documents bucket: {result}")
         
