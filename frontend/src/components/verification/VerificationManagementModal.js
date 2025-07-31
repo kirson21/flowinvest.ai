@@ -258,7 +258,7 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
                         key={index}
                         variant="outline"
                         size="sm"
-                        onClick={() => openFileInNewTab(doc.url)}
+                        onClick={() => openFileInNewTab(doc.url, doc.path)}
                         className="justify-start text-left"
                       >
                         <FileText size={16} className="mr-2" />
