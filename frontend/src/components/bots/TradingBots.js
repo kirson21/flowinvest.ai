@@ -489,8 +489,48 @@ const TradingBots = () => {
             <Progress value={bot.winRate} className="h-2" />
           </div>
 
-          {/* Different buttons based on connection status */}
-          {isConnected ? (
+          {/* Different buttons based on connection status and super admin */}
+          {isSuperAdmin() ? (
+            // Super Admin: Full control buttons
+            <div className="space-y-2">
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => handleEditBot(bot)}
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                >
+                  <Edit size={16} className="mr-2" />
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => handleMoveToMyBots(bot)}
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-purple-500/20 text-purple-600 hover:bg-purple-50"
+                >
+                  <Bot size={16} className="mr-2" />
+                  Move to My Bots
+                </Button>
+              </div>
+              <Button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this pre-built bot?')) {
+                    const updatedPreBuiltBots = preBuiltBots.filter(b => b.id !== bot.id);
+                    setPreBuiltBots(updatedPreBuiltBots);
+                    localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
+                    alert('✅ Pre-built bot deleted successfully!');
+                  }
+                }}
+                size="sm"
+                variant="outline"
+                className="w-full border-red-200 text-red-600 hover:bg-red-50"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Delete Bot
+              </Button>
+            </div>
+          ) : isConnected ? (
             // Connected: Show Manage button
             <Button
               onClick={() => {
