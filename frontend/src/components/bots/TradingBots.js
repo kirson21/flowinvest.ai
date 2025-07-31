@@ -52,10 +52,24 @@ const TradingBots = () => {
 
   // Load user bots from Supabase
   useEffect(() => {
-    // Load pre-built bots from localStorage if available
+    // Load pre-built bots consistently for all users
     const savedPreBuiltBots = JSON.parse(localStorage.getItem('prebuilt_bots') || '[]');
-    if (savedPreBuiltBots.length > 0) {
+    
+    if (isSuperAdmin()) {
+      // Super admin sees both original mock bots AND any moved bots
       setPreBuiltBots([...mockTradingBots, ...savedPreBuiltBots]);
+      console.log('Super admin: Loading all pre-built bots (mock + saved)');
+    } else {
+      // Regular users ONLY see what super admin has made available
+      if (savedPreBuiltBots.length > 0) {
+        // If super admin has saved custom pre-built bots, show only those
+        setPreBuiltBots(savedPreBuiltBots);
+        console.log('Regular user: Loading custom pre-built bots only');
+      } else {
+        // If no custom pre-built bots, show original mock bots
+        setPreBuiltBots(mockTradingBots);
+        console.log('Regular user: Loading original mock pre-built bots');
+      }
     }
     
     if (user) {
