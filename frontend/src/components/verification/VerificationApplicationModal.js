@@ -194,12 +194,19 @@ const VerificationApplicationModal = ({ isOpen, onClose, onSuccess }) => {
       const validLinks = links.filter(link => link.url.trim());
 
       // Prepare application data
+      const fullAddress = [
+        formData.addressLine1.trim(),
+        formData.addressLine2.trim(),
+        formData.city.trim(),
+        formData.postcode.trim()
+      ].filter(line => line).join(', ');
+
       const applicationData = {
         user_id: user.id,
         full_name: formData.fullName.trim(),
         contact_email: formData.contactEmail.trim(),
         country_residence: formData.country.trim(),
-        address: formData.address.trim(),
+        address: fullAddress,
         national_id_type: formData.nationalIdType,
         national_id_file_url: nationalIdUpload.url,
         additional_documents: additionalDocuments,
