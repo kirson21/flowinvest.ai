@@ -510,9 +510,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Remove Featured Badges from Marketplace"
-    - "Remove Language Choice from Settings"
-    - "Delete Railway-related Files"
+    - "Implement Super Admin Role System"
+    - "Implement Bot Movement Between Sections"
+    - "Add Super Admin Controls to Trading Bots"
+    - "Implement Super Admin Portfolio Management"
     - "Backend Regression Testing"
   stuck_tasks: []
   test_all: false
