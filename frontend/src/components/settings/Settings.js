@@ -104,7 +104,6 @@ const Settings = () => {
   const canAccessSellerFeatures = () => {
     return isSuperAdmin() || isVerifiedSeller;
   };
-  });
   
   // Delete account state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
