@@ -430,6 +430,12 @@ const Settings = () => {
 
   // Seller Mode Functions
   const toggleSellerMode = () => {
+    // Check if user can access seller features before enabling
+    if (!isSellerMode && !canAccessSellerFeatures()) {
+      setIsVerificationRequiredOpen(true);
+      return;
+    }
+
     const newSellerMode = !isSellerMode;
     setIsSellerMode(newSellerMode);
     localStorage.setItem(`seller_mode_${user?.id}`, newSellerMode.toString());
