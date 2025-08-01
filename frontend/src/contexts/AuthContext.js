@@ -77,15 +77,14 @@ export const AuthProvider = ({ children }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Trigger data sync when user logs in
+        // Trigger data sync when user logs in (non-blocking)
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log('User signed in, triggering data sync...');
-          try {
-            await dataSyncService.syncAllUserData(session.user.id);
+          console.log('User signed in, starting background data sync...');
+          dataSyncService.syncAllUserData(session.user.id).then(() => {
             console.log('✅ Data sync completed on sign in');
-          } catch (error) {
+          }).catch(error => {
             console.warn('Data sync failed on sign in:', error);
-          }
+          });
         }
         
         setLoading(false);
