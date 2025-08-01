@@ -533,18 +533,44 @@ export const verificationService = {
   // Mark notification as read
   async markNotificationAsRead(notificationId) {
     try {
-      const { error } = await supabase
-        .from('user_notifications')
-        .update({ is_read: true })
-        .eq('id', notificationId);
+      // Try Supabase first
+      try {
+        const { error } = await supabase
+          .from('user_notifications')
+          .update({ is_read: true })
+          .eq('id', notificationId);
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.warn('Supabase mark as read failed, using localStorage:', error);
+          return this.markNotificationAsReadInLocalStorage(notificationId);
+        }
+
+        return true;
+      } catch (supabaseError) {
+        console.warn('Supabase not available for mark as read, using localStorage:', supabaseError);
+        return this.markNotificationAsReadInLocalStorage(notificationId);
       }
-
-      return true;
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      return false;
+    }
+  },
+
+  // Fallback: Mark notification as read in localStorage
+  markNotificationAsReadInLocalStorage(notificationId) {
+    try {
+      const notifications = JSON.parse(localStorage.getItem('user_notifications') || '[]');
+      const updatedNotifications = notifications.map(notification => {
+        if (notification.id === notificationId) {
+          return { ...notification, is_read: true };
+        }
+        return notification;
+      });
+      localStorage.setItem('user_notifications', JSON.stringify(updatedNotifications));
+      console.log('Notification marked as read in localStorage');
+      return true;
+    } catch (error) {
+      console.error('Error marking notification as read in localStorage:', error);
       return false;
     }
   },
@@ -552,19 +578,40 @@ export const verificationService = {
   // Get unread notification count
   async getUnreadNotificationCount(userId) {
     try {
-      const { count, error } = await supabase
-        .from('user_notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('is_read', false);
+      // Try Supabase first
+      try {
+        const { count, error } = await supabase
+          .from('user_notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('is_read', false);
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.warn('Supabase unread count failed, using localStorage:', error);
+          return this.getUnreadNotificationCountFromLocalStorage(userId);
+        }
+
+        return count || 0;
+      } catch (supabaseError) {
+        console.warn('Supabase not available for unread count, using localStorage:', supabaseError);
+        return this.getUnreadNotificationCountFromLocalStorage(userId);
       }
-
-      return count || 0;
     } catch (error) {
       console.error('Error getting unread notification count:', error);
+      return 0;
+    }
+  },
+
+  // Fallback: Get unread count from localStorage
+  getUnreadNotificationCountFromLocalStorage(userId) {
+    try {
+      const allNotifications = JSON.parse(localStorage.getItem('user_notifications') || '[]');
+      const userUnreadNotifications = allNotifications.filter(notification => 
+        notification.user_id === userId && !notification.is_read
+      );
+      return userUnreadNotifications.length;
+    } catch (error) {
+      console.error('Error getting unread count from localStorage:', error);
       return 0;
     }
   }
