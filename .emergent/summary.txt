@@ -1,106 +1,99 @@
 <analysis>
-The previous AI engineer diligently built out the Flow Invest MVP. Key initial tasks involved a migration to Supabase for authentication and data, integration of Grok 4 for AI bot creation, and resolving complex multi-platform deployment challenges. Subsequent efforts focused heavily on UI/UX, including refactoring the Advanced Bot Builder for multi-step navigation, ensuring comprehensive mobile responsiveness across components like the Bot Builder and AI Creator, and transforming the Portfolios section into a dynamic Marketplace. Debugging persistent issues, such as Google OAuth and temporary  bot storage due to RLS, was also central. Recent significant work involved enhancing marketplace product creation with Patreon-like features, fixing image loading and  quota errors via Supabase Storage integration, implementing an Airbnb-style review system, and overhauling My Bots with comprehensive editing capabilities. A Seller Mode was introduced in user settings to manage social profiles and specialties. The immediate focus before this summary was refining how seller information (name, bio, reviews, social links) is displayed on product cards, addressing inaccuracies and ensuring data consistency.
+The AI engineer successfully evolved the Flow Invest application, initially building core MVP features like AI Feed and Trading Bots with FastAPI and Supabase. Subsequent efforts transformed Portfolios into a Marketplace with rich content editing and a review system, enhanced the Advanced Bot Builder with trading presets, and integrated a Reddit-style voting system. Recent work focused on critical UI/UX cleanup (removing featured badges, language options, Railway files) and then a significant feature addition: a comprehensive Super Admin role for managing user portfolios and pre-built bots. This led to several bug fixes related to bot visibility and synchronization. The immediate preceding work involved implementing a Seller Verification System, which introduced file upload and form validation issues, followed by critical data synchronization problems across devices due to missing Supabase tables and flawed migration logic. The engineer is currently debugging these synchronization and data loss issues.
 </analysis>
 
 <product_requirements>
-The Flow Invest application is conceptualized as a minimalist, AI-powered investment platform, designed for scalability and mobile-friendliness as an MVP. Initial specifications included a distinct UI color palette, Comfortaa font, theme/language toggles, mock login, and bottom navigation. Core functionalities were defined as an AI Feed (news summaries), Trading Bots (pre-built and user-created with Veles Finance-inspired UX), and Ready-Made Portfolios.
+Flow Invest is an AI-powered investment platform focusing on minimalist design, scalability, and mobile responsiveness. It offers an AI Feed for news, Trading Bots (pre-built and custom-made inspired by Veles Finance), and a Marketplace (formerly Portfolios). The backend uses FastAPI with Supabase for data and authentication (Email/Password, Google OAuth).
 
-The application's architecture evolved from a FastAPI backend with MongoDB to Supabase for robust authentication and data management. Key enhancements included the integration of Grok 4 for AI bot creation, real user authentication (Email/Password, Google OAuth), and multi-platform deployment. Subsequent refinements focused on refactoring the Advanced Bot Builder for multi-step navigation and detailed entry fields, improving overall mobile responsiveness across the app, transforming Portfolios into a dynamic Marketplace, and enabling users to create and publish their own Patreon-like products with optional metadata. Recent features introduced included an Edit button for creator-owned products, a Leave a Review system for sellers, comprehensive bot editing functionalities, and a Seller Mode in user settings allowing the management and display of social links and specialties on product cards.
+Key features developed include Grok 4 integration for AI bot creation, user-generated content (Patreon-like products with rich content editors), an Airbnb-style review system, enhanced bot editing, and a Seller Mode. Recent advancements added advanced trading settings (leverage, margin type, presets) to the bot builder, a Reddit-style voting system for marketplace products, and a My Purchases section. The application also requires a Super Admin role (User UID: ) with exclusive privileges to manage all user portfolios and pre-built bots, including moving bots between My Bots and Pre-Built Bots. A Seller Verification System is required to restrict seller features (product creation, enable seller mode) to verified users and super admins. This system includes an application form, document uploads, super admin approval/rejection, and a notification system. Data across user devices must be synchronized.
 </product_requirements>
 
 <key_technical_concepts>
--   **Frontend**: React, , Tailwind CSS, Radix UI, , React Context API, Local Storage.
--   **Backend**: FastAPI, , , , usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
-              [-o ORGANIZATION] [-t {openai,azure}]
-              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
-              [--azure-ad-token AZURE_AD_TOKEN] [-V]
-              {api,tools,migrate,grit} ...
-
-positional arguments:
-  {api,tools,migrate,grit}
-    api                 Direct API calls
-    tools               Client side tools for convenience
-
-options:
-  -h, --help            show this help message and exit
-  -v, --verbose         Set verbosity.
-  -b API_BASE, --api-base API_BASE
-                        What API base url to use.
-  -k API_KEY, --api-key API_KEY
-                        What API key to use.
-  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
-                        What proxy to use.
-  -o ORGANIZATION, --organization ORGANIZATION
-                        Which organization to run as (will use your default
-                        organization if not specified)
-  -t {openai,azure}, --api-type {openai,azure}
-                        The backend API to call, must be `openai` or `azure`
-  --api-version API_VERSION
-                        The Azure API version, e.g.
-                        'https://learn.microsoft.com/en-us/azure/ai-
-                        services/openai/reference#rest-api-versioning'
-  --azure-endpoint AZURE_ENDPOINT
-                        The Azure endpoint, e.g.
-                        'https://endpoint.openai.azure.com'
-  --azure-ad-token AZURE_AD_TOKEN
-                        A token from Azure Active Directory,
-                        https://www.microsoft.com/en-
-                        us/security/business/identity-access/microsoft-entra-
-                        id
-  -V, --version         show program's version number and exit (Python client).
--   **Database/Auth**: Supabase (PostgreSQL), Supabase Auth, Row Level Security (RLS), Supabase Storage.
--   **AI/Integration**: OpenAI API (translation), Grok 4 API (bot creation).
--   **Deployment**: Railway, Render, Vercel, Docker, GitHub Actions.
+- **Frontend**: React, , Tailwind CSS, Radix UI, , React Context API, Local Storage, .
+- **Backend**: FastAPI, , , .
+- **Database/Auth**: Supabase (PostgreSQL), Supabase Auth, Row Level Security (RLS), Supabase Storage.
+- **AI/Integration**: OpenAI API (translation), Grok 4 API (bot creation).
+- **Deployment**: Render, Vercel, Docker.
 </key_technical_concepts>
 
 <code_architecture>
-The application employs a full-stack architecture with a React frontend and a FastAPI backend, primarily utilizing Supabase for database and authentication.
+The application uses a full-stack architecture with a React frontend and a FastAPI backend, primarily using Supabase for database operations and authentication.
 
 **Directory Structure:**
 
 
 
-**Key Files and Changes:**
--   : Central router. Modified  and  to allow test user in development mode. The  component was also adjusted to correctly handle development mode authentication state.
--   : Supabase authentication context. Temporarily modified to inject a test user for development, and then reverted to original. Logic related to  was considered here.
--   : Manages general app context, including authentication state. Its  logic was indirectly affected by and adapted to the AuthContext changes for development mode testing.
--   : Main layout. Added dynamic bottom padding () to prevent buttons and content from being obscured by the fixed bottom navigation, improving scroll space.
--   : Renamed from Portfolios to Marketplace. Enhanced to prominently display product titles and new optional metadata fields (Risk Level, Expected Return, etc.). The Edit button for product creators was positioned () and styled. Seller specialties are now displayed as badges. The Featured badge positioning was adjusted () and the  given top padding () to prevent overlap with titles on mobile. The  component within this file already supports Telegram.
--   : Implements the product creation interface. Enhanced to include all optional metadata fields. File uploads now leverage  via  (replacing  base64 storage), including upload progress indicators. Mobile responsiveness was addressed by adding generous bottom padding () and adjusting modal height (). It now loads and utilizes actual seller data (name, social links, specialties) from the settings. A  import error causing runtime crashes was fixed.
--   : Placeholder for editing/deleting products. Updated to integrate the new  for managing product attachments. Also updated to load and reflect current seller data from settings when editing. Adjusted bottom padding ().
--   : Displays detailed seller profiles. Its review section was refactored from a pagination system to an Airbnb-style display showing 3 latest reviews with a Show all X reviews toggle. The Contact Seller button was replaced with a Leave a Review button that conditionally appears for purchasers and opens a modal for star rating and text review submission. Scroll space was improved by adding bottom padding to the review submission buttons () and the main modal container (, ).
--   : (NEW FILE) Centralized service for all Supabase Storage operations. Handles uploading various file types (images, videos, documents) to specific Supabase buckets (, , ), generates unique, organized paths (), and provides public URLs and deletion capabilities.
--   : Updated to include expanded mock data for marketplace products, detailed seller profiles with extended social links, and additional review data to support the Airbnb-style review system. Image URLs were initially replaced with placeholders, then restored to Unsplash, and finally moved to  placeholders, pending full Supabase Storage integration for *user-uploaded* content.
--   : Comprehensive profile management. A Seller Mode toggle was added, revealing additional fields for social media links (Instagram, Twitter, LinkedIn, YouTube, Website, and newly added Telegram) and Specialties (tag-based input). A Manage Products section was added as a placeholder. All seller mode data is persisted in .
--   : Manages bot display. The Delete button on user bot cards was replaced with an Edit button. This button intelligently routes users to either the  or  based on how the bot was initially created. The  function was updated to prevent duplicate bots by updating existing entries rather than creating new ones.
--   : Detailed bot configuration. Modified to accept an  prop, pre-populating form fields for existing bots. The Create Bot button dynamically changes to Update Bot, and a Delete Bot option (with confirmation) is available in edit mode. All steps are now immediately accessible when editing a bot (no sequential navigation required). Responsive bottom padding ( for main container,  for button section) was added to ensure buttons are fully visible on desktop.
--   : AI bot creation UI. Updated to accept an  prop, pre-filling the description and starting in preview mode when editing. The Save Bot button changes to Update Bot, and a Delete Bot option (with confirmation) is available in edit mode.
+**Key Files and Changes Made:**
 
+- : Manages user authentication state.
+    - **Changes**: Modified to automatically load a test user in development mode. Integrated  to synchronize user data (bots, purchases, account, votes) to/from Supabase upon user login or changes, with localStorage fallback for development. Includes super admin detection logic for the test user.
+- : Central marketplace display.
+    - **Changes**:  badge display removed. Enhanced  and  rich content editor logic. My Purchases section added. Implemented access control for Create your product button based on seller verification status (super admin or verified seller). Added  to prompt unverified users. Integrated super admin controls (edit/delete) for all portfolios, with the  icon import.
+- : Interface for creating new marketplace products.
+    - **Changes**:  property initialization removed. UI fixed for delete and Add more content buttons by adjusting padding/positioning.
+- : User profile and application settings.
+    - **Changes**:  badge display removed. Language choice UI removed (including  icon import and related state/logic), with a bug fix for a residual  reference. Seller Mode toggle now checks seller verification status, displaying  if unverified. Implemented a notification system (Mail icon) to display application messages (e.g., verification status). Integrated  for account balance synchronization. Added super admin verification management button. Fixed lint errors.
+- : Provides mock data.
+    - **Changes**:  properties removed from .
+- : Trading bot management.
+    - **Changes**: Implemented super admin capabilities:  check; functions for moving bots between My Bots and Pre-Built Bots (e.g., , , ); UI controls for these actions in  and . Fixed privacy bug where My Bots showed other users' bots (now filtered by ). Addressed synchronization mismatch for Pre-Built Bots by loading them from Supabase (or localStorage fallback). Integrated  for loading and saving user bots.
+- : Handles Supabase Storage interactions.
+    - **Changes**: Updated for secure file uploads and deletions for verification documents.
+- : (NEW FILE) Handles seller verification logic, including application submission, file uploads to Supabase Storage, status updates, and notifications.
+    - **Changes**: Refactored to handle file upload errors (400 status), implement a  fallback for development, and use signed URLs for secure document viewing. Fixed , ,  functions to work with Supabase RLS and  fallback, and to create user notifications.
+- : (NEW COMPONENT) Frontend form for seller verification application.
+    - **Changes**: Improved address entry to include separate , , ,  fields. Added bottom spacing for buttons. Updated validation and submission logic to handle new address format and file uploads. Includes  fallback for development.
+- : (NEW COMPONENT) Modal displayed to unverified users attempting to access seller features.
+- : (NEW COMPONENT) Super admin panel for managing seller verification applications.
+    - **Changes**: Updated to use signed URLs for secure document viewing. Added debugging logs.
+- : (NEW FILE) Manages synchronization of user data (bots, purchases, account, votes) between localStorage and Supabase.
+    - **Changes**: Includes functions for , , , , etc.
+- : (NEW FILE) Backend routes for handling seller verification applications and document storage.
+- : Main FastAPI server.
+    - **Changes**: Added  to include new seller verification API endpoints.
+- : (NEW FILE) SQL schema for  table.
+- : (NEW FILE) SQL policies for the  Supabase storage bucket.
+- : (NEW FILE) SQL schema for , , ,  tables in Supabase.
+- : (NEW FILE) Clean version of  without markdown.
+- , , , , , , , : **All DELETED** as they were unnecessary Railway-related files.
 </code_architecture>
 
 <pending_tasks>
--   Supabase RLS Finalization (for backend bot management).
--   n8n Webhook URL Update (manual update required).
--   Frontend Deployment on Vercel (after latest changes).
--   Run  (to enable profile updates).
--   OpenAI API Key for Render Backend (ensure correct environment variable).
--   Enhanced Manage Products section (full CRUD operations).
--   URL Validation for social links in Seller Mode settings.
--   Backend Integration for Seller Data/Reviews (move from  to Supabase).
--   Refine Seller Info on Product Cards (display name, bio, real ratings, only connected socials).
+- Supabase RLS Finalization (for backend bot management - partially addressed by data sync policies).
+- n8n Webhook URL Update (manual update required).
+- Frontend Deployment on Vercel (after latest changes).
+- Run  (to enable profile updates).
+- OpenAI API Key for Render Backend (ensure correct environment variable).
+- URL Validation for social links in Seller Mode settings.
+- Backend Integration for Seller Data/Reviews (move from  to Supabase).
+- Enhance View All Products in SellerProfileModal to fetch real data from Supabase.
 </pending_tasks>
 
 <current_work>
-Immediately prior to this summary request, the AI engineer was engaged in refining the display of seller information on marketplace product cards. The user's explicit feedback indicated several inconsistencies that needed addressing:
+Immediately before this summary request, the AI engineer was addressing a series of critical bugs related to the newly implemented Super Admin role and the Cross-Device Data Synchronization system.
 
-1.  **Incorrect Seller Name**: The product cards were displaying a generic name (e.g., Hakuna Matata) instead of the user's specified display name from their settings (e.g., Kirson).
-2.  **Inaccurate 'About' Information**: The 'About' section on the product card was not pulling content from the user's  field in settings (e.g., CEO flowinvest.ai).
-3.  **Misleading Star Ratings**: Even without any reviews, product cards were displaying a 4.8 stars rating, which was inaccurate. The requirement is to show 0 stars if there are no real reviews.
-4.  **Display of Unconnected Social Links**: Product cards were showing icons for all social media platforms, even if the user had not provided a link for them. The user explicitly requested that only connected social links (e.g., Telegram, Instagram, Website in their case) should be visible.
+**Context of the Issue:**
+After successfully implementing the super admin role, the seller verification system, and the initial cross-device data synchronization logic, the user reported significant issues:
+1.  **Bots Disappeared**: On the desktop version, user's bots vanished.
+2.  **Bot Movement Failure**: Moving bots between Pre-built Bots and My Bots resulted in them disappearing from both sections.
+3.  **Mobile Sign-in Stuck**: On a mobile device, the sign-in process hung indefinitely (Completing sign in...).
+4.  **Data Synchronization Failure**: User confirmed that data (bots, purchases, account balance) was not synchronizing across devices, despite the data sync service being implemented.
 
-The engineer has just begun implementing these fixes, starting with the  to ensure that it correctly incorporates the user's actual display name, bio, and a filtered list of connected social links when a new product is created or an existing one is updated. This foundational change is crucial for the accurate representation of seller profiles on product cards across the marketplace.
+**AI Engineer's Investigation and Actions:**
+The AI engineer identified that the primary cause of the synchronization issues was the **missing Supabase tables** (, , , ) that the  was designed to interact with. Consequently, the application was falling back to , which is device-specific, explaining the synchronization failures and data inconsistencies.
+
+To fix this, the engineer:
+1.  Created  (later refined to  due to user's SQL editor syntax error) to define the necessary Supabase tables and their RLS policies.
+2.  Created  to handle data migration from  to Supabase and manage data synchronization.
+3.  Updated  to trigger the data synchronization process upon user login and changes.
+4.  Modified  to use the new  for loading and saving user bots.
+
+The user then reported that even after running the new SQL, the bots were still disappearing, and mobile sign-in was stuck, indicating new bugs introduced or existing ones not fully resolved, specifically within the migration function and bot movement logic within the .
+
+**Current State:**
+The application has the necessary database schemas for cross-device sync and seller verification policies in place (manual application of policies was provided). The frontend components are wired to use these services. However, there are still active bugs where data is being lost or not properly migrated/synchronized, and mobile login is failing. The engineer is actively debugging the 's migration and bot movement functions.
 </current_work>
 
 <optional_next_step>
-Continue updating the  to correctly display the user's , , and only the connected  on product cards, addressing the user's latest feedback.
+Fix the data migration and bot movement logic within  to prevent data loss and ensure proper synchronization across devices.
 </optional_next_step>
