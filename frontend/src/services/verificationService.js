@@ -445,6 +445,15 @@ export const verificationService = {
           seller_verification_status: 'rejected'
         };
         localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
+
+        // Create rejection notification
+        this.createNotificationInLocalStorage(
+          application.user_id,
+          'Seller Verification Rejected',
+          `Your seller verification application has been rejected. Reason: ${rejectionReason}. Please contact support for more information.`,
+          'error',
+          applicationId
+        );
       }
 
       console.log('Application rejected in localStorage');
