@@ -74,6 +74,13 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session);
+        
+        // Don't override development test user
+        if (process.env.NODE_ENV === 'development' && !session && user) {
+          console.log('Preserving development test user, ignoring null session');
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         
