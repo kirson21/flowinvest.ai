@@ -16,6 +16,7 @@ import ProductEditModal from '../portfolios/ProductEditModal';
 import VerificationRequiredModal from '../verification/VerificationRequiredModal';
 import VerificationManagementModal from '../verification/VerificationManagementModal';
 import { verificationService } from '../../services/verificationService';
+import { dataSyncService } from '../../services/dataSyncService';
 import { 
   Settings as SettingsIcon,
   Moon,
