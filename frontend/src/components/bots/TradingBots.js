@@ -107,18 +107,17 @@ const TradingBots = () => {
     console.log('Current user for bot creation:', user);
     
     try {
-      // Temporary localStorage solution while backend RLS issues are resolved
-      console.log('Using localStorage for bot storage (temporary solution)');
+      // Use data sync service for cross-device synchronization
+      console.log('Using data sync service for bot storage');
       console.log('Bot data received:', botData);
       
-      // Get existing bots from localStorage
-      const existingBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
+      // Get existing bots using sync service
+      const existingBots = await dataSyncService.syncUserBots(user?.id);
       
       // Check if this is an update (has existing ID) or new bot creation
       const isUpdate = botData.id && existingBots.some(bot => bot.id === botData.id);
       
       let botToSave;
-      let updatedBots;
       
       if (isUpdate) {
         console.log('Updating existing bot with ID:', botData.id);
@@ -132,11 +131,6 @@ const TradingBots = () => {
           // Keep original created_at
           created_at: existingBots.find(bot => bot.id === botData.id)?.created_at || new Date().toISOString()
         };
-        
-        // Replace the existing bot
-        updatedBots = existingBots.map(bot => 
-          bot.id === botData.id ? botToSave : bot
-        );
       } else {
         console.log('Creating new bot');
         // Create new bot
@@ -151,18 +145,14 @@ const TradingBots = () => {
           updated_at: new Date().toISOString(),
           status: 'inactive'
         };
-        
-        // Add new bot
-        updatedBots = [...existingBots, botToSave];
       }
       
       console.log(isUpdate ? 'Bot data to update:' : 'Bot data to save:', botToSave);
       
-      // Save back to localStorage
-      localStorage.setItem('user_bots', JSON.stringify(updatedBots));
+      // Save using data sync service (tries Supabase first, falls back to localStorage)
+      await dataSyncService.saveUserBot(botToSave);
       
-      console.log(`Bot ${isUpdate ? 'updated' : 'saved'} to localStorage successfully`);
-      console.log('Total bots in storage:', updatedBots.length);
+      console.log(`Bot ${isUpdate ? 'updated' : 'saved'} successfully with cross-device sync`);
       
       // Refresh the bot list
       await loadUserBots();
