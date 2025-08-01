@@ -273,6 +273,24 @@ export const dataSyncService = {
         return;
       }
 
+      // Check if user_bots table exists before migration
+      try {
+        const { data: testData, error: testError } = await supabase
+          .from('user_bots')
+          .select('count')
+          .limit(1);
+        
+        if (testError && testError.code === 'PGRST116') {
+          console.log('user_bots table does not exist, skipping migration');
+          localStorage.setItem(migrationKey, 'true');
+          return;
+        }
+      } catch (error) {
+        console.log('Supabase tables not available, skipping migration');
+        localStorage.setItem(migrationKey, 'true');
+        return;
+      }
+
       // Migrate user bots
       const localBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
       const userBots = localBots.filter(bot => bot.user_id === userId);
@@ -326,14 +344,15 @@ export const dataSyncService = {
         console.log(`Migration complete: ${migratedCount}/${userBots.length} bots migrated`);
       }
 
-      // Only mark migration as completed if we attempted to migrate
-      // (even if some failed, we don't want to keep retrying)
+      // Mark migration as completed
       localStorage.setItem(migrationKey, 'true');
       console.log('Migration process completed');
 
     } catch (error) {
       console.error('Error during data migration:', error);
-      // Don't mark as completed if there was a major error
+      // Mark as completed to prevent retry loops
+      const migrationKey = `migration_done_${userId}`;
+      localStorage.setItem(migrationKey, 'true');
     }
   }
 };
