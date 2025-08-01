@@ -464,6 +464,33 @@ export const verificationService = {
     }
   },
 
+  // Create notification in localStorage (fallback)
+  createNotificationInLocalStorage(userId, title, message, type, relatedApplicationId = null) {
+    try {
+      const notifications = JSON.parse(localStorage.getItem('user_notifications') || '[]');
+      
+      const newNotification = {
+        id: Date.now().toString(),
+        user_id: userId,
+        title: title,
+        message: message,
+        type: type,
+        related_application_id: relatedApplicationId,
+        is_read: false,
+        created_at: new Date().toISOString()
+      };
+
+      notifications.unshift(newNotification); // Add to beginning
+      localStorage.setItem('user_notifications', JSON.stringify(notifications));
+      
+      console.log('Notification created in localStorage:', newNotification);
+      return newNotification;
+    } catch (error) {
+      console.error('Error creating notification in localStorage:', error);
+      return null;
+    }
+  },
+
   // Get user notifications
   async getUserNotifications(userId) {
     try {
