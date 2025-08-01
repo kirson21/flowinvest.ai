@@ -75,9 +75,9 @@ export const AuthProvider = ({ children }) => {
       async (event, session) => {
         console.log('Auth state change:', event, session);
         
-        // Don't override development test user
-        if (process.env.NODE_ENV === 'development' && !session && user) {
-          console.log('Preserving development test user, ignoring null session');
+        // Don't override development test user with initial null session
+        if (process.env.NODE_ENV === 'development' && event === 'INITIAL_SESSION' && !session && user) {
+          console.log('Preserving development test user, ignoring initial null session');
           return;
         }
         
