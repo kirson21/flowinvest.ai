@@ -494,19 +494,38 @@ export const verificationService = {
   // Get user notifications
   async getUserNotifications(userId) {
     try {
-      const { data, error } = await supabase
-        .from('user_notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+      // Try Supabase first
+      try {
+        const { data, error } = await supabase
+          .from('user_notifications')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.warn('Supabase notifications failed, using localStorage:', error);
+          return this.getUserNotificationsFromLocalStorage(userId);
+        }
+
+        return data;
+      } catch (supabaseError) {
+        console.warn('Supabase not available for notifications, using localStorage:', supabaseError);
+        return this.getUserNotificationsFromLocalStorage(userId);
       }
-
-      return data;
     } catch (error) {
       console.error('Error getting user notifications:', error);
+      return [];
+    }
+  },
+
+  // Fallback: Get notifications from localStorage
+  getUserNotificationsFromLocalStorage(userId) {
+    try {
+      const allNotifications = JSON.parse(localStorage.getItem('user_notifications') || '[]');
+      const userNotifications = allNotifications.filter(notification => notification.user_id === userId);
+      return userNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } catch (error) {
+      console.error('Error getting notifications from localStorage:', error);
       return [];
     }
   },
