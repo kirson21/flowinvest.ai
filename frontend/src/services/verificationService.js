@@ -363,6 +363,15 @@ export const verificationService = {
           seller_verification_status: 'verified'
         };
         localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
+
+        // Create success notification
+        this.createNotificationInLocalStorage(
+          application.user_id,
+          'Seller Verification Approved!',
+          'Congratulations! Your seller verification has been approved. You now have access to all seller features including product creation and seller mode.',
+          'success',
+          applicationId
+        );
       }
 
       console.log('Application approved in localStorage');
