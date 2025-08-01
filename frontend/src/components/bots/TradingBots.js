@@ -165,17 +165,30 @@ const TradingBots = () => {
     }
   };
 
-  // Bot management functions (using localStorage temporarily)
+  // Bot management functions (using data sync service)
   const handlePauseBot = async (botId) => {
     try {
       console.log('Pausing bot:', botId);
-      const bots = JSON.parse(localStorage.getItem('user_bots') || '[]');
-      const updatedBots = bots.map(bot => 
-        bot.id === botId ? { ...bot, is_active: false, status: 'paused' } : bot
-      );
-      localStorage.setItem('user_bots', JSON.stringify(updatedBots));
-      await loadUserBots();
-      return true;
+      
+      // Get current user bots using data sync service
+      const userBots = await dataSyncService.syncUserBots(user?.id);
+      const botToUpdate = userBots.find(bot => bot.id === botId);
+      
+      if (botToUpdate) {
+        const updatedBot = {
+          ...botToUpdate,
+          is_active: false,
+          status: 'paused',
+          updated_at: new Date().toISOString()
+        };
+        
+        // Save using data sync service
+        await dataSyncService.saveUserBot(updatedBot);
+        await loadUserBots();
+        return true;
+      }
+      
+      return false;
     } catch (error) {
       console.error('Error pausing bot:', error);
       return false;
@@ -185,13 +198,26 @@ const TradingBots = () => {
   const handleResumeBot = async (botId) => {
     try {
       console.log('Resuming bot:', botId);
-      const bots = JSON.parse(localStorage.getItem('user_bots') || '[]');
-      const updatedBots = bots.map(bot => 
-        bot.id === botId ? { ...bot, is_active: true, status: 'running' } : bot
-      );
-      localStorage.setItem('user_bots', JSON.stringify(updatedBots));
-      await loadUserBots();
-      return true;
+      
+      // Get current user bots using data sync service
+      const userBots = await dataSyncService.syncUserBots(user?.id);
+      const botToUpdate = userBots.find(bot => bot.id === botId);
+      
+      if (botToUpdate) {
+        const updatedBot = {
+          ...botToUpdate,
+          is_active: true,
+          status: 'running',
+          updated_at: new Date().toISOString()
+        };
+        
+        // Save using data sync service
+        await dataSyncService.saveUserBot(updatedBot);
+        await loadUserBots();
+        return true;
+      }
+      
+      return false;
     } catch (error) {
       console.error('Error resuming bot:', error);
       return false;
@@ -201,9 +227,27 @@ const TradingBots = () => {
   const handleDeleteBot = async (botId) => {
     try {
       console.log('Deleting bot:', botId);
+      
+      // Get current bots from localStorage (for now, until we have delete function in data sync service)
       const bots = JSON.parse(localStorage.getItem('user_bots') || '[]');
       const updatedBots = bots.filter(bot => bot.id !== botId);
       localStorage.setItem('user_bots', JSON.stringify(updatedBots));
+      
+      // Also try to delete from Supabase if available
+      try {
+        const { error } = await supabase
+          .from('user_bots')
+          .delete()
+          .eq('id', botId)
+          .eq('user_id', user?.id);
+        
+        if (error) {
+          console.warn('Failed to delete from Supabase:', error);
+        }
+      } catch (error) {
+        console.warn('Supabase not available for deletion:', error);
+      }
+      
       await loadUserBots();
       return true;
     } catch (error) {
