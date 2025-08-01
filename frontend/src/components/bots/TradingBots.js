@@ -290,10 +290,8 @@ const TradingBots = () => {
         status: 'inactive'
       };
       
-      // Add to user bots
-      const existingUserBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
-      const updatedUserBots = [...existingUserBots, userBot];
-      localStorage.setItem('user_bots', JSON.stringify(updatedUserBots));
+      // Save the new user bot using data sync service
+      await dataSyncService.saveUserBot(userBot);
       
       // Remove from pre-built bots and update localStorage
       const updatedPreBuiltBots = preBuiltBots.filter(bot => bot.id !== preBuiltBot.id);
