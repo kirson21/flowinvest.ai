@@ -277,88 +277,63 @@ export const dataSyncService = {
       const localBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
       const userBots = localBots.filter(bot => bot.user_id === userId);
       
+      console.log(`Found ${userBots.length} user bots to migrate`);
+      
       if (userBots.length > 0) {
         console.log(`Migrating ${userBots.length} bots to Supabase`);
+        
+        // Try to migrate each bot individually to avoid batch failures
+        let migratedCount = 0;
         for (const bot of userBots) {
           try {
-            await supabase
-              .from('user_bots')
-              .upsert([{
-                id: bot.id,
-                user_id: userId,
-                name: bot.name || 'Unnamed Bot',
-                description: bot.description || '',
-                strategy: bot.strategy || 'unknown',
-                exchange: bot.exchange || 'binance',
-                trading_pair: bot.trading_pair || 'BTC/USDT',
-                risk_level: bot.risk_level || 'medium',
-                daily_pnl: bot.daily_pnl || 0,
-                weekly_pnl: bot.weekly_pnl || 0,
-                monthly_pnl: bot.monthly_pnl || 0,
-                win_rate: bot.win_rate || 0,
-                is_active: bot.is_active || false,
-                is_prebuilt: bot.is_prebuilt || false,
-                status: bot.status || 'inactive',
-                advanced_settings: bot.advanced_settings || {},
-                created_at: bot.created_at || new Date().toISOString(),
-                updated_at: bot.updated_at || new Date().toISOString()
-              }]);
-          } catch (error) {
-            console.warn('Failed to migrate bot:', bot.id, error);
-          }
-        }
-      }
-
-      // Migrate account balance
-      const savedBalance = localStorage.getItem(`account_balance_${userId}`);
-      if (savedBalance) {
-        console.log('Migrating account balance to Supabase');
-        try {
-          await supabase
-            .from('user_accounts')
-            .upsert([{
+            // Ensure all required fields are present
+            const botToMigrate = {
+              id: bot.id || Date.now().toString(),
               user_id: userId,
-              balance: parseFloat(savedBalance) || 0,
-              currency: 'USD'
-            }]);
-        } catch (error) {
-          console.warn('Failed to migrate account balance:', error);
-        }
-      }
+              name: bot.name || 'Unnamed Bot',
+              description: bot.description || '',
+              strategy: bot.strategy || 'unknown',
+              exchange: bot.exchange || 'binance',
+              trading_pair: bot.trading_pair || 'BTC/USDT',
+              risk_level: bot.risk_level || 'medium',
+              daily_pnl: parseFloat(bot.daily_pnl) || 0,
+              weekly_pnl: parseFloat(bot.weekly_pnl) || 0,
+              monthly_pnl: parseFloat(bot.monthly_pnl) || 0,
+              win_rate: parseFloat(bot.win_rate) || 0,
+              is_active: Boolean(bot.is_active),
+              is_prebuilt: Boolean(bot.is_prebuilt),
+              status: bot.status || 'inactive',
+              advanced_settings: bot.advanced_settings || {},
+              created_at: bot.created_at || new Date().toISOString(),
+              updated_at: bot.updated_at || new Date().toISOString()
+            };
 
-      // Migrate user purchases
-      const savedPurchases = JSON.parse(localStorage.getItem('user_purchases') || '{}');
-      const userPurchases = savedPurchases[userId] || [];
-      
-      if (userPurchases.length > 0) {
-        console.log(`Migrating ${userPurchases.length} purchases to Supabase`);
-        for (const purchase of userPurchases) {
-          try {
-            await supabase
-              .from('user_purchases')
-              .upsert([{
-                id: purchase.id || crypto.randomUUID(),
-                user_id: userId,
-                product_id: purchase.product_id || purchase.id,
-                product_name: purchase.product_name || purchase.name || 'Unknown Product',
-                product_type: purchase.product_type || 'portfolio',
-                purchase_price: purchase.purchase_price || purchase.price || 0,
-                purchased_at: purchase.purchased_at || purchase.date || new Date().toISOString(),
-                product_data: purchase,
-                status: 'active'
-              }]);
+            const { data, error } = await supabase
+              .from('user_bots')
+              .upsert([botToMigrate], { onConflict: 'id' });
+
+            if (error) {
+              console.warn('Failed to migrate bot:', bot.id, error);
+            } else {
+              console.log('Successfully migrated bot:', bot.id);
+              migratedCount++;
+            }
           } catch (error) {
-            console.warn('Failed to migrate purchase:', purchase.id, error);
+            console.warn('Error migrating individual bot:', bot.id, error);
           }
         }
+        
+        console.log(`Migration complete: ${migratedCount}/${userBots.length} bots migrated`);
       }
 
-      // Mark migration as completed
+      // Only mark migration as completed if we attempted to migrate
+      // (even if some failed, we don't want to keep retrying)
       localStorage.setItem(migrationKey, 'true');
-      console.log('Migration completed successfully');
+      console.log('Migration process completed');
 
     } catch (error) {
       console.error('Error during data migration:', error);
+      // Don't mark as completed if there was a major error
     }
   }
 };
