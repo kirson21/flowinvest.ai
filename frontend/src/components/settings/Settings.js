@@ -172,11 +172,11 @@ const Settings = () => {
     }
   };
 
-  const loadAccountBalance = () => {
+  const loadAccountBalance = async () => {
     try {
-      // Load balance from localStorage (in a real app, this would come from backend/database)
-      const savedBalance = localStorage.getItem(`account_balance_${user?.id}`);
-      setAccountBalance(savedBalance ? parseFloat(savedBalance) : 0);
+      // Use data sync service for cross-device synchronization
+      const balance = await dataSyncService.syncAccountBalance(user?.id);
+      setAccountBalance(balance);
     } catch (error) {
       console.error('Error loading account balance:', error);
       setAccountBalance(0);
