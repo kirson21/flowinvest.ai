@@ -45,14 +45,13 @@ export const AuthProvider = ({ children }) => {
           setSession(testSession);
           setUser(testUser);
           
-          // Trigger data sync for development test user
-          console.log('Development test user loaded, triggering data sync...');
-          try {
-            await dataSyncService.syncAllUserData(testUser.id);
+          // Trigger data sync for development test user (non-blocking)
+          console.log('Development test user loaded, starting background data sync...');
+          dataSyncService.syncAllUserData(testUser.id).then(() => {
             console.log('✅ Data sync completed for test user');
-          } catch (error) {
+          }).catch(error => {
             console.warn('Data sync failed for test user:', error);
-          }
+          });
         } else {
           setSession(session);
           setUser(session?.user ?? null);
