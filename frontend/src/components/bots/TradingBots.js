@@ -85,14 +85,10 @@ const TradingBots = () => {
         return;
       }
       
-      // Load from localStorage and filter by current user
-      console.log('Loading bots from localStorage for user:', user.id);
-      const localBots = JSON.parse(localStorage.getItem('user_bots') || '[]');
-      console.log('Found total bots in localStorage:', localBots.length);
-      
-      // CRITICAL: Filter bots to only show current user's bots
-      const userSpecificBots = localBots.filter(bot => bot.user_id === user.id);
-      console.log('Filtered bots for current user:', userSpecificBots.length);
+      // Use data sync service to get user bots from Supabase or localStorage
+      console.log('Loading bots using data sync service for user:', user.id);
+      const userSpecificBots = await dataSyncService.syncUserBots(user.id);
+      console.log('Synced bots for current user:', userSpecificBots.length);
       
       setUserBots(userSpecificBots);
       setLoadingBots(false);
