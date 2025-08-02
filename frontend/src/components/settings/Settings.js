@@ -203,25 +203,30 @@ const Settings = () => {
     return productVotes;
   };
 
-  const handleTopUp = () => {
+  const handleTopUp = async () => {
     if (!topUpAmount || parseFloat(topUpAmount) <= 0) {
-      alert('Please enter a valid amount to top up.');
+      alert('Please enter a valid amount');
       return;
     }
 
-    const amount = parseFloat(topUpAmount);
-    const newBalance = accountBalance + amount;
-    
-    // Update balance in localStorage
-    localStorage.setItem(`account_balance_${user?.id}`, newBalance.toString());
-    setAccountBalance(newBalance);
-    
-    // Reset and close modal
-    setTopUpAmount('');
-    setShowTopUpModal(false);
-    
-    setMessage(`Successfully topped up $${amount.toFixed(2)}! Your new balance is $${newBalance.toFixed(2)}`);
-    setTimeout(() => setMessage(''), 4000);
+    try {
+      const amount = parseFloat(topUpAmount);
+      const newBalance = accountBalance + amount;
+      
+      // Update balance using data sync service
+      await dataSyncService.saveAccountBalance(user?.id, newBalance);
+      setAccountBalance(newBalance);
+      
+      // Reset and close modal
+      setTopUpAmount('');
+      setShowTopUpModal(false);
+      
+      setMessage(`Successfully topped up $${amount.toFixed(2)}! Your new balance is $${newBalance.toFixed(2)}`);
+      setTimeout(() => setMessage(''), 4000);
+    } catch (error) {
+      console.error('Error topping up account:', error);
+      alert('Failed to top up account. Please try again.');
+    }
   };
 
   // Load user products when manage products modal opens
