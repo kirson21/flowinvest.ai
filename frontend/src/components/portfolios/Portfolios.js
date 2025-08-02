@@ -377,7 +377,7 @@ const Portfolios = () => {
   // Load user-created portfolios from localStorage/Supabase
   useEffect(() => {
     const loadData = async () => {
-      loadProductsWithReviews();
+      await loadProductsWithReviews();
       loadUserVotes();
       if (user?.id) {
         await loadUserPurchases();
