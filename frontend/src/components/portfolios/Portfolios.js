@@ -196,22 +196,32 @@ const Portfolios = () => {
   };
 
   // Handle product purchase
-  const handlePurchase = (product) => {
+  const handlePurchase = async (product) => {
     if (!user) {
       alert('Please log in to make a purchase');
       return;
     }
 
     const purchaseData = {
-      ...product,
-      purchasedAt: new Date().toISOString(),
-      purchaseId: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      id: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      user_id: user.id,
+      product_id: product.id,
+      product_name: product.title || product.name,
+      product_description: product.description || '',
+      price: product.price || 0,
+      seller_id: product.userId,
+      seller_name: product.author || 'Unknown Seller',
+      purchased_at: new Date().toISOString(),
+      status: 'completed'
     };
 
-    const updatedPurchases = [...userPurchases, purchaseData];
-    saveUserPurchases(updatedPurchases);
-    
-    alert(`Successfully purchased ${product.title || product.name}!`);
+    try {
+      await saveUserPurchase(purchaseData);
+      alert(`Successfully purchased ${product.title || product.name}!`);
+    } catch (error) {
+      console.error('Purchase failed:', error);
+      alert('Purchase failed. Please try again.');
+    }
   };
 
   // Check if user has purchased a product
