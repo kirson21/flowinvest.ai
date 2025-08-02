@@ -38,14 +38,36 @@ export const dataSyncService = {
     }
   },
 
-  // Save user bot - PURE SUPABASE VERSION
+  // Save user bot - PURE SUPABASE VERSION with schema compatibility
   async saveUserBot(botData) {
     try {
       console.log('Saving user bot to Supabase:', botData.name);
       
+      // Filter fields to match current user_bots schema
+      const schemaCompatibleBot = {
+        id: botData.id,
+        user_id: botData.user_id,
+        name: botData.name,
+        description: botData.description,
+        strategy: botData.strategy,
+        exchange: botData.exchange,
+        trading_pair: botData.trading_pair,
+        risk_level: botData.risk_level,
+        daily_pnl: botData.daily_pnl,
+        weekly_pnl: botData.weekly_pnl,
+        monthly_pnl: botData.monthly_pnl,
+        win_rate: botData.win_rate,
+        is_active: botData.is_active,
+        is_prebuilt: botData.is_prebuilt,
+        status: botData.status,
+        advanced_settings: botData.advanced_settings,
+        created_at: botData.created_at,
+        updated_at: botData.updated_at
+      };
+
       const { data, error } = await supabase
         .from('user_bots')
-        .upsert([botData])
+        .upsert([schemaCompatibleBot])
         .select()
         .single();
 
