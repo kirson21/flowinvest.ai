@@ -459,6 +459,9 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
 
       // Save using data sync service
       try {
+        console.log('Attempting to save portfolio with user ID:', user?.id);
+        console.log('Portfolio data user fields:', { user_id: newProduct.user_id, userId: newProduct.userId });
+        
         await dataSyncService.saveUserPortfolio(newProduct);
         console.log('Product created successfully:', newProduct);
       } catch (error) {
