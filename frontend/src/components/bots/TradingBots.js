@@ -423,6 +423,40 @@ const TradingBots = () => {
     // TODO: Implement bot editing functionality
   };
 
+  const handleDeletePreBuiltBot = async (preBuiltBot) => {
+    if (!isSuperAdmin()) {
+      alert('❌ Only super admin can delete pre-built bots');
+      return false;
+    }
+    
+    try {
+      console.log('Deleting pre-built bot:', preBuiltBot);
+      
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('user_bots')
+        .delete()
+        .eq('id', preBuiltBot.id)
+        .eq('is_prebuilt', true);
+      
+      if (error) {
+        console.warn('Failed to delete pre-built bot from Supabase:', error);
+        alert('❌ Failed to delete pre-built bot from database');
+        return false;
+      }
+      
+      // Refresh pre-built bots list
+      await loadPreBuiltBots();
+      
+      alert('✅ Pre-built bot deleted successfully!');
+      return true;
+    } catch (error) {
+      console.error('Error deleting pre-built bot:', error);
+      alert('❌ Failed to delete pre-built bot');
+      return false;
+    }
+  };
+
   const getRiskColor = (risk) => {
     if (!risk) return 'bg-gray-500';
     switch (risk.toLowerCase()) {
