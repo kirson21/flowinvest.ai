@@ -73,7 +73,7 @@ async def create_bot_with_ai(request: BotCreationRequest):
         if request.user_id:
             try:
                 # Save to Supabase
-                response = supabase.table('bots').insert(bot_data).execute()
+                response = supabase.table('user_bots').insert(bot_data).execute()
                 if response.data:
                     bot_id = response.data[0]['id']
                     bot_config['id'] = bot_id
