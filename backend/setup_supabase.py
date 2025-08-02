@@ -192,7 +192,7 @@ def verify_setup():
     
     try:
         # Check tables exist by trying to query them
-        tables_to_check = ['users', 'bots', 'portfolios', 'news_feed', 'user_settings']
+        tables_to_check = ['users', 'bots', 'user_bots', 'user_accounts', 'user_purchases', 'user_votes', 'portfolios', 'news_feed', 'user_settings']
         
         for table in tables_to_check:
             try:
