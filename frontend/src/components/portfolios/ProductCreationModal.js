@@ -420,6 +420,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
       // Create a more compact product object to avoid localStorage quota issues
       const newProduct = {
         id: Date.now() + Math.random(),
+        user_id: user?.id || 'current-user', // Required for Supabase
         title: productData.title,
         name: productData.title, // For compatibility with existing code
         description: productData.description,
