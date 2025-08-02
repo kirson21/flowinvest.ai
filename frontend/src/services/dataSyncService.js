@@ -391,7 +391,121 @@ export const dataSyncService = {
     }
   },
 
-  // Fallback: Get account balance from localStorage
+  // Save user portfolio to Supabase with localStorage fallback
+  async saveUserPortfolio(portfolioData) {
+    try {
+      console.log('Saving user portfolio to Supabase:', portfolioData.title);
+      
+      // Ensure portfolio has valid ID
+      const portfolioId = portfolioData.id || `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const portfolioToSave = {
+        id: portfolioId,
+        user_id: portfolioData.userId || portfolioData.user_id,
+        title: portfolioData.title || 'Unnamed Portfolio',
+        description: portfolioData.description || '',
+        category: portfolioData.category || 'other',
+        price: parseFloat(portfolioData.price) || 0,
+        risk_level: portfolioData.riskLevel || portfolioData.risk_level || 'medium',
+        asset_type: portfolioData.assetType || portfolioData.asset_type || 'stock',
+        content: portfolioData.content || [],
+        images: portfolioData.images || [],
+        created_at: portfolioData.createdAt || portfolioData.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('portfolios')
+        .upsert([portfolioToSave])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase portfolio save failed:', error);
+        // Fallback to localStorage
+        console.warn('Using localStorage fallback for portfolio save');
+        this.saveUserPortfolioToLocalStorage(portfolioToSave);
+        return portfolioToSave;
+      }
+
+      console.log('Portfolio saved to Supabase successfully:', data.id);
+      return data;
+    } catch (error) {
+      console.error('Error saving user portfolio:', error);
+      // Fallback to localStorage
+      const portfolioId = portfolioData.id || `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const portfolioToSave = {...portfolioData, id: portfolioId};
+      this.saveUserPortfolioToLocalStorage(portfolioToSave);
+      return portfolioToSave;
+    }
+  },
+
+  // Fallback: Save portfolio to localStorage
+  saveUserPortfolioToLocalStorage(portfolioData) {
+    try {
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      
+      // Remove existing portfolio with same ID
+      const filteredPortfolios = userPortfolios.filter(p => p.id !== portfolioData.id);
+      // Add new/updated portfolio
+      filteredPortfolios.push(portfolioData);
+      
+      localStorage.setItem('user_portfolios', JSON.stringify(filteredPortfolios));
+      console.log('Portfolio saved to localStorage successfully');
+    } catch (error) {
+      console.error('Error saving portfolio to localStorage:', error);
+    }
+  },
+
+  // Sync user portfolios across devices
+  async syncUserPortfolios(userId) {
+    try {
+      console.log('Syncing user portfolios from Supabase for user:', userId);
+      
+      const { data, error } = await supabase
+        .from('portfolios')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase user_portfolios sync failed:', error);
+        // Fallback to localStorage
+        console.warn('Using localStorage fallback for user portfolios');
+        return this.getUserPortfoliosFromLocalStorage();
+      }
+
+      console.log('Synced user portfolios from Supabase:', data?.length || 0);
+      
+      // If no portfolios in Supabase, check localStorage as fallback
+      if (!data || data.length === 0) {
+        console.log('No portfolios found in Supabase, checking localStorage fallback...');
+        const localPortfolios = this.getUserPortfoliosFromLocalStorage();
+        if (localPortfolios && localPortfolios.length > 0) {
+          console.log(`Found ${localPortfolios.length} portfolios in localStorage fallback`);
+          return localPortfolios;
+        }
+      }
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error syncing user portfolios:', error);
+      console.warn('Using localStorage fallback for user portfolios');
+      return this.getUserPortfoliosFromLocalStorage();
+    }
+  },
+
+  // Fallback: Get user portfolios from localStorage
+  getUserPortfoliosFromLocalStorage() {
+    try {
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      console.log('Loaded user portfolios from localStorage:', userPortfolios.length);
+      return userPortfolios;
+    } catch (error) {
+      console.error('Error getting user portfolios from localStorage:', error);
+      return [];
+    }
+  },
   getAccountBalanceFromLocalStorage(userId) {
     try {
       const balances = JSON.parse(localStorage.getItem('account_balances') || '{}');
