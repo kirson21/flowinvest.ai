@@ -93,31 +93,27 @@ export const dataSyncService = {
     }
   },
 
-  // Sync user purchases across devices
+  // Sync user purchases across devices - PURE SUPABASE VERSION
   async syncUserPurchases(userId) {
     try {
-      // Try to get purchases from Supabase first
-      try {
-        const { data, error } = await supabase
-          .from('user_purchases')
-          .select('*')
-          .eq('user_id', userId)
-          .order('purchased_at', { ascending: false });
+      console.log('Syncing user purchases from Supabase for user:', userId);
+      
+      const { data, error } = await supabase
+        .from('user_purchases')
+        .select('*')
+        .eq('user_id', userId)
+        .order('purchased_at', { ascending: false });
 
-        if (error && error.code !== 'PGRST116') {
-          console.warn('Supabase purchases sync failed, using localStorage:', error);
-          return this.getUserPurchasesFromLocalStorage(userId);
-        }
-
-        console.log('Synced user purchases from Supabase:', data?.length || 0);
-        return data || [];
-      } catch (supabaseError) {
-        console.warn('Supabase not available for purchases sync, using localStorage:', supabaseError);
-        return this.getUserPurchasesFromLocalStorage(userId);
+      if (error) {
+        console.error('Supabase user_purchases sync failed:', error);
+        throw new Error(`Failed to sync user purchases: ${error.message}`);
       }
+
+      console.log('Synced user purchases from Supabase:', data?.length || 0);
+      return data || [];
     } catch (error) {
       console.error('Error syncing user purchases:', error);
-      return [];
+      throw error; // Don't fallback to localStorage
     }
   },
 
