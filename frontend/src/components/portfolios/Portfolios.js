@@ -456,6 +456,7 @@ const Portfolios = () => {
   };
 
   const getRiskColor = (risk) => {
+    if (!risk) return 'bg-gray-500';
     switch (risk.toLowerCase()) {
       case 'low': return 'bg-green-500';
       case 'medium': return 'bg-yellow-500';
@@ -465,6 +466,7 @@ const Portfolios = () => {
   };
 
   const getRiskTextColor = (risk) => {
+    if (!risk) return 'text-gray-600';
     switch (risk.toLowerCase()) {
       case 'low': return 'text-green-600';
       case 'medium': return 'text-yellow-600';
@@ -474,6 +476,7 @@ const Portfolios = () => {
   };
 
   const getAssetTypeColor = (type) => {
+    if (!type) return 'bg-gray-500';
     switch (type.toLowerCase()) {
       case 'stock': return 'bg-blue-500';
       case 'crypto': return 'bg-orange-500';
