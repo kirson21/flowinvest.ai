@@ -809,13 +809,25 @@ const Portfolios = () => {
 
         {/* Purchase/Access Button */}
         {isPurchased(portfolio.id) || showMyPurchases ? (
-          <Button 
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => handleViewPurchasedProduct(portfolio)}
-          >
-            <ExternalLink size={16} className="mr-2" />
-            Access Content
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => handleViewPurchasedProduct(portfolio)}
+            >
+              <ExternalLink size={16} className="mr-2" />
+              Access Content
+            </Button>
+            {showMyPurchases && (
+              <Button 
+                variant="outline"
+                className="w-full border-red-300 dark:border-red-600 text-red-700 dark:text-red-200 hover:bg-red-50 dark:hover:bg-red-900"
+                onClick={() => handleRemovePurchase(portfolio.purchaseId || portfolio.id)}
+              >
+                <Trash2 size={16} className="mr-2" />
+                Remove from Purchases
+              </Button>
+            )}
+          </div>
         ) : (
           <Button 
             className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
