@@ -449,21 +449,14 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         attachments: productData.attachments,
       };
 
-      // Get existing portfolios and check localStorage space
+      // Save using data sync service
       try {
-        const existingPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-        
-        // Limit to last 10 user products to avoid quota issues
-        const limitedPortfolios = existingPortfolios.slice(-9); // Keep last 9, add 1 new = 10 total
-        limitedPortfolios.push(newProduct);
-        
-        localStorage.setItem('user_portfolios', JSON.stringify(limitedPortfolios));
+        await dataSyncService.saveUserPortfolio(newProduct);
         console.log('Product created successfully:', newProduct);
-        
-      } catch (storageError) {
-        console.warn('localStorage quota exceeded, clearing old products:', storageError);
-        // If still quota exceeded, keep only the new product
-        localStorage.setItem('user_portfolios', JSON.stringify([newProduct]));
+      } catch (error) {
+        console.error('Error saving product with data sync service:', error);
+        alert('Failed to save product. Please try again.');
+        return;
       }
       
       // Call onSave callback if provided
