@@ -546,7 +546,7 @@ const TradingBots = () => {
                 {t('tradingPair')}
               </p>
               <p className="text-sm font-medium text-[#474545] dark:text-white">
-                {bot.tradingPair}
+                {bot.tradingPair || bot.trading_pair || 'BTC/USDT'}
               </p>
             </div>
             <div>
