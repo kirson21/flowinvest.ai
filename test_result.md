@@ -327,9 +327,9 @@ backend:
     implemented: true
     working: false
     file: "/app/frontend/src/components/bots/TradingBots.js, /app/frontend/src/components/bots/GrokAIBotCreator.js"
-    stuck_count: 1
+    stuck_count: 2
     priority: "critical"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
@@ -337,6 +337,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "🚨 CRITICAL SUPABASE SCHEMA ISSUE DISCOVERED: Comprehensive end-to-end testing reveals bot creation API works perfectly (HTTP 200) but Supabase save fails due to schema mismatch. TESTING RESULTS: ✅ Bot Creation API Success - POST /api/bots/create-with-ai returns HTTP 200 with bot_id: 2f02db42-1d89-47e8-8ed6-c349cfde24e1, ✅ AI Bot Generation Working - Successfully generates 'BTC Steady Growth Bot' with complete configuration, ✅ Supabase Connection Working - 'Synced user bots from Supabase: 0' confirms user_bots table access, ❌ CRITICAL SCHEMA ERROR - Supabase save fails: 'Could not find the config column of user_bots in the schema cache' (HTTP 400), ❌ Bot Persistence Failing - Bots don't appear in My Bots section due to save failure, ❌ Page Refresh Test Fails - No bots persist because they never get saved to Supabase. ROOT CAUSE IDENTIFIED: Frontend tries to save 'config' column that doesn't exist in Supabase user_bots table schema. The data sync service is working correctly, but the table schema is incomplete. IMMEDIATE FIX NEEDED: Either add 'config' column to user_bots table or modify frontend to not send config field. This is the final blocker preventing bot creation from working end-to-end."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL SUPABASE RLS POLICY ISSUE DISCOVERED: Comprehensive testing after schema compatibility fix reveals the real blocker is Row-Level Security policies, NOT schema issues. TESTING RESULTS: ✅ Bot Creation API Success - POST /api/bots/create-with-ai returns HTTP 200 with bot_id: 79e7e12d-9fdb-48ed-a934-227f79260666, ✅ AI Bot Generation Working - Successfully generates 'BTC Steady Growth Bot' with complete configuration, ✅ Schema Compatibility Fix Working - saveUserBot function correctly filters fields to match user_bots schema (no more 'config column' errors), ❌ CRITICAL RLS POLICY ERROR - Supabase save fails: 'new row violates row-level security policy for table user_bots' (HTTP 401), ❌ No Fallback Mechanism - Data sync service configured as 'PURE SUPABASE VERSION' throws errors instead of falling back to localStorage, ❌ Bot Never Appears in My Bots - Since bot can't be saved anywhere, it never appears in UI. ROOT CAUSE IDENTIFIED: The schema compatibility fix is working correctly, but Supabase RLS policies prevent the development test user (cd0e9717-f85d-4726-81e9-f260394ead58) from inserting rows into user_bots table. IMMEDIATE FIX NEEDED: 1) Fix Supabase RLS policies to allow authenticated users to insert their own bots, 2) Add fallback mechanism to localStorage when Supabase fails, 3) Ensure proper authentication tokens for Supabase operations. The original user complaint 'bots not appearing in My Bots section' remains unresolved due to database permission issues, not schema compatibility."
 
 frontend:
   - task: "Development Test User Implementation"
