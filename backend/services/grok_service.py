@@ -261,7 +261,19 @@ class GrokBotCreator:
                 "position_size": 33,
                 "rebalance_frequency": "daily",
                 "technical_indicators": ["RSI", "MACD", "Moving Average"]
-            }
+            },
+            # Add metadata for consistency
+            "created_by_ai": True,
+            "ai_model": "fallback",
+            "user_prompt": user_prompt,
+            "is_prebuilt": False,
+            "status": "inactive",
+            "daily_pnl": 0,
+            "weekly_pnl": 0,
+            "monthly_pnl": 0,
+            "win_rate": 0,
+            "total_trades": 0,
+            "successful_trades": 0
         }
     
     def validate_bot_config(self, config: Dict[str, Any]) -> bool:
