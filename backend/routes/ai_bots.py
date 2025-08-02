@@ -120,7 +120,7 @@ async def activate_bot(bot_id: str, user_id: str):
     """Activate a bot (mock implementation for now)"""
     try:
         # Update bot status in Supabase
-        response = supabase.table('bots').update({
+        response = supabase.table('user_bots').update({
             'status': 'active',
             'last_executed_at': datetime.utcnow().isoformat()
         }).eq('id', bot_id).eq('user_id', user_id).execute()
