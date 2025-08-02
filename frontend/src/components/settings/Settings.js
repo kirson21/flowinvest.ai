@@ -371,23 +371,40 @@ const Settings = () => {
     }
   };
 
-  const loadSellerData = () => {
+  const loadSellerData = async () => {
     try {
-      // Load seller data from localStorage
+      // Try to load from dataSyncService first for cross-device sync
+      let sellerProfile = {};
+      try {
+        const profile = await dataSyncService.syncUserProfile(user?.id);
+        if (profile && profile.seller_data) {
+          sellerProfile = profile.seller_data;
+          console.log('Loaded seller data from cross-device sync');
+        }
+      } catch (syncError) {
+        console.warn('Failed to load seller data from sync service:', syncError);
+      }
+      
+      // Fallback to localStorage if dataSyncService fails or has no data
+      if (!sellerProfile.socialLinks && !sellerProfile.specialties) {
+        const savedSellerData = JSON.parse(localStorage.getItem(`seller_data_${user?.id}`) || '{}');
+        sellerProfile = savedSellerData;
+        console.log('Loaded seller data from localStorage fallback');
+      }
+      
       const savedSellerMode = localStorage.getItem(`seller_mode_${user?.id}`) === 'true';
-      const savedSellerData = JSON.parse(localStorage.getItem(`seller_data_${user?.id}`) || '{}');
       
       setIsSellerMode(savedSellerMode);
       setSellerData({
         socialLinks: {
-          instagram: savedSellerData.socialLinks?.instagram || '',
-          twitter: savedSellerData.socialLinks?.twitter || '',
-          linkedin: savedSellerData.socialLinks?.linkedin || '',
-          youtube: savedSellerData.socialLinks?.youtube || '',
-          telegram: savedSellerData.socialLinks?.telegram || '',
-          website: savedSellerData.socialLinks?.website || ''
+          instagram: sellerProfile.socialLinks?.instagram || '',
+          twitter: sellerProfile.socialLinks?.twitter || '',
+          linkedin: sellerProfile.socialLinks?.linkedin || '',
+          youtube: sellerProfile.socialLinks?.youtube || '',
+          telegram: sellerProfile.socialLinks?.telegram || '',
+          website: sellerProfile.socialLinks?.website || ''
         },
-        specialties: savedSellerData.specialties || [],
+        specialties: sellerProfile.specialties || [],
         newSpecialty: ''
       });
     } catch (error) {
