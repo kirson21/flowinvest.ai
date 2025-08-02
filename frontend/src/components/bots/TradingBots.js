@@ -52,28 +52,47 @@ const TradingBots = () => {
     return user?.id === SUPER_ADMIN_UID;
   };
 
-  // Load user bots from Supabase
+  // Load user bots and sync pre-built bots from Supabase
   useEffect(() => {
-    // Synchronized pre-built bots system
-    const savedPreBuiltBots = JSON.parse(localStorage.getItem('prebuilt_bots') || '[]');
-    
-    // Check if super admin has customized the pre-built bots list
-    const hasSuperAdminCustomization = localStorage.getItem('prebuilt_bots_customized') === 'true';
-    
-    if (hasSuperAdminCustomization && savedPreBuiltBots.length > 0) {
-      // Use super admin's customized list for ALL users
-      setPreBuiltBots(savedPreBuiltBots);
-      console.log('All users: Loading super admin customized pre-built bots');
-    } else {
-      // Use original mock bots for ALL users (default state)
-      setPreBuiltBots(mockTradingBots);
-      console.log('All users: Loading original mock pre-built bots');
-    }
+    loadPreBuiltBots();
     
     if (user) {
       loadUserBots();
     }
   }, [user]);
+
+  const loadPreBuiltBots = async () => {
+    try {
+      console.log('Loading pre-built bots from Supabase...');
+      
+      // Try to get pre-built bots from Supabase
+      const { data: preBuiltBotsFromSupabase, error } = await supabase
+        .from('user_bots')
+        .select('*')
+        .eq('is_prebuilt', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase pre-built bots loading failed, using mock data:', error);
+        setPreBuiltBots(mockTradingBots);
+        return;
+      }
+
+      // If we have pre-built bots in Supabase, use them
+      if (preBuiltBotsFromSupabase && preBuiltBotsFromSupabase.length > 0) {
+        console.log(`Loaded ${preBuiltBotsFromSupabase.length} pre-built bots from Supabase`);
+        setPreBuiltBots(preBuiltBotsFromSupabase);
+      } else {
+        // No pre-built bots in Supabase, use mock data as default
+        console.log('No pre-built bots in Supabase, using mock data as default');
+        setPreBuiltBots(mockTradingBots);
+      }
+    } catch (error) {
+      console.error('Error loading pre-built bots:', error);
+      console.log('Using mock data as fallback');
+      setPreBuiltBots(mockTradingBots);
+    }
+  };
 
   const loadUserBots = async () => {
     try {
