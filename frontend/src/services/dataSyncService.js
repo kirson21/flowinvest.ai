@@ -484,6 +484,11 @@ export const dataSyncService = {
         updated_at: new Date().toISOString()
       };
 
+      console.log('=== SUPABASE SAVE ATTEMPT ===');
+      console.log('Final portfolio object to save:', portfolioToSave);
+      console.log('User ID in final object:', portfolioToSave.user_id);
+      console.log('About to call Supabase upsert...');
+
       const { data, error } = await supabase
         .from('portfolios')
         .upsert([portfolioToSave])
@@ -491,7 +496,12 @@ export const dataSyncService = {
         .single();
 
       if (error) {
-        console.error('Supabase portfolio save failed:', error);
+        console.error('=== SUPABASE ERROR DETAILS ===');
+        console.error('Full Supabase error object:', error);
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
         // Fallback to localStorage
         console.warn('Using localStorage fallback for portfolio save');
         this.saveUserPortfolioToLocalStorage(portfolioToSave);
