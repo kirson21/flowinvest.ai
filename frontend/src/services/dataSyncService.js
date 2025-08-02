@@ -343,6 +343,54 @@ export const dataSyncService = {
     }
   },
 
+  // Save account balance to Supabase with localStorage fallback
+  async saveAccountBalance(userId, balance) {
+    try {
+      console.log('Saving account balance to Supabase:', balance);
+      
+      const accountData = {
+        user_id: userId,
+        balance: parseFloat(balance),
+        currency: 'USD',
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('user_accounts')
+        .upsert([accountData], { onConflict: 'user_id' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase balance save failed:', error);
+        // Fallback to localStorage
+        console.warn('Using localStorage fallback for balance save');
+        this.saveAccountBalanceToLocalStorage(userId, balance);
+        return balance;
+      }
+
+      console.log('Account balance saved to Supabase successfully');
+      return data.balance;
+    } catch (error) {
+      console.error('Error saving account balance:', error);
+      // Fallback to localStorage
+      this.saveAccountBalanceToLocalStorage(userId, balance);
+      return balance;
+    }
+  },
+
+  // Fallback: Save account balance to localStorage
+  saveAccountBalanceToLocalStorage(userId, balance) {
+    try {
+      const balances = JSON.parse(localStorage.getItem('account_balances') || '{}');
+      balances[userId] = parseFloat(balance);
+      localStorage.setItem('account_balances', JSON.stringify(balances));
+      console.log('Account balance saved to localStorage successfully');
+    } catch (error) {
+      console.error('Error saving balance to localStorage:', error);
+    }
+  },
+
   // Fallback: Get account balance from localStorage
   getAccountBalanceFromLocalStorage(userId) {
     try {
