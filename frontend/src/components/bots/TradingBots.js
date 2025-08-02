@@ -44,6 +44,7 @@ const TradingBots = () => {
   const [selectedDetailsBot, setSelectedDetailsBot] = useState(null);
   const [selectedManageBot, setSelectedManageBot] = useState(null);
   const [manageBotType, setManageBotType] = useState('user'); // 'user' or 'prebuilt'
+  const [forceUpdate, setForceUpdate] = useState(0); // For forcing re-renders
 
   // Super Admin Check
   const isSuperAdmin = () => {
