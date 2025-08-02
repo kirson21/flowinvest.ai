@@ -460,7 +460,11 @@ export const dataSyncService = {
   // Save user portfolio to Supabase with localStorage fallback
   async saveUserPortfolio(portfolioData) {
     try {
-      console.log('Saving user portfolio to Supabase:', portfolioData.title);
+      console.log('=== PORTFOLIO SAVE DEBUG ===');
+      console.log('Raw portfolio data received:', portfolioData);
+      console.log('Portfolio title:', portfolioData.title);
+      console.log('User ID from portfolioData.userId:', portfolioData.userId);
+      console.log('User ID from portfolioData.user_id:', portfolioData.user_id);
       
       // Ensure portfolio has valid ID
       const portfolioId = portfolioData.id || `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
