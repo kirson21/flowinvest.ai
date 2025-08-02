@@ -154,8 +154,11 @@ const TradingBots = () => {
       
       console.log(`Bot ${isUpdate ? 'updated' : 'saved'} successfully with cross-device sync`);
       
-      // Refresh the bot list
+      // Refresh the bot list and force UI update
       await loadUserBots();
+      
+      // Force re-render by updating state timestamp
+      setLastUpdate(new Date().getTime());
       
       return true;
     } catch (error) {
