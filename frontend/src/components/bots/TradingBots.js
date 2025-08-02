@@ -289,11 +289,13 @@ const TradingBots = () => {
     try {
       console.log('Moving bot to pre-built:', userBot);
       
-      // Create pre-built version with is_prebuilt = true and no user_id
+      // Create pre-built version with system user ID (pre-built bots use system ID)
+      const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000'; // System user for pre-built bots
+      
       const preBuiltBot = {
         ...userBot,
         id: Date.now().toString(), // New ID for pre-built version
-        user_id: null, // Pre-built bots don't belong to specific users
+        user_id: SYSTEM_USER_ID, // Use system user ID instead of null
         is_prebuilt: true,
         is_active: false,
         status: 'inactive',
@@ -322,7 +324,7 @@ const TradingBots = () => {
       return true;
     } catch (error) {
       console.error('Error moving bot to pre-built:', error);
-      alert('❌ Failed to move bot to pre-built section');
+      alert('❌ Failed to move bot to pre-built section: ' + error.message);
       return false;
     }
   };
