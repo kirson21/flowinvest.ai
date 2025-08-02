@@ -380,6 +380,12 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
   };
 
   const handlePublish = async () => {
+    // Validate user is logged in
+    if (!user?.id) {
+      alert('You must be logged in to create a portfolio. Please log in and try again.');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
