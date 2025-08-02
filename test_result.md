@@ -327,7 +327,7 @@ backend:
     implemented: true
     working: false
     file: "/app/frontend/src/components/bots/TradingBots.js, /app/frontend/src/components/bots/GrokAIBotCreator.js"
-    stuck_count: 2
+    stuck_count: 3
     priority: "critical"
     needs_retesting: false
     status_history:
@@ -340,6 +340,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "🚨 CRITICAL SUPABASE RLS POLICY ISSUE DISCOVERED: Comprehensive testing after schema compatibility fix reveals the real blocker is Row-Level Security policies, NOT schema issues. TESTING RESULTS: ✅ Bot Creation API Success - POST /api/bots/create-with-ai returns HTTP 200 with bot_id: 79e7e12d-9fdb-48ed-a934-227f79260666, ✅ AI Bot Generation Working - Successfully generates 'BTC Steady Growth Bot' with complete configuration, ✅ Schema Compatibility Fix Working - saveUserBot function correctly filters fields to match user_bots schema (no more 'config column' errors), ❌ CRITICAL RLS POLICY ERROR - Supabase save fails: 'new row violates row-level security policy for table user_bots' (HTTP 401), ❌ No Fallback Mechanism - Data sync service configured as 'PURE SUPABASE VERSION' throws errors instead of falling back to localStorage, ❌ Bot Never Appears in My Bots - Since bot can't be saved anywhere, it never appears in UI. ROOT CAUSE IDENTIFIED: The schema compatibility fix is working correctly, but Supabase RLS policies prevent the development test user (cd0e9717-f85d-4726-81e9-f260394ead58) from inserting rows into user_bots table. IMMEDIATE FIX NEEDED: 1) Fix Supabase RLS policies to allow authenticated users to insert their own bots, 2) Add fallback mechanism to localStorage when Supabase fails, 3) Ensure proper authentication tokens for Supabase operations. The original user complaint 'bots not appearing in My Bots section' remains unresolved due to database permission issues, not schema compatibility."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL LOCALSTORAGE FALLBACK BUG DISCOVERED: Comprehensive testing reveals localStorage fallback works for SAVING but FAILS for LOADING after page refresh. TESTING RESULTS: ✅ Bot Creation API Success - POST /api/bots/create-with-ai returns HTTP 200 with bot_id: 70212262-dd26-4602-9126-0e303bdebff6, ✅ Supabase RLS Error Handled - Console shows 'Supabase bot save failed (likely RLS policy issue)' and 'Using localStorage fallback due to RLS policy restrictions', ✅ localStorage Fallback for Saving Works - Bot saved to localStorage successfully, ✅ Bot Appears Initially - Created bot appears in My Bots section immediately (bot count: 0→4), ❌ CRITICAL BUG: Bot Does NOT Persist After Page Refresh - Bot count drops from 4 to 3 after refresh, ❌ Data Sync Service NOT Using localStorage Fallback for Loading - After refresh, logs show 'Synced user bots from Supabase: 0' and 'Synced bots for current user: 0' with no localStorage fallback attempt. ROOT CAUSE IDENTIFIED: The dataSyncService.syncUserBots() function has localStorage fallback for RLS policy errors during SAVING, but when LOADING bots after page refresh, it only tries Supabase and doesn't fall back to localStorage when Supabase returns 0 results. IMMEDIATE FIX NEEDED: Update syncUserBots() function to check localStorage as fallback when Supabase returns empty results, not just when there are RLS policy errors. The localStorage fallback mechanism is incomplete - it saves but doesn't load properly."
 
 frontend:
   - task: "Development Test User Implementation"
