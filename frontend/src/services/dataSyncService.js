@@ -38,33 +38,27 @@ export const dataSyncService = {
     }
   },
 
-  // Save user bot (sync to Supabase if available)
+  // Save user bot - PURE SUPABASE VERSION
   async saveUserBot(botData) {
     try {
-      // Try Supabase first
-      try {
-        const { data, error } = await supabase
-          .from('user_bots')
-          .upsert([botData])
-          .select()
-          .single();
+      console.log('Saving user bot to Supabase:', botData.name);
+      
+      const { data, error } = await supabase
+        .from('user_bots')
+        .upsert([botData])
+        .select()
+        .single();
 
-        if (error) {
-          console.warn('Supabase bot save failed, using localStorage:', error);
-          return this.saveUserBotToLocalStorage(botData);
-        }
-
-        console.log('Bot saved to Supabase successfully');
-        // Also save to localStorage for offline access
-        this.saveUserBotToLocalStorage(botData);
-        return data;
-      } catch (supabaseError) {
-        console.warn('Supabase not available for bot save, using localStorage:', supabaseError);
-        return this.saveUserBotToLocalStorage(botData);
+      if (error) {
+        console.error('Supabase bot save failed:', error);
+        throw new Error(`Failed to save user bot: ${error.message}`);
       }
+
+      console.log('Bot saved to Supabase successfully:', data.id);
+      return data;
     } catch (error) {
       console.error('Error saving user bot:', error);
-      throw error;
+      throw error; // Don't fallback to localStorage
     }
   },
 
