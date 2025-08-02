@@ -338,38 +338,32 @@ const TradingBots = () => {
       
       // Create user bot version
       const userBot = {
+        ...preBuiltBot,
         id: Date.now().toString(), // New ID for user version
-        name: preBuiltBot.name,
-        description: preBuiltBot.description,
-        strategy: preBuiltBot.strategy,
-        exchange: preBuiltBot.exchange,
-        trading_pair: preBuiltBot.tradingPair,
-        risk_level: preBuiltBot.riskLevel,
-        daily_pnl: preBuiltBot.dailyPnL || 0,
-        weekly_pnl: preBuiltBot.weeklyPnL || 0,
-        monthly_pnl: preBuiltBot.monthlyPnL || 0,
-        win_rate: preBuiltBot.winRate || 75,
-        user_id: user?.id, // CRITICAL: Assign to current user
-        is_active: false,
+        user_id: user?.id, // Assign to current user
         is_prebuilt: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        status: 'inactive'
+        is_active: false,
+        status: 'inactive',
+        updated_at: new Date().toISOString()
       };
       
       // Save the new user bot using data sync service
       await dataSyncService.saveUserBot(userBot);
       
-      // Remove from pre-built bots and update localStorage
-      const updatedPreBuiltBots = preBuiltBots.filter(bot => bot.id !== preBuiltBot.id);
-      localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
-      localStorage.setItem('prebuilt_bots_customized', 'true');
+      // Remove from pre-built bots in Supabase
+      const { error } = await supabase
+        .from('user_bots')
+        .delete()
+        .eq('id', preBuiltBot.id)
+        .eq('is_prebuilt', true);
       
-      // Update states for immediate UI feedback
-      setPreBuiltBots(updatedPreBuiltBots);
+      if (error) {
+        console.warn('Failed to delete pre-built bot from Supabase:', error);
+      }
       
-      // Refresh user bots
+      // Refresh both lists
       await loadUserBots();
+      await loadPreBuiltBots();
       
       alert('✅ Bot moved to My Bots successfully!');
       return true;
