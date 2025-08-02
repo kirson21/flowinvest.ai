@@ -101,19 +101,98 @@ class GrokBotCreator:
             # Parse JSON response
             try:
                 config = json.loads(ai_response)
+                
+                # Validate required fields
+                required_fields = [
+                    "name", "description", "strategy", "base_coin", "quote_coin", 
+                    "exchange", "risk_level", "trade_type", "profit_target", "stop_loss"
+                ]
+                
+                for field in required_fields:
+                    if field not in config:
+                        raise ValueError(f"Missing required field: {field}")
+                
+                # Validate risk level
+                if config.get("risk_level") not in ["low", "medium", "high"]:
+                    config["risk_level"] = "medium"
+                
+                # Validate exchange
+                if config.get("exchange") not in ["binance", "bybit", "kraken"]:
+                    config["exchange"] = "binance"
+                
+                # Validate trade type
+                if config.get("trade_type") not in ["long", "short"]:
+                    config["trade_type"] = "long"
+                
+                # Add metadata
+                config["created_by_ai"] = True
+                config["ai_model"] = "grok-2-1212"
+                config["user_prompt"] = user_prompt
+                config["is_prebuilt"] = False
+                config["status"] = "inactive"
+                
+                # Set default performance metrics
+                config.setdefault("daily_pnl", 0)
+                config.setdefault("weekly_pnl", 0)
+                config.setdefault("monthly_pnl", 0)
+                config.setdefault("win_rate", 0)
+                config.setdefault("total_trades", 0)
+                config.setdefault("successful_trades", 0)
+                
                 return config
             except json.JSONDecodeError:
                 # Try to extract JSON from response if there's extra text
                 json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
                 if json_match:
                     config = json.loads(json_match.group())
+                    
+                    # Apply same validation and metadata as above
+                    required_fields = [
+                        "name", "description", "strategy", "base_coin", "quote_coin", 
+                        "exchange", "risk_level", "trade_type", "profit_target", "stop_loss"
+                    ]
+                    
+                    for field in required_fields:
+                        if field not in config:
+                            raise ValueError(f"Missing required field: {field}")
+                    
+                    # Validate and set defaults
+                    if config.get("risk_level") not in ["low", "medium", "high"]:
+                        config["risk_level"] = "medium"
+                    if config.get("exchange") not in ["binance", "bybit", "kraken"]:
+                        config["exchange"] = "binance"
+                    if config.get("trade_type") not in ["long", "short"]:
+                        config["trade_type"] = "long"
+                    
+                    # Add metadata
+                    config["created_by_ai"] = True
+                    config["ai_model"] = "grok-2-1212"
+                    config["user_prompt"] = user_prompt
+                    config["is_prebuilt"] = False
+                    config["status"] = "inactive"
+                    
+                    # Set default performance metrics
+                    config.setdefault("daily_pnl", 0)
+                    config.setdefault("weekly_pnl", 0)
+                    config.setdefault("monthly_pnl", 0)
+                    config.setdefault("win_rate", 0)
+                    config.setdefault("total_trades", 0)
+                    config.setdefault("successful_trades", 0)
+                    
                     return config
                 else:
                     raise ValueError("Invalid JSON response from AI")
 
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Grok returned invalid JSON: {str(e)}")
         except Exception as e:
-            print(f"Grok API error: {e}")
-            raise e
+            if "rate_limit" in str(e).lower():
+                raise ValueError("Rate limit exceeded. Please try again in a moment.")
+            elif "api_key" in str(e).lower():
+                raise ValueError("API key error. Please check Grok configuration.")
+            else:
+                print(f"Grok API error: {e}")
+                raise e
     
     def _generate_fallback_config(self, user_prompt: str, user_id: str = None) -> Dict[str, Any]:
         """Generate fallback configuration when Grok API fails"""
