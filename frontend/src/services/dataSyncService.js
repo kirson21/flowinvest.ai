@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 
 export const dataSyncService = {
-  // Sync user bots across devices - PURE SUPABASE VERSION with temporary localStorage fallback
+  // Sync user bots across devices - PURE SUPABASE VERSION with complete localStorage fallback
   async syncUserBots(userId) {
     try {
       console.log('Syncing user bots from Supabase for user:', userId);
@@ -15,7 +15,7 @@ export const dataSyncService = {
       if (error) {
         console.error('Supabase user_bots sync failed:', error);
         
-        // Temporary fallback for RLS or access issues
+        // Fallback for RLS or access issues
         if (error.code === 'PGRST301' || error.message.includes('policy')) {
           console.warn('Using localStorage fallback due to RLS policy restrictions');
           return this.getUserBotsFromLocalStorage(userId);
@@ -25,17 +25,30 @@ export const dataSyncService = {
       }
 
       console.log('Synced user bots from Supabase:', data?.length || 0);
+      
+      // If Supabase returns no bots, check localStorage as fallback
+      if (!data || data.length === 0) {
+        console.log('No bots found in Supabase, checking localStorage fallback...');
+        const localBots = this.getUserBotsFromLocalStorage(userId);
+        if (localBots && localBots.length > 0) {
+          console.log(`Found ${localBots.length} bots in localStorage fallback`);
+          return localBots;
+        }
+      }
+      
       return data || [];
     } catch (error) {
       console.error('Error syncing user bots:', error);
       
-      // Temporary fallback for any Supabase access issues
+      // Fallback for any Supabase access issues
       if (error.message.includes('policy') || error.message.includes('security')) {
         console.warn('Using localStorage fallback due to Supabase access restrictions');
         return this.getUserBotsFromLocalStorage(userId);
       }
       
-      throw error;
+      // Final fallback if all else fails
+      console.warn('Attempting localStorage fallback as last resort');
+      return this.getUserBotsFromLocalStorage(userId);
     }
   },
 
