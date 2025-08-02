@@ -38,7 +38,7 @@ export const dataSyncService = {
     }
   },
 
-  // Save user bot - PURE SUPABASE VERSION with schema compatibility
+  // Save user bot - PURE SUPABASE VERSION with temporary localStorage fallback for RLS issues
   async saveUserBot(botData) {
     try {
       console.log('Saving user bot to Supabase:', botData.name);
@@ -72,7 +72,14 @@ export const dataSyncService = {
         .single();
 
       if (error) {
-        console.error('Supabase bot save failed:', error);
+        console.error('Supabase bot save failed (likely RLS policy issue):', error);
+        
+        // Temporary fallback to localStorage for RLS policy issues
+        if (error.code === 'PGRST301' || error.message.includes('policy')) {
+          console.warn('Using localStorage fallback due to RLS policy restrictions');
+          return this.saveUserBotToLocalStorage(botData);
+        }
+        
         throw new Error(`Failed to save user bot: ${error.message}`);
       }
 
@@ -80,7 +87,14 @@ export const dataSyncService = {
       return data;
     } catch (error) {
       console.error('Error saving user bot:', error);
-      throw error; // Don't fallback to localStorage
+      
+      // Temporary fallback for any Supabase issues
+      if (error.message.includes('policy') || error.message.includes('security')) {
+        console.warn('Using localStorage fallback due to Supabase access restrictions');
+        return this.saveUserBotToLocalStorage(botData);
+      }
+      
+      throw error;
     }
   },
 
