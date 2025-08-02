@@ -750,7 +750,7 @@ const Portfolios = () => {
                 </div>
                 
                 {/* Seller Specialties */}
-                {portfolio.seller.specialties && portfolio.seller.specialties.length > 0 && (
+                {portfolio.seller?.specialties && portfolio.seller.specialties.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {portfolio.seller.specialties.slice(0, 2).map((specialty, index) => (
                       <Badge
