@@ -423,9 +423,18 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         return '';
       }).filter(content => content.trim()).join('\n\n');
 
+      // Generate a proper UUID for Supabase compatibility
+      const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+
       // Create a more compact product object to avoid localStorage quota issues
       const newProduct = {
-        id: `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generate UUID-like string
+        id: generateUUID(), // Generate proper UUID format for Supabase
         user_id: user?.id, // Must be a valid UUID for Supabase
         userId: user?.id, // For compatibility with dataSyncService
         title: productData.title,
