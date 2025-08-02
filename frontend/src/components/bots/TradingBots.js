@@ -583,8 +583,8 @@ const TradingBots = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                 {t('monthlyPnL')}
               </p>
-              <p className={`text-sm font-bold ${bot.monthlyPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {bot.monthlyPnL >= 0 ? '+' : ''}{bot.monthlyPnL}%
+              <p className={`text-sm font-bold ${(bot.monthlyPnL || bot.monthly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {(bot.monthlyPnL || bot.monthly_pnl || 0) >= 0 ? '+' : ''}{bot.monthlyPnL || bot.monthly_pnl || 0}%
               </p>
             </div>
           </div>
