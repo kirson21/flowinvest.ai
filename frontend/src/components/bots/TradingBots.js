@@ -291,13 +291,13 @@ const TradingBots = () => {
     try {
       console.log('Moving bot to pre-built:', userBot);
       
-      // Create pre-built version with system user ID (pre-built bots use system ID)
-      const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000'; // System user for pre-built bots
+      // Pre-built bots belong to super admin but are visible to all users
+      const SUPER_ADMIN_UID = 'cd0e9717-f85d-4726-81e9-f260394ead58';
       
       const preBuiltBot = {
         ...userBot,
         id: Date.now().toString(), // New ID for pre-built version
-        user_id: SYSTEM_USER_ID, // Use system user ID instead of null
+        user_id: SUPER_ADMIN_UID, // Pre-built bots belong to super admin
         is_prebuilt: true,
         is_active: false,
         status: 'inactive',
