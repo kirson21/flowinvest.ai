@@ -315,6 +315,53 @@ export const dataSyncService = {
     }
   },
 
+  // Save user profile to Supabase with localStorage fallback
+  async saveUserProfile(userId, profileUpdates) {
+    try {
+      console.log('Saving user profile to Supabase:', profileUpdates);
+      
+      const profileData = {
+        user_id: userId,
+        ...profileUpdates,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .upsert([profileData], { onConflict: 'user_id' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase profile save failed:', error);
+        // Fallback to localStorage
+        console.warn('Using localStorage fallback for profile save');
+        this.saveUserProfileToLocalStorage(userId, profileUpdates);
+        return profileUpdates;
+      }
+
+      console.log('User profile saved to Supabase successfully');
+      return data;
+    } catch (error) {
+      console.error('Error saving user profile:', error);
+      // Fallback to localStorage
+      this.saveUserProfileToLocalStorage(userId, profileUpdates);
+      return profileUpdates;
+    }
+  },
+
+  // Fallback: Save user profile to localStorage
+  saveUserProfileToLocalStorage(userId, profileUpdates) {
+    try {
+      const allProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
+      allProfiles[userId] = { ...allProfiles[userId], ...profileUpdates };
+      localStorage.setItem('user_profiles', JSON.stringify(allProfiles));
+      console.log('User profile saved to localStorage successfully');
+    } catch (error) {
+      console.error('Error saving profile to localStorage:', error);
+    }
+  },
+
   // Sync account balance across devices
   async syncAccountBalance(userId) {
     try {
