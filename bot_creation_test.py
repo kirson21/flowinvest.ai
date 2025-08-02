@@ -464,7 +464,7 @@ def main():
                 "passed_tests": len([r for r in tester.test_results if r["success"]]),
                 "failed_tests": len([r for r in tester.test_results if not r["success"]])
             }
-        }, indent=2)
+        }, f, indent=2)
     
     return success
 
