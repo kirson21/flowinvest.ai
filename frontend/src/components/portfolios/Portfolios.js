@@ -171,20 +171,28 @@ const Portfolios = () => {
     applyFilter(filter);
   };
 
-  // Load user purchases from localStorage
-  const loadUserPurchases = () => {
+  // Load user purchases from Supabase with localStorage fallback
+  const loadUserPurchases = async () => {
     if (!user) return;
-    const savedPurchases = localStorage.getItem(`user_purchases_${user.id}`);
-    if (savedPurchases) {
-      setUserPurchases(JSON.parse(savedPurchases));
+    try {
+      const purchases = await dataSyncService.syncUserPurchases(user.id);
+      setUserPurchases(purchases);
+    } catch (error) {
+      console.error('Error loading user purchases:', error);
+      setUserPurchases([]);
     }
   };
 
-  // Save user purchases to localStorage
-  const saveUserPurchases = (purchases) => {
+  // Save user purchase to Supabase with localStorage fallback
+  const saveUserPurchase = async (purchaseData) => {
     if (!user) return;
-    localStorage.setItem(`user_purchases_${user.id}`, JSON.stringify(purchases));
-    setUserPurchases(purchases);
+    try {
+      await dataSyncService.saveUserPurchase(purchaseData);
+      // Reload purchases to update UI
+      await loadUserPurchases();
+    } catch (error) {
+      console.error('Error saving user purchase:', error);
+    }
   };
 
   // Handle product purchase
