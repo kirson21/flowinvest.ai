@@ -16,8 +16,8 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Initial session:', session);
         
-        // Development mode test user - TEMPORARY for testing seller info fixes
-        if (process.env.NODE_ENV === 'development' && !session) {
+        // Development mode test user - DISABLED for real authentication testing
+        if (false && process.env.NODE_ENV === 'development' && !session) {
           const testUser = {
             id: 'cd0e9717-f85d-4726-81e9-f260394ead58', // Use super admin UID for testing
             email: 'kirillpopolitov@gmail.com',
