@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 
 export const dataSyncService = {
-  // Sync user bots across devices - PURE SUPABASE VERSION
+  // Sync user bots across devices - PURE SUPABASE VERSION with temporary localStorage fallback
   async syncUserBots(userId) {
     try {
       console.log('Syncing user bots from Supabase for user:', userId);
@@ -14,6 +14,13 @@ export const dataSyncService = {
 
       if (error) {
         console.error('Supabase user_bots sync failed:', error);
+        
+        // Temporary fallback for RLS or access issues
+        if (error.code === 'PGRST301' || error.message.includes('policy')) {
+          console.warn('Using localStorage fallback due to RLS policy restrictions');
+          return this.getUserBotsFromLocalStorage(userId);
+        }
+        
         throw new Error(`Failed to sync user bots: ${error.message}`);
       }
 
@@ -21,7 +28,14 @@ export const dataSyncService = {
       return data || [];
     } catch (error) {
       console.error('Error syncing user bots:', error);
-      throw error; // Don't fallback to localStorage
+      
+      // Temporary fallback for any Supabase access issues
+      if (error.message.includes('policy') || error.message.includes('security')) {
+        console.warn('Using localStorage fallback due to Supabase access restrictions');
+        return this.getUserBotsFromLocalStorage(userId);
+      }
+      
+      throw error;
     }
   },
 
