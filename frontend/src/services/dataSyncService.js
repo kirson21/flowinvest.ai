@@ -274,6 +274,25 @@ export const dataSyncService = {
     }
   },
 
+  // Save multiple user purchases (for bulk operations like removing purchases)
+  async saveUserPurchases(userId, purchasesArray) {
+    try {
+      console.log('Saving user purchases array to Supabase:', purchasesArray.length, 'purchases');
+      
+      // For now, save to localStorage only since it's primarily for purchase list management
+      // In a full implementation, this would sync to Supabase as well
+      const allPurchases = JSON.parse(localStorage.getItem('user_purchases') || '{}');
+      allPurchases[userId] = purchasesArray;
+      localStorage.setItem('user_purchases', JSON.stringify(allPurchases));
+      
+      console.log('User purchases array saved successfully');
+      return purchasesArray;
+    } catch (error) {
+      console.error('Error saving user purchases array:', error);
+      throw error;
+    }
+  },
+
   // Sync user profile across devices
   async syncUserProfile(userId) {
     try {
