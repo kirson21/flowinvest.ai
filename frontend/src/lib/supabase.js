@@ -188,7 +188,7 @@ export const database = {
 
   // Bot operations
   getUserBots: async (userId, includePrebuilt = true) => {
-    let query = supabase.from('bots').select('*')
+    let query = supabase.from('user_bots').select('*')
     
     if (includePrebuilt) {
       query = query.or(`user_id.eq.${userId},is_prebuilt.eq.true`)
@@ -207,7 +207,7 @@ export const database = {
 
   createBot: async (bot) => {
     const { data, error } = await supabase
-      .from('bots')
+      .from('user_bots')
       .insert(bot)
       .select()
       .single()
@@ -221,7 +221,7 @@ export const database = {
 
   updateBot: async (botId, updates) => {
     const { data, error } = await supabase
-      .from('bots')
+      .from('user_bots')
       .update(updates)
       .eq('id', botId)
       .select()
@@ -236,7 +236,7 @@ export const database = {
 
   deleteBot: async (botId) => {
     const { error } = await supabase
-      .from('bots')
+      .from('user_bots')
       .delete()
       .eq('id', botId)
     
