@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend Testing Suite for Portfolio Creation and My Purchases Deletion Fixes
-Focus: Test backend support for portfolio creation with user_id field and data sync service
+Backend Testing Suite for Portfolio Creation Fix Verification
+Focus: Portfolio creation with proper user_id UUID format and data validation
+Priority: Verify backend readiness for portfolio operations with corrected user_id field
 """
 
 import requests
@@ -22,7 +23,8 @@ API_BASE = f"{BACKEND_URL}/api"
 class BackendTester:
     def __init__(self):
         self.test_results = []
-        self.test_user_id = f"test_{uuid.uuid4().hex[:8]}@flowinvest.ai"
+        self.test_user_id = str(uuid.uuid4())  # Use proper UUID format
+        self.test_email = f"portfolio_test_{uuid.uuid4().hex[:8]}@flowinvest.ai"
         self.super_admin_uid = "cd0e9717-f85d-4726-81e9-f260394ead58"
         
     def log_test(self, test_name, success, details="", response_data=None):
