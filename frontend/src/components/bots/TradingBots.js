@@ -595,10 +595,10 @@ const TradingBots = () => {
                 {t('winRate')}
               </span>
               <span className="text-sm font-medium text-[#474545] dark:text-white">
-                {bot.winRate}%
+                {bot.winRate || bot.win_rate || 75}%
               </span>
             </div>
-            <Progress value={bot.winRate} className="h-2" />
+            <Progress value={bot.winRate || bot.win_rate || 75} className="h-2" />
           </div>
 
           {/* Different buttons based on connection status and super admin */}
