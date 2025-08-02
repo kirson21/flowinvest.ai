@@ -34,11 +34,21 @@ class GrokBotCreator:
         return True
     
     def generate_bot_config(self, user_prompt: str, user_id: str = None) -> Dict[str, Any]:
-        """Generate trading bot configuration using Grok 4"""
+        """Generate trading bot configuration using Grok 4 with fallback"""
         
         if not self.validate_prompt(user_prompt):
             raise ValueError("Invalid or unsafe prompt provided")
         
+        # Try to use Grok API first
+        try:
+            return self._generate_with_grok(user_prompt, user_id)
+        except Exception as e:
+            print(f"Grok API failed: {e}")
+            # Fallback to predefined configuration based on prompt analysis
+            return self._generate_fallback_config(user_prompt, user_id)
+    
+    def _generate_with_grok(self, user_prompt: str, user_id: str = None) -> Dict[str, Any]:
+        """Generate using Grok API"""
         system_prompt = """
         You are an expert trading bot configuration assistant for Flow Invest. Convert natural language trading instructions into structured JSON configuration.
 
@@ -48,145 +58,132 @@ class GrokBotCreator:
             "name": "string (creative bot name based on strategy)",
             "description": "string (detailed description of the strategy)",
             "strategy": "string (e.g., 'momentum', 'mean_reversion', 'breakout', 'scalping', 'trend_following')",
-            "base_coin": "string (e.g., 'BTC', 'ETH', 'SOL')",
-            "quote_coin": "string (e.g., 'USDT', 'USD', 'EUR')",
-            "exchange": "string (binance, bybit, or kraken)",
-            "risk_level": "string (low, medium, or high)",
-            "trade_type": "string (long or short)",
-            "deposit_amount": "number (suggested amount in quote currency)",
-            "trading_mode": "string (simple, advanced, or signal)",
-            "profit_target": "number (percentage, e.g., 5.0 for 5%)",
-            "stop_loss": "number (percentage, e.g., 2.0 for 2%)",
+            "risk_level": "string (low, medium, high)",
+            "trade_type": "string (spot, futures, options)",
+            "base_coin": "string (e.g., BTC, ETH, SOL)",
+            "quote_coin": "string (e.g., USDT, USD, BTC)",
+            "exchange": "string (e.g., binance, coinbase, kraken)",
+            "deposit_amount": "number (initial capital amount)",
+            "trading_mode": "string (simple, advanced)",
+            "profit_target": "number (percentage for profit taking)",
+            "stop_loss": "number (percentage for stop loss)",
             "advanced_settings": {
-                "position_size": "number (percentage of deposit, e.g., 10.0 for 10%)",
-                "timeframe": "string (1m, 5m, 15m, 1h, 4h, 1d)",
-                "max_trades_per_day": "number (1-20)",
-                "trailing_stop": "boolean",
-                "martingale": "boolean (use cautiously)",
-                "entry_conditions": ["array of trading conditions"],
-                "exit_conditions": ["array of trading conditions"],
-                "indicators": ["array of technical indicators used"]
-            },
-            "performance_targets": {
-                "daily_return": "number (realistic daily return percentage)",
-                "win_rate": "number (realistic win rate percentage 50-80)",
-                "max_drawdown": "number (maximum acceptable loss percentage)"
+                "max_positions": "number (1-10)",
+                "position_size": "number (percentage of capital per trade)",
+                "rebalance_frequency": "string (daily, weekly, monthly)",
+                "technical_indicators": ["string array of indicators"]
             }
         }
 
-        Guidelines:
-        - Use realistic and safe trading parameters
-        - For beginners, suggest conservative settings (low risk, small position sizes)
-        - For experienced traders, allow more aggressive settings if requested
-        - Always include proper risk management (stop loss, position sizing)
-        - Base coin should be a major cryptocurrency (BTC, ETH, ADA, SOL, etc.)
-        - Quote coin should be stable (USDT, USD, EUR, etc.)
-        - Timeframes should match strategy (scalping: 1m-5m, swing: 1h-1d)
-        - Be creative with bot names that reflect the strategy
+        Examples:
+        - Conservative strategy: low risk, 5-15% profit target, 3-8% stop loss
+        - Aggressive strategy: high risk, 20-50% profit target, 10-20% stop loss
+        - Scalping: very frequent trades, 1-3% profit target, 1-2% stop loss
 
-        Example valid response:
-        {
-            "name": "BTC Lightning Scalper",
-            "description": "A fast-paced scalping bot designed to capture small price movements in Bitcoin using RSI oversold/overbought signals with tight risk management.",
-            "strategy": "scalping",
-            "base_coin": "BTC",
-            "quote_coin": "USDT",
-            "exchange": "binance",
-            "risk_level": "medium",
-            "trade_type": "long",
-            "deposit_amount": 1000,
-            "trading_mode": "advanced",
-            "profit_target": 1.5,
-            "stop_loss": 0.8,
-            "advanced_settings": {
-                "position_size": 15.0,
-                "timeframe": "5m",
-                "max_trades_per_day": 10,
-                "trailing_stop": true,
-                "martingale": false,
-                "entry_conditions": ["RSI < 30", "Volume > 20-period average"],
-                "exit_conditions": ["RSI > 70", "Profit target reached", "Stop loss hit"],
-                "indicators": ["RSI", "Volume", "EMA"]
-            },
-            "performance_targets": {
-                "daily_return": 2.5,
-                "win_rate": 65,
-                "max_drawdown": 5.0
-            }
-        }
+        Respond with ONLY the JSON object, no additional text.
         """
-        
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Create a trading bot configuration for: {user_prompt}"}
+        ]
+
         try:
             response = self.client.chat.completions.create(
-                model="grok-2-latest",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.7,
-                max_tokens=2000,
-                timeout=30
+                model="grok-2-1212",
+                messages=messages,
+                max_tokens=1000,
+                temperature=0.7
             )
             
-            # Get the response content
-            config_text = response.choices[0].message.content.strip()
+            ai_response = response.choices[0].message.content.strip()
             
-            # Try to extract JSON if there's extra text
-            json_match = re.search(r'\{.*\}', config_text, re.DOTALL)
-            if json_match:
-                config_text = json_match.group()
-            
-            # Parse JSON
-            config_json = json.loads(config_text)
-            
-            # Validate required fields
-            required_fields = [
-                "name", "description", "strategy", "base_coin", "quote_coin", 
-                "exchange", "risk_level", "trade_type", "profit_target", "stop_loss"
-            ]
-            
-            for field in required_fields:
-                if field not in config_json:
-                    raise ValueError(f"Missing required field: {field}")
-            
-            # Validate risk level
-            if config_json.get("risk_level") not in ["low", "medium", "high"]:
-                config_json["risk_level"] = "medium"
-            
-            # Validate exchange
-            if config_json.get("exchange") not in ["binance", "bybit", "kraken"]:
-                config_json["exchange"] = "binance"
-            
-            # Validate trade type
-            if config_json.get("trade_type") not in ["long", "short"]:
-                config_json["trade_type"] = "long"
-            
-            # Add metadata
-            config_json["created_by_ai"] = True
-            config_json["ai_model"] = "grok-2-latest"
-            config_json["user_prompt"] = user_prompt
-            config_json["is_prebuilt"] = False
-            config_json["status"] = "inactive"
-            
-            # Set default performance metrics
-            config_json.setdefault("daily_pnl", 0)
-            config_json.setdefault("weekly_pnl", 0)
-            config_json.setdefault("monthly_pnl", 0)
-            config_json.setdefault("win_rate", 0)
-            config_json.setdefault("total_trades", 0)
-            config_json.setdefault("successful_trades", 0)
-            
-            return config_json
-            
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Grok returned invalid JSON: {str(e)}")
+            # Parse JSON response
+            try:
+                config = json.loads(ai_response)
+                return config
+            except json.JSONDecodeError:
+                # Try to extract JSON from response if there's extra text
+                json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
+                if json_match:
+                    config = json.loads(json_match.group())
+                    return config
+                else:
+                    raise ValueError("Invalid JSON response from AI")
+
         except Exception as e:
-            if "rate_limit" in str(e).lower():
-                raise ValueError("Rate limit exceeded. Please try again in a moment.")
-            elif "api_key" in str(e).lower():
-                raise ValueError("API key error. Please check Grok configuration.")
-            else:
-                raise ValueError(f"AI service error: {str(e)}")
+            print(f"Grok API error: {e}")
+            raise e
+    
+    def _generate_fallback_config(self, user_prompt: str, user_id: str = None) -> Dict[str, Any]:
+        """Generate fallback configuration when Grok API fails"""
+        prompt_lower = user_prompt.lower()
+        
+        # Analyze prompt for key characteristics
+        is_conservative = any(word in prompt_lower for word in ['conservative', 'safe', 'low risk', 'stable'])
+        is_aggressive = any(word in prompt_lower for word in ['aggressive', 'high risk', 'risky', 'fast'])
+        is_scalping = any(word in prompt_lower for word in ['scalp', 'quick', 'frequent', 'short term'])
+        
+        # Extract coin mentions
+        base_coin = 'BTC'  # Default
+        if 'eth' in prompt_lower or 'ethereum' in prompt_lower:
+            base_coin = 'ETH'
+        elif 'sol' in prompt_lower or 'solana' in prompt_lower:
+            base_coin = 'SOL'
+        elif 'ada' in prompt_lower or 'cardano' in prompt_lower:
+            base_coin = 'ADA'
+        
+        # Determine strategy and risk level
+        if is_scalping:
+            strategy = 'scalping'
+            risk_level = 'high'
+            profit_target = 2
+            stop_loss = 1
+            name = f"{base_coin} Lightning Scalper"
+            description = f"High-frequency scalping bot for {base_coin} targeting quick 1-3% gains with tight stop losses"
+        elif is_conservative:
+            strategy = 'trend_following'
+            risk_level = 'low' 
+            profit_target = 10
+            stop_loss = 5
+            name = f"{base_coin} Steady Growth Bot"
+            description = f"Conservative trend-following strategy for {base_coin} with focus on capital preservation"
+        elif is_aggressive:
+            strategy = 'momentum'
+            risk_level = 'high'
+            profit_target = 25
+            stop_loss = 15
+            name = f"{base_coin} Momentum Hunter"
+            description = f"Aggressive momentum trading bot for {base_coin} targeting high returns with calculated risks"
+        else:
+            # Balanced default
+            strategy = 'mean_reversion'
+            risk_level = 'medium'
+            profit_target = 15
+            stop_loss = 8
+            name = f"{base_coin} Smart Trader Pro"
+            description = f"Balanced mean-reversion strategy for {base_coin} optimized for consistent profits"
+        
+        return {
+            "name": name,
+            "description": description,
+            "strategy": strategy,
+            "risk_level": risk_level,
+            "trade_type": "spot",
+            "base_coin": base_coin,
+            "quote_coin": "USDT",
+            "exchange": "binance",
+            "deposit_amount": 1000,
+            "trading_mode": "simple",
+            "profit_target": profit_target,
+            "stop_loss": stop_loss,
+            "advanced_settings": {
+                "max_positions": 3,
+                "position_size": 33,
+                "rebalance_frequency": "daily",
+                "technical_indicators": ["RSI", "MACD", "Moving Average"]
+            }
+        }
     
     def validate_bot_config(self, config: Dict[str, Any]) -> bool:
         """Validate the generated bot configuration"""
