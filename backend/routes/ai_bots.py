@@ -169,7 +169,7 @@ async def delete_bot(bot_id: str, user_id: str):
 async def get_bot_details(bot_id: str, user_id: Optional[str] = None):
     """Get detailed information about a specific bot"""
     try:
-        query = supabase.table('bots').select('*').eq('id', bot_id)
+        query = supabase.table('user_bots').select('*').eq('id', bot_id)
         
         # If user_id provided, ensure user owns the bot or it's prebuilt
         if user_id:
