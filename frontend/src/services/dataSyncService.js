@@ -70,27 +70,32 @@ export const dataSyncService = {
     try {
       console.log('Saving user bot to Supabase:', botData.name);
       
+      // Ensure bot has a valid ID
+      const botId = botData.id || `bot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       // Filter fields to match current user_bots schema
       const schemaCompatibleBot = {
-        id: botData.id,
+        id: botId,
         user_id: botData.user_id,
-        name: botData.name,
-        description: botData.description,
-        strategy: botData.strategy,
-        exchange: botData.exchange,
-        trading_pair: botData.trading_pair,
-        risk_level: botData.risk_level,
-        daily_pnl: botData.daily_pnl,
-        weekly_pnl: botData.weekly_pnl,
-        monthly_pnl: botData.monthly_pnl,
-        win_rate: botData.win_rate,
-        is_active: botData.is_active,
-        is_prebuilt: botData.is_prebuilt,
-        status: botData.status,
-        advanced_settings: botData.advanced_settings,
-        created_at: botData.created_at,
-        updated_at: botData.updated_at
+        name: botData.name || 'Unnamed Bot',
+        description: botData.description || '',
+        strategy: botData.strategy || 'unknown',
+        exchange: botData.exchange || 'binance',
+        trading_pair: botData.trading_pair || 'BTC/USDT',
+        risk_level: botData.risk_level || 'medium',
+        daily_pnl: parseFloat(botData.daily_pnl) || 0,
+        weekly_pnl: parseFloat(botData.weekly_pnl) || 0,
+        monthly_pnl: parseFloat(botData.monthly_pnl) || 0,
+        win_rate: parseFloat(botData.win_rate) || 0,
+        is_active: Boolean(botData.is_active),
+        is_prebuilt: Boolean(botData.is_prebuilt),
+        status: botData.status || 'inactive',
+        advanced_settings: botData.advanced_settings || {},
+        created_at: botData.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
+
+      console.log('Attempting to save bot with ID:', botId);
 
       const { data, error } = await supabase
         .from('user_bots')
@@ -104,7 +109,7 @@ export const dataSyncService = {
         // Temporary fallback to localStorage for RLS policy issues
         if (error.code === 'PGRST301' || error.message.includes('policy')) {
           console.warn('Using localStorage fallback due to RLS policy restrictions');
-          return this.saveUserBotToLocalStorage(botData);
+          return this.saveUserBotToLocalStorage({...botData, id: botId});
         }
         
         throw new Error(`Failed to save user bot: ${error.message}`);
@@ -118,7 +123,8 @@ export const dataSyncService = {
       // Temporary fallback for any Supabase issues
       if (error.message.includes('policy') || error.message.includes('security')) {
         console.warn('Using localStorage fallback due to Supabase access restrictions');
-        return this.saveUserBotToLocalStorage(botData);
+        const botId = botData.id || `bot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        return this.saveUserBotToLocalStorage({...botData, id: botId});
       }
       
       throw error;
