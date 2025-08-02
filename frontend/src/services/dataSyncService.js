@@ -156,7 +156,7 @@ export const dataSyncService = {
     }
   },
 
-  // Sync user purchases across devices - PURE SUPABASE VERSION
+  // Sync user purchases across devices - with localStorage fallback
   async syncUserPurchases(userId) {
     try {
       console.log('Syncing user purchases from Supabase for user:', userId);
@@ -169,14 +169,28 @@ export const dataSyncService = {
 
       if (error) {
         console.error('Supabase user_purchases sync failed:', error);
-        throw new Error(`Failed to sync user purchases: ${error.message}`);
+        // Fallback to localStorage
+        console.warn('Using localStorage fallback for user purchases');
+        return this.getUserPurchasesFromLocalStorage(userId);
       }
 
       console.log('Synced user purchases from Supabase:', data?.length || 0);
+      
+      // If no purchases in Supabase, check localStorage as fallback
+      if (!data || data.length === 0) {
+        console.log('No purchases found in Supabase, checking localStorage fallback...');
+        const localPurchases = this.getUserPurchasesFromLocalStorage(userId);
+        if (localPurchases && localPurchases.length > 0) {
+          console.log(`Found ${localPurchases.length} purchases in localStorage fallback`);
+          return localPurchases;
+        }
+      }
+      
       return data || [];
     } catch (error) {
       console.error('Error syncing user purchases:', error);
-      throw error; // Don't fallback to localStorage
+      console.warn('Using localStorage fallback due to Supabase access issues');
+      return this.getUserPurchasesFromLocalStorage(userId);
     }
   },
 
