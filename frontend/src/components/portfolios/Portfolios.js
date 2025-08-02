@@ -741,7 +741,7 @@ const Portfolios = () => {
                       <SocialIcon key={platform} platform={platform} url={url} />
                     ))
                   }
-                  {portfolio.seller.socialLinks && 
+                  {portfolio.seller?.socialLinks && 
                     Object.entries(portfolio.seller.socialLinks).filter(([platform, url]) => url && url.trim()).length > 3 && (
                     <span className="text-xs text-gray-500 ml-1">
                       +{Object.entries(portfolio.seller.socialLinks).filter(([platform, url]) => url && url.trim()).length - 3}
