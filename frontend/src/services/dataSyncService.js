@@ -1,31 +1,27 @@
 import { supabase } from '../lib/supabase';
 
 export const dataSyncService = {
-  // Sync user bots across devices
+  // Sync user bots across devices - PURE SUPABASE VERSION
   async syncUserBots(userId) {
     try {
-      // Try to get bots from Supabase first
-      try {
-        const { data, error } = await supabase
-          .from('user_bots')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
+      console.log('Syncing user bots from Supabase for user:', userId);
+      
+      const { data, error } = await supabase
+        .from('user_bots')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
-        if (error && error.code !== 'PGRST116') {
-          console.warn('Supabase user bots sync failed, using localStorage:', error);
-          return this.getUserBotsFromLocalStorage(userId);
-        }
-
-        console.log('Synced user bots from Supabase:', data?.length || 0);
-        return data || [];
-      } catch (supabaseError) {
-        console.warn('Supabase not available for bots sync, using localStorage:', supabaseError);
-        return this.getUserBotsFromLocalStorage(userId);
+      if (error) {
+        console.error('Supabase user_bots sync failed:', error);
+        throw new Error(`Failed to sync user bots: ${error.message}`);
       }
+
+      console.log('Synced user bots from Supabase:', data?.length || 0);
+      return data || [];
     } catch (error) {
       console.error('Error syncing user bots:', error);
-      return [];
+      throw error; // Don't fallback to localStorage
     }
   },
 
