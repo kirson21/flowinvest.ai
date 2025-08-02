@@ -359,11 +359,17 @@ const Portfolios = () => {
     loadVerificationStatus();
   }, [user?.id]);
 
-  // Load user-created portfolios from localStorage
+  // Load user-created portfolios from localStorage/Supabase
   useEffect(() => {
-    loadProductsWithReviews();
-    loadUserVotes();
-    loadUserPurchases();
+    const loadData = async () => {
+      loadProductsWithReviews();
+      loadUserVotes();
+      if (user?.id) {
+        await loadUserPurchases();
+      }
+    };
+    
+    loadData();
   }, [user]);
 
   // Apply default filter when portfolios are loaded
