@@ -132,7 +132,7 @@ const Settings = () => {
   useEffect(() => {
     if (user) {
       loadUserProfile();
-      loadSellerData();
+      loadSellerData(); // This is now async but we don't need to await here
       loadAccountBalance();
       loadUserVotes();
       loadVerificationStatus();
