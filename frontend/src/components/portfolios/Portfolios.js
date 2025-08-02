@@ -81,14 +81,23 @@ const Portfolios = () => {
 
   const loadProductsWithReviews = async () => {
     try {
-      // Load user portfolios from Supabase with localStorage fallback
-      const userPortfolios = user?.id ? await dataSyncService.syncUserPortfolios(user.id) : [];
-      
+      // Load ALL portfolios from Supabase for live marketplace (shared across all users)
+      const { data: allPortfolios, error } = await supabase
+        .from('portfolios')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading portfolios from Supabase:', error);
+        setPortfolios([]);
+        return;
+      }
+
       const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
       const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
       
       // Update products with real review data and votes
-      const updatedUserPortfolios = userPortfolios.map(product => {
+      const updatedPortfolios = (allPortfolios || []).map(product => {
         let updatedProduct = { ...product };
         
         // Update review data
@@ -108,37 +117,22 @@ const Portfolios = () => {
         if (productVotes[product.id]) {
           updatedProduct.votes = productVotes[product.id];
         } else {
-          // Initialize votes for user-created products
+          // Initialize votes for products
           updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
         }
         
         return updatedProduct;
       });
       
-      // Update mock portfolios with saved votes
-      const updatedMockPortfolios = mockPortfolios.map(product => {
-        if (productVotes[product.id]) {
-          return { ...product, votes: productVotes[product.id] };
-        }
-        return product;
-      });
-      
-      const allPortfolios = [...updatedMockPortfolios, ...updatedUserPortfolios];
-      setPortfolios(allPortfolios);
+      setPortfolios(updatedPortfolios);
       
       // Apply current filter to updated portfolios
-      applyFilter(selectedFilter, allPortfolios);
+      applyFilter(selectedFilter, updatedPortfolios);
       
-      console.log('Loaded portfolios with reviews and votes:', allPortfolios.length);
+      console.log('Loaded live portfolios from Supabase:', updatedPortfolios.length);
     } catch (error) {
-      console.error('Error loading products with reviews:', error);
-      // Fallback to original logic if data sync fails
-      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
-      
-      const allPortfolios = [...userPortfolios, ...mockPortfolios];
-      setPortfolios(allPortfolios);
+      console.error('Error loading live portfolios:', error);
+      setPortfolios([]);
     }
   };
 
