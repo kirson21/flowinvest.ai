@@ -234,6 +234,23 @@ const Portfolios = () => {
     }
   };
 
+  // Handle removing a purchase from My Purchases
+  const handleRemovePurchase = (purchaseId) => {
+    if (!user?.id) return;
+
+    if (window.confirm('Are you sure you want to remove this item from your purchases? You can always purchase it again later.')) {
+      const updatedPurchases = userPurchases.filter(purchase => 
+        (purchase.purchaseId || purchase.id) !== purchaseId
+      );
+      
+      // Update purchase list using data sync service
+      dataSyncService.saveUserPurchases(user.id, updatedPurchases);
+      setUserPurchases(updatedPurchases);
+      
+      alert('✅ Item removed from your purchases');
+    }
+  };
+
   // Check if user has purchased a product
   const isPurchased = (productId) => {
     return userPurchases.some(purchase => purchase.id === productId);
