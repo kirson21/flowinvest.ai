@@ -75,28 +75,26 @@ export const AuthProvider = ({ children }) => {
 
     getInitialSession();
 
-    // Only listen for auth changes in production or when no dev user is set
-    if (process.env.NODE_ENV !== 'development') {
-      // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log('Auth state change:', event, session);
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          // Trigger data sync when user logs in (non-blocking)
-          if (event === 'SIGNED_IN' && session?.user) {
-            console.log('User signed in, starting background data sync...');
-            dataSyncService.syncAllUserData(session.user.id).then(() => {
-              console.log('✅ Data sync completed on sign in');
-            }).catch(error => {
-              console.warn('Data sync failed on sign in:', error);
-            });
-          }
-          
-          setLoading(false);
+    // Listen for auth changes - ALWAYS active now
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state change:', event, session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Trigger data sync when user logs in (non-blocking)
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('User signed in, starting background data sync...');
+          dataSyncService.syncAllUserData(session.user.id).then(() => {
+            console.log('✅ Data sync completed on sign in');
+          }).catch(error => {
+            console.warn('Data sync failed on sign in:', error);
+          });
         }
-      );
+        
+        setLoading(false);
+      }
+    );
 
       return () => subscription.unsubscribe();
     }
