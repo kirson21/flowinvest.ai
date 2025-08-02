@@ -138,7 +138,7 @@ async def deactivate_bot(bot_id: str, user_id: str):
     """Deactivate a bot"""
     try:
         # Update bot status in Supabase
-        response = supabase.table('bots').update({
+        response = supabase.table('user_bots').update({
             'status': 'inactive'
         }).eq('id', bot_id).eq('user_id', user_id).execute()
         
