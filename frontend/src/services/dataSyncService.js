@@ -207,6 +207,73 @@ export const dataSyncService = {
     }
   },
 
+  // Save user purchase - with Supabase and localStorage fallback
+  async saveUserPurchase(purchaseData) {
+    try {
+      console.log('Saving user purchase to Supabase:', purchaseData.product_name);
+      
+      // Ensure purchase has valid ID
+      const purchaseId = purchaseData.id || `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const purchaseToSave = {
+        id: purchaseId,
+        user_id: purchaseData.user_id,
+        product_id: purchaseData.product_id,
+        product_name: purchaseData.product_name || 'Unknown Product',
+        product_description: purchaseData.product_description || '',
+        price: parseFloat(purchaseData.price) || 0,
+        seller_id: purchaseData.seller_id,
+        seller_name: purchaseData.seller_name || 'Unknown Seller',
+        purchased_at: purchaseData.purchased_at || new Date().toISOString(),
+        status: purchaseData.status || 'completed'
+      };
+
+      const { data, error } = await supabase
+        .from('user_purchases')
+        .upsert([purchaseToSave])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase purchase save failed:', error);
+        // Fallback to localStorage
+        console.warn('Using localStorage fallback for purchase save');
+        this.saveUserPurchaseToLocalStorage(purchaseToSave);
+        return purchaseToSave;
+      }
+
+      console.log('Purchase saved to Supabase successfully:', data.id);
+      return data;
+    } catch (error) {
+      console.error('Error saving user purchase:', error);
+      // Fallback to localStorage
+      const purchaseId = purchaseData.id || `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const purchaseToSave = {...purchaseData, id: purchaseId};
+      this.saveUserPurchaseToLocalStorage(purchaseToSave);
+      return purchaseToSave;
+    }
+  },
+
+  // Fallback: Save purchase to localStorage
+  saveUserPurchaseToLocalStorage(purchaseData) {
+    try {
+      const allPurchases = JSON.parse(localStorage.getItem('user_purchases') || '{}');
+      if (!allPurchases[purchaseData.user_id]) {
+        allPurchases[purchaseData.user_id] = [];
+      }
+      
+      // Remove existing purchase with same ID
+      allPurchases[purchaseData.user_id] = allPurchases[purchaseData.user_id].filter(p => p.id !== purchaseData.id);
+      // Add new purchase
+      allPurchases[purchaseData.user_id].unshift(purchaseData);
+      
+      localStorage.setItem('user_purchases', JSON.stringify(allPurchases));
+      console.log('Purchase saved to localStorage successfully');
+    } catch (error) {
+      console.error('Error saving purchase to localStorage:', error);
+    }
+  },
+
   // Sync user profile across devices
   async syncUserProfile(userId) {
     try {
