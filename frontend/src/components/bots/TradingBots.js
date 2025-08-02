@@ -65,11 +65,13 @@ const TradingBots = () => {
     try {
       console.log('Loading pre-built bots from Supabase...');
       
-      // Try to get pre-built bots from Supabase
+      const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000'; // System user for pre-built bots
+      
+      // Try to get pre-built bots from Supabase (either is_prebuilt=true OR system user)
       const { data: preBuiltBotsFromSupabase, error } = await supabase
         .from('user_bots')
         .select('*')
-        .eq('is_prebuilt', true)
+        .or(`is_prebuilt.eq.true,user_id.eq.${SYSTEM_USER_ID}`)
         .order('created_at', { ascending: false });
 
       if (error) {
