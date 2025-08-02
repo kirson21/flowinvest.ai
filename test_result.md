@@ -211,11 +211,11 @@ backend:
           agent: "main"
   - task: "Fix Authentication Hang and Data Synchronization Issues"
     implemented: true
-    working: true
-    file: "/app/frontend/src/contexts/AuthContext.js, /app/frontend/src/services/dataSyncService.js, /app/frontend/src/components/bots/TradingBots.js"
-    stuck_count: 0
-    priority: "critical" 
-    needs_retesting: false
+    working: false
+    file: "/app/backend/routes/ai_bots.py"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: true
     status_history:
         - working: true
           agent: "main"
