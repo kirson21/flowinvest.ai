@@ -554,9 +554,9 @@ const TradingBots = () => {
                 {t('riskLevel')}
               </p>
               <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${getRiskColor(bot.riskLevel)}`} />
+                <div className={`w-2 h-2 rounded-full ${getRiskColor(bot.riskLevel || bot.risk_level)}`} />
                 <span className="text-sm font-medium text-[#474545] dark:text-white">
-                  {t(bot.riskLevel.toLowerCase())}
+                  {t((bot.riskLevel || bot.risk_level || 'medium').toLowerCase())}
                 </span>
               </div>
             </div>
