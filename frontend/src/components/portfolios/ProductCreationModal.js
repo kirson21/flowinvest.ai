@@ -435,7 +435,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
         contentBlocks: productData.contentBlocks, // New rich content format
         price: parseFloat(productData.price),
         category: productData.category,
-        createdBy: user?.id || 'current-user',
+        createdBy: user?.id,
         createdAt: new Date().toISOString(),
         // Optional metadata fields
         riskLevel: productData.riskLevel || 'Medium',
