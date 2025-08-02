@@ -575,8 +575,8 @@ const TradingBots = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                 {t('weeklyPnL')}
               </p>
-              <p className={`text-sm font-bold ${bot.weeklyPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {bot.weeklyPnL >= 0 ? '+' : ''}{bot.weeklyPnL}%
+              <p className={`text-sm font-bold ${(bot.weeklyPnL || bot.weekly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {(bot.weeklyPnL || bot.weekly_pnl || 0) >= 0 ? '+' : ''}{bot.weeklyPnL || bot.weekly_pnl || 0}%
               </p>
             </div>
             <div className="text-center">
