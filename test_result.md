@@ -659,12 +659,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Implement Super Admin Role System"
-    - "Implement Bot Movement Between Sections"
-    - "Add Super Admin Controls to Trading Bots"
-    - "Implement Super Admin Portfolio Management"
-    - "Backend Regression Testing"
-  stuck_tasks: []
+    - "My Purchases Section & Product Editor Fixes"
+    - "Fix Cross-Device Social Links Sync"
+    - "Fix Seller Verification Management Sync"
+  stuck_tasks:
+    - "My Purchases Section & Product Editor Fixes"
   test_all: false
   test_priority: "high_first"
 
