@@ -325,15 +325,18 @@ backend:
 
   - task: "End-to-End Bot Creation Flow Testing"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/components/bots/TradingBots.js, /app/frontend/src/components/bots/GrokAIBotCreator.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "critical"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
           comment: "✅ FINAL VERIFICATION COMPLETED: End-to-end bot creation flow testing confirms complete resolution of the original user complaint. COMPREHENSIVE TESTING RESULTS: 1. Complete Bot Creation Flow ✅ - Navigation to Trading Bots section successful, AI Creator button accessible and functional, bot description entry working ('Create a conservative Bitcoin trading bot for steady profits'), form submission successful with HTTP 200 API response. 2. Bot Persistence Verification ✅ - Created bot 'BTC Steady Growth Bot' appears in My Bots section immediately, bot persists after page refresh, localStorage fallback system working correctly, data sync service handling Supabase issues gracefully. 3. User Experience Validation ✅ - Entire flow works without errors, success notifications display properly, bot configuration preview shows all required fields (Basic Configuration, Risk Management, Trading Pair, Strategy), no JavaScript errors during process. 4. Cross-Device Sync Test ✅ - Bot data saved to localStorage with proper user association, data sync service operational with fallback mechanisms, bot accessible across browser sessions. API INTEGRATION SUCCESS: POST /api/bots/create-with-ai returns HTTP 200 with proper response: {success: true, bot_config: Object, bot_id: '762c752c-40df-4635-ab1d-e84dd01ef249', message: 'Bot created successfully with AI'}. Generated bot configuration includes all required fields: name, description, strategy (trend_following), exchange (binance), trading_pair (BTC/USDT), risk_level, profit_target, stop_loss. CRITICAL SUCCESS CRITERIA MET: ✅ Bot creation form works without HTTP 400 errors, ✅ Success notification appears after bot creation, ✅ Created bots appear in My Bots section, ✅ Bots persist after page refresh, ✅ No JavaScript errors during bot creation process, ✅ Complete resolution of user's original complaint. The 'bots not appearing in My Bots section' issue has been FULLY RESOLVED through the implementation of the Grok service fallback system and proper data synchronization mechanisms."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL SUPABASE SCHEMA ISSUE DISCOVERED: Comprehensive end-to-end testing reveals bot creation API works perfectly (HTTP 200) but Supabase save fails due to schema mismatch. TESTING RESULTS: ✅ Bot Creation API Success - POST /api/bots/create-with-ai returns HTTP 200 with bot_id: 2f02db42-1d89-47e8-8ed6-c349cfde24e1, ✅ AI Bot Generation Working - Successfully generates 'BTC Steady Growth Bot' with complete configuration, ✅ Supabase Connection Working - 'Synced user bots from Supabase: 0' confirms user_bots table access, ❌ CRITICAL SCHEMA ERROR - Supabase save fails: 'Could not find the config column of user_bots in the schema cache' (HTTP 400), ❌ Bot Persistence Failing - Bots don't appear in My Bots section due to save failure, ❌ Page Refresh Test Fails - No bots persist because they never get saved to Supabase. ROOT CAUSE IDENTIFIED: Frontend tries to save 'config' column that doesn't exist in Supabase user_bots table schema. The data sync service is working correctly, but the table schema is incomplete. IMMEDIATE FIX NEEDED: Either add 'config' column to user_bots table or modify frontend to not send config field. This is the final blocker preventing bot creation from working end-to-end."
 
 frontend:
   - task: "Development Test User Implementation"
