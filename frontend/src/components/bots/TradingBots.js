@@ -436,16 +436,18 @@ const TradingBots = () => {
     try {
       console.log('Deleting pre-built bot:', preBuiltBot);
       
-      // Delete from Supabase
+      const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000'; // System user for pre-built bots
+      
+      // Delete from Supabase (check both is_prebuilt=true OR system user)
       const { error } = await supabase
         .from('user_bots')
         .delete()
         .eq('id', preBuiltBot.id)
-        .eq('is_prebuilt', true);
+        .or(`is_prebuilt.eq.true,user_id.eq.${SYSTEM_USER_ID}`);
       
       if (error) {
         console.warn('Failed to delete pre-built bot from Supabase:', error);
-        alert('❌ Failed to delete pre-built bot from database');
+        alert('❌ Failed to delete pre-built bot from database: ' + error.message);
         return false;
       }
       
@@ -456,7 +458,7 @@ const TradingBots = () => {
       return true;
     } catch (error) {
       console.error('Error deleting pre-built bot:', error);
-      alert('❌ Failed to delete pre-built bot');
+      alert('❌ Failed to delete pre-built bot: ' + error.message);
       return false;
     }
   };
