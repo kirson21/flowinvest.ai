@@ -626,11 +626,7 @@ const TradingBots = () => {
               <Button
                 onClick={() => {
                   if (window.confirm('Are you sure you want to delete this pre-built bot? This will affect all users.')) {
-                    const updatedPreBuiltBots = preBuiltBots.filter(b => b.id !== bot.id);
-                    setPreBuiltBots(updatedPreBuiltBots);
-                    localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
-                    localStorage.setItem('prebuilt_bots_customized', 'true');
-                    alert('✅ Pre-built bot deleted successfully! Change applies to all users.');
+                    handleDeletePreBuiltBot(bot);
                   }
                 }}
                 size="sm"
