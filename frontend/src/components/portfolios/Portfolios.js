@@ -729,17 +729,17 @@ const Portfolios = () => {
           >
             <div className="flex items-center space-x-3">
               <Avatar className="w-8 h-8">
-                <AvatarImage src={portfolio.seller.avatar} alt={portfolio.seller.name} />
+                <AvatarImage src={portfolio.seller?.avatar} alt={portfolio.seller?.name || 'Seller'} />
                 <AvatarFallback className="bg-[#0097B2] text-white text-sm">
-                  {portfolio.seller.name.charAt(0)}
+                  {portfolio.seller?.name?.charAt(0) || portfolio.seller_name?.charAt(0) || 'S'}
                 </AvatarFallback>
               </Avatar>
               <div className="text-left">
                 <p className="text-sm font-medium text-[#474545] dark:text-white">
-                  {portfolio.seller.name}
+                  {portfolio.seller?.name || portfolio.seller_name || 'Unknown Seller'}
                 </p>
                 <div className="flex items-center space-x-1 mt-1">
-                  {portfolio.seller.socialLinks && Object.entries(portfolio.seller.socialLinks)
+                  {portfolio.seller?.socialLinks && Object.entries(portfolio.seller.socialLinks)
                     .filter(([platform, url]) => url && url.trim()) // Only show platforms with actual URLs
                     .slice(0, 3)
                     .map(([platform, url]) => (
