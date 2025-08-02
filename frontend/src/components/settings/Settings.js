@@ -511,12 +511,28 @@ const Settings = () => {
     }));
   };
 
-  const saveSellerData = () => {
+  const saveSellerData = async () => {
     try {
-      localStorage.setItem(`seller_data_${user?.id}`, JSON.stringify({
+      const sellerProfile = {
         socialLinks: sellerData.socialLinks,
         specialties: sellerData.specialties
-      }));
+      };
+      
+      // Save to localStorage as fallback
+      localStorage.setItem(`seller_data_${user?.id}`, JSON.stringify(sellerProfile));
+      
+      // Sync with dataSyncService for cross-device compatibility
+      try {
+        await dataSyncService.saveUserProfile(user?.id, {
+          seller_data: sellerProfile,
+          updated_at: new Date().toISOString()
+        });
+        console.log('Seller data synced across devices');
+      } catch (syncError) {
+        console.warn('Failed to sync seller data across devices:', syncError);
+        // Continue with localStorage-only save
+      }
+      
       setMessage('Seller profile updated successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
