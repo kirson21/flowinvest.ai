@@ -531,9 +531,22 @@ const Settings = () => {
       setError('');
 
       // First, delete all user data (bots, settings, etc.)
-      const userBots = await database.getUserBots(user.id, false);
+      const userBots = await dataSyncService.syncUserBots(user.id);
       for (const bot of userBots) {
-        await database.deleteBot(bot.id);
+        try {
+          // Delete from Supabase
+          const { error } = await supabase
+            .from('user_bots')
+            .delete()
+            .eq('id', bot.id)
+            .eq('user_id', user.id);
+          
+          if (error) {
+            console.warn('Failed to delete bot from Supabase:', error);
+          }
+        } catch (error) {
+          console.warn('Error deleting bot:', error);
+        }
       }
 
       // Delete user profile
