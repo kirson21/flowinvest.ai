@@ -280,45 +280,45 @@ const TradingBots = () => {
   };
 
   // Super Admin Functions for Bot Management
-  const handleMoveToPreBuilt = async (bot) => {
+  const handleMoveToPreBuilt = async (userBot) => {
     if (!isSuperAdmin()) {
       alert('❌ Only super admin can move bots to pre-built section');
       return false;
     }
     
     try {
-      console.log('Moving bot to pre-built:', bot);
+      console.log('Moving bot to pre-built:', userBot);
       
-      // Create pre-built bot version
+      // Create pre-built version with is_prebuilt = true and no user_id
       const preBuiltBot = {
-        id: Date.now(), // New ID for pre-built version
-        name: bot.name,
-        description: bot.description,
-        strategy: bot.strategy,
-        exchange: bot.exchange,
-        tradingPair: bot.trading_pair || bot.tradingPair,
-        riskLevel: bot.risk_level || bot.riskLevel,
-        dailyPnL: bot.daily_pnl || 0,
-        weeklyPnL: bot.weekly_pnl || 0,
-        monthlyPnL: bot.monthly_pnl || 0,
-        winRate: bot.win_rate || 75,
+        ...userBot,
+        id: Date.now().toString(), // New ID for pre-built version
+        user_id: null, // Pre-built bots don't belong to specific users
         is_prebuilt: true,
-        original_creator: user?.id,
-        created_at: new Date().toISOString()
+        is_active: false,
+        status: 'inactive',
+        updated_at: new Date().toISOString()
       };
       
-      // Get current pre-built bots and add new one
-      const currentPreBuiltBots = JSON.parse(localStorage.getItem('prebuilt_bots') || '[]');
-      const updatedPreBuiltBots = [...currentPreBuiltBots, preBuiltBot];
+      // Save to Supabase as pre-built bot
+      await dataSyncService.saveUserBot(preBuiltBot);
       
-      // Update localStorage and mark as customized by super admin
-      localStorage.setItem('prebuilt_bots', JSON.stringify(updatedPreBuiltBots));
-      localStorage.setItem('prebuilt_bots_customized', 'true');
+      // Delete the original user bot from Supabase
+      const { error } = await supabase
+        .from('user_bots')
+        .delete()
+        .eq('id', userBot.id)
+        .eq('user_id', user?.id);
       
-      // Update state for immediate UI feedback
-      setPreBuiltBots(updatedPreBuiltBots);
+      if (error) {
+        console.warn('Failed to delete original user bot from Supabase:', error);
+      }
       
-      alert('✅ Bot moved to Pre-Built Bots successfully! All users will now see this bot.');
+      // Refresh both lists
+      await loadUserBots();
+      await loadPreBuiltBots();
+      
+      alert('✅ Bot moved to Pre-Built Bots successfully!');
       return true;
     } catch (error) {
       console.error('Error moving bot to pre-built:', error);
