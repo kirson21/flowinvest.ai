@@ -375,14 +375,23 @@ const TradingBots = () => {
 
   const handleUpdateAPI = async (botId, apiData) => {
     try {
-      const result = await database.updateBot(botId, { 
-        api_credentials: apiData,
-        updated_at: new Date().toISOString()
-      });
-      if (result) {
+      // Get current user bots using data sync service
+      const userBots = await dataSyncService.syncUserBots(user?.id);
+      const botToUpdate = userBots.find(bot => bot.id === botId);
+      
+      if (botToUpdate) {
+        const updatedBot = {
+          ...botToUpdate,
+          api_credentials: apiData,
+          updated_at: new Date().toISOString()
+        };
+        
+        // Save using data sync service
+        await dataSyncService.saveUserBot(updatedBot);
         await loadUserBots();
         return true;
       }
+      
       return false;
     } catch (error) {
       console.error('Error updating API:', error);
