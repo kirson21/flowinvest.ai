@@ -158,8 +158,8 @@ const TradingBots = () => {
       // Refresh the bot list and force UI update
       await loadUserBots();
       
-      // Force re-render by updating state timestamp
-      setLastUpdate(new Date().getTime());
+      // Force re-render by updating state
+      setForceUpdate(prev => prev + 1);
       
       return true;
     } catch (error) {
