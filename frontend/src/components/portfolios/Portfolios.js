@@ -78,52 +78,67 @@ const Portfolios = () => {
     'Trading Tools'
   ];
 
-  const loadProductsWithReviews = () => {
-    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-    const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-    const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
-    
-    // Update products with real review data and votes
-    const updatedUserPortfolios = userPortfolios.map(product => {
-      let updatedProduct = { ...product };
+  const loadProductsWithReviews = async () => {
+    try {
+      // Load user portfolios from Supabase with localStorage fallback
+      const userPortfolios = user?.id ? await dataSyncService.syncUserPortfolios(user.id) : [];
       
-      // Update review data
-      if (product.seller && product.seller.name) {
-        const productReviews = sellerReviews[product.seller.name] || [];
-        if (productReviews.length > 0) {
-          const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
-          updatedProduct = {
-            ...updatedProduct,
-            rating: Math.round(avgRating * 10) / 10,
-            totalReviews: productReviews.length
-          };
+      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      
+      // Update products with real review data and votes
+      const updatedUserPortfolios = userPortfolios.map(product => {
+        let updatedProduct = { ...product };
+        
+        // Update review data
+        if (product.seller && product.seller.name) {
+          const productReviews = sellerReviews[product.seller.name] || [];
+          if (productReviews.length > 0) {
+            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
+            updatedProduct = {
+              ...updatedProduct,
+              rating: Math.round(avgRating * 10) / 10,
+              totalReviews: productReviews.length
+            };
+          }
         }
-      }
+        
+        // Update vote data - ensure votes object exists
+        if (productVotes[product.id]) {
+          updatedProduct.votes = productVotes[product.id];
+        } else {
+          // Initialize votes for user-created products
+          updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
+        }
+        
+        return updatedProduct;
+      });
       
-      // Update vote data - ensure votes object exists
-      if (productVotes[product.id]) {
-        updatedProduct.votes = productVotes[product.id];
-      } else {
-        // Initialize votes for user-created products
-        updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
-      }
+      // Update mock portfolios with saved votes
+      const updatedMockPortfolios = mockPortfolios.map(product => {
+        if (productVotes[product.id]) {
+          return { ...product, votes: productVotes[product.id] };
+        }
+        return product;
+      });
       
-      return updatedProduct;
-    });
-    
-    // Update mock portfolios with saved votes
-    const updatedMockPortfolios = mockPortfolios.map(product => {
-      if (productVotes[product.id]) {
-        return { ...product, votes: productVotes[product.id] };
-      }
-      return product;
-    });
-    
-    const allPortfolios = [...updatedMockPortfolios, ...updatedUserPortfolios];
-    setPortfolios(allPortfolios);
-    
-    // Apply current filter to updated portfolios
-    applyFilter(selectedFilter, allPortfolios);
+      const allPortfolios = [...updatedMockPortfolios, ...updatedUserPortfolios];
+      setPortfolios(allPortfolios);
+      
+      // Apply current filter to updated portfolios
+      applyFilter(selectedFilter, allPortfolios);
+      
+      console.log('Loaded portfolios with reviews and votes:', allPortfolios.length);
+    } catch (error) {
+      console.error('Error loading products with reviews:', error);
+      // Fallback to original logic if data sync fails
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      
+      const allPortfolios = [...userPortfolios, ...mockPortfolios];
+      setPortfolios(allPortfolios);
+    }
   };
 
   const applyFilter = (filter, portfoliosToFilter = portfolios) => {
