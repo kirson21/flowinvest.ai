@@ -21,7 +21,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://19c4f676-d3bc-415e-bde4-7bac84c88f94.preview.emergentagent.com"
+BACKEND_URL = "https://b4826960-66b7-4cee-87fb-b5f8225660d2.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test user data - using proper UUID format
