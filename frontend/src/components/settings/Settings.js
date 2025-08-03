@@ -236,26 +236,87 @@ const Settings = () => {
     }
   }, [showManageProducts]);
 
-  const loadUserProducts = () => {
+  const loadUserProducts = async () => {
     try {
       setLoadingProducts(true);
-      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      const productVotes = loadProductVotes();
+      console.log('=== MANAGE PRODUCTS DEBUG (SUPABASE MODE) ===');
+      console.log('Loading products for user:', user?.id);
       
-      // Filter products created by current user and merge with vote data
-      const currentUserProducts = userPortfolios.filter(product => product.createdBy === user?.id).map(product => {
-        // Merge with vote data from localStorage (sync with marketplace)
-        const updatedProduct = { ...product };
+      // Load from Supabase (same source as marketplace) instead of localStorage
+      const { data: allPortfolios, error } = await supabase
+        .from('portfolios')
+        .select('*')
+        .eq('user_id', user?.id); // Only get current user's products
+      
+      if (error) {
+        console.error('Error loading user portfolios from Supabase:', error);
+        setUserProducts([]);
+        return;
+      }
+      
+      console.log('User portfolios from Supabase:', allPortfolios);
+      
+      // Load review and vote data for proper display
+      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      
+      // Process portfolios with same logic as marketplace
+      const processedPortfolios = (allPortfolios || []).map(product => {
+        // Extract metadata from images field (same as marketplace)
+        let metadata = {};
+        try {
+          metadata = typeof product.images === 'string' ? JSON.parse(product.images) : product.images || {};
+        } catch (e) {
+          metadata = {};
+        }
+
+        let updatedProduct = { 
+          ...product,
+          // Map Supabase fields to frontend expected format (same as marketplace)
+          riskLevel: product.risk_level || 'Medium',
+          expectedReturn: metadata.expectedReturn || null,
+          minimumInvestment: metadata.minimumInvestment || product.price,
+          assetAllocation: metadata.assetAllocation || null,
+          seller: metadata.seller || {
+            name: 'Anonymous',
+            bio: 'Product creator on FlowInvestAI marketplace',
+            avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
+            socialLinks: {},
+            specialties: []
+          },
+          totalInvestors: metadata.totalInvestors || 0,
+          totalReviews: metadata.totalReviews || 0,
+          rating: metadata.rating || 0,
+          votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
+          images: metadata.actualImages || []
+        };
+        
+        // Update review data (same as marketplace)
+        const sellerName = (metadata.seller && metadata.seller.name);
+        if (sellerName && sellerReviews[sellerName]) {
+          const productReviews = sellerReviews[sellerName] || [];
+          if (productReviews.length > 0) {
+            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
+            updatedProduct = {
+              ...updatedProduct,
+              rating: Math.round(avgRating * 10) / 10,
+              totalReviews: productReviews.length
+            };
+          }
+        }
+        
+        // Update vote data (same as marketplace)
         if (productVotes[product.id]) {
           updatedProduct.votes = productVotes[product.id];
-        } else {
-          // Initialize votes if they don't exist
-          updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
         }
+        
         return updatedProduct;
       });
       
-      setUserProducts(currentUserProducts);
+      console.log('Processed user portfolios:', processedPortfolios);
+      console.log('=== END MANAGE PRODUCTS DEBUG ===');
+      
+      setUserProducts(processedPortfolios);
     } catch (error) {
       console.error('Error loading user products:', error);
       setUserProducts([]);
