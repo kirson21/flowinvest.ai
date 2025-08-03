@@ -509,16 +509,40 @@ const Portfolios = () => {
     setSelectedProductForEdit(null);
   };
 
-  const handleProductDeleted = (productId) => {
-    // Remove the product from localStorage
-    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-    const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
-    localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
-    
-    // Refresh the portfolios list with review data
-    loadProductsWithReviews();
-    setIsProductEditOpen(false);
-    setSelectedProductForEdit(null);
+  const handleProductDeleted = async (productId) => {
+    try {
+      console.log('Deleting product from edit modal:', productId);
+      
+      // Delete from Supabase
+      const { error: deleteError } = await supabase
+        .from('portfolios')
+        .delete()
+        .eq('id', productId);
+
+      if (deleteError) {
+        console.error('Supabase deletion failed:', deleteError);
+      } else {
+        console.log('Supabase deletion successful');
+      }
+      
+      // Always try localStorage deletion regardless of Supabase result
+      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+      const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
+      localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+      
+      // Force immediate UI update
+      setPortfolios(prev => prev.filter(p => p.id !== productId));
+      
+      // Refresh the portfolios list with review data
+      await loadProductsWithReviews();
+      setIsProductEditOpen(false);
+      setSelectedProductForEdit(null);
+      
+      console.log('Product deletion completed successfully');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('❌ Failed to delete product: ' + error.message);
+    }
   };
 
   const canEditProduct = (product) => {
