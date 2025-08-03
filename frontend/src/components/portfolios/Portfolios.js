@@ -253,7 +253,27 @@ const Portfolios = () => {
         console.log('Extracted metadata:', metadata);
         console.log('Seller from metadata:', metadata.seller);
         
-        // Use CURRENT marketplace data, not old purchase data
+        // Update review data - check both stored seller and metadata seller
+        const sellerName = (metadata.seller && metadata.seller.name) || (productToUse.seller_info && productToUse.seller_info.name) || (productToUse.seller && productToUse.seller.name);
+        if (sellerName) {
+          const productReviews = sellerReviews[sellerName] || [];
+          if (productReviews.length > 0) {
+            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
+            processedPurchase.rating = Math.round(avgRating * 10) / 10;
+            processedPurchase.totalReviews = productReviews.length;
+          }
+        }
+        
+        // Update vote data - ensure votes are properly loaded
+        const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+        if (productVotes[purchase.id]) {
+          processedPurchase.votes = productVotes[purchase.id];
+        } else if (metadata.votes) {
+          processedPurchase.votes = metadata.votes;
+        } else {
+          // Initialize votes for products that don't have them
+          processedPurchase.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
+        }
         const processedPurchase = {
           ...purchase,
           // Map current data (this ensures purchases show the latest marketplace info)
