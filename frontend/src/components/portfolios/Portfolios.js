@@ -79,6 +79,56 @@ const Portfolios = () => {
     'Trading Tools'
   ];
 
+  // Calculate real investor count from Supabase purchase data
+  const calculateRealInvestorCounts = async (portfolios) => {
+    try {
+      console.log('=== CALCULATING REAL INVESTOR COUNTS ===');
+      
+      // Get all purchases from Supabase
+      const { data: allPurchases, error } = await supabase
+        .from('user_purchases')
+        .select('portfolio_id, user_id');
+      
+      if (error) {
+        console.error('Error loading purchase data for investor counts:', error);
+        return portfolios; // Return original data if can't load purchases
+      }
+      
+      console.log('All purchases for investor calculation:', allPurchases);
+      
+      // Count unique investors per product
+      const investorCounts = {};
+      allPurchases.forEach(purchase => {
+        const productId = purchase.portfolio_id;
+        if (!investorCounts[productId]) {
+          investorCounts[productId] = new Set();
+        }
+        investorCounts[productId].add(purchase.user_id);
+      });
+      
+      // Convert Set sizes to actual counts
+      const finalCounts = {};
+      Object.keys(investorCounts).forEach(productId => {
+        finalCounts[productId] = investorCounts[productId].size;
+      });
+      
+      console.log('Calculated investor counts:', finalCounts);
+      
+      // Update portfolios with real investor counts
+      const updatedPortfolios = portfolios.map(portfolio => ({
+        ...portfolio,
+        totalInvestors: finalCounts[portfolio.id] || 0
+      }));
+      
+      console.log('=== END INVESTOR COUNTS CALCULATION ===');
+      return updatedPortfolios;
+      
+    } catch (error) {
+      console.error('Error calculating real investor counts:', error);
+      return portfolios; // Return original data on error
+    }
+  };
+
   const loadProductsWithReviews = async () => {
     try {
       // Load ALL portfolios from Supabase for live marketplace (shared across all users)
