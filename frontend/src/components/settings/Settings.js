@@ -325,22 +325,37 @@ const Settings = () => {
     }
   };
 
-  const handleDeleteProduct = (productId) => {
+  const handleDeleteProduct = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
       try {
-        // Remove from localStorage
+        console.log('Deleting product from settings:', productId);
+        
+        // Delete from Supabase (same as marketplace delete)
+        const { error: deleteError } = await supabase
+          .from('portfolios')
+          .delete()
+          .eq('id', productId);
+
+        if (deleteError) {
+          console.error('Supabase deletion failed:', deleteError);
+        } else {
+          console.log('Supabase deletion successful');
+        }
+        
+        // Also try localStorage deletion as fallback
         const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
         const filteredPortfolios = userPortfolios.filter(p => p.id !== productId);
         localStorage.setItem('user_portfolios', JSON.stringify(filteredPortfolios));
         
-        // Update local state
-        setUserProducts(filteredPortfolios.filter(product => product.createdBy === user?.id));
+        // Refresh the product list
+        await loadUserProducts();
         
         setMessage('Product deleted successfully!');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
         console.error('Error deleting product:', error);
         setError('Failed to delete product');
+        setTimeout(() => setError(''), 3000);
       }
     }
   };
