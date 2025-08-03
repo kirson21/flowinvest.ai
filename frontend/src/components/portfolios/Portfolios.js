@@ -221,6 +221,10 @@ const Portfolios = () => {
       const purchases = await dataSyncService.syncUserPurchases(user.id);
       console.log('Raw purchases from Supabase/sync:', purchases);
       
+      // Load review data for rating calculations
+      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      
       // Get current marketplace data to ensure purchases show the latest info
       const { data: currentPortfolios, error } = await supabase
         .from('portfolios')
@@ -253,27 +257,7 @@ const Portfolios = () => {
         console.log('Extracted metadata:', metadata);
         console.log('Seller from metadata:', metadata.seller);
         
-        // Update review data - check both stored seller and metadata seller
-        const sellerName = (metadata.seller && metadata.seller.name) || (productToUse.seller_info && productToUse.seller_info.name) || (productToUse.seller && productToUse.seller.name);
-        if (sellerName) {
-          const productReviews = sellerReviews[sellerName] || [];
-          if (productReviews.length > 0) {
-            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
-            processedPurchase.rating = Math.round(avgRating * 10) / 10;
-            processedPurchase.totalReviews = productReviews.length;
-          }
-        }
-        
-        // Update vote data - ensure votes are properly loaded
-        const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
-        if (productVotes[purchase.id]) {
-          processedPurchase.votes = productVotes[purchase.id];
-        } else if (metadata.votes) {
-          processedPurchase.votes = metadata.votes;
-        } else {
-          // Initialize votes for products that don't have them
-          processedPurchase.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
-        }
+        // Use CURRENT marketplace data, not old purchase data
         const processedPurchase = {
           ...purchase,
           // Map current data (this ensures purchases show the latest marketplace info)
@@ -295,8 +279,26 @@ const Portfolios = () => {
           totalReviews: metadata.totalReviews || 0,
           rating: metadata.rating || 0,
           votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
-          images: metadata.actualImages || []
+          images: metadata.actualImages || [],
+          content: productToUse.content || purchase.content || [],
+          contentBlocks: productToUse.contentBlocks || purchase.contentBlocks || []
         };
+        
+        // Update review data for proper star rating
+        const sellerName = (metadata.seller && metadata.seller.name) || (productToUse.seller_info && productToUse.seller_info.name);
+        if (sellerName && sellerReviews[sellerName]) {
+          const productReviews = sellerReviews[sellerName] || [];
+          if (productReviews.length > 0) {
+            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
+            processedPurchase.rating = Math.round(avgRating * 10) / 10;
+            processedPurchase.totalReviews = productReviews.length;
+          }
+        }
+        
+        // Update vote data for proper score display
+        if (productVotes[purchase.id]) {
+          processedPurchase.votes = productVotes[purchase.id];
+        }
         
         console.log('Final processed purchase:', processedPurchase);
         return processedPurchase;
