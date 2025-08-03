@@ -217,35 +217,51 @@ const Portfolios = () => {
     try {
       const purchases = await dataSyncService.syncUserPurchases(user.id);
       
-      // Apply the same metadata extraction logic as main portfolios
+      // Get current marketplace data to ensure purchases show the latest info
+      const { data: currentPortfolios, error } = await supabase
+        .from('portfolios')
+        .select('*');
+      
+      if (error) {
+        console.error('Error loading current portfolios for purchases:', error);
+      }
+      
+      // Map purchases to current marketplace data
       const processedPurchases = purchases.map(purchase => {
-        // Extract metadata from images field (where we store extra data as JSON)
+        // Find the current marketplace data for this purchase
+        const currentProduct = currentPortfolios?.find(p => p.id === purchase.id) || purchase;
+        
+        // Extract metadata from current product (same logic as marketplace)
         let metadata = {};
         try {
-          metadata = typeof purchase.images === 'string' ? JSON.parse(purchase.images) : purchase.images || {};
+          metadata = typeof currentProduct.images === 'string' ? JSON.parse(currentProduct.images) : currentProduct.images || {};
         } catch (e) {
           metadata = {};
         }
-
+        
+        // Use CURRENT marketplace data, not old purchase data
         return {
           ...purchase,
-          // Use metadata from JSON or fallback to basic values
-          riskLevel: purchase.risk_level || purchase.riskLevel || 'Medium',
-          expectedReturn: metadata.expectedReturn || purchase.expectedReturn || null,
-          minimumInvestment: metadata.minimumInvestment || purchase.minimumInvestment || purchase.price,
-          assetAllocation: metadata.assetAllocation || purchase.assetAllocation || null,
-          seller: metadata.seller || purchase.seller || {
+          // Map current data (this ensures purchases show the latest marketplace info)
+          title: currentProduct.title || purchase.title,
+          description: currentProduct.description || purchase.description,
+          price: currentProduct.price || purchase.price,
+          riskLevel: currentProduct.risk_level || purchase.riskLevel || 'Medium',
+          expectedReturn: metadata.expectedReturn || null,
+          minimumInvestment: metadata.minimumInvestment || currentProduct.price,
+          assetAllocation: metadata.assetAllocation || null,
+          seller: metadata.seller || {
             name: 'Anonymous',
             bio: 'Product creator on FlowInvestAI marketplace',
             avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
             socialLinks: {},
             specialties: []
           },
-          totalInvestors: metadata.totalInvestors || purchase.totalInvestors || 0,
-          totalReviews: metadata.totalReviews || purchase.totalReviews || 0,
-          rating: metadata.rating || purchase.rating || 0,
-          votes: metadata.votes || purchase.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
-          images: metadata.actualImages || purchase.actualImages || []
+          totalInvestors: metadata.totalInvestors || 0,
+          totalReviews: metadata.totalReviews || 0,
+          rating: metadata.rating || 0,
+          votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
+          images: metadata.actualImages || []
         };
       });
       
