@@ -154,6 +154,29 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
         return updatedProduct;
       });
       
+      // Calculate real investor counts from purchase data (same as marketplace)
+      const { data: allPurchases, error: purchaseError } = await supabase
+        .from('user_purchases')
+        .select('portfolio_id, user_id');
+      
+      if (!purchaseError && allPurchases) {
+        // Count unique investors per product
+        const investorCounts = {};
+        allPurchases.forEach(purchase => {
+          const productId = purchase.portfolio_id;
+          if (!investorCounts[productId]) {
+            investorCounts[productId] = new Set();
+          }
+          investorCounts[productId].add(purchase.user_id);
+        });
+        
+        // Update portfolios with real investor counts
+        processedPortfolios.forEach(portfolio => {
+          const uniqueInvestors = investorCounts[portfolio.id];
+          portfolio.totalInvestors = uniqueInvestors ? uniqueInvestors.size : 0;
+        });
+      }
+      
       // Filter products by seller name
       const sellerPortfolios = processedPortfolios.filter(product => 
         product.seller && product.seller.name === seller.name
