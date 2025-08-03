@@ -101,11 +101,17 @@ const Portfolios = () => {
         let updatedProduct = { 
           ...product,
           // Map Supabase fields to frontend expected format
-          riskLevel: product.risk_level,
-          expectedReturn: product.expected_return,
-          minimumInvestment: product.minimum_investment,
-          assetAllocation: product.asset_allocation,
-          seller: product.seller_info,
+          riskLevel: product.risk_level || 'Medium',
+          expectedReturn: product.expected_return || null,
+          minimumInvestment: product.minimum_investment || product.price,
+          assetAllocation: product.asset_allocation || null,
+          seller: product.seller_info || {
+            name: 'Anonymous',
+            bio: 'Product creator on FlowInvestAI marketplace',
+            avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
+            socialLinks: {},
+            specialties: []
+          },
           totalInvestors: product.total_investors || 0,
           totalReviews: product.total_reviews || 0,
           rating: product.rating || 0
