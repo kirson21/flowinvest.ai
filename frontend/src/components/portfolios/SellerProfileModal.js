@@ -78,27 +78,88 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
     }
   }, [isOpen, seller]);
 
-  const loadSellerProducts = () => {
+  const loadSellerProducts = async () => {
     try {
-      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      const mockPortfolios = JSON.parse(localStorage.getItem('mock_portfolios') || '[]');
-      const allPortfolios = [...userPortfolios, ...mockPortfolios];
-      const productVotes = loadProductVotes();
+      console.log('=== SELLER PRODUCTS DEBUG (SUPABASE MODE) ===');
+      console.log('Loading products for seller:', seller.name);
       
-      // Filter products by seller name and merge with vote data
-      const sellerPortfolios = allPortfolios.filter(product => 
-        product.seller && product.seller.name === seller.name
-      ).map(product => {
-        // Merge with vote data from localStorage (sync with marketplace)
-        const updatedProduct = { ...product };
+      // Load from Supabase (same source as marketplace) instead of localStorage
+      const { data: allPortfolios, error } = await supabase
+        .from('portfolios')
+        .select('*');
+      
+      if (error) {
+        console.error('Error loading portfolios from Supabase:', error);
+        setSellerProducts([]);
+        return;
+      }
+      
+      console.log('All portfolios from Supabase:', allPortfolios);
+      
+      // Load review and vote data for proper display
+      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
+      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      
+      // Process portfolios with same logic as marketplace
+      const processedPortfolios = (allPortfolios || []).map(product => {
+        // Extract metadata from images field (same as marketplace)
+        let metadata = {};
+        try {
+          metadata = typeof product.images === 'string' ? JSON.parse(product.images) : product.images || {};
+        } catch (e) {
+          metadata = {};
+        }
+
+        let updatedProduct = { 
+          ...product,
+          // Map Supabase fields to frontend expected format (same as marketplace)
+          riskLevel: product.risk_level || 'Medium',
+          expectedReturn: metadata.expectedReturn || null,
+          minimumInvestment: metadata.minimumInvestment || product.price,
+          assetAllocation: metadata.assetAllocation || null,
+          seller: metadata.seller || {
+            name: 'Anonymous',
+            bio: 'Product creator on FlowInvestAI marketplace',
+            avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
+            socialLinks: {},
+            specialties: []
+          },
+          totalInvestors: metadata.totalInvestors || 0,
+          totalReviews: metadata.totalReviews || 0,
+          rating: metadata.rating || 0,
+          votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
+          images: metadata.actualImages || []
+        };
+        
+        // Update review data (same as marketplace)
+        const sellerName = (metadata.seller && metadata.seller.name);
+        if (sellerName && sellerReviews[sellerName]) {
+          const productReviews = sellerReviews[sellerName] || [];
+          if (productReviews.length > 0) {
+            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
+            updatedProduct = {
+              ...updatedProduct,
+              rating: Math.round(avgRating * 10) / 10,
+              totalReviews: productReviews.length
+            };
+          }
+        }
+        
+        // Update vote data (same as marketplace)
         if (productVotes[product.id]) {
           updatedProduct.votes = productVotes[product.id];
-        } else {
-          // Initialize votes if they don't exist
-          updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
         }
+        
         return updatedProduct;
       });
+      
+      // Filter products by seller name
+      const sellerPortfolios = processedPortfolios.filter(product => 
+        product.seller && product.seller.name === seller.name
+      );
+      
+      console.log('Filtered seller portfolios:', sellerPortfolios);
+      console.log('=== END SELLER PRODUCTS DEBUG ===');
       
       setSellerProducts(sellerPortfolios);
     } catch (error) {
