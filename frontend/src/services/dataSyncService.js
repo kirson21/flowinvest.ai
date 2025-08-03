@@ -481,15 +481,6 @@ export const dataSyncService = {
         asset_type: portfolioData.assetType || portfolioData.asset_type || 'stock',
         content: portfolioData.content || [],
         images: portfolioData.images || [],
-        // Add missing metadata fields
-        expected_return: portfolioData.expectedReturn || null,
-        minimum_investment: parseFloat(portfolioData.minimumInvestment) || null,
-        asset_allocation: portfolioData.assetAllocation || null,
-        seller_info: portfolioData.seller || null,
-        total_investors: portfolioData.totalInvestors || 0,
-        rating: portfolioData.rating || 0,
-        total_reviews: portfolioData.totalReviews || 0,
-        votes: portfolioData.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
         created_at: portfolioData.createdAt || portfolioData.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
