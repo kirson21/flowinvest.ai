@@ -204,10 +204,13 @@ const Portfolios = () => {
         return updatedProduct;
       });
       
-      setPortfolios(updatedPortfolios);
+      // Calculate real investor counts from purchase data
+      const portfoliosWithRealInvestors = await calculateRealInvestorCounts(updatedPortfolios);
+      
+      setPortfolios(portfoliosWithRealInvestors);
       
       // Apply current filter to updated portfolios
-      applyFilter(selectedFilter, updatedPortfolios);
+      applyFilter(selectedFilter, portfoliosWithRealInvestors);
       
       console.log('Loaded live portfolios from Supabase:', updatedPortfolios.length);
     } catch (error) {
