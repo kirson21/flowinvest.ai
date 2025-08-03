@@ -754,20 +754,7 @@ const Portfolios = () => {
         </div>
       )}
 
-      {/* Super Admin Delete Button - Always visible to super admin */}
-      {isSuperAdmin() && (
-        <div className="absolute top-2 right-2 z-10">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleSuperAdminDelete(portfolio.id)}
-            className="bg-red-50 dark:bg-red-900 border-red-300 dark:border-red-600 text-red-700 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-800 shadow-sm"
-          >
-            <Trash2 size={12} className="mr-1" />
-            Delete
-          </Button>
-        </div>
-      )}
+      {/* Super Admin Delete Button - REMOVED - Use edit modal instead */}
       
       <CardHeader className="pb-3 pt-6">
         <div className="flex items-start justify-between mb-2">
