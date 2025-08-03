@@ -215,9 +215,11 @@ const Portfolios = () => {
   const loadUserPurchases = async () => {
     if (!user) return;
     try {
-      const purchases = await dataSyncService.syncUserPurchases(user.id);
-      console.log('=== MY PURCHASES DEBUG ===');
-      console.log('Raw purchases from storage:', purchases);
+      console.log('=== MY PURCHASES DEBUG (EMERGENCY LOCALSTORAGE MODE) ===');
+      
+      // EMERGENCY FIX: Use localStorage only, bypass broken Supabase user_purchases table
+      const purchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
+      console.log('Raw purchases from localStorage:', purchases);
       
       // Get current marketplace data to ensure purchases show the latest info
       const { data: currentPortfolios, error } = await supabase
