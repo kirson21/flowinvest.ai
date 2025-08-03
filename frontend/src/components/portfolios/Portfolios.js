@@ -98,11 +98,22 @@ const Portfolios = () => {
       
       // Update products with real review data and votes
       const updatedPortfolios = (allPortfolios || []).map(product => {
-        let updatedProduct = { ...product };
+        let updatedProduct = { 
+          ...product,
+          // Map Supabase fields to frontend expected format
+          riskLevel: product.risk_level,
+          expectedReturn: product.expected_return,
+          minimumInvestment: product.minimum_investment,
+          assetAllocation: product.asset_allocation,
+          seller: product.seller_info,
+          totalInvestors: product.total_investors || 0,
+          totalReviews: product.total_reviews || 0,
+          rating: product.rating || 0
+        };
         
         // Update review data
-        if (product.seller && product.seller.name) {
-          const productReviews = sellerReviews[product.seller.name] || [];
+        if (product.seller_info && product.seller_info.name) {
+          const productReviews = sellerReviews[product.seller_info.name] || [];
           if (productReviews.length > 0) {
             const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
             updatedProduct = {
@@ -116,6 +127,8 @@ const Portfolios = () => {
         // Update vote data - ensure votes object exists
         if (productVotes[product.id]) {
           updatedProduct.votes = productVotes[product.id];
+        } else if (product.votes) {
+          updatedProduct.votes = product.votes;
         } else {
           // Initialize votes for products
           updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
