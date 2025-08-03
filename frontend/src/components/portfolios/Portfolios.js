@@ -316,19 +316,11 @@ const Portfolios = () => {
       purchasedBy: user.id
     };
 
-    // EMERGENCY FIX: Save to localStorage only, bypass broken Supabase user_purchases
-    try {
-      const existingPurchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
-      const updatedPurchases = [...existingPurchases, purchaseData];
-      localStorage.setItem(`user_purchases_${user.id}`, JSON.stringify(updatedPurchases));
-      
-      setUserPurchases(prev => [...prev, purchaseData]);
-      alert('✅ Product purchased successfully!');
-      console.log('Purchase saved to localStorage:', purchaseData);
-    } catch (error) {
-      console.error('Error saving purchase to localStorage:', error);
-      alert('❌ Failed to save purchase');
-    }
+    // Save purchase using data sync service for cross-device sync
+    dataSyncService.saveUserPurchases(user.id, [...userPurchases, purchaseData]);
+    
+    setUserPurchases(prev => [...prev, purchaseData]);
+    alert('✅ Product purchased successfully!');
   };
 
   // Handle removing a purchase from My Purchases
