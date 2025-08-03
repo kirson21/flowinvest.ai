@@ -472,6 +472,7 @@ export const dataSyncService = {
       const portfolioToSave = {
         id: portfolioId,
         user_id: portfolioData.userId || portfolioData.user_id,
+        name: portfolioData.title || portfolioData.name || 'Unnamed Portfolio', // Add required name field
         title: portfolioData.title || 'Unnamed Portfolio',
         description: portfolioData.description || '',
         category: portfolioData.category || 'other',
