@@ -721,8 +721,8 @@ const Portfolios = () => {
         </div>
       )}
 
-      {/* Super Admin Delete Button - Only visible to super admin */}
-      {isSuperAdmin() && !canEditProduct(portfolio) && (
+      {/* Super Admin Delete Button - Always visible to super admin */}
+      {isSuperAdmin() && (
         <div className="absolute top-2 right-2 z-10">
           <Button
             size="sm"
