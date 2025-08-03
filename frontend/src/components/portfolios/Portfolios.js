@@ -500,20 +500,35 @@ const Portfolios = () => {
       return;
     }
     
+    console.log('Attempting to delete portfolio with ID:', productId);
+    
     if (window.confirm('Are you sure you want to delete this portfolio? This action cannot be undone.')) {
       try {
         // Delete from Supabase
+        console.log('Deleting from Supabase with ID:', productId);
         const { error } = await supabase
           .from('portfolios')
           .delete()
           .eq('id', productId);
 
         if (error) {
-          console.error('Error deleting portfolio from Supabase:', error);
-          alert('❌ Failed to delete portfolio from database');
+          console.error('Supabase deletion error:', error);
+          console.log('Attempting localStorage-only deletion...');
+          
+          // If Supabase fails, still try localStorage deletion
+          const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+          const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
+          localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+          
+          // Also remove from current state
+          setPortfolios(prev => prev.filter(p => p.id !== productId));
+          
+          alert('✅ Portfolio deleted from local storage (Supabase failed)');
           return;
         }
 
+        console.log('Supabase deletion successful');
+        
         // Also remove from localStorage as fallback
         const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
         const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
@@ -524,7 +539,7 @@ const Portfolios = () => {
         alert('✅ Portfolio deleted successfully by super admin');
       } catch (error) {
         console.error('Error deleting portfolio:', error);
-        alert('❌ Failed to delete portfolio');
+        alert('❌ Failed to delete portfolio: ' + error.message);
       }
     }
   };
