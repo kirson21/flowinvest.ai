@@ -127,9 +127,10 @@ const Portfolios = () => {
           images: metadata.actualImages || []
         };
         
-        // Update review data
-        if (product.seller_info && product.seller_info.name) {
-          const productReviews = sellerReviews[product.seller_info.name] || [];
+        // Update review data - check both stored seller and metadata seller
+        const sellerName = (metadata.seller && metadata.seller.name) || (product.seller_info && product.seller_info.name);
+        if (sellerName) {
+          const productReviews = sellerReviews[sellerName] || [];
           if (productReviews.length > 0) {
             const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
             updatedProduct = {
