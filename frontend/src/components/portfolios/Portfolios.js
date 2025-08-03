@@ -495,52 +495,78 @@ const Portfolios = () => {
 
   // Super admin function to delete any portfolio
   const handleSuperAdminDelete = async (productId) => {
+    console.log('=== DELETE ATTEMPT STARTED ===');
+    console.log('Product ID to delete:', productId);
+    console.log('Product ID type:', typeof productId);
+    
     if (!isSuperAdmin()) {
       alert('❌ Only super admin can delete any portfolio');
       return;
     }
     
-    console.log('Attempting to delete portfolio with ID:', productId);
-    
     if (window.confirm('Are you sure you want to delete this portfolio? This action cannot be undone.')) {
+      console.log('User confirmed deletion, proceeding...');
+      
       try {
+        // First, check if the portfolio exists in Supabase
+        console.log('Checking if portfolio exists in Supabase...');
+        const { data: existingPortfolio, error: checkError } = await supabase
+          .from('portfolios')
+          .select('id, title')
+          .eq('id', productId)
+          .single();
+        
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error('Error checking portfolio existence:', checkError);
+        }
+        
+        console.log('Portfolio exists in Supabase:', existingPortfolio);
+        
         // Delete from Supabase
-        console.log('Deleting from Supabase with ID:', productId);
-        const { error } = await supabase
+        console.log('Attempting Supabase deletion...');
+        const { error: deleteError } = await supabase
           .from('portfolios')
           .delete()
           .eq('id', productId);
 
-        if (error) {
-          console.error('Supabase deletion error:', error);
-          console.log('Attempting localStorage-only deletion...');
-          
-          // If Supabase fails, still try localStorage deletion
-          const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-          const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
-          localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
-          
-          // Also remove from current state
-          setPortfolios(prev => prev.filter(p => p.id !== productId));
-          
-          alert('✅ Portfolio deleted from local storage (Supabase failed)');
-          return;
+        if (deleteError) {
+          console.error('Supabase deletion failed:', deleteError);
+        } else {
+          console.log('Supabase deletion successful');
         }
-
-        console.log('Supabase deletion successful');
         
-        // Also remove from localStorage as fallback
+        // Always try localStorage deletion regardless of Supabase result
+        console.log('Attempting localStorage deletion...');
         const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-        const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
-        localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+        console.log('Current localStorage portfolios count:', userPortfolios.length);
         
-        // Refresh the portfolios list
-        loadProductsWithReviews();
-        alert('✅ Portfolio deleted successfully by super admin');
+        const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
+        console.log('Filtered localStorage portfolios count:', filteredUserPortfolios.length);
+        
+        localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+        console.log('localStorage updated');
+        
+        // Force immediate UI update
+        console.log('Forcing UI update...');
+        setPortfolios(prev => {
+          const filtered = prev.filter(p => p.id !== productId);
+          console.log('UI state updated - before:', prev.length, 'after:', filtered.length);
+          return filtered;
+        });
+        
+        // Also refresh from Supabase
+        console.log('Refreshing from Supabase...');
+        await loadProductsWithReviews();
+        
+        console.log('=== DELETE ATTEMPT COMPLETED ===');
+        alert('✅ Portfolio deletion completed - check console for details');
+        
       } catch (error) {
-        console.error('Error deleting portfolio:', error);
+        console.error('=== DELETE ERROR ===', error);
         alert('❌ Failed to delete portfolio: ' + error.message);
       }
+    } else {
+      console.log('User cancelled deletion');
     }
   };
 
