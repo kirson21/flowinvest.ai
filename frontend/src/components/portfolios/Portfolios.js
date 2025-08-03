@@ -216,7 +216,40 @@ const Portfolios = () => {
     if (!user) return;
     try {
       const purchases = await dataSyncService.syncUserPurchases(user.id);
-      setUserPurchases(purchases);
+      
+      // Apply the same metadata extraction logic as main portfolios
+      const processedPurchases = purchases.map(purchase => {
+        // Extract metadata from images field (where we store extra data as JSON)
+        let metadata = {};
+        try {
+          metadata = typeof purchase.images === 'string' ? JSON.parse(purchase.images) : purchase.images || {};
+        } catch (e) {
+          metadata = {};
+        }
+
+        return {
+          ...purchase,
+          // Use metadata from JSON or fallback to basic values
+          riskLevel: purchase.risk_level || purchase.riskLevel || 'Medium',
+          expectedReturn: metadata.expectedReturn || purchase.expectedReturn || null,
+          minimumInvestment: metadata.minimumInvestment || purchase.minimumInvestment || purchase.price,
+          assetAllocation: metadata.assetAllocation || purchase.assetAllocation || null,
+          seller: metadata.seller || purchase.seller || {
+            name: 'Anonymous',
+            bio: 'Product creator on FlowInvestAI marketplace',
+            avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
+            socialLinks: {},
+            specialties: []
+          },
+          totalInvestors: metadata.totalInvestors || purchase.totalInvestors || 0,
+          totalReviews: metadata.totalReviews || purchase.totalReviews || 0,
+          rating: metadata.rating || purchase.rating || 0,
+          votes: metadata.votes || purchase.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
+          images: metadata.actualImages || purchase.actualImages || []
+        };
+      });
+      
+      setUserPurchases(processedPurchases);
     } catch (error) {
       console.error('Error loading user purchases:', error);
       setUserPurchases([]);
