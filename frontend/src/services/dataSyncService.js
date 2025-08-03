@@ -476,7 +476,7 @@ export const dataSyncService = {
         description: portfolioData.description || '',
         category: portfolioData.category || 'other',
         price: parseFloat(portfolioData.price) || 0,
-        risk_level: portfolioData.riskLevel || portfolioData.risk_level || 'medium',
+        risk_level: (portfolioData.riskLevel || portfolioData.risk_level || 'medium').toLowerCase(),
         asset_type: portfolioData.assetType || portfolioData.asset_type || 'stock',
         content: portfolioData.content || [],
         images: portfolioData.images || [],
