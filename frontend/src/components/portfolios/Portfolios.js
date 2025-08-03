@@ -98,23 +98,33 @@ const Portfolios = () => {
       
       // Update products with real review data and votes
       const updatedPortfolios = (allPortfolios || []).map(product => {
+        // Extract metadata from images field (where we store extra data as JSON)
+        let metadata = {};
+        try {
+          metadata = typeof product.images === 'string' ? JSON.parse(product.images) : product.images || {};
+        } catch (e) {
+          metadata = {};
+        }
+
         let updatedProduct = { 
           ...product,
-          // Map Supabase fields to frontend expected format
+          // Use metadata from JSON or fallback to basic values
           riskLevel: product.risk_level || 'Medium',
-          expectedReturn: product.expected_return || null,
-          minimumInvestment: product.minimum_investment || product.price,
-          assetAllocation: product.asset_allocation || null,
-          seller: product.seller_info || {
+          expectedReturn: metadata.expectedReturn || null,
+          minimumInvestment: metadata.minimumInvestment || product.price,
+          assetAllocation: metadata.assetAllocation || null,
+          seller: metadata.seller || {
             name: 'Anonymous',
             bio: 'Product creator on FlowInvestAI marketplace',
             avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
             socialLinks: {},
             specialties: []
           },
-          totalInvestors: product.total_investors || 0,
-          totalReviews: product.total_reviews || 0,
-          rating: product.rating || 0
+          totalInvestors: metadata.totalInvestors || 0,
+          totalReviews: metadata.totalReviews || 0,
+          rating: metadata.rating || 0,
+          votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
+          images: metadata.actualImages || []
         };
         
         // Update review data
