@@ -388,7 +388,8 @@ const Portfolios = () => {
       ...product,
       purchaseId: `purchase_${Date.now()}_${user.id}`,
       purchasedAt: new Date().toISOString(),
-      purchasedBy: user.id
+      purchasedBy: user.id,
+      portfolio_id: product.id // Add portfolio_id for investor counting
     };
 
     // Save purchase using data sync service for cross-device sync
