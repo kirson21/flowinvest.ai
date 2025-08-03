@@ -493,21 +493,38 @@ const Portfolios = () => {
   };
 
   // Super admin function to delete any portfolio
-  const handleSuperAdminDelete = (productId) => {
+  const handleSuperAdminDelete = async (productId) => {
     if (!isSuperAdmin()) {
       alert('❌ Only super admin can delete any portfolio');
       return;
     }
     
     if (window.confirm('Are you sure you want to delete this portfolio? This action cannot be undone.')) {
-      // Remove from user portfolios
-      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
-      localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
-      
-      // Refresh the portfolios list
-      loadProductsWithReviews();
-      alert('✅ Portfolio deleted successfully by super admin');
+      try {
+        // Delete from Supabase
+        const { error } = await supabase
+          .from('portfolios')
+          .delete()
+          .eq('id', productId);
+
+        if (error) {
+          console.error('Error deleting portfolio from Supabase:', error);
+          alert('❌ Failed to delete portfolio from database');
+          return;
+        }
+
+        // Also remove from localStorage as fallback
+        const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
+        const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
+        localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+        
+        // Refresh the portfolios list
+        loadProductsWithReviews();
+        alert('✅ Portfolio deleted successfully by super admin');
+      } catch (error) {
+        console.error('Error deleting portfolio:', error);
+        alert('❌ Failed to delete portfolio');
+      }
     }
   };
 
