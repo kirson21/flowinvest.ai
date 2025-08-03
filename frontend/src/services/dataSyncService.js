@@ -472,7 +472,7 @@ export const dataSyncService = {
       const portfolioToSave = {
         id: portfolioId,
         user_id: portfolioData.userId || portfolioData.user_id,
-        name: portfolioData.title || portfolioData.name || 'Unnamed Portfolio', // Add required name field
+        name: portfolioData.title || portfolioData.name || 'Unnamed Portfolio',
         title: portfolioData.title || 'Unnamed Portfolio',
         description: portfolioData.description || '',
         category: portfolioData.category || 'other',
@@ -480,7 +480,18 @@ export const dataSyncService = {
         risk_level: (portfolioData.riskLevel || portfolioData.risk_level || 'medium').toLowerCase(),
         asset_type: portfolioData.assetType || portfolioData.asset_type || 'stock',
         content: portfolioData.content || [],
-        images: portfolioData.images || [],
+        images: JSON.stringify({
+          // Store all the extra metadata in the images field as JSON
+          seller: portfolioData.seller || null,
+          expectedReturn: portfolioData.expectedReturn || null,
+          minimumInvestment: portfolioData.minimumInvestment || null,
+          assetAllocation: portfolioData.assetAllocation || null,
+          totalInvestors: portfolioData.totalInvestors || 0,
+          rating: portfolioData.rating || 0,
+          totalReviews: portfolioData.totalReviews || 0,
+          votes: portfolioData.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
+          actualImages: portfolioData.images || []
+        }),
         created_at: portfolioData.createdAt || portfolioData.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
