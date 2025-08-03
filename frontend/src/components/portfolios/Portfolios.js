@@ -216,6 +216,8 @@ const Portfolios = () => {
     if (!user) return;
     try {
       const purchases = await dataSyncService.syncUserPurchases(user.id);
+      console.log('=== MY PURCHASES DEBUG ===');
+      console.log('Raw purchases from storage:', purchases);
       
       // Get current marketplace data to ensure purchases show the latest info
       const { data: currentPortfolios, error } = await supabase
@@ -226,29 +228,39 @@ const Portfolios = () => {
         console.error('Error loading current portfolios for purchases:', error);
       }
       
+      console.log('Current portfolios from Supabase:', currentPortfolios);
+      
       // Map purchases to current marketplace data
       const processedPurchases = purchases.map(purchase => {
+        console.log('Processing purchase:', purchase.id, purchase.title);
+        
         // Find the current marketplace data for this purchase
-        const currentProduct = currentPortfolios?.find(p => p.id === purchase.id) || purchase;
+        const currentProduct = currentPortfolios?.find(p => p.id === purchase.id);
+        console.log('Found matching product:', currentProduct ? currentProduct.title : 'NOT FOUND');
+        
+        const productToUse = currentProduct || purchase;
         
         // Extract metadata from current product (same logic as marketplace)
         let metadata = {};
         try {
-          metadata = typeof currentProduct.images === 'string' ? JSON.parse(currentProduct.images) : currentProduct.images || {};
+          metadata = typeof productToUse.images === 'string' ? JSON.parse(productToUse.images) : productToUse.images || {};
         } catch (e) {
           metadata = {};
         }
         
+        console.log('Extracted metadata:', metadata);
+        console.log('Seller from metadata:', metadata.seller);
+        
         // Use CURRENT marketplace data, not old purchase data
-        return {
+        const processedPurchase = {
           ...purchase,
           // Map current data (this ensures purchases show the latest marketplace info)
-          title: currentProduct.title || purchase.title,
-          description: currentProduct.description || purchase.description,
-          price: currentProduct.price || purchase.price,
-          riskLevel: currentProduct.risk_level || purchase.riskLevel || 'Medium',
+          title: productToUse.title || purchase.title,
+          description: productToUse.description || purchase.description,
+          price: productToUse.price || purchase.price,
+          riskLevel: productToUse.risk_level || purchase.riskLevel || 'Medium',
           expectedReturn: metadata.expectedReturn || null,
-          minimumInvestment: metadata.minimumInvestment || currentProduct.price,
+          minimumInvestment: metadata.minimumInvestment || productToUse.price,
           assetAllocation: metadata.assetAllocation || null,
           seller: metadata.seller || {
             name: 'Anonymous',
@@ -263,8 +275,12 @@ const Portfolios = () => {
           votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
           images: metadata.actualImages || []
         };
+        
+        console.log('Final processed purchase:', processedPurchase);
+        return processedPurchase;
       });
       
+      console.log('=== END MY PURCHASES DEBUG ===');
       setUserPurchases(processedPurchases);
     } catch (error) {
       console.error('Error loading user purchases:', error);
