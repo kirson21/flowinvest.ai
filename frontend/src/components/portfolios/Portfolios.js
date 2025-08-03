@@ -1310,9 +1310,35 @@ const PurchasedProductModal = ({ product, isOpen, onClose }) => {
             </div>
 
             {/* Rich content blocks */}
-            {product.contentBlocks && product.contentBlocks.length > 0 && (
+            {(() => {
+              console.log('=== CONTENT DEBUG ===');
+              console.log('product.contentBlocks:', product.contentBlocks);
+              console.log('product.content:', product.content);
+              console.log('product (full):', product);
+              return null;
+            })()}
+            
+            {product.contentBlocks && product.contentBlocks.length > 0 ? (
               <div className="space-y-4">
+                <h4 className="text-md font-medium text-[#474545] dark:text-white mb-2">
+                  Rich Content
+                </h4>
                 {product.contentBlocks.map((block, index) => renderContentBlock(block, index))}
+              </div>
+            ) : product.content ? (
+              <div className="space-y-4">
+                <h4 className="text-md font-medium text-[#474545] dark:text-white mb-2">
+                  Content
+                </h4>
+                <div className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  {typeof product.content === 'string' ? product.content : JSON.stringify(product.content, null, 2)}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
+                <p className="text-gray-500 dark:text-gray-400 text-center">
+                  No additional content available for this product.
+                </p>
               </div>
             )}
 
