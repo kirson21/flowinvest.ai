@@ -336,15 +336,21 @@ const Portfolios = () => {
     if (!user?.id) return;
 
     if (window.confirm('Are you sure you want to remove this item from your purchases? You can always purchase it again later.')) {
-      const updatedPurchases = userPurchases.filter(purchase => 
-        (purchase.purchaseId || purchase.id) !== purchaseId
-      );
-      
-      // Update purchase list using data sync service
-      dataSyncService.saveUserPurchases(user.id, updatedPurchases);
-      setUserPurchases(updatedPurchases);
-      
-      alert('✅ Item removed from your purchases');
+      try {
+        // EMERGENCY FIX: Remove from localStorage only
+        const existingPurchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
+        const updatedPurchases = existingPurchases.filter(purchase => 
+          (purchase.purchaseId || purchase.id) !== purchaseId
+        );
+        localStorage.setItem(`user_purchases_${user.id}`, JSON.stringify(updatedPurchases));
+        
+        setUserPurchases(updatedPurchases);
+        alert('✅ Item removed from your purchases');
+        console.log('Purchase removed from localStorage:', purchaseId);
+      } catch (error) {
+        console.error('Error removing purchase:', error);
+        alert('❌ Failed to remove purchase');
+      }
     }
   };
 
