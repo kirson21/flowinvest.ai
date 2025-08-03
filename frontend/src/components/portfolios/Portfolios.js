@@ -310,24 +310,24 @@ const Portfolios = () => {
     }
 
     const purchaseData = {
-      id: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      user_id: user.id,
-      product_id: product.id,
-      product_name: product.title || product.name,
-      product_description: product.description || '',
-      price: product.price || 0,
-      seller_id: product.userId,
-      seller_name: product.author || 'Unknown Seller',
-      purchased_at: new Date().toISOString(),
-      status: 'completed'
+      ...product,
+      purchaseId: `purchase_${Date.now()}_${user.id}`,
+      purchasedAt: new Date().toISOString(),
+      purchasedBy: user.id
     };
 
+    // EMERGENCY FIX: Save to localStorage only, bypass broken Supabase user_purchases
     try {
-      await saveUserPurchase(purchaseData);
-      alert(`Successfully purchased ${product.title || product.name}!`);
+      const existingPurchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
+      const updatedPurchases = [...existingPurchases, purchaseData];
+      localStorage.setItem(`user_purchases_${user.id}`, JSON.stringify(updatedPurchases));
+      
+      setUserPurchases(prev => [...prev, purchaseData]);
+      alert('✅ Product purchased successfully!');
+      console.log('Purchase saved to localStorage:', purchaseData);
     } catch (error) {
-      console.error('Purchase failed:', error);
-      alert('Purchase failed. Please try again.');
+      console.error('Error saving purchase to localStorage:', error);
+      alert('❌ Failed to save purchase');
     }
   };
 
