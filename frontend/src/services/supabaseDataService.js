@@ -9,44 +9,44 @@ export const supabaseDataService = {
   // Debug function to test Supabase connection
   async testSupabaseConnection() {
     try {
-      console.log('=== SUPABASE DEBUGGING ===');
+      console.log('=== DETAILED SUPABASE DEBUGGING ===');
       console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
       console.log('Supabase Key present:', !!process.env.REACT_APP_SUPABASE_ANON_KEY);
       
-      // Test 1: Check if we can connect to Supabase at all
-      console.log('Test 1: Basic connection test...');
-      const { data: authData, error: authError } = await supabase.auth.getSession();
-      console.log('Auth session:', authData, 'Auth error:', authError);
+      // Test 1: Most basic test - just try to ping Supabase
+      console.log('Test 1: Basic ping test...');
+      try {
+        const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}/rest/v1/`, {
+          headers: {
+            'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`
+          }
+        });
+        console.log('Raw fetch response status:', response.status);
+        console.log('Raw fetch response:', await response.text());
+      } catch (fetchError) {
+        console.error('Raw fetch failed:', fetchError);
+      }
       
-      // Test 2: Try to access a known table (portfolios)
-      console.log('Test 2: Testing portfolios table access...');
+      // Test 2: Try portfolios table (we know this exists)
+      console.log('Test 2: Portfolios table test...');
       const { data: portfolioData, error: portfolioError } = await supabase
         .from('portfolios')
         .select('id')
         .limit(1);
-      console.log('Portfolios data:', portfolioData, 'Portfolios error:', portfolioError);
+      console.log('Portfolios result:', { data: portfolioData, error: portfolioError });
       
-      // Test 3: Try to access user_votes table
-      console.log('Test 3: Testing user_votes table access...');
+      // Test 3: Try user_votes table
+      console.log('Test 3: User votes table test...');
       const { data: votesData, error: votesError } = await supabase
         .from('user_votes')
         .select('id')
         .limit(1);
-      console.log('Votes data:', votesData, 'Votes error:', votesError);
-      
-      // Test 4: Check if we can list tables
-      console.log('Test 4: Testing if we can see table structure...');
-      try {
-        const { data: tableData, error: tableError } = await supabase
-          .rpc('get_schema_info'); // This might not exist, but let's try
-        console.log('Table data:', tableData, 'Table error:', tableError);
-      } catch (e) {
-        console.log('RPC call failed (expected):', e.message);
-      }
+      console.log('Votes result:', { data: votesData, error: votesError });
       
       return true;
     } catch (error) {
-      console.error('=== SUPABASE DEBUGGING ERROR ===', error);
+      console.error('=== SUPABASE DEBUGGING FAILED ===', error);
       return false;
     }
   },
