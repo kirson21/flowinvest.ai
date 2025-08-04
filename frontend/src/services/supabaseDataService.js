@@ -178,6 +178,8 @@ export const supabaseDataService = {
    */
   async getSellerReviews(sellerNames = []) {
     try {
+      console.log('Getting seller reviews for:', sellerNames);
+      
       let query = supabase
         .from('seller_reviews')
         .select('seller_name, rating, review_text, created_at, reviewer_id');
@@ -207,6 +209,7 @@ export const supabaseDataService = {
         });
       });
 
+      console.log('Successfully loaded seller reviews for sellers:', Object.keys(reviewsMap).length);
       return reviewsMap;
     } catch (error) {
       console.error('Error in getSellerReviews:', error);
