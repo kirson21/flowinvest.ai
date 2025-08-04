@@ -439,24 +439,19 @@ const Portfolios = () => {
       try {
         console.log('Removing purchase:', purchaseId, 'for user:', user.id);
         
-        // Remove from Supabase directly
+        // Delete from Supabase
         const { error: supabaseError } = await supabase
           .from('user_purchases')
           .delete()
           .eq('user_id', user.id)
           .eq('purchase_id', purchaseId);
-        
+
         if (supabaseError) {
           console.error('Supabase delete error:', supabaseError);
-          // Continue with localStorage removal even if Supabase fails
+          throw supabaseError; // Stop execution if Supabase fails
         }
         
-        // Also remove from localStorage as fallback
-        const localPurchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
-        const filteredPurchases = localPurchases.filter(purchase => 
-          (purchase.purchaseId || purchase.id) !== purchaseId
-        );
-        localStorage.setItem(`user_purchases_${user.id}`, JSON.stringify(filteredPurchases));
+        console.log('Purchase removed from Supabase successfully');
         
         // Update local state immediately
         setUserPurchases(prev => prev.filter(purchase => 
