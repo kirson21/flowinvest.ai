@@ -606,10 +606,8 @@ const Portfolios = () => {
     
     setPortfolios(updatedPortfolios);
     
-    // Save updated votes to localStorage
-    const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
-    productVotes[productId] = updatedPortfolios.find(p => p.id === productId)?.votes;
-    localStorage.setItem('product_votes', JSON.stringify(productVotes));
+    // Votes are now managed in Supabase via triggers, no need for localStorage
+    console.log('Product votes updated in memory for product:', productId);
     
     // Apply current filter to updated portfolios
     applyFilter(selectedFilter, updatedPortfolios);
