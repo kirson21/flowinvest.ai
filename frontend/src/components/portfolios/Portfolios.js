@@ -695,14 +695,10 @@ const Portfolios = () => {
 
       if (deleteError) {
         console.error('Supabase deletion failed:', deleteError);
-      } else {
-        console.log('Supabase deletion successful');
+        throw deleteError; // Stop execution if Supabase fails
       }
       
-      // Always try localStorage deletion regardless of Supabase result
-      const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-      const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
-      localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
+      console.log('Supabase deletion successful');
       
       // Force immediate UI update
       setPortfolios(prev => prev.filter(p => p.id !== productId));
