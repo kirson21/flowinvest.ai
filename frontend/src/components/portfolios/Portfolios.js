@@ -635,12 +635,12 @@ const Portfolios = () => {
     loadVerificationStatus();
   }, [user?.id]);
 
-  // Load user-created portfolios from localStorage/Supabase
+  // Load data from Supabase (no more localStorage dependencies)
   useEffect(() => {
     const loadData = async () => {
       await loadProductsWithReviews();
-      loadUserVotes();
       if (user?.id) {
+        await loadUserVotes();
         await loadUserPurchases();
       }
     };
