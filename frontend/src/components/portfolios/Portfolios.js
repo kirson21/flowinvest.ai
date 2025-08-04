@@ -268,23 +268,39 @@ const Portfolios = () => {
   const loadUserPurchases = async () => {
     if (!user) return;
     try {
-      console.log('=== MY PURCHASES DEBUG (SUPABASE MODE) ===');
+      console.log('=== MY PURCHASES DEBUG (DIRECT SUPABASE MODE) ===');
       
-      // Load purchases from Supabase for cross-device sync
-      const purchases = await dataSyncService.syncUserPurchases(user.id);
-      console.log('Raw purchases from Supabase/sync:', purchases);
+      // Load purchases directly from Supabase to avoid sync issues
+      const { data: rawPurchases, error } = await supabase
+        .from('user_purchases')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('purchased_at', { ascending: false });
       
-      // Load review data for rating calculations
+      if (error) {
+        console.error('Error loading purchases from Supabase:', error);
+        // Fallback to localStorage only if Supabase fails
+        const localPurchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
+        console.log('Using localStorage fallback:', localPurchases);
+        setUserPurchases(localPurchases);
+        return;
+      }
+      
+      // Extract purchase data from Supabase format
+      const purchases = rawPurchases.map(row => row.purchase_data || row);
+      console.log('Raw purchases from Supabase:', purchases);
+      
+      // Load review and vote data for proper display
       const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
       const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
       
       // Get current marketplace data to ensure purchases show the latest info
-      const { data: currentPortfolios, error } = await supabase
+      const { data: currentPortfolios, error: portfolioError } = await supabase
         .from('portfolios')
         .select('*');
       
-      if (error) {
-        console.error('Error loading current portfolios for purchases:', error);
+      if (portfolioError) {
+        console.error('Error loading current portfolios for purchases:', portfolioError);
       }
       
       console.log('Current portfolios from Supabase:', currentPortfolios);
@@ -322,7 +338,7 @@ const Portfolios = () => {
           minimumInvestment: metadata.minimumInvestment || productToUse.price,
           assetAllocation: metadata.assetAllocation || null,
           seller: metadata.seller || {
-            name: 'Anonymous',
+            name: 'Anonymous', 
             bio: 'Product creator on FlowInvestAI marketplace',
             avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
             socialLinks: {},
@@ -338,7 +354,7 @@ const Portfolios = () => {
         };
         
         // Update review data for proper star rating
-        const sellerName = (metadata.seller && metadata.seller.name) || (productToUse.seller_info && productToUse.seller_info.name);
+        const sellerName = (metadata.seller && metadata.seller.name);
         if (sellerName && sellerReviews[sellerName]) {
           const productReviews = sellerReviews[sellerName] || [];
           if (productReviews.length > 0) {
