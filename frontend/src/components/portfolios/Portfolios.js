@@ -42,8 +42,8 @@ import { verificationService } from '../../services/verificationService';
 const Portfolios = () => {
   const { user } = useAuth();
   const { t } = useApp();
-  const [portfolios, setPortfolios] = useState(mockPortfolios);
-  const [filteredPortfolios, setFilteredPortfolios] = useState(mockPortfolios);
+  const [portfolios, setPortfolios] = useState([]);
+  const [filteredPortfolios, setFilteredPortfolios] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('Most Popular');
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
