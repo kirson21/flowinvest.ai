@@ -146,7 +146,11 @@ const Portfolios = () => {
       // Load review and vote data from Supabase (no more localStorage)
       console.log('Loading reviews and votes from Supabase...');
       const sellerReviews = await supabaseDataService.getSellerReviews();
-      const productVotes = await supabaseDataService.getProductVotes();
+      const productVotesData = await supabaseDataService.getProductVotes();
+      
+      // Set the product votes in component state
+      setProductVotes(productVotesData);
+      console.log('Set product votes in state:', Object.keys(productVotesData).length);
       
       // Update products with real review data and votes
       const updatedPortfolios = (allPortfolios || []).map(product => {
