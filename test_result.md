@@ -105,7 +105,17 @@
 user_problem_statement: "UI Loading Bug – Remove Local Storage / Mock Data: When switching between menu tabs (e.g., My Bots, Marketplace), outdated elements (bots, products) briefly appear for a split second — likely being loaded from local storage or mock data before Supabase fetch completes. Task: Please remove all fallback loading from local storage or mock data for bots and marketplace products. Ensure that only real-time data from Supabase is used during rendering, even if it causes a brief loading state. The goal is to prevent any visual flickering or outdated content from appearing on tab switches."
 
 backend:
-  - task: "Fix Privacy Bug - My Bots Section"
+  - task: "Remove Mock Data Initialization from Components"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/bots/TradingBots.js, /app/frontend/src/components/portfolios/Portfolios.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "UI LOADING BUG FIX IMPLEMENTED: Removed mock data initialization from useState calls in both TradingBots.js and Portfolios.js components. Changed useState(mockTradingBots) to useState([]) and useState(mockPortfolios) to useState([]). Updated all fallback logic to use empty arrays instead of mock data. Removed unused imports of mockTradingBots and mockPortfolios. This should eliminate the flickering effect when switching between tabs as components will no longer show outdated mock data before Supabase data loads."
     implemented: true
     working: true
     file: "/app/frontend/src/components/bots/TradingBots.js"
