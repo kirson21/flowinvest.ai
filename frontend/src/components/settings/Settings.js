@@ -654,31 +654,27 @@ const Settings = () => {
 
   const saveSellerData = async () => {
     try {
-      const sellerProfile = {
+      if (!user?.id) {
+        setError('User not authenticated');
+        return;
+      }
+
+      console.log('Saving seller data to Supabase...');
+      const sellerProfileData = {
         socialLinks: sellerData.socialLinks,
         specialties: sellerData.specialties
       };
       
-      // Save to localStorage as fallback
-      localStorage.setItem(`seller_data_${user?.id}`, JSON.stringify(sellerProfile));
+      // Save to Supabase only (no more localStorage)
+      await supabaseDataService.saveSellerData(user.id, sellerProfileData, isSellerMode);
       
-      // Sync with dataSyncService for cross-device compatibility
-      try {
-        await dataSyncService.saveUserProfile(user?.id, {
-          seller_data: sellerProfile,
-          updated_at: new Date().toISOString()
-        });
-        console.log('Seller data synced across devices');
-      } catch (syncError) {
-        console.warn('Failed to sync seller data across devices:', syncError);
-        // Continue with localStorage-only save
-      }
-      
+      console.log('Seller data saved to Supabase successfully');
       setMessage('Seller profile updated successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error saving seller data:', error);
-      setError('Failed to save seller data');
+      setError('Failed to save seller data: ' + error.message);
+      setTimeout(() => setError(''), 3000);
     }
   };
 
