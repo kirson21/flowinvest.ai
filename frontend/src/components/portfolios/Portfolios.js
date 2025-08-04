@@ -281,10 +281,9 @@ const Portfolios = () => {
       
       if (error) {
         console.error('Error loading purchases from Supabase:', error);
-        // Fallback to localStorage only if Supabase fails
-        const localPurchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
-        console.log('Using localStorage fallback:', localPurchases);
-        setUserPurchases(localPurchases);
+        // Set empty state if Supabase fails - no localStorage fallback
+        console.log('Setting empty purchases due to Supabase error');
+        setUserPurchases([]);
         return;
       }
       
