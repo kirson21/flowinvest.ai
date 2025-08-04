@@ -558,7 +558,22 @@ const Portfolios = () => {
       
       // Reload product vote counts to get updated totals
       const updatedProductVotes = await supabaseDataService.getProductVotes([productId]);
-      setProductVotes(prev => ({ ...prev, ...updatedProductVotes }));
+      
+      // Update the portfolios state with new vote counts
+      setPortfolios(prev => prev.map(portfolio => {
+        if (portfolio.id === productId && updatedProductVotes[productId]) {
+          return { ...portfolio, votes: updatedProductVotes[productId] };
+        }
+        return portfolio;
+      }));
+      
+      // Also update filtered portfolios
+      setFilteredPortfolios(prev => prev.map(portfolio => {
+        if (portfolio.id === productId && updatedProductVotes[productId]) {
+          return { ...portfolio, votes: updatedProductVotes[productId] };
+        }
+        return portfolio;
+      }));
       
     } catch (error) {
       console.error('Error handling vote:', error);
