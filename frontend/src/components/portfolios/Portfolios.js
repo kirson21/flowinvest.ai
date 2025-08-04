@@ -299,7 +299,10 @@ const Portfolios = () => {
       // Load review and vote data from Supabase (no more localStorage)
       console.log('Loading reviews and votes from Supabase...');
       const sellerReviews = await supabaseDataService.getSellerReviews();
-      const productVotes = await supabaseDataService.getProductVotes();
+      const productVotesData = await supabaseDataService.getProductVotes();
+      
+      // Update the component state with latest vote data
+      setProductVotes(productVotesData);
       
       // Get current marketplace data to ensure purchases show the latest info
       const { data: currentPortfolios, error: portfolioError } = await supabase
