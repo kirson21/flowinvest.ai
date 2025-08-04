@@ -39,7 +39,10 @@ const ProtectedRoute = ({ children }) => {
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
+  console.log('PublicRoute check:', { user: user?.id, loading, isAuthenticated: !!user });
+
   if (loading) {
+    console.log('PublicRoute: Still loading, showing spinner');
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FAECEC] to-white flex items-center justify-center">
         <div className="text-center">
@@ -50,7 +53,13 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  return user ? <Navigate to="/app" replace /> : children;
+  if (user) {
+    console.log('PublicRoute: User authenticated, redirecting to /app');
+    return <Navigate to="/app" replace />;
+  } else {
+    console.log('PublicRoute: User not authenticated, showing login screen');
+    return children;
+  }
 };
 
 // Integration component that bridges old and new auth
