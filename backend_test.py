@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """
-Backend Testing Suite for Voting and Star Rating System Fixes
-Focus: Verify authentication checks, voting system, and star rating functionality
-Priority: Ensure no API key errors and proper Supabase integration
+Comprehensive Backend Testing Suite for Authentication and Voting System Verification
+After Frontend Auth Fix
+
+This test suite focuses on:
+1. Authentication System Post-Fix Verification
+2. Voting System Database Schema Verification (PostgreSQL UUID fix)
+3. Seller Reviews System Verification
+4. Supabase Data Service Operations
+5. Core Backend Stability Check
 """
 
 import requests
@@ -14,505 +20,752 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv('/app/frontend/.env')
+load_dotenv('/app/backend/.env')
 
-# Get backend URL from frontend environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'http://localhost:8001')
-API_BASE = f"{BACKEND_URL}/api"
+# Configuration
+BACKEND_URL = "https://a5788070-a9a8-4a59-9a84-ae18d931cf76.preview.emergentagent.com/api"
+TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"  # Development test user (super admin)
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 
-class VotingSystemTester:
+class BackendTester:
     def __init__(self):
-        self.test_results = []
-        self.test_user_id = str(uuid.uuid4())
-        self.test_email = f"voting_test_{uuid.uuid4().hex[:8]}@flowinvest.ai"
-        self.super_admin_uid = "cd0e9717-f85d-4726-81e9-f260394ead58"
-        self.auth_token = None
+        self.results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        self.failed_tests = 0
         
-    def log_test(self, test_name, success, details="", error=""):
-        """Log test results with enhanced formatting"""
-        status = "✅" if success else "❌"
+    def log_result(self, test_name, success, message, details=None):
+        """Log test result"""
+        self.total_tests += 1
+        if success:
+            self.passed_tests += 1
+            status = "✅ PASS"
+        else:
+            self.failed_tests += 1
+            status = "❌ FAIL"
+            
         result = {
-            "test": test_name,
-            "success": success,
-            "details": details,
-            "error": error,
-            "timestamp": datetime.now().isoformat()
+            'test': test_name,
+            'status': status,
+            'message': message,
+            'details': details,
+            'timestamp': datetime.now().isoformat()
         }
-        self.test_results.append(result)
-        print(f"{status} {test_name}: {details}")
-        if error:
-            print(f"   Error: {error}")
-        print()
-
-    def test_core_api_health(self):
-        """Test core API health - Priority 1"""
-        print("🔍 TESTING CORE API HEALTH...")
+        self.results.append(result)
+        print(f"{status}: {test_name} - {message}")
+        if details:
+            print(f"   Details: {details}")
+    
+    def test_core_backend_health(self):
+        """Test core backend health endpoints"""
+        print("\n=== CORE BACKEND HEALTH TESTS ===")
         
-        # Test API root
+        # Test 1: API Root endpoint
         try:
-            response = requests.get(f"{API_BASE}/", timeout=10)
+            response = requests.get(f"{BACKEND_URL}/", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                self.log_test("API Root Endpoint", True, f"Status: {response.status_code}, Environment: {data.get('environment', 'unknown')}")
+                self.log_result(
+                    "API Root Endpoint",
+                    True,
+                    f"API root accessible (Status: {response.status_code})",
+                    f"Environment: {data.get('environment', 'unknown')}, Status: {data.get('status', 'unknown')}"
+                )
             else:
-                self.log_test("API Root Endpoint", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "API Root Endpoint",
+                    False,
+                    f"API root returned status {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("API Root Endpoint", False, "Connection failed", str(e))
+            self.log_result("API Root Endpoint", False, f"API root request failed: {str(e)}")
         
-        # Test status endpoint
+        # Test 2: Status endpoint
         try:
-            response = requests.get(f"{API_BASE}/status", timeout=10)
+            response = requests.get(f"{BACKEND_URL}/status", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                self.log_test("Status Endpoint", True, f"Status: {data.get('status', 'unknown')}")
+                self.log_result(
+                    "Status Endpoint",
+                    True,
+                    f"Status endpoint working (Status: {response.status_code})",
+                    f"Status: {data.get('status', 'unknown')}, Environment: {data.get('environment', 'unknown')}"
+                )
             else:
-                self.log_test("Status Endpoint", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Status Endpoint",
+                    False,
+                    f"Status endpoint returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Status Endpoint", False, "Connection failed", str(e))
+            self.log_result("Status Endpoint", False, f"Status endpoint failed: {str(e)}")
         
-        # Test health endpoint
+        # Test 3: Health check endpoint
         try:
-            response = requests.get(f"{API_BASE}/health", timeout=10)
+            response = requests.get(f"{BACKEND_URL}/health", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                services = data.get('services', {})
-                self.log_test("Health Check", True, f"API: {services.get('api', 'unknown')}, Supabase: {services.get('supabase', 'unknown')}")
+                supabase_status = data.get('services', {}).get('supabase', 'unknown')
+                self.log_result(
+                    "Health Check Endpoint",
+                    True,
+                    f"Health check working (Status: {response.status_code})",
+                    f"API: {data.get('services', {}).get('api', 'unknown')}, Supabase: {supabase_status}"
+                )
             else:
-                self.log_test("Health Check", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Health Check Endpoint",
+                    False,
+                    f"Health check returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Health Check", False, "Connection failed", str(e))
-
+            self.log_result("Health Check Endpoint", False, f"Health check failed: {str(e)}")
+    
     def test_authentication_system(self):
-        """Test authentication system for voting and review features - Priority 1"""
-        print("🔍 TESTING AUTHENTICATION SYSTEM...")
+        """Test authentication system stability after frontend auth fix"""
+        print("\n=== AUTHENTICATION SYSTEM TESTS ===")
         
-        # Test auth health
+        # Test 1: Auth health check
         try:
-            response = requests.get(f"{API_BASE}/auth/health", timeout=10)
+            response = requests.get(f"{BACKEND_URL}/auth/health", timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 supabase_connected = data.get('supabase_connected', False)
-                self.log_test("Auth Health Check", True, f"Supabase connected: {supabase_connected}")
+                self.log_result(
+                    "Auth Health Check",
+                    supabase_connected,
+                    f"Auth service health check (Status: {response.status_code})",
+                    f"Supabase connected: {supabase_connected}, Success: {data.get('success', False)}"
+                )
             else:
-                self.log_test("Auth Health Check", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Auth Health Check",
+                    False,
+                    f"Auth health check returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Auth Health Check", False, "Connection failed", str(e))
+            self.log_result("Auth Health Check", False, f"Auth health check failed: {str(e)}")
         
-        # Test user signup (for authentication testing)
+        # Test 2: User signup (test user creation)
         try:
+            test_email = f"test_{uuid.uuid4().hex[:8]}@flowinvest.ai"
             signup_data = {
-                "email": self.test_email,
-                "password": "TestPassword123!",
-                "full_name": "Voting Test User"
+                "email": test_email,
+                "password": "testpassword123",
+                "full_name": "Test User",
+                "country": "US"
             }
-            response = requests.post(f"{API_BASE}/auth/signup", json=signup_data, timeout=10)
+            
+            response = requests.post(f"{BACKEND_URL}/auth/signup", json=signup_data, timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                user_id = data.get('user', {}).get('id')
-                if user_id and len(user_id) == 36:  # UUID format check
-                    self.test_user_id = user_id
-                    # Store auth token for authenticated requests
-                    session = data.get('session', {})
-                    self.auth_token = session.get('access_token')
-                    self.log_test("User Signup", True, f"Created user with UUID: {user_id[:8]}..., Auth token: {'Present' if self.auth_token else 'Missing'}")
-                else:
-                    self.log_test("User Signup", False, "Invalid or missing user ID format", str(data))
+                success = data.get('success', False)
+                user_created = data.get('user', {}).get('id') is not None
+                self.log_result(
+                    "User Signup",
+                    success and user_created,
+                    f"User signup working (Status: {response.status_code})",
+                    f"Test user created: {test_email}, User ID: {data.get('user', {}).get('id', 'N/A')[:8]}..."
+                )
             else:
-                self.log_test("User Signup", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "User Signup",
+                    False,
+                    f"User signup returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("User Signup", False, "Connection failed", str(e))
+            self.log_result("User Signup", False, f"User signup failed: {str(e)}")
         
-        # Test signin validation
+        # Test 3: Signin validation (should reject invalid credentials)
         try:
             signin_data = {
                 "email": "invalid@test.com",
                 "password": "wrongpassword"
             }
-            response = requests.post(f"{API_BASE}/auth/signin", json=signin_data, timeout=10)
-            if response.status_code == 401:
-                self.log_test("Signin Validation", True, "Correctly rejected invalid credentials")
-            else:
-                self.log_test("Signin Validation", False, f"Expected 401, got {response.status_code}", response.text[:200])
-        except Exception as e:
-            self.log_test("Signin Validation", False, "Connection failed", str(e))
-
-    def test_supabase_table_access(self):
-        """Test Supabase table access for voting and review systems - Priority 1"""
-        print("🔍 TESTING SUPABASE TABLE ACCESS...")
-        
-        # Test user_votes table accessibility (critical for voting system)
-        try:
-            # This would normally require authentication, but we're testing table structure
-            # We'll test this indirectly through the API endpoints
-            self.log_test("User Votes Table Structure", True, "Table structure verified through API endpoints")
-        except Exception as e:
-            self.log_test("User Votes Table Structure", False, "Error verifying table structure", str(e))
-        
-        # Test seller_reviews table accessibility (critical for star ratings)
-        try:
-            # This would normally require authentication, but we're testing table structure
-            # We'll test this indirectly through the API endpoints
-            self.log_test("Seller Reviews Table Structure", True, "Table structure verified through API endpoints")
-        except Exception as e:
-            self.log_test("Seller Reviews Table Structure", False, "Error verifying table structure", str(e))
-        
-        # Test portfolios table for vote counts
-        try:
-            # Test if portfolios table supports vote count fields
-            self.log_test("Portfolios Vote Count Fields", True, "Vote count fields supported in portfolios table")
-        except Exception as e:
-            self.log_test("Portfolios Vote Count Fields", False, "Error verifying vote count fields", str(e))
-
-    def test_voting_system_backend_support(self):
-        """Test backend support for voting system functionality - Priority 1"""
-        print("🔍 TESTING VOTING SYSTEM BACKEND SUPPORT...")
-        
-        # Test if backend can handle vote operations (simulated)
-        try:
-            # Since we don't have direct voting endpoints, we test the underlying infrastructure
-            # The voting system works through Supabase directly from frontend
-            self.log_test("Vote Operations Infrastructure", True, "Backend supports Supabase-based voting operations")
-        except Exception as e:
-            self.log_test("Vote Operations Infrastructure", False, "Error in voting infrastructure", str(e))
-        
-        # Test authentication checks for voting operations
-        try:
-            # Test that authentication is properly configured for protected operations
-            headers = {}
-            if self.auth_token:
-                headers['Authorization'] = f'Bearer {self.auth_token}'
             
-            # Test a protected endpoint to verify auth is working
-            response = requests.get(f"{API_BASE}/auth/user", headers=headers, timeout=10)
-            if response.status_code == 200:
-                self.log_test("Authentication for Voting", True, "Authentication system supports voting operations")
-            elif response.status_code == 401:
-                self.log_test("Authentication for Voting", True, "Authentication properly rejects unauthorized requests")
+            response = requests.post(f"{BACKEND_URL}/auth/signin", json=signin_data, timeout=10)
+            # Should return 401 for invalid credentials
+            if response.status_code == 401:
+                self.log_result(
+                    "Signin Validation",
+                    True,
+                    "Signin correctly rejects invalid credentials (Status: 401)",
+                    "Authentication validation working properly"
+                )
             else:
-                self.log_test("Authentication for Voting", False, f"Unexpected status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Signin Validation",
+                    False,
+                    f"Signin returned unexpected status {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Authentication for Voting", False, "Error testing authentication", str(e))
-
-    def test_star_rating_system_support(self):
-        """Test backend support for star rating system - Priority 1"""
-        print("🔍 TESTING STAR RATING SYSTEM SUPPORT...")
+            self.log_result("Signin Validation", False, f"Signin validation failed: {str(e)}")
         
-        # Test seller review system infrastructure
+        # Test 4: Super admin setup check
         try:
-            # The star rating system is based on seller reviews stored in Supabase
-            # Test that the backend can support review operations
-            self.log_test("Star Rating Infrastructure", True, "Backend supports Supabase-based star rating system")
-        except Exception as e:
-            self.log_test("Star Rating Infrastructure", False, "Error in star rating infrastructure", str(e))
-        
-        # Test review aggregation support
-        try:
-            # Test that backend can support review aggregation for star ratings
-            self.log_test("Review Aggregation Support", True, "Backend supports review aggregation for star ratings")
-        except Exception as e:
-            self.log_test("Review Aggregation Support", False, "Error in review aggregation", str(e))
-
-    def test_api_key_error_resolution(self):
-        """Test that API key errors have been resolved - Priority 1"""
-        print("🔍 TESTING API KEY ERROR RESOLUTION...")
-        
-        # Test that Supabase connection doesn't have API key issues
-        try:
-            response = requests.get(f"{API_BASE}/auth/health", timeout=10)
+            response = requests.post(f"{BACKEND_URL}/auth/admin/setup", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                if data.get('supabase_connected', False):
-                    self.log_test("Supabase API Key Resolution", True, "No API key errors detected in Supabase connection")
-                else:
-                    self.log_test("Supabase API Key Resolution", False, "Supabase connection issues detected")
+                success = data.get('success', False)
+                self.log_result(
+                    "Super Admin Setup",
+                    success,
+                    f"Super admin setup check (Status: {response.status_code})",
+                    f"Admin configured: {success}, UID: {TEST_USER_ID}"
+                )
             else:
-                self.log_test("Supabase API Key Resolution", False, f"Auth health check failed: {response.status_code}")
+                self.log_result(
+                    "Super Admin Setup",
+                    False,
+                    f"Super admin setup returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Supabase API Key Resolution", False, "Error testing API key resolution", str(e))
+            self.log_result("Super Admin Setup", False, f"Super admin setup failed: {str(e)}")
+    
+    def test_voting_system_database_schema(self):
+        """Test voting system database schema after PostgreSQL UUID fix"""
+        print("\n=== VOTING SYSTEM DATABASE SCHEMA TESTS ===")
         
-        # Test that authentication operations don't have API key errors
+        # Test using Supabase REST API directly to verify schema
+        headers = {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        }
+        
+        # Test 1: Verify user_votes table structure
         try:
-            # Test a simple auth operation to ensure no API key errors
-            response = requests.get(f"{API_BASE}/auth/health", timeout=10)
-            response_text = response.text.lower()
-            if 'api key' not in response_text or 'key not found' not in response_text:
-                self.log_test("Authentication API Key Check", True, "No API key errors in authentication system")
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/user_votes?select=*&limit=1",
+                headers=headers,
+                timeout=10
+            )
+            if response.status_code == 200:
+                self.log_result(
+                    "User Votes Table Access",
+                    True,
+                    f"user_votes table accessible (Status: {response.status_code})",
+                    f"Table structure verified, response length: {len(response.text)}"
+                )
             else:
-                self.log_test("Authentication API Key Check", False, "API key errors detected in response", response.text[:200])
+                self.log_result(
+                    "User Votes Table Access",
+                    False,
+                    f"user_votes table returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Authentication API Key Check", False, "Error checking API key issues", str(e))
-
-    def test_bot_management_apis(self):
-        """Test bot management APIs for regression testing - Priority 2"""
-        print("🔍 TESTING BOT MANAGEMENT APIS...")
+            self.log_result("User Votes Table Access", False, f"user_votes table test failed: {str(e)}")
         
-        # Test bot creation API (should work with Supabase)
+        # Test 2: Test vote creation with UUID types (critical test for PostgreSQL UUID fix)
         try:
-            bot_request = {
-                "prompt": "Create a conservative Bitcoin trading bot for voting system testing",
-                "user_id": self.super_admin_uid
+            test_vote_data = {
+                "user_id": TEST_USER_ID,
+                "product_id": str(uuid.uuid4()),  # Generate UUID for product_id
+                "vote_type": "upvote"
             }
-            response = requests.post(f"{API_BASE}/bots/create-with-ai", json=bot_request, timeout=30)
+            
+            response = requests.post(
+                f"{SUPABASE_URL}/rest/v1/user_votes",
+                headers=headers,
+                json=test_vote_data,
+                timeout=10
+            )
+            
+            if response.status_code == 201:
+                data = response.json()
+                vote_id = data[0].get('id') if data else None
+                self.log_result(
+                    "Vote Creation with UUID",
+                    True,
+                    f"Vote created successfully (Status: {response.status_code})",
+                    f"Vote ID: {vote_id}, Product ID: {test_vote_data['product_id'][:8]}..."
+                )
+                
+                # Clean up test vote
+                if vote_id:
+                    cleanup_response = requests.delete(
+                        f"{SUPABASE_URL}/rest/v1/user_votes?id=eq.{vote_id}",
+                        headers=headers,
+                        timeout=5
+                    )
+                    if cleanup_response.status_code == 204:
+                        print("   Test vote cleaned up successfully")
+                        
+            else:
+                error_text = response.text
+                # Check for the specific PostgreSQL UUID error that was previously failing
+                if "operator does not exist: uuid = character varying" in error_text:
+                    self.log_result(
+                        "Vote Creation with UUID",
+                        False,
+                        "CRITICAL: PostgreSQL UUID error still exists!",
+                        "The 'operator does not exist: uuid = character varying' error indicates schema fix failed"
+                    )
+                else:
+                    self.log_result(
+                        "Vote Creation with UUID",
+                        False,
+                        f"Vote creation failed (Status: {response.status_code})",
+                        error_text[:300]
+                    )
+        except Exception as e:
+            self.log_result("Vote Creation with UUID", False, f"Vote creation test failed: {str(e)}")
+        
+        # Test 3: Test vote update (trigger function test)
+        try:
+            # First create a test portfolio to vote on
+            test_portfolio_data = {
+                "id": str(uuid.uuid4()),
+                "title": "Test Portfolio for Voting",
+                "description": "Test portfolio for voting system verification",
+                "price": 99.99,
+                "seller_name": "Test Seller",
+                "user_id": TEST_USER_ID,
+                "vote_count_upvotes": 0,
+                "vote_count_downvotes": 0,
+                "vote_count_total": 0
+            }
+            
+            portfolio_response = requests.post(
+                f"{SUPABASE_URL}/rest/v1/portfolios",
+                headers=headers,
+                json=test_portfolio_data,
+                timeout=10
+            )
+            
+            if portfolio_response.status_code == 201:
+                portfolio_id = test_portfolio_data["id"]
+                
+                # Now test voting on this portfolio
+                vote_data = {
+                    "user_id": TEST_USER_ID,
+                    "product_id": portfolio_id,
+                    "vote_type": "upvote"
+                }
+                
+                vote_response = requests.post(
+                    f"{SUPABASE_URL}/rest/v1/user_votes",
+                    headers=headers,
+                    json=vote_data,
+                    timeout=10
+                )
+                
+                if vote_response.status_code == 201:
+                    # Check if trigger function updated portfolio vote counts
+                    time.sleep(1)  # Give trigger time to execute
+                    
+                    portfolio_check = requests.get(
+                        f"{SUPABASE_URL}/rest/v1/portfolios?id=eq.{portfolio_id}&select=vote_count_upvotes,vote_count_total",
+                        headers=headers,
+                        timeout=10
+                    )
+                    
+                    if portfolio_check.status_code == 200:
+                        portfolio_data = portfolio_check.json()
+                        if portfolio_data and len(portfolio_data) > 0:
+                            upvotes = portfolio_data[0].get('vote_count_upvotes', 0)
+                            total_votes = portfolio_data[0].get('vote_count_total', 0)
+                            
+                            trigger_working = upvotes == 1 and total_votes == 1
+                            self.log_result(
+                                "Vote Trigger Function",
+                                trigger_working,
+                                f"Trigger function {'working' if trigger_working else 'not working'} (Upvotes: {upvotes}, Total: {total_votes})",
+                                f"Portfolio vote counts updated correctly: {trigger_working}"
+                            )
+                        else:
+                            self.log_result("Vote Trigger Function", False, "Portfolio data not found after vote")
+                    else:
+                        self.log_result("Vote Trigger Function", False, f"Portfolio check failed: {portfolio_check.status_code}")
+                    
+                    # Clean up test vote
+                    vote_data_response = vote_response.json()
+                    if vote_data_response:
+                        vote_id = vote_data_response[0].get('id')
+                        if vote_id:
+                            requests.delete(f"{SUPABASE_URL}/rest/v1/user_votes?id=eq.{vote_id}", headers=headers, timeout=5)
+                else:
+                    self.log_result("Vote Trigger Function", False, f"Test vote creation failed: {vote_response.status_code}")
+                
+                # Clean up test portfolio
+                requests.delete(f"{SUPABASE_URL}/rest/v1/portfolios?id=eq.{portfolio_id}", headers=headers, timeout=5)
+                
+            else:
+                self.log_result("Vote Trigger Function", False, f"Test portfolio creation failed: {portfolio_response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Vote Trigger Function", False, f"Trigger function test failed: {str(e)}")
+    
+    def test_seller_reviews_system(self):
+        """Test seller reviews system verification"""
+        print("\n=== SELLER REVIEWS SYSTEM TESTS ===")
+        
+        headers = {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        }
+        
+        # Test 1: Verify seller_reviews table access
+        try:
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/seller_reviews?select=*&limit=1",
+                headers=headers,
+                timeout=10
+            )
+            if response.status_code == 200:
+                self.log_result(
+                    "Seller Reviews Table Access",
+                    True,
+                    f"seller_reviews table accessible (Status: {response.status_code})",
+                    f"Table structure verified, response length: {len(response.text)}"
+                )
+            else:
+                self.log_result(
+                    "Seller Reviews Table Access",
+                    False,
+                    f"seller_reviews table returned {response.status_code}",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_result("Seller Reviews Table Access", False, f"seller_reviews table test failed: {str(e)}")
+        
+        # Test 2: Test seller review creation
+        try:
+            test_review_data = {
+                "reviewer_id": TEST_USER_ID,
+                "seller_name": "Test Seller for Review",
+                "seller_id": str(uuid.uuid4()),
+                "rating": 5,
+                "review_text": "Excellent seller, great products and fast delivery!"
+            }
+            
+            response = requests.post(
+                f"{SUPABASE_URL}/rest/v1/seller_reviews",
+                headers=headers,
+                json=test_review_data,
+                timeout=10
+            )
+            
+            if response.status_code == 201:
+                data = response.json()
+                review_id = data[0].get('id') if data else None
+                self.log_result(
+                    "Seller Review Creation",
+                    True,
+                    f"Seller review created successfully (Status: {response.status_code})",
+                    f"Review ID: {review_id}, Rating: {test_review_data['rating']}, Seller: {test_review_data['seller_name']}"
+                )
+                
+                # Clean up test review
+                if review_id:
+                    cleanup_response = requests.delete(
+                        f"{SUPABASE_URL}/rest/v1/seller_reviews?id=eq.{review_id}",
+                        headers=headers,
+                        timeout=5
+                    )
+                    if cleanup_response.status_code == 204:
+                        print("   Test review cleaned up successfully")
+                        
+            else:
+                self.log_result(
+                    "Seller Review Creation",
+                    False,
+                    f"Seller review creation failed (Status: {response.status_code})",
+                    response.text[:300]
+                )
+        except Exception as e:
+            self.log_result("Seller Review Creation", False, f"Seller review creation test failed: {str(e)}")
+        
+        # Test 3: Test seller review retrieval
+        try:
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/seller_reviews?select=seller_name,rating,review_text,created_at&limit=5",
+                headers=headers,
+                timeout=10
+            )
+            
             if response.status_code == 200:
                 data = response.json()
+                review_count = len(data) if data else 0
+                self.log_result(
+                    "Seller Review Retrieval",
+                    True,
+                    f"Seller reviews retrieved successfully (Status: {response.status_code})",
+                    f"Retrieved {review_count} reviews from database"
+                )
+            else:
+                self.log_result(
+                    "Seller Review Retrieval",
+                    False,
+                    f"Seller review retrieval failed (Status: {response.status_code})",
+                    response.text[:200]
+                )
+        except Exception as e:
+            self.log_result("Seller Review Retrieval", False, f"Seller review retrieval test failed: {str(e)}")
+    
+    def test_bot_management_apis(self):
+        """Test bot management APIs"""
+        print("\n=== BOT MANAGEMENT API TESTS ===")
+        
+        # Test 1: Bot creation API
+        try:
+            bot_data = {
+                "prompt": "Create a conservative Bitcoin trading bot that focuses on steady growth with low risk",
+                "user_id": TEST_USER_ID
+            }
+            
+            response = requests.post(f"{BACKEND_URL}/bots/create-with-ai", json=bot_data, timeout=15)
+            if response.status_code == 200:
+                data = response.json()
+                success = data.get('success', False)
                 bot_id = data.get('bot_id', 'N/A')
                 bot_name = data.get('bot_config', {}).get('name', 'N/A')
-                self.log_test("Bot Creation API", True, f"Bot created: {bot_name}, ID: {bot_id[:8]}...")
+                self.log_result(
+                    "Bot Creation API",
+                    success,
+                    f"Bot creation API working (Status: {response.status_code})",
+                    f"Bot created: {bot_name}, ID: {bot_id[:8]}..."
+                )
             else:
-                self.log_test("Bot Creation API", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Bot Creation API",
+                    False,
+                    f"Bot creation returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Bot Creation API", False, "Connection failed", str(e))
-
-        # Test user bots retrieval (should use user_bots table)
+            self.log_result("Bot Creation API", False, f"Bot creation failed: {str(e)}")
+        
+        # Test 2: User bots retrieval
         try:
-            response = requests.get(f"{API_BASE}/bots/user/{self.super_admin_uid}", timeout=10)
+            response = requests.get(f"{BACKEND_URL}/bots/user/{TEST_USER_ID}", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                bot_count = len(data.get('bots', []))
-                self.log_test("User Bots Retrieval", True, f"Bots found: {bot_count}")
+                success = data.get('success', False)
+                bot_count = data.get('total', 0)
+                self.log_result(
+                    "User Bots Retrieval",
+                    success,
+                    f"User bots retrieval working (Status: {response.status_code})",
+                    f"Found {bot_count} bots for user"
+                )
             else:
-                self.log_test("User Bots Retrieval", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "User Bots Retrieval",
+                    False,
+                    f"User bots retrieval returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("User Bots Retrieval", False, "Connection failed", str(e))
-
+            self.log_result("User Bots Retrieval", False, f"User bots retrieval failed: {str(e)}")
+    
     def test_webhook_system(self):
-        """Test webhook system for regression testing - Priority 2"""
-        print("🔍 TESTING WEBHOOK SYSTEM...")
+        """Test webhook system for AI feed"""
+        print("\n=== WEBHOOK SYSTEM TESTS ===")
         
-        # Test OpenAI webhook endpoint
+        # Test 1: OpenAI format webhook
         try:
             webhook_data = {
                 "choices": [
                     {
                         "message": {
                             "content": {
-                                "title": "Voting System Testing Update",
-                                "summary": "Backend testing confirms voting and star rating system fixes are working correctly with proper authentication.",
-                                "sentiment_score": 90
+                                "title": "Backend Test: Market Analysis Update",
+                                "summary": "Comprehensive backend testing confirms all systems operational after frontend authentication fixes.",
+                                "sentiment_score": 75
                             }
                         }
                     }
                 ],
-                "source": "Voting System Testing",
-                "timestamp": datetime.now().isoformat()
+                "source": "Backend Testing Suite",
+                "timestamp": datetime.utcnow().isoformat() + "Z"
             }
             
-            response = requests.post(f"{API_BASE}/ai_news_webhook", json=webhook_data, timeout=10)
+            response = requests.post(f"{BACKEND_URL}/ai_news_webhook", json=webhook_data, timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 entry_id = data.get('id', 'N/A')
-                self.log_test("OpenAI Webhook", True, f"Entry created: {entry_id[:8]}...")
+                title = data.get('title', 'N/A')
+                self.log_result(
+                    "OpenAI Webhook",
+                    True,
+                    f"OpenAI webhook working (Status: {response.status_code})",
+                    f"Entry created: {entry_id[:8]}..., Title: {title[:50]}..."
+                )
             else:
-                self.log_test("OpenAI Webhook", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "OpenAI Webhook",
+                    False,
+                    f"OpenAI webhook returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("OpenAI Webhook", False, "Connection failed", str(e))
-
-        # Test feed retrieval
+            self.log_result("OpenAI Webhook", False, f"OpenAI webhook failed: {str(e)}")
+        
+        # Test 2: Feed retrieval
         try:
-            response = requests.get(f"{API_BASE}/feed_entries?limit=5", timeout=10)
+            response = requests.get(f"{BACKEND_URL}/feed_entries?limit=5", timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 entry_count = len(data) if isinstance(data, list) else 0
-                self.log_test("Feed Retrieval", True, f"Entries retrieved: {entry_count}")
+                self.log_result(
+                    "Feed Retrieval",
+                    True,
+                    f"Feed retrieval working (Status: {response.status_code})",
+                    f"Retrieved {entry_count} feed entries"
+                )
             else:
-                self.log_test("Feed Retrieval", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Feed Retrieval",
+                    False,
+                    f"Feed retrieval returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Feed Retrieval", False, "Connection failed", str(e))
-
-    def test_supabase_data_operations(self):
-        """Test Supabase-specific data operations - Priority 2"""
-        print("🔍 TESTING SUPABASE DATA OPERATIONS...")
+            self.log_result("Feed Retrieval", False, f"Feed retrieval failed: {str(e)}")
         
-        # Test verification storage setup (Supabase storage)
+        # Test 3: Russian language feed (translation test)
         try:
-            response = requests.post(f"{API_BASE}/setup-verification-storage", timeout=10)
+            start_time = time.time()
+            response = requests.get(f"{BACKEND_URL}/feed_entries?limit=1&language=ru", timeout=15)
+            translation_time = time.time() - start_time
+            
             if response.status_code == 200:
                 data = response.json()
-                bucket_name = data.get('bucket_name', 'unknown')
-                self.log_test("Verification Storage Setup", True, f"Bucket: {bucket_name}")
+                entry_count = len(data) if isinstance(data, list) else 0
+                has_russian = any(entry.get('language') == 'ru' for entry in data) if data else False
+                self.log_result(
+                    "Russian Language Feed",
+                    True,
+                    f"Russian feed working (Status: {response.status_code})",
+                    f"Retrieved {entry_count} entries, Russian content: {has_russian}, Time: {translation_time:.2f}s"
+                )
             else:
-                self.log_test("Verification Storage Setup", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Russian Language Feed",
+                    False,
+                    f"Russian feed returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Verification Storage Setup", False, "Connection failed", str(e))
-
-        # Test super admin setup (user management)
+            self.log_result("Russian Language Feed", False, f"Russian feed failed: {str(e)}")
+    
+    def test_verification_system(self):
+        """Test verification system"""
+        print("\n=== VERIFICATION SYSTEM TESTS ===")
+        
+        # Test 1: Verification storage setup
         try:
-            response = requests.post(f"{API_BASE}/auth/admin/setup", timeout=10)
+            response = requests.post(f"{BACKEND_URL}/setup-verification-storage", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                message = data.get('message', 'OK')
-                self.log_test("Super Admin Setup", True, f"Admin setup: {message[:50]}...")
+                success = data.get('success', False)
+                bucket_name = data.get('bucket_name', 'N/A')
+                self.log_result(
+                    "Verification Storage Setup",
+                    success,
+                    f"Verification storage setup working (Status: {response.status_code})",
+                    f"Bucket: {bucket_name}, Success: {success}"
+                )
             else:
-                self.log_test("Super Admin Setup", False, f"Status: {response.status_code}", response.text[:200])
+                self.log_result(
+                    "Verification Storage Setup",
+                    False,
+                    f"Verification storage setup returned {response.status_code}",
+                    response.text[:200]
+                )
         except Exception as e:
-            self.log_test("Super Admin Setup", False, "Connection failed", str(e))
-
-    def test_voting_and_review_data_flow(self):
-        """Test data flow for voting and review systems - Priority 1"""
-        print("🔍 TESTING VOTING AND REVIEW DATA FLOW...")
-        
-        # Test that backend supports the data structures needed for voting
-        try:
-            # Verify that the backend can handle the data structures used by the voting system
-            # This includes user_votes table, product vote counts, etc.
-            self.log_test("Voting Data Flow Support", True, "Backend supports voting system data structures")
-        except Exception as e:
-            self.log_test("Voting Data Flow Support", False, "Error in voting data flow", str(e))
-        
-        # Test that backend supports the data structures needed for reviews/ratings
-        try:
-            # Verify that the backend can handle seller reviews and rating aggregation
-            self.log_test("Review Data Flow Support", True, "Backend supports review system data structures")
-        except Exception as e:
-            self.log_test("Review Data Flow Support", False, "Error in review data flow", str(e))
-        
-        # Test authentication integration with voting/review operations
-        try:
-            # Verify that authentication properly integrates with voting and review operations
-            self.log_test("Auth Integration with Voting/Reviews", True, "Authentication properly integrated with voting and review systems")
-        except Exception as e:
-            self.log_test("Auth Integration with Voting/Reviews", False, "Error in auth integration", str(e))
-
+            self.log_result("Verification Storage Setup", False, f"Verification storage setup failed: {str(e)}")
+    
     def run_all_tests(self):
-        """Run all backend tests for voting and star rating system verification"""
-        print("🚀 BACKEND TESTING FOR VOTING AND STAR RATING SYSTEM FIXES")
-        print(f"Backend URL: {BACKEND_URL}")
-        print(f"Test User: {self.test_email}")
-        print(f"Super Admin UID: {self.super_admin_uid}")
+        """Run all backend tests"""
+        print("🚀 STARTING COMPREHENSIVE BACKEND TESTING SUITE")
+        print("=" * 80)
+        print("Focus: Authentication and Voting System Verification After Frontend Auth Fix")
         print("=" * 80)
         
-        # Run test suites in priority order
-        self.test_core_api_health()
+        start_time = time.time()
+        
+        # Run all test suites
+        self.test_core_backend_health()
         self.test_authentication_system()
-        self.test_supabase_table_access()
-        self.test_voting_system_backend_support()
-        self.test_star_rating_system_support()
-        self.test_api_key_error_resolution()
-        self.test_voting_and_review_data_flow()
+        self.test_voting_system_database_schema()
+        self.test_seller_reviews_system()
         self.test_bot_management_apis()
         self.test_webhook_system()
-        self.test_supabase_data_operations()
+        self.test_verification_system()
         
-        # Generate summary
-        self.generate_summary()
-
-    def generate_summary(self):
-        """Generate comprehensive test summary"""
+        end_time = time.time()
+        total_time = end_time - start_time
+        
+        # Print summary
+        print("\n" + "=" * 80)
+        print("🏁 COMPREHENSIVE BACKEND TESTING COMPLETED")
         print("=" * 80)
-        print("🏁 VOTING AND STAR RATING SYSTEM BACKEND TESTING SUMMARY")
+        print(f"Total Tests: {self.total_tests}")
+        print(f"Passed: {self.passed_tests} ✅")
+        print(f"Failed: {self.failed_tests} ❌")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
+        print(f"Total Time: {total_time:.2f} seconds")
         print("=" * 80)
         
-        total_tests = len(self.test_results)
-        passed_tests = sum(1 for result in self.test_results if result['success'])
-        failed_tests = total_tests - passed_tests
-        success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
+        # Print critical findings
+        print("\n🔍 CRITICAL FINDINGS:")
         
-        print(f"Total Tests: {total_tests}")
-        print(f"Passed: {passed_tests}")
-        print(f"Failed: {failed_tests}")
-        print(f"Success Rate: {success_rate:.1f}%")
-        print()
-        
-        # Group results by category
-        categories = {
-            'Core API Health': [],
-            'Authentication System': [],
-            'Voting System Support': [],
-            'Star Rating System': [],
-            'API Key Resolution': [],
-            'Supabase Integration': [],
-            'Regression Testing': []
-        }
-        
-        for result in self.test_results:
-            test_name = result['test']
-            if any(keyword in test_name for keyword in ['API', 'Endpoint', 'Health', 'Status']):
-                categories['Core API Health'].append(result)
-            elif any(keyword in test_name for keyword in ['Auth', 'User', 'Signin', 'Signup']):
-                categories['Authentication System'].append(result)
-            elif any(keyword in test_name for keyword in ['Voting', 'Vote']):
-                categories['Voting System Support'].append(result)
-            elif any(keyword in test_name for keyword in ['Star', 'Rating', 'Review']):
-                categories['Star Rating System'].append(result)
-            elif any(keyword in test_name for keyword in ['API Key', 'Key']):
-                categories['API Key Resolution'].append(result)
-            elif any(keyword in test_name for keyword in ['Supabase', 'Table', 'Storage', 'Admin']):
-                categories['Supabase Integration'].append(result)
+        # Check for PostgreSQL UUID error resolution
+        uuid_tests = [r for r in self.results if 'UUID' in r['test'] or 'Vote Creation' in r['test']]
+        if uuid_tests:
+            uuid_success = all('✅' in r['status'] for r in uuid_tests)
+            if uuid_success:
+                print("✅ PostgreSQL UUID Error: RESOLVED - Voting system working correctly")
             else:
-                categories['Regression Testing'].append(result)
+                print("❌ PostgreSQL UUID Error: STILL EXISTS - Voting system has issues")
         
-        # Print category summaries
-        for category, results in categories.items():
-            if results:
-                passed = sum(1 for r in results if r['success'])
-                total = len(results)
-                rate = (passed / total * 100) if total > 0 else 0
-                print(f"{category}: {passed}/{total} tests passed ({rate:.1f}%)")
+        # Check authentication system stability
+        auth_tests = [r for r in self.results if 'Auth' in r['test'] or 'Signin' in r['test']]
+        if auth_tests:
+            auth_success_rate = sum(1 for r in auth_tests if '✅' in r['status']) / len(auth_tests)
+            if auth_success_rate >= 0.75:
+                print("✅ Authentication System: STABLE after frontend auth fix")
+            else:
+                print("❌ Authentication System: UNSTABLE - May have regressions")
         
-        print()
-        print("FAILED TESTS:")
-        failed_found = False
-        for result in self.test_results:
-            if not result['success']:
-                failed_found = True
-                print(f"❌ {result['test']}: {result['details']}")
-                if result['error']:
-                    print(f"   Error: {result['error']}")
+        # Check core backend stability
+        core_tests = [r for r in self.results if any(keyword in r['test'] for keyword in ['API Root', 'Status', 'Health'])]
+        if core_tests:
+            core_success = all('✅' in r['status'] for r in core_tests)
+            if core_success:
+                print("✅ Core Backend: STABLE - No regressions detected")
+            else:
+                print("❌ Core Backend: ISSUES DETECTED - Potential regressions")
         
-        if not failed_found:
-            print("🎉 All tests passed!")
+        print("\n📊 DETAILED RESULTS:")
+        for result in self.results:
+            print(f"{result['status']}: {result['test']}")
+            if result['details']:
+                print(f"   └─ {result['details']}")
         
-        print()
-        print("KEY FINDINGS:")
-        
-        # Analyze results for key findings
-        auth_working = any(r['success'] and 'Auth Health' in r['test'] for r in self.test_results)
-        voting_support = any(r['success'] and 'Voting' in r['test'] for r in self.test_results)
-        rating_support = any(r['success'] and ('Rating' in r['test'] or 'Review' in r['test']) for r in self.test_results)
-        api_key_resolved = any(r['success'] and 'API Key' in r['test'] for r in self.test_results)
-        supabase_working = any(r['success'] and ('Supabase' in r['test'] or 'Table' in r['test']) for r in self.test_results)
-        
-        if auth_working:
-            print("✅ Authentication system operational - supports voting and review operations")
-        else:
-            print("⚠️ Authentication system issues detected")
-            
-        if voting_support:
-            print("✅ Voting system backend support confirmed - user votes and product votes working")
-        else:
-            print("⚠️ Voting system backend support issues detected")
-            
-        if rating_support:
-            print("✅ Star rating system backend support confirmed - seller reviews and rating aggregation working")
-        else:
-            print("⚠️ Star rating system backend support issues detected")
-            
-        if api_key_resolved:
-            print("✅ API key errors resolved - no 'No API key found in request' errors detected")
-        else:
-            print("⚠️ API key resolution issues detected")
-            
-        if supabase_working:
-            print("✅ Supabase integration working - user_votes and seller_reviews tables accessible")
-        else:
-            print("⚠️ Supabase integration issues detected")
-        
-        print()
-        print("VOTING AND STAR RATING SYSTEM VERIFICATION:")
-        print("✅ Authentication checks added to supabaseDataService methods")
-        print("✅ Backend supports user_votes table operations")
-        print("✅ Backend supports seller_reviews table operations")
-        print("✅ No API key errors detected in authentication system")
-        print("✅ Supabase RLS policies support voting and review operations")
-        print("✅ Backend infrastructure ready for voting and star rating features")
-        
-        if success_rate >= 85:
-            print(f"🎯 OVERALL ASSESSMENT: Backend is READY to support voting and star rating system fixes")
-        elif success_rate >= 70:
-            print(f"⚠️ OVERALL ASSESSMENT: Backend has minor issues but core voting/rating functionality is operational")
-        else:
-            print(f"🚨 OVERALL ASSESSMENT: Backend has significant issues that need to be addressed for voting/rating systems")
+        return {
+            'total_tests': self.total_tests,
+            'passed_tests': self.passed_tests,
+            'failed_tests': self.failed_tests,
+            'success_rate': (self.passed_tests/self.total_tests*100) if self.total_tests > 0 else 0,
+            'results': self.results,
+            'duration': total_time
+        }
 
 if __name__ == "__main__":
-    tester = VotingSystemTester()
-    tester.run_all_tests()
+    tester = BackendTester()
+    results = tester.run_all_tests()
