@@ -93,14 +93,37 @@ export const supabaseDataService = {
     try {
       console.log('Saving user vote:', { userId, productId, voteType });
       
-      // Use upsert to handle both insert and update cases
+      // Validate input data
+      if (!userId || !productId || !voteType) {
+        throw new Error('Missing required fields: userId, productId, or voteType');
+      }
+      
+      // Ensure user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('Authentication error in saveUserVote:', authError);
+        throw new Error('User not authenticated');
+      }
+      
+      if (user.id !== userId) {
+        console.error('User ID mismatch in saveUserVote:', { currentUser: user.id, requestedUser: userId });
+        throw new Error('User ID mismatch');
+      }
+
+      // First try to delete existing vote to avoid conflicts
+      await supabase
+        .from('user_votes')
+        .delete()
+        .eq('user_id', userId)
+        .eq('product_id', productId);
+
+      // Insert new vote
       const { data, error } = await supabase
         .from('user_votes')
-        .upsert({
+        .insert({
           user_id: userId,
           product_id: productId,
-          vote_type: voteType,
-          updated_at: new Date().toISOString()
+          vote_type: voteType
         })
         .select()
         .single();
