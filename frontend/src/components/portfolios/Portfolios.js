@@ -392,11 +392,24 @@ const Portfolios = () => {
       portfolio_id: product.id // Add portfolio_id for investor counting
     };
 
-    // Save purchase using data sync service for cross-device sync
-    dataSyncService.saveUserPurchases(user.id, [...userPurchases, purchaseData]);
-    
-    setUserPurchases(prev => [...prev, purchaseData]);
-    alert('✅ Product purchased successfully!');
+    try {
+      // Save individual purchase to Supabase (for investor counting)
+      await dataSyncService.saveUserPurchase(purchaseData);
+      
+      // Also update the purchases array
+      const updatedPurchases = [...userPurchases, purchaseData];
+      await dataSyncService.saveUserPurchases(user.id, updatedPurchases);
+      
+      setUserPurchases(updatedPurchases);
+      
+      // Refresh marketplace to update investor counts
+      await loadProductsWithReviews();
+      
+      alert('✅ Product purchased successfully!');
+    } catch (error) {
+      console.error('Error saving purchase:', error);
+      alert('❌ Failed to save purchase');
+    }
   };
 
   // Handle removing a purchase from My Purchases
