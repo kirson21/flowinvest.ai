@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Feature Request – Super Admin Role and Pre-Built Bot Management: 1. Create a Super Admin Role with elevated privileges for User UID: cd0e9717-f85d-4726-81e9-f260394ead58 (Kirson, kirillpopolitov@gmail.com). 2. Full Management of User Portfolios - super admin can view, edit, and delete any user's portfolios. 3. Full Control of Pre-Built Bots - super admin can edit, delete, or update pre-built bots and publish new ones. 4. Ability to Move Bots Between My Bots and Pre-Built Bots sections with proper visibility control."
+user_problem_statement: "UI Loading Bug – Remove Local Storage / Mock Data: When switching between menu tabs (e.g., My Bots, Marketplace), outdated elements (bots, products) briefly appear for a split second — likely being loaded from local storage or mock data before Supabase fetch completes. Task: Please remove all fallback loading from local storage or mock data for bots and marketplace products. Ensure that only real-time data from Supabase is used during rendering, even if it causes a brief loading state. The goal is to prevent any visual flickering or outdated content from appearing on tab switches."
 
 backend:
   - task: "Fix Privacy Bug - My Bots Section"
