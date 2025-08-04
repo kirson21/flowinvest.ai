@@ -48,17 +48,10 @@ export const AuthProvider = ({ children }) => {
 
     getInitialSession();
 
-    // Listen for auth changes - but skip in development mode with test user
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session);
-        
-        // Skip auth state changes in development mode with test user
-        if (process.env.NODE_ENV === 'development' && !session) {
-          console.log('Development mode: Ignoring auth state change to preserve test user');
-          return;
-        }
-        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -72,10 +65,7 @@ export const AuthProvider = ({ children }) => {
           });
         }
         
-        // Only set loading to false in production or when we have a real session
-        if (process.env.NODE_ENV !== 'development' || session) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     );
 
