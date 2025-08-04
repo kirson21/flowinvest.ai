@@ -674,14 +674,10 @@ const Portfolios = () => {
   };
 
   const handleProductUpdated = (updatedProduct) => {
-    // Update the product in localStorage
-    const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-    const updatedUserPortfolios = userPortfolios.map(p => 
-      p.id === updatedProduct.id ? updatedProduct : p
-    );
-    localStorage.setItem('user_portfolios', JSON.stringify(updatedUserPortfolios));
+    // Product is already updated in Supabase via ProductEditModal
+    console.log('Product updated successfully in Supabase:', updatedProduct.id);
     
-    // Refresh the portfolios list with review data
+    // Refresh the portfolios list with review data to reflect changes
     loadProductsWithReviews();
     setIsProductEditOpen(false);
     setSelectedProductForEdit(null);
