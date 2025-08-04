@@ -531,44 +531,38 @@ const Portfolios = () => {
     return ((votes.upvotes - votes.downvotes) / votes.totalVotes) * 100;
   };
 
-  // Handle voting
-  const handleVote = (productId, voteType) => {
+  // Handle voting with Supabase persistence
+  const handleVote = async (productId, voteType) => {
     if (!user) {
       alert('Please log in to vote');
       return;
     }
 
-    const currentVote = userVotes[productId];
-    console.log(`Voting: productId=${productId}, voteType=${voteType}, currentVote=${currentVote}`);
-    
-    // If user already voted the same way, remove the vote (toggle off)
-    if (currentVote === voteType) {
-      const newUserVotes = { ...userVotes };
-      delete newUserVotes[productId];
-      setUserVotes(newUserVotes);
-      saveUserVotes(newUserVotes);
+    try {
+      const currentVote = userVotes[productId];
+      const newVotes = { ...userVotes };
+
+      if (currentVote === voteType) {
+        // Remove vote if clicking the same vote type
+        delete newVotes[productId];
+        await supabaseDataService.removeUserVote(user.id, productId);
+        console.log('Removed vote for product:', productId);
+      } else {
+        // Add or change vote
+        newVotes[productId] = voteType;
+        await supabaseDataService.saveUserVote(user.id, productId, voteType);
+        console.log('Saved vote for product:', productId, voteType);
+      }
+
+      setUserVotes(newVotes);
       
-      console.log(`Removing ${voteType} vote for product ${productId}`);
-      // Update product votes
-      updateProductVotes(productId, voteType, -1);
-      return;
-    }
-    
-    // If user voted differently, update the vote
-    const newUserVotes = { ...userVotes, [productId]: voteType };
-    setUserVotes(newUserVotes);
-    saveUserVotes(newUserVotes);
-    
-    // Update product votes
-    if (currentVote) {
-      // Remove previous vote and add new vote
-      console.log(`Changing vote from ${currentVote} to ${voteType} for product ${productId}`);
-      updateProductVotes(productId, currentVote, -1);
-      updateProductVotes(productId, voteType, 1);
-    } else {
-      // Add new vote
-      console.log(`Adding new ${voteType} vote for product ${productId}`);
-      updateProductVotes(productId, voteType, 1);
+      // Reload product vote counts to get updated totals
+      const updatedProductVotes = await supabaseDataService.getProductVotes([productId]);
+      setProductVotes(prev => ({ ...prev, ...updatedProductVotes }));
+      
+    } catch (error) {
+      console.error('Error handling vote:', error);
+      alert('Failed to save vote. Please try again.');
     }
   };
 
