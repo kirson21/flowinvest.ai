@@ -9,20 +9,44 @@ export const supabaseDataService = {
   // Debug function to test Supabase connection
   async testSupabaseConnection() {
     try {
-      console.log('Testing Supabase connection...');
+      console.log('=== SUPABASE DEBUGGING ===');
       console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
       console.log('Supabase Key present:', !!process.env.REACT_APP_SUPABASE_ANON_KEY);
       
-      // Test basic connection
-      const { data, error } = await supabase.from('user_votes').select('count').limit(1);
-      if (error) {
-        console.error('Supabase connection test failed:', error);
-        return false;
+      // Test 1: Check if we can connect to Supabase at all
+      console.log('Test 1: Basic connection test...');
+      const { data: authData, error: authError } = await supabase.auth.getSession();
+      console.log('Auth session:', authData, 'Auth error:', authError);
+      
+      // Test 2: Try to access a known table (portfolios)
+      console.log('Test 2: Testing portfolios table access...');
+      const { data: portfolioData, error: portfolioError } = await supabase
+        .from('portfolios')
+        .select('id')
+        .limit(1);
+      console.log('Portfolios data:', portfolioData, 'Portfolios error:', portfolioError);
+      
+      // Test 3: Try to access user_votes table
+      console.log('Test 3: Testing user_votes table access...');
+      const { data: votesData, error: votesError } = await supabase
+        .from('user_votes')
+        .select('id')
+        .limit(1);
+      console.log('Votes data:', votesData, 'Votes error:', votesError);
+      
+      // Test 4: Check if we can list tables
+      console.log('Test 4: Testing if we can see table structure...');
+      try {
+        const { data: tableData, error: tableError } = await supabase
+          .rpc('get_schema_info'); // This might not exist, but let's try
+        console.log('Table data:', tableData, 'Table error:', tableError);
+      } catch (e) {
+        console.log('RPC call failed (expected):', e.message);
       }
-      console.log('Supabase connection test successful');
+      
       return true;
     } catch (error) {
-      console.error('Supabase connection test error:', error);
+      console.error('=== SUPABASE DEBUGGING ERROR ===', error);
       return false;
     }
   },
