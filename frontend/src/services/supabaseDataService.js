@@ -137,6 +137,8 @@ export const supabaseDataService = {
    */
   async getProductVotes(productIds = []) {
     try {
+      console.log('Getting product votes for products:', productIds.length > 0 ? productIds.length : 'all');
+      
       let query = supabase
         .from('portfolios')
         .select('id, vote_count_upvotes, vote_count_downvotes, vote_count_total');
@@ -162,6 +164,7 @@ export const supabaseDataService = {
         };
       });
 
+      console.log('Successfully loaded product votes for', data.length, 'products');
       return votesMap;
     } catch (error) {
       console.error('Error in getProductVotes:', error);
