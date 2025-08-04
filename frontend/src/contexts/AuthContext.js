@@ -16,8 +16,14 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Initial session:', session);
         
+        console.log('Development mode check:', {
+          isDevelopment: process.env.NODE_ENV === 'development',
+          nodeEnv: process.env.NODE_ENV,
+          hasSession: !!session
+        });
+        
         // Development mode test user - ENABLED for testing reviews functionality
-        if (true && process.env.NODE_ENV === 'development' && !session) {
+        if (process.env.NODE_ENV === 'development' && !session) {
           const testUser = {
             id: 'cd0e9717-f85d-4726-81e9-f260394ead58', // Use super admin UID for testing
             email: 'kirillpopolitov@gmail.com',
