@@ -105,7 +105,17 @@
 user_problem_statement: "Comprehensive Local Storage Audit & Supabase Migration: In addition to the previously fixed UI loading bug (flickering issue), the application still relies on local storage or temporary client-side memory in certain sections. Please thoroughly review and update Social Media & Links, Messages & Notifications, Seller Verification Management, as well as any other user settings or profile-related sections. Ensure no data is being stored or loaded from local storage or mock data across the entire application. All fields and user information in these sections must be fetched from and saved to Supabase. Double-check the Supabase schema and tables to confirm they are properly structured and reflect all expected fields for these sections. Implement appropriate loading states if needed to ensure smooth transitions while fetching real-time data from Supabase. The goal is full reliance on Supabase as the single source of truth — no more legacy mock data or local memory fallbacks except AI FEED."
 
 backend:
-  - task: "Remove Mock Data Initialization from Components"
+  - task: "Comprehensive LocalStorage to Supabase Migration"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/settings/Settings.js, /app/frontend/src/services/verificationService.js, /app/frontend/src/services/dataSyncService.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "COMPREHENSIVE LOCALSTORAGE AUDIT STARTED: Identified extensive localStorage usage across the application in Social Media & Links (Settings.js), Messages & Notifications (verificationService.js), Seller Verification Management, user votes, reviews, and other profile data. Need to migrate all these to Supabase-only approach with proper schema validation and loading states. Key areas: 1) Social links currently saved to localStorage with dataSyncService fallback, 2) Verification notifications using localStorage fallback, 3) User votes and reviews stored in localStorage, 4) Product votes and seller reviews in localStorage. Must ensure Supabase schema supports all required fields and implement proper loading states."
     implemented: true
     working: true
     file: "/app/frontend/src/components/bots/TradingBots.js, /app/frontend/src/components/portfolios/Portfolios.js"
