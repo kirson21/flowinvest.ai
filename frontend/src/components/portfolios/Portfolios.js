@@ -292,9 +292,10 @@ const Portfolios = () => {
       const purchases = rawPurchases.map(row => row.purchase_data || row);
       console.log('Raw purchases from Supabase:', purchases);
       
-      // Load review and vote data for proper display
-      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      // Load review and vote data from Supabase (no more localStorage)
+      console.log('Loading reviews and votes from Supabase...');
+      const sellerReviews = await supabaseDataService.getSellerReviews();
+      const productVotes = await supabaseDataService.getProductVotes();
       
       // Get current marketplace data to ensure purchases show the latest info
       const { data: currentPortfolios, error: portfolioError } = await supabase
