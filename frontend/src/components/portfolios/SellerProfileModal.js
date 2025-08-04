@@ -245,45 +245,56 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!validateReview()) return;
     
-    // Create new review
-    const newReview = {
-      id: Date.now(),
-      userName: user?.user_metadata?.display_name || user?.user_metadata?.name || user?.email || 'Anonymous',
-      userAvatar: user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.display_name || user?.email || 'User')}&size=50&background=0097B2&color=ffffff`,
-      rating: reviewData.rating,
-      comment: reviewData.comment,
-      date: new Date().toISOString(),
-      verified: true
-    };
-    
-    // Add to localStorage
-    const reviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-    if (!reviews[seller.name]) reviews[seller.name] = [];
-    reviews[seller.name].unshift(newReview);
-    localStorage.setItem('seller_reviews', JSON.stringify(reviews));
-    
-    // Update local state immediately
-    const updatedReviews = [newReview, ...allReviews];
-    setAllReviews(updatedReviews);
-    
-    // Recalculate rating
-    const avgRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0) / updatedReviews.length;
-    setSellerRating(Math.round(avgRating * 10) / 10);
-    
-    // Reset form and close modal
-    setReviewData({ rating: 5, comment: '' });
-    setReviewErrors({});
-    setIsReviewModalOpen(false);
-    
-    // Trigger refresh of marketplace products
-    if (onReviewAdded) {
-      onReviewAdded();
+    try {
+      console.log('Submitting review to Supabase:', {
+        rating: reviewData.rating,
+        comment: reviewData.comment
+      });
+      
+      // Save to Supabase using the new service
+      await supabaseDataService.saveSellerReview(
+        user.id,
+        seller.name,
+        seller.id || seller.name, // Use seller.id if available, fallback to name
+        reviewData.rating,
+        reviewData.comment
+      );
+
+      console.log('Review saved to Supabase successfully');
+      
+      // Reload seller reviews to get updated data
+      const updatedSellerReviews = await supabaseDataService.getSellerReviews([seller.name]);
+      
+      // Update local state with fresh review data
+      const sellerReviewsArray = updatedSellerReviews[seller.name] || [];
+      setAllReviews(sellerReviewsArray);
+      
+      // Recalculate rating from fresh data
+      if (sellerReviewsArray.length > 0) {
+        const avgRating = sellerReviewsArray.reduce((sum, review) => sum + review.rating, 0) / sellerReviewsArray.length;
+        setSellerRating(Math.round(avgRating * 10) / 10);
+      } else {
+        setSellerRating(0);
+      }
+      
+      // Reset form and close modal
+      setReviewData({ rating: 5, comment: '' });
+      setReviewErrors({});
+      setIsReviewModalOpen(false);
+      
+      // Trigger refresh of marketplace products
+      if (onReviewAdded) {
+        onReviewAdded();
+      }
+      
+      alert('Review submitted successfully! The seller\'s rating has been updated.');
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review. Please try again.');
     }
-    
-    alert('Review submitted successfully! The seller\'s rating has been updated.');
   };
 
   const handleDeleteReview = (reviewId) => {
