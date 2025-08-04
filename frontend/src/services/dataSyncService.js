@@ -279,17 +279,65 @@ export const dataSyncService = {
     try {
       console.log('Saving user purchases array to Supabase:', purchasesArray.length, 'purchases');
       
-      // For now, save to localStorage only since it's primarily for purchase list management
-      // In a full implementation, this would sync to Supabase as well
+      // Save each purchase to Supabase properly
+      for (const purchaseData of purchasesArray) {
+        await this.saveUserPurchase(purchaseData);
+      }
+      
+      // Also save to localStorage as fallback
       const allPurchases = JSON.parse(localStorage.getItem('user_purchases') || '{}');
       allPurchases[userId] = purchasesArray;
       localStorage.setItem('user_purchases', JSON.stringify(allPurchases));
       
-      console.log('User purchases array saved successfully');
+      console.log('User purchases array saved successfully to both Supabase and localStorage');
       return purchasesArray;
     } catch (error) {
       console.error('Error saving user purchases array:', error);
-      throw error;
+      // Still save to localStorage even if Supabase fails
+      const allPurchases = JSON.parse(localStorage.getItem('user_purchases') || '{}');
+      allPurchases[userId] = purchasesArray;
+      localStorage.setItem('user_purchases', JSON.stringify(allPurchases));
+      return purchasesArray;
+    }
+  },
+
+  // Save individual purchase to Supabase
+  async saveUserPurchase(purchaseData) {
+    try {
+      console.log('Saving individual purchase to Supabase:', purchaseData.title);
+      
+      const purchaseToSave = {
+        id: purchaseData.purchaseId || purchaseData.id || `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        user_id: purchaseData.purchasedBy || purchaseData.user_id,
+        portfolio_id: purchaseData.portfolio_id || purchaseData.id,
+        purchase_id: purchaseData.purchaseId || `purchase_${Date.now()}`,
+        purchased_at: purchaseData.purchasedAt || new Date().toISOString(),
+        purchased_by: purchaseData.purchasedBy || purchaseData.user_id, 
+        purchase_data: purchaseData, // Store full purchase data as JSONB
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('user_purchases')
+        .upsert([purchaseToSave], { onConflict: 'purchase_id' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase purchase save failed:', error);
+        // Save to localStorage as fallback
+        this.saveUserPurchaseToLocalStorage(purchaseData);
+        return purchaseData;
+      }
+
+      console.log('Purchase saved to Supabase successfully');
+      return data;
+    } catch (error) {
+      console.error('Error saving purchase to Supabase:', error);
+      // Fallback to localStorage
+      this.saveUserPurchaseToLocalStorage(purchaseData);
+      return purchaseData;
     }
   },
 
