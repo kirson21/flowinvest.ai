@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email, password, metadata = {}) => {
+  const signUp = useCallback(async (email, password, metadata = {}) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -130,9 +130,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const signIn = async (email, password) => {
+  const signIn = useCallback(async (email, password) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -145,9 +145,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -162,9 +162,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -173,9 +173,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     session,
     loading,
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }) => {
     signInWithGoogle,
     signOut,
     isAuthenticated: !!user
-  };
+  }), [user, session, loading, signUp, signIn, signInWithGoogle, signOut]);
 
   return (
     <AuthContext.Provider value={value}>
