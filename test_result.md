@@ -707,11 +707,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "My Purchases Section & Product Editor Fixes"
-    - "Fix Cross-Device Social Links Sync"
-    - "Fix Seller Verification Management Sync"
+    - "Remove Mock Data Initialization from Components"
   stuck_tasks:
-    - "My Purchases Section & Product Editor Fixes"
+    []
   test_all: false
   test_priority: "high_first"
 
