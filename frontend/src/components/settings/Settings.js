@@ -175,9 +175,11 @@ const Settings = () => {
 
   const loadAccountBalance = async () => {
     try {
-      // Use data sync service for cross-device synchronization
-      const balance = await dataSyncService.syncAccountBalance(user?.id);
+      if (!user?.id) return;
+      console.log('Loading account balance from Supabase...');
+      const balance = await supabaseDataService.getAccountBalance(user.id);
       setAccountBalance(balance);
+      console.log('Loaded account balance from Supabase:', balance);
     } catch (error) {
       console.error('Error loading account balance:', error);
       setAccountBalance(0);
