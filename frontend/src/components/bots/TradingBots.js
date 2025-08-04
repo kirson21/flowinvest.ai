@@ -34,7 +34,7 @@ import GrokAIBotCreator from './GrokAIBotCreator';
 const TradingBots = () => {
   const { t } = useApp();
   const { user } = useAuth();
-  const [preBuiltBots, setPreBuiltBots] = useState(mockTradingBots);
+  const [preBuiltBots, setPreBuiltBots] = useState([]);
   const [userBots, setUserBots] = useState([]);
   const [loadingBots, setLoadingBots] = useState(true);
   const [showAdvancedBuilder, setShowAdvancedBuilder] = useState(false);
