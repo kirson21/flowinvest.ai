@@ -758,20 +758,10 @@ const Portfolios = () => {
 
         if (deleteError) {
           console.error('Supabase deletion failed:', deleteError);
-        } else {
-          console.log('Supabase deletion successful');
+          throw deleteError; // Stop execution if Supabase fails
         }
         
-        // Always try localStorage deletion regardless of Supabase result
-        console.log('Attempting localStorage deletion...');
-        const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
-        console.log('Current localStorage portfolios count:', userPortfolios.length);
-        
-        const filteredUserPortfolios = userPortfolios.filter(p => p.id !== productId);
-        console.log('Filtered localStorage portfolios count:', filteredUserPortfolios.length);
-        
-        localStorage.setItem('user_portfolios', JSON.stringify(filteredUserPortfolios));
-        console.log('localStorage updated');
+        console.log('Supabase deletion successful');
         
         // Force immediate UI update
         console.log('Forcing UI update...');
@@ -781,12 +771,21 @@ const Portfolios = () => {
           return filtered;
         });
         
-        // Also refresh from Supabase
-        console.log('Refreshing from Supabase...');
-        await loadProductsWithReviews();
+        // Also update filtered portfolios
+        setFilteredPortfolios(prev => {
+          const filtered = prev.filter(p => p.id !== productId);
+          return filtered;
+        });
         
-        console.log('=== DELETE ATTEMPT COMPLETED ===');
-        alert('✅ Portfolio deletion completed - check console for details');
+        console.log('UI state updated successfully');
+        
+        // Refresh the marketplace
+        console.log('Refreshing marketplace...');
+        await loadProductsWithReviews();
+        console.log('Marketplace refreshed');
+        
+        alert('✅ Portfolio deleted successfully!');
+        console.log('=== DELETE COMPLETED SUCCESSFULLY ===');
         
       } catch (error) {
         console.error('=== DELETE ERROR ===', error);
