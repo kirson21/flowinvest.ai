@@ -222,6 +222,20 @@ export const supabaseDataService = {
    */
   async saveSellerReview(reviewerId, sellerName, sellerId, rating, reviewText) {
     try {
+      console.log('Saving seller review:', { reviewerId, sellerName, rating });
+      
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('Authentication error in saveSellerReview:', authError);
+        throw new Error('User not authenticated');
+      }
+      
+      if (user.id !== reviewerId) {
+        console.error('User ID mismatch:', { currentUser: user.id, requestedUser: reviewerId });
+        throw new Error('User ID mismatch');
+      }
+
       const { data, error } = await supabase
         .from('seller_reviews')
         .upsert({
@@ -240,6 +254,7 @@ export const supabaseDataService = {
         throw error;
       }
 
+      console.log('Successfully saved seller review:', data);
       return data;
     } catch (error) {
       console.error('Error in saveSellerReview:', error);
