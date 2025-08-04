@@ -32,7 +32,6 @@ import {
   FileText,
   Trash2
 } from 'lucide-react';
-import { mockPortfolios } from '../../data/mockData';
 import SellerProfileModal from './SellerProfileModal';
 import ProductCreationModal from './ProductCreationModal';
 import ProductEditModal from './ProductEditModal';
