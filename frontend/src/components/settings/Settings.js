@@ -204,10 +204,17 @@ const Settings = () => {
     return ((votes.upvotes - votes.downvotes) / votes.totalVotes) * 100;
   };
 
-  // Load votes from localStorage (sync with marketplace)
-  const loadProductVotes = () => {
-    const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
-    return productVotes;
+  // Load votes from Supabase (no more localStorage)
+  const loadProductVotes = async () => {
+    try {
+      console.log('Loading product votes from Supabase...');
+      const productVotes = await supabaseDataService.getProductVotes();
+      console.log('Loaded product votes from Supabase:', Object.keys(productVotes).length);
+      return productVotes;
+    } catch (error) {
+      console.error('Error loading product votes:', error);
+      return {};
+    }
   };
 
   const handleTopUp = async () => {
