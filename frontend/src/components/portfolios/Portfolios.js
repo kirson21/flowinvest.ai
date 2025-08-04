@@ -429,19 +429,47 @@ const Portfolios = () => {
   };
 
   // Handle removing a purchase from My Purchases
-  const handleRemovePurchase = (purchaseId) => {
+  const handleRemovePurchase = async (purchaseId) => {
     if (!user?.id) return;
 
     if (window.confirm('Are you sure you want to remove this item from your purchases? You can always purchase it again later.')) {
-      const updatedPurchases = userPurchases.filter(purchase => 
-        (purchase.purchaseId || purchase.id) !== purchaseId
-      );
-      
-      // Update purchase list using data sync service for cross-device sync
-      dataSyncService.saveUserPurchases(user.id, updatedPurchases);
-      setUserPurchases(updatedPurchases);
-      
-      alert('✅ Item removed from your purchases');
+      try {
+        console.log('Removing purchase:', purchaseId, 'for user:', user.id);
+        
+        // Remove from Supabase directly
+        const { error: supabaseError } = await supabase
+          .from('user_purchases')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('purchase_id', purchaseId);
+        
+        if (supabaseError) {
+          console.error('Supabase delete error:', supabaseError);
+          // Continue with localStorage removal even if Supabase fails
+        }
+        
+        // Also remove from localStorage as fallback
+        const localPurchases = JSON.parse(localStorage.getItem(`user_purchases_${user.id}`) || '[]');
+        const filteredPurchases = localPurchases.filter(purchase => 
+          (purchase.purchaseId || purchase.id) !== purchaseId
+        );
+        localStorage.setItem(`user_purchases_${user.id}`, JSON.stringify(filteredPurchases));
+        
+        // Update local state immediately
+        setUserPurchases(prev => prev.filter(purchase => 
+          (purchase.purchaseId || purchase.id) !== purchaseId
+        ));
+        
+        // Refresh marketplace to update investor counts
+        await loadProductsWithReviews();
+        
+        alert('✅ Item removed from your purchases');
+        console.log('Purchase removed successfully');
+        
+      } catch (error) {
+        console.error('Error removing purchase:', error);
+        alert('❌ Failed to remove purchase: ' + error.message);
+      }
     }
   };
 
