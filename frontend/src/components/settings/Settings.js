@@ -381,7 +381,7 @@ const Settings = () => {
           console.log('Supabase deletion successful');
         }
         
-        // Also try localStorage deletion as fallback
+        // Also try localStorage deletion as fallback (for backward compatibility during migration)
         const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
         const filteredPortfolios = userPortfolios.filter(p => p.id !== productId);
         localStorage.setItem('user_portfolios', JSON.stringify(filteredPortfolios));
