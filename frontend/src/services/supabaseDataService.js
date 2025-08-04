@@ -55,6 +55,20 @@ export const supabaseDataService = {
    */
   async saveUserVote(userId, productId, voteType) {
     try {
+      console.log('Saving user vote:', { userId, productId, voteType });
+      
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('Authentication error in saveUserVote:', authError);
+        throw new Error('User not authenticated');
+      }
+      
+      if (user.id !== userId) {
+        console.error('User ID mismatch:', { currentUser: user.id, requestedUser: userId });
+        throw new Error('User ID mismatch');
+      }
+
       // Use upsert to handle both insert and update cases
       const { data, error } = await supabase
         .from('user_votes')
@@ -72,6 +86,7 @@ export const supabaseDataService = {
         throw error;
       }
 
+      console.log('Successfully saved user vote:', data);
       return data;
     } catch (error) {
       console.error('Error in saveUserVote:', error);
