@@ -58,6 +58,7 @@ const Portfolios = () => {
   const [isVerificationRequiredOpen, setIsVerificationRequiredOpen] = useState(false);
   const [isVerifiedSeller, setIsVerifiedSeller] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('unverified');
+  const [productVotes, setProductVotes] = useState({});
 
   // Super Admin Check
   const isSuperAdmin = () => {
