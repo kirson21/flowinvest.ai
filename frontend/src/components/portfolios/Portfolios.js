@@ -375,8 +375,8 @@ const Portfolios = () => {
         }
         
         // Update vote data for proper score display
-        if (productVotes[purchase.id]) {
-          processedPurchase.votes = productVotes[purchase.id];
+        if (productVotesData[purchase.id]) {
+          processedPurchase.votes = productVotesData[purchase.id];
         }
         
         console.log('Final processed purchase:', processedPurchase);
