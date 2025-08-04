@@ -272,9 +272,9 @@ const Settings = () => {
       
       console.log('User portfolios from Supabase:', allPortfolios);
       
-      // Load review and vote data for proper display
-      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      // Load review and vote data from Supabase (no more localStorage)
+      const sellerReviews = await supabaseDataService.getSellerReviews();
+      const productVotes = await supabaseDataService.getProductVotes();
       
       // Process portfolios with same logic as marketplace
       const processedPortfolios = (allPortfolios || []).map(product => {
