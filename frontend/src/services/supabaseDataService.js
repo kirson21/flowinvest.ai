@@ -15,6 +15,17 @@ export const supabaseDataService = {
    */
   async getUserVotes(userId) {
     try {
+      console.log('Getting user votes for userId:', userId);
+      
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('Authentication error in getUserVotes:', authError);
+        return {};
+      }
+      
+      console.log('Authenticated user:', user.id);
+      
       const { data, error } = await supabase
         .from('user_votes')
         .select('product_id, vote_type')
@@ -31,6 +42,7 @@ export const supabaseDataService = {
         votesMap[vote.product_id] = vote.vote_type;
       });
 
+      console.log('Successfully loaded user votes:', Object.keys(votesMap).length);
       return votesMap;
     } catch (error) {
       console.error('Error in getUserVotes:', error);
