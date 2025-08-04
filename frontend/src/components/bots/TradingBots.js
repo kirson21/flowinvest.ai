@@ -73,8 +73,9 @@ const TradingBots = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('Supabase pre-built bots loading failed, using mock data:', error);
-        setPreBuiltBots(mockTradingBots);
+        console.warn('Supabase pre-built bots loading failed:', error);
+        // Instead of setting mock data, keep empty state
+        setPreBuiltBots([]);
         return;
       }
 
