@@ -84,9 +84,9 @@ const TradingBots = () => {
         console.log(`Loaded ${preBuiltBotsFromSupabase.length} pre-built bots from Supabase`);
         setPreBuiltBots(preBuiltBotsFromSupabase);
       } else {
-        // No pre-built bots in Supabase, use mock data as default
-        console.log('No pre-built bots in Supabase, using mock data as default');
-        setPreBuiltBots(mockTradingBots);
+        // No pre-built bots in Supabase, keep empty state
+        console.log('No pre-built bots in Supabase, keeping empty state');
+        setPreBuiltBots([]);
       }
     } catch (error) {
       console.error('Error loading pre-built bots:', error);
