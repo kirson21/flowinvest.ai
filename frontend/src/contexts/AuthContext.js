@@ -22,61 +22,20 @@ export const AuthProvider = ({ children }) => {
           hasSession: !!session
         });
         
-        // Development mode test user - ENABLED for testing reviews functionality
-        if (process.env.NODE_ENV === 'development' && !session) {
-          const testUser = {
-            id: 'cd0e9717-f85d-4726-81e9-f260394ead58', // Use super admin UID for testing
-            email: 'kirillpopolitov@gmail.com',
-            user_metadata: {
-              name: 'Kirson',
-              display_name: 'Kirson',
-              full_name: 'Kirson Super Admin',
-              avatar_url: 'https://ui-avatars.com/api/?name=Kirson&size=150&background=0097B2&color=ffffff'
-            },
-            app_metadata: {},
-            aud: 'authenticated',
-            created_at: new Date().toISOString()
-          };
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Also try to get user if session exists
+        if (session?.user) {
+          console.log('User found in session:', session.user);
           
-          const testSession = {
-            user: testUser,
-            access_token: 'dev-test-token',
-            token_type: 'bearer',
-            expires_in: 3600,
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
-            refresh_token: 'dev-refresh-token'
-          };
-
-          console.log('Development mode: Using test user', testUser);
-          
-          // Set state in the correct order and force re-render
-          setUser(testUser);
-          setSession(testSession);
-          setLoading(false);
-          
-          console.log('Development test user auth state set:', { 
-            user: testUser.id, 
-            session: !!testSession, 
-            loading: false 
-          });
-          
-          // Trigger data sync for development test user (non-blocking)
-          console.log('Development test user loaded, starting background data sync...');
-          dataSyncService.syncAllUserData(testUser.id).then(() => {
-            console.log('✅ Data sync completed for test user');
+          // Trigger data sync for authenticated user (non-blocking)
+          console.log('User authenticated, starting background data sync...');
+          dataSyncService.syncAllUserData(session.user.id).then(() => {
+            console.log('✅ Data sync completed for authenticated user');
           }).catch(error => {
-            console.warn('Data sync failed for test user:', error);
+            console.warn('Data sync failed for authenticated user:', error);
           });
-          
-          return; // Skip the real auth setup in development
-        } else {
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          // Also try to get user if session exists
-          if (session?.user) {
-            console.log('User found in session:', session.user);
-          }
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
