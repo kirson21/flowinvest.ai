@@ -23,7 +23,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://4630f24e-339a-432a-a20a-e8e4df34d1ed.preview.emergentagent.com"
+BACKEND_URL = "https://3bdf4b10-0fcc-4b15-9941-2a9737fd27ae.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test user data
