@@ -91,5 +91,13 @@ FROM user_votes;
 
 COMMENT ON TABLE user_votes IS 'User votes for products - FIXED: user_id now properly typed as UUID';
 
--- Show the final table structure
-\d user_votes;
+-- Show the final table structure (Supabase compatible)
+SELECT 
+    column_name, 
+    data_type, 
+    is_nullable, 
+    column_default,
+    character_maximum_length
+FROM information_schema.columns 
+WHERE table_name = 'user_votes' 
+ORDER BY ordinal_position;
