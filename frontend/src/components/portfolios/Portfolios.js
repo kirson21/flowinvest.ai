@@ -497,11 +497,17 @@ const Portfolios = () => {
     setShowMyPurchases(false);
   };
 
-  // Load user votes from localStorage
-  const loadUserVotes = () => {
-    const savedVotes = localStorage.getItem(`user_votes_${user?.id || 'guest'}`);
-    if (savedVotes) {
-      setUserVotes(JSON.parse(savedVotes));
+  // Load user votes from Supabase (no more localStorage)
+  const loadUserVotes = async () => {
+    try {
+      if (!user?.id) return;
+      console.log('Loading user votes from Supabase...');
+      const votes = await supabaseDataService.getUserVotes(user.id);
+      setUserVotes(votes);
+      console.log('Loaded user votes from Supabase:', Object.keys(votes).length);
+    } catch (error) {
+      console.error('Error loading user votes:', error);
+      setUserVotes({});
     }
   };
 
