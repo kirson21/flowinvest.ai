@@ -107,9 +107,9 @@ user_problem_statement: "Comprehensive Local Storage Audit & Supabase Migration:
 backend:
   - task: "Fix Voting and Star Rating System Bugs"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/services/supabaseDataService.js, /app/frontend/src/components/portfolios/Portfolios.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "critical"
     needs_retesting: false
     status_history:
