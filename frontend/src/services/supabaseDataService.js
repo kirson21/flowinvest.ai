@@ -89,18 +89,6 @@ export const supabaseDataService = {
     try {
       console.log('Removing user vote:', { userId, productId });
       
-      // Check if user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.error('Authentication error in removeUserVote:', authError);
-        throw new Error('User not authenticated');
-      }
-      
-      if (user.id !== userId) {
-        console.error('User ID mismatch:', { currentUser: user.id, requestedUser: userId });
-        throw new Error('User ID mismatch');
-      }
-
       const { error } = await supabase
         .from('user_votes')
         .delete()
