@@ -567,7 +567,7 @@ const Settings = () => {
   };
 
   // Seller Mode Functions
-  const toggleSellerMode = () => {
+  const toggleSellerMode = async () => {
     // Check if user can access seller features before enabling
     if (!isSellerMode && !canAccessSellerFeatures()) {
       setIsVerificationRequiredOpen(true);
@@ -576,12 +576,22 @@ const Settings = () => {
 
     const newSellerMode = !isSellerMode;
     setIsSellerMode(newSellerMode);
-    localStorage.setItem(`seller_mode_${user?.id}`, newSellerMode.toString());
     
-    if (newSellerMode) {
-      setMessage('Seller mode enabled! You can now add social links and specialties.');
-    } else {
-      setMessage('Seller mode disabled.');
+    try {
+      // Save to Supabase instead of localStorage
+      console.log('Saving seller mode to Supabase:', newSellerMode);
+      await supabaseDataService.saveSellerData(user?.id, sellerData, newSellerMode);
+      
+      if (newSellerMode) {
+        setMessage('Seller mode enabled! You can now add social links and specialties.');
+      } else {
+        setMessage('Seller mode disabled.');
+      }
+    } catch (error) {
+      console.error('Error saving seller mode:', error);
+      setError('Failed to update seller mode');
+      // Revert state change
+      setIsSellerMode(!newSellerMode);
     }
     
     setTimeout(() => setMessage(''), 3000);
