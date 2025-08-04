@@ -715,6 +715,8 @@ test_plan:
 
 agent_communication:
     - agent: "main"
+    - agent: "main"
+      message: "Fixed UI loading bug by removing mock data initialization from TradingBots.js and Portfolios.js components. Changed useState calls to use empty arrays instead of mock data. This should eliminate flickering when switching between tabs. Ready for backend testing to ensure no regressions."
       message: "✅ ADVANCED BOT BUILDER ENHANCEMENTS COMPLETED: Successfully implemented both requested updates: 1) Limited Quote Coin options to USDT and USDC only in TradingPairSelector, 2) Completely refactored Entry step with comprehensive advanced trading settings including proper range inputs, enhanced Trade Entry Conditions with up to 5 filters, and full indicator/interval/signal type selection. Ready for frontend testing to verify all functionality works as expected."
     - agent: "testing"
       message: "✅ BACKEND REGRESSION TESTING COMPLETED: All critical backend endpoints verified working properly. Fixed import path issues that were preventing backend startup. Core functionality confirmed: Server status ✅, Authentication system ✅, Webhook system ✅, Feed retrieval ✅. No regressions introduced from Advanced Bot Builder frontend enhancements. Backend is stable and ready to support the new UI features."
