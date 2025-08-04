@@ -157,14 +157,15 @@ const Settings = () => {
     }
   };
 
-  // Load notifications
+  // Load notifications from Supabase
   const loadNotifications = async () => {
     if (user?.id) {
       try {
-        const userNotifications = await verificationService.getUserNotifications(user.id);
-        const unreadCount = await verificationService.getUnreadNotificationCount(user.id);
+        const userNotifications = await supabaseDataService.getUserNotifications(user.id);
+        const unreadCount = await supabaseDataService.getUnreadNotificationCount(user.id);
         setNotifications(userNotifications);
         setUnreadCount(unreadCount);
+        console.log('Loaded notifications from Supabase:', userNotifications.length);
       } catch (error) {
         console.error('Error loading notifications:', error);
         setNotifications([]);
