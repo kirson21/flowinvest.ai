@@ -262,6 +262,17 @@ export const supabaseDataService = {
     try {
       console.log('Saving seller review:', { reviewerId, sellerName, rating });
       
+      // Validate input data
+      if (!reviewerId || !sellerName || !rating) {
+        throw new Error('Missing required fields: reviewerId, sellerName, or rating');
+      }
+      
+      // Ensure rating is a valid number between 1-5
+      const numRating = parseInt(rating);
+      if (isNaN(numRating) || numRating < 1 || numRating > 5) {
+        throw new Error('Rating must be a number between 1 and 5');
+      }
+      
       // Check if user is authenticated
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -274,15 +285,22 @@ export const supabaseDataService = {
         throw new Error('User ID mismatch');
       }
 
+      // First try to delete existing review to avoid conflicts
+      await supabase
+        .from('seller_reviews')
+        .delete()
+        .eq('reviewer_id', reviewerId)
+        .eq('seller_name', sellerName);
+
+      // Insert new review
       const { data, error } = await supabase
         .from('seller_reviews')
-        .upsert({
+        .insert({
           reviewer_id: reviewerId,
           seller_name: sellerName,
-          seller_id: sellerId,
-          rating: rating,
-          review_text: reviewText,
-          updated_at: new Date().toISOString()
+          seller_id: sellerId || null,
+          rating: numRating,
+          review_text: reviewText || ''
         })
         .select()
         .single();
