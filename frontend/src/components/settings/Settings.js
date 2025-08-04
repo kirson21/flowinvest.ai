@@ -488,28 +488,13 @@ const Settings = () => {
 
   const loadSellerData = async () => {
     try {
-      // Try to load from dataSyncService first for cross-device sync
-      let sellerProfile = {};
-      try {
-        const profile = await dataSyncService.syncUserProfile(user?.id);
-        if (profile && profile.seller_data) {
-          sellerProfile = profile.seller_data;
-          console.log('Loaded seller data from cross-device sync');
-        }
-      } catch (syncError) {
-        console.warn('Failed to load seller data from sync service:', syncError);
-      }
+      if (!user?.id) return;
       
-      // Fallback to localStorage if dataSyncService fails or has no data
-      if (!sellerProfile.socialLinks && !sellerProfile.specialties) {
-        const savedSellerData = JSON.parse(localStorage.getItem(`seller_data_${user?.id}`) || '{}');
-        sellerProfile = savedSellerData;
-        console.log('Loaded seller data from localStorage fallback');
-      }
+      console.log('Loading seller data from Supabase...');
+      const sellerProfile = await supabaseDataService.getSellerData(user.id);
       
-      const savedSellerMode = localStorage.getItem(`seller_mode_${user?.id}`) === 'true';
-      
-      setIsSellerMode(savedSellerMode);
+      console.log('Loaded seller data from Supabase');
+      setIsSellerMode(sellerProfile.sellerMode);
       setSellerData({
         socialLinks: {
           instagram: sellerProfile.socialLinks?.instagram || '',
@@ -524,6 +509,20 @@ const Settings = () => {
       });
     } catch (error) {
       console.error('Error loading seller data:', error);
+      // Set default empty state
+      setIsSellerMode(false);
+      setSellerData({
+        socialLinks: {
+          instagram: '',
+          twitter: '',
+          linkedin: '',
+          youtube: '',
+          telegram: '',
+          website: ''
+        },
+        specialties: [],
+        newSpecialty: ''
+      });
     }
   };
 
