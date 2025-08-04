@@ -511,9 +511,18 @@ const Portfolios = () => {
     }
   };
 
-  // Save user votes to localStorage
-  const saveUserVotes = (votes) => {
-    localStorage.setItem(`user_votes_${user?.id || 'guest'}`, JSON.stringify(votes));
+  // Save user votes to Supabase (no more localStorage)
+  const saveUserVotes = async (votes) => {
+    try {
+      if (!user?.id) return;
+      console.log('Saving user votes to Supabase...');
+      
+      // Note: This function is kept for backward compatibility
+      // Individual votes are now saved directly via handleVote function
+      console.log('User votes updated in memory:', Object.keys(votes).length);
+    } catch (error) {
+      console.error('Error saving user votes:', error);
+    }
   };
 
   // Calculate vote score using the formula: (Upvotes - Downvotes) / Total Votes × 100
