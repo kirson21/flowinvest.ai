@@ -1,0 +1,18 @@
+DROP POLICY "Allow authenticated users to read all votes" ON user_votes;
+DROP POLICY "Allow users to delete their own votes" ON user_votes;
+DROP POLICY "Allow users to insert their own votes" ON user_votes;
+DROP POLICY "Allow users to update their own votes" ON user_votes;
+DROP POLICY "Users can delete own votes" ON user_votes;
+DROP POLICY "Users can insert own votes" ON user_votes;
+DROP POLICY "Users can manage own votes" ON user_votes;
+DROP POLICY "Users can update own votes" ON user_votes;
+DROP POLICY "Users can view own votes" ON user_votes;
+ALTER TABLE user_votes DROP CONSTRAINT IF EXISTS user_votes_user_id_fkey;
+ALTER TABLE user_votes ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
+ALTER TABLE user_votes ADD CONSTRAINT user_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+CREATE POLICY allow_read_votes ON user_votes FOR SELECT TO authenticated USING (true);
+CREATE POLICY allow_insert_votes ON user_votes FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY allow_update_votes ON user_votes FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY allow_delete_votes ON user_votes FOR DELETE TO authenticated USING (auth.uid() = user_id);
+NOTIFY pgrst, 'reload schema';
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'user_votes' AND column_name = 'user_id';
