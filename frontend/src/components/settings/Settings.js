@@ -227,13 +227,11 @@ const Settings = () => {
 
     try {
       const amount = parseFloat(topUpAmount);
-      const newBalance = accountBalance + amount;
       
-      try {
-        // Update balance using Supabase service
-        console.log('Saving account balance to Supabase:', amount);
-        const newBalance = await supabaseDataService.saveAccountBalance(user?.id, accountBalance + amount);
-        setAccountBalance(newBalance);
+      // Update balance using Supabase service
+      console.log('Saving account balance to Supabase:', amount);
+      const newBalance = await supabaseDataService.saveAccountBalance(user?.id, accountBalance + amount);
+      setAccountBalance(newBalance);
       
       // Reset and close modal
       setTopUpAmount('');
