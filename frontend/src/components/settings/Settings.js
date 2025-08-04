@@ -601,7 +601,7 @@ const Settings = () => {
   // Notification Functions
   const markNotificationAsRead = async (notificationId) => {
     try {
-      await verificationService.markNotificationAsRead(notificationId);
+      await supabaseDataService.markNotificationAsRead(notificationId);
       await loadNotifications(); // Reload notifications
     } catch (error) {
       console.error('Error marking notification as read:', error);
