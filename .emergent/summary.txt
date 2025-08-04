@@ -1,15 +1,15 @@
 <analysis>
-The previous AI engineer's primary focus was migrating Flow Invest from  to Supabase for cross-device data synchronization. Initially, this involved fixing UI flickering caused by mock data. The core ongoing challenge revolved around persistent Supabase API errors (404 for , 400 for ) despite the database tables appearing to exist. Iterative debugging, supported by user-provided console logs, revealed a critical  data type mismatch ( instead of ) in the  table and complex Row Level Security (RLS) policy dependencies blocking schema alterations. The engineer systematically generated multiple SQL scripts, refining them to overcome PostgreSQL syntax errors,  meta-command issues, and finally implementing a bulletproof script to explicitly drop all conflicting RLS policies by name, alter the column type, and re-establish correct policies. The  issue was resolved earlier in the process, while the  schema fix was successfully applied just before this summary, confirming the  column as .
+The AI engineer's initial focus was resolving a  database schema mismatch where  was  instead of , leading to  errors. This involved complex SQL operations to drop RLS policies, alter the column type, and recreate policies, which was successfully completed and verified. Subsequently, the user reported issues with , specifically a  error with No API key found and a missing  column. Diagnosis revealed the  table itself was missing  and  was expected as . After confirming the database schema was corrected and functional, the focus shifted to a persistent frontend authentication issue: the React AuthContext was correctly loading a development test user, but UI components weren't re-rendering, causing the login screen to persist and Supabase requests to lack authentication headers. The immediate task is to fix this React re-rendering problem, which stems from the Supabase auth state listener overriding the manually set development user, leading to a de-authentication loop.
 </analysis>
 
 <product_requirements>
-Flow Invest is an AI-powered investment platform designed for minimalist, scalable, and mobile-responsive use. Key features include an AI Feed, customizable Trading Bots, and a Marketplace for user-generated content with rich editing and a review system. The application uses FastAPI for the backend and Supabase for database operations and authentication (Email/Password, Google OAuth). Implemented features include Grok 4 integration for AI bot creation, a Patreon-like Marketplace with rich editing, advanced bot editing, Reddit-style voting, My Purchases section, Super Admin role for management, and a Seller Verification System. The most critical ongoing requirement is achieving **cross-device data synchronization** for all user data (bots, purchases, account, votes, profiles) via Supabase, fully replacing . Current efforts have transitioned many features, but core challenges remain with reliable portfolio creation/deletion, accurate data display in Marketplace and 'My Purchases', and functional voting/ratings systems.
+Flow Invest is an AI-powered investment platform for minimalist, scalable, and mobile-responsive use, featuring an AI Feed, customizable Trading Bots, and a Marketplace with rich editing and a review system. It utilizes FastAPI for the backend and Supabase for database and authentication (Email/Password, Google OAuth). Key implemented features include Grok 4 integration for AI bot creation, a Patreon-like Marketplace, advanced bot editing, Reddit-style voting, My Purchases section, Super Admin role, and a Seller Verification System. The overarching goal is **cross-device data synchronization** for all user data (bots, purchases, account, votes, profiles) by fully migrating from  to Supabase. Current challenges include reliable portfolio creation/deletion, accurate data display, and functional voting/ratings systems, with recent efforts focused on resolving database schema and frontend authentication issues for voting and reviews.
 </product_requirements>
 
 <key_technical_concepts>
-- **Frontend**: React, , Tailwind CSS, React Context API.
+- **Frontend**: React, , Tailwind CSS, React Context API, .
 - **Backend**: FastAPI, .
-- **Database/Auth**: Supabase (PostgreSQL), Supabase Auth, Row Level Security (RLS), Supabase Storage.
+- **Database/Auth**: Supabase (PostgreSQL), Supabase Auth, Row Level Security (RLS).
 - **AI Integration**: OpenAI API, Grok 4 API.
 - **Data Persistence**: Shift from  to Supabase.
 </key_technical_concepts>
@@ -19,45 +19,26 @@ The application uses a full-stack architecture with React (frontend) and FastAPI
 
 
 
-**Key Files and Changes Made:**
-- :
-    - **Importance**: Displays pre-built and custom trading bots.
-    - **Changes**: Removed  initialization for  to prevent UI flickering on tab switch.
-- :
-    - **Importance**: Main marketplace display and 'My Purchases' section.
-    - **Changes**: Removed  initialization. Updated to use  for user votes, seller reviews, product votes, and purchase/product management. Added  state. Removed all  dependencies.
-- :
-    - **Importance**: User profile and application settings, including seller profile and product management.
-    - **Changes**: Integrated  for user profile data, social links, notifications, and balance top-up, replacing . Added a migration function call on component mount.
-- :
-    - **Importance**: Centralizes Supabase interactions for user data.
-    - **Changes**: Minimal recent changes, as new functionality for votes/reviews moved to .
--  (NEW):
-    - **Importance**: New core service to handle all  data migration to Supabase, including user votes, seller reviews, and notifications.
-    - **Changes**: Created to abstract Supabase calls for , , , , and  data. Includes , , , , , , , , , , . Debugging functions () were added and refined, and authentication headers and data formats were checked for POST requests.
-- :
-    - **Importance**: Supabase client helper functions.
-    - **Changes**: Added debugging log for Supabase client configuration during troubleshooting.
-- :
-    - **Importance**: Handles displaying and submitting seller reviews.
-    - **Changes**: Checked the call site for  for parameter issues during debugging.
-- , ,  (NEW): Initial SQL scripts for migration, including fixes for PostgreSQL syntax and adding missing columns.
-- , ,  (NEW): Temporary SQL scripts for debugging RLS by disabling/granting permissions.
-- ,  (NEW): Minimal SQL scripts to attempt direct table creation for debugging 404s.
--  (NEW): SQL script created to update RLS policies for voting and reviews.
--  (NEW): SQL script to fix the  column type to UUID.
--  (NEW): A simplified version of the schema fix, addressing prior SQL syntax errors.
--  (NEW): A script to verify the schema changes after the fix.
--  (NEW): A simplified, robust SQL script to fix  type by dropping FK, converting type, recreating FK, and forcing schema reload.
--  (NEW): A simple SQL script to test  functionality.
--  (NEW): A comprehensive SQL script to drop RLS policies, remove FK, convert column type, recreate FK, recreate RLS, and force schema reload.
--  (NEW): A SQL script to identify existing RLS policies on .
--  (NEW): A dynamic SQL script to automatically drop and re-create RLS policies, then fix the column type.
--  (NEW): An even simpler SQL query to find policies.
--  (NEW): A script to temporarily disable RLS, fix the column type, and re-enable RLS with new policies.
--  (NEW): The final, successful SQL script that explicitly drops all previously identified policies by name, alters the  column to UUID, and recreates new RLS policies.
--  (NEW): A SQL script to test end-to-end voting functionality after the fix.
--  (NEW): A simplified SQL test for .
+- : Removed  dependencies and mock data, now uses  for votes, reviews, and product management. Crucial for displaying marketplace data.
+-  (NEW): Central service for Supabase interactions for , , , , and . Contains logic for data migration and saving/retrieving data.
+- : Supabase client configuration.
+- : Component for displaying/submitting seller reviews. Its calls to  were part of the debugging path.
+- : Manages user authentication state. Modified to enable a development test user and to refine how authentication state changes () are handled to prevent race conditions and ensure proper UI updates. Recent changes involved wrapping context value in  for optimization and debugging the  listener.
+- : Main application component, handles routing and wraps the application in . Debugging logs were added to  and  to trace authentication flow.
+-  (NEW): A critical SQL script that was manually executed to fix  column type from  to  by dropping, altering, and recreating foreign key constraints and RLS policies.
+-  (NEW): Created to potentially address  column type issues in , similar to .
+-  (NEW): A simple SQL script to test database connectivity and schema.
+-  (NEW): A Python script attempting to apply database fixes via Supabase REST API (failed due to RPC function not existing).
+-  (NEW): Python script using  to directly diagnose database schema issues, confirming  type mismatch.
+-  (NEW): Python script to check table existence and basic column info.
+-  (NEW): Python script to directly insert a test vote, confirming the  vs  error.
+-  (NEW): Python script attempting to apply PostgreSQL fixes directly using .
+-  (NEW): Comprehensive Python test script for voting functionality after fixes.
+-  (NEW): Python script to test  functionality and diagnose API key and schema issues.
+-  (NEW): Python script to check the structure of the  table.
+-  (NEW): Python script to test  with expected frontend columns.
+-  (NEW): Python script to test  with UUID-formatted .
+-  (NEW): Python script to diagnose frontend authentication issues.
 </code_architecture>
 
 <pending_tasks>
@@ -70,12 +51,13 @@ The application uses a full-stack architecture with React (frontend) and FastAPI
 </pending_tasks>
 
 <current_work>
-Immediately before this summary, the AI engineer was engaged in an extensive debugging effort to resolve persistent 404 (for ) and 400 (for ) errors from Supabase, which were preventing voting and review functionality. Initial diagnosis, aided by detailed console logs provided by the user, revealed that while the Supabase connection and tables were accessible, there was a fundamental schema mismatch in the  table: the  column was defined as  but was expected to be . This led to database errors like .
+Immediately before this summary, the previous AI engineer had successfully resolved a critical  database schema issue where  was  instead of . This fix involved a multi-step process, including identifying and dropping existing RLS policies by name, altering the  column to , recreating foreign key constraints, and finally re-establishing RLS policies using the  script executed manually by the user. Comprehensive backend testing confirmed the voting system was fully functional.
 
-The engineer iteratively generated and refined multiple SQL scripts (, , , , , ) to address the issue. This involved navigating through various PostgreSQL syntax errors (like psql meta-commands and quoted identifier issues) and, critically, understanding that  does not drop existing RLS policies. The  functionality was determined to be working earlier, but the persistent  issue required the explicit dropping of all 9 existing RLS policies by their exact names, then altering the  column to , and finally recreating the necessary foreign key constraints and new RLS policies. This database schema fix for  was successfully applied and verified just before this summary. The application-side code in  and  had already been updated to use Supabase for these features.
+Following this, the user reported a new issue with the  system, specifically a  error (No API key found in request). Initial diagnosis revealed two problems: a missing  column in the  table and the  column expecting a  but receiving a string. These database schema issues for  were diagnosed and implicitly fixed during testing, confirming the  database functionality (201 status with proper UUID schema).
+
+The investigation then shifted to a persistent frontend authentication problem. Despite enabling a development test user in  and console logs confirming the test user was loaded and authenticated (, , ), the application's UI continuously displayed the login screen. Debugging revealed a race condition or timing issue where the Supabase  listener was being triggered with a  session *after* the development test user was manually set, effectively de-authenticating the user and causing  components to redirect to the login screen. The current state is that the frontend routing is showing a login screen because the auth state listener is overriding the manually set test user.
 </current_work>
 
 <optional_next_step>
-The immediate next step is to await user confirmation that the voting and review functionality is working correctly within the Flow Invest application's user interface.
+Fix the React re-rendering issue in AuthContext to prevent the Supabase auth state listener from overriding the development test user.
 </optional_next_step>
-
