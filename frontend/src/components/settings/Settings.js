@@ -406,7 +406,7 @@ const Settings = () => {
 
   const handleProductUpdated = (updatedProduct) => {
     try {
-      // Update the product in localStorage
+      // Update the product in localStorage (for backward compatibility during migration)
       const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
       const updatedUserPortfolios = userPortfolios.map(p => 
         p.id === updatedProduct.id ? updatedProduct : p
