@@ -113,6 +113,9 @@ backend:
     priority: "critical"
     needs_retesting: true
     status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "SCHEMA FIX APPLIED: User executed SQL fix to change user_votes.product_id from VARCHAR to UUID type. Applied: ALTER TABLE user_votes ALTER COLUMN product_id TYPE UUID USING product_id::UUID; and recreated foreign key constraint with portfolios.id. Now testing to verify the PostgreSQL 'operator does not exist: uuid = character varying' error is resolved and voting functionality works correctly."
         - working: false
           agent: "user"
           comment: "USER REPORTS VOTING STILL NOT WORKING: Despite previous schema fixes for user_id column, voting functionality still fails with PostgreSQL error 'operator does not exist: uuid = character varying' occurring in the trigger function update_portfolio_vote_counts(). The error indicates that user_votes.product_id is VARCHAR(255) but portfolios.id is UUID, causing type mismatch in the WHERE clause comparison. This is similar to the previous user_id issue but affecting the product_id column. Need to alter user_votes.product_id from VARCHAR to UUID type."
