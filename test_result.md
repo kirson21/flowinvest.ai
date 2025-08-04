@@ -57,8 +57,8 @@
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
+##     -agent: "main"
+##     -message: "CRITICAL DATABASE SCHEMA FIX NEEDED: User reports voting functionality still broken with PostgreSQL error 'operator does not exist: uuid = character varying' in trigger function. Issue identified as user_votes.product_id being VARCHAR(255) but portfolios.id being UUID type. Created supabase_product_id_fix.sql script to alter user_votes.product_id from VARCHAR to UUID using same successful pattern as previous user_id fix. Will execute schema fix and test functionality to resolve type mismatch in trigger function update_portfolio_vote_counts()."
 
 # Protocol Guidelines for Main agent
 #
