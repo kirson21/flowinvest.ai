@@ -143,8 +143,10 @@ const Portfolios = () => {
         return;
       }
 
-      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      // Load review and vote data from Supabase (no more localStorage)
+      console.log('Loading reviews and votes from Supabase...');
+      const sellerReviews = await supabaseDataService.getSellerReviews();
+      const productVotes = await supabaseDataService.getProductVotes();
       
       // Update products with real review data and votes
       const updatedPortfolios = (allPortfolios || []).map(product => {
