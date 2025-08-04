@@ -109,9 +109,9 @@ backend:
     implemented: true
     working: false
     file: "/app/frontend/src/services/supabaseDataService.js, /app/frontend/src/components/portfolios/Portfolios.js"
-    stuck_count: 1
+    stuck_count: 2
     priority: "critical"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "main"
