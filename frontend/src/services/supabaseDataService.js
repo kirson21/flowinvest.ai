@@ -6,6 +6,27 @@ import { supabase } from '../lib/supabase';
  */
 export const supabaseDataService = {
   
+  // Debug function to test Supabase connection
+  async testSupabaseConnection() {
+    try {
+      console.log('Testing Supabase connection...');
+      console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
+      console.log('Supabase Key present:', !!process.env.REACT_APP_SUPABASE_ANON_KEY);
+      
+      // Test basic connection
+      const { data, error } = await supabase.from('user_votes').select('count').limit(1);
+      if (error) {
+        console.error('Supabase connection test failed:', error);
+        return false;
+      }
+      console.log('Supabase connection test successful');
+      return true;
+    } catch (error) {
+      console.error('Supabase connection test error:', error);
+      return false;
+    }
+  },
+  
   // ========================================
   // USER VOTES MANAGEMENT
   // ========================================
