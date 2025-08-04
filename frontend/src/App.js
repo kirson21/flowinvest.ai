@@ -12,7 +12,10 @@ import './App.css';
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
+  console.log('ProtectedRoute check:', { user: user?.id, loading, isAuthenticated: !!user });
+
   if (loading) {
+    console.log('ProtectedRoute: Still loading, showing spinner');
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FAECEC] to-white flex items-center justify-center">
         <div className="text-center">
@@ -23,7 +26,13 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  return user ? children : <Navigate to="/auth" replace />;
+  if (user) {
+    console.log('ProtectedRoute: User authenticated, rendering app');
+    return children;
+  } else {
+    console.log('ProtectedRoute: User not authenticated, redirecting to /auth');
+    return <Navigate to="/auth" replace />;
+  }
 };
 
 // Public Route Component (redirects to app if authenticated)
