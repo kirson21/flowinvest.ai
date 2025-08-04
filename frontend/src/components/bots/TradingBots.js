@@ -90,8 +90,8 @@ const TradingBots = () => {
       }
     } catch (error) {
       console.error('Error loading pre-built bots:', error);
-      console.log('Using mock data as fallback');
-      setPreBuiltBots(mockTradingBots);
+      console.log('Setting empty state due to error');
+      setPreBuiltBots([]);
     }
   };
 
