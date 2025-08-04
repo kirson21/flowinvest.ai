@@ -720,7 +720,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Remove Mock Data Initialization from Components"
+    - "Comprehensive LocalStorage to Supabase Migration"
   stuck_tasks:
     []
   test_all: false
