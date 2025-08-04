@@ -430,7 +430,7 @@ const Settings = () => {
 
   const handleProductDeleted = (productId) => {
     try {
-      // Remove from localStorage
+      // Remove from localStorage (for backward compatibility during migration)
       const userPortfolios = JSON.parse(localStorage.getItem('user_portfolios') || '[]');
       const filteredPortfolios = userPortfolios.filter(p => p.id !== productId);
       localStorage.setItem('user_portfolios', JSON.stringify(filteredPortfolios));
