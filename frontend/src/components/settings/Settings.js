@@ -129,17 +129,44 @@ const Settings = () => {
   // Voting state
   const [userVotes, setUserVotes] = useState({});
 
-  // Load user data on component mount
+  // Load user data on component mount and migrate localStorage data
   useEffect(() => {
     if (user) {
       loadUserProfile();
-      loadSellerData(); // This is now async but we don't need to await here
+      loadSellerData();
       loadAccountBalance();
       loadUserVotes();
       loadVerificationStatus();
       loadNotifications();
+      
+      // Migrate localStorage data to Supabase on first load
+      migrateUserDataIfNeeded();
     }
   }, [user]);
+
+  // Migrate localStorage data to Supabase
+  const migrateUserDataIfNeeded = async () => {
+    try {
+      const migrationKey = `supabase_migration_completed_${user?.id}`;
+      const migrationCompleted = localStorage.getItem(migrationKey);
+      
+      if (!migrationCompleted && user?.id) {
+        console.log('Migrating user data from localStorage to Supabase...');
+        const results = await supabaseDataService.migrateUserDataFromLocalStorage(user.id);
+        
+        if (results.length > 0) {
+          console.log('Migration completed:', results);
+          setMessage('Your data has been synchronized across all devices!');
+          setTimeout(() => setMessage(''), 5000);
+        }
+        
+        // Mark migration as completed
+        localStorage.setItem(migrationKey, 'true');
+      }
+    } catch (error) {
+      console.error('Error during data migration:', error);
+    }
+  };
 
   // Load verification status
   const loadVerificationStatus = async () => {
