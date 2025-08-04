@@ -199,8 +199,8 @@ const Portfolios = () => {
         }
         
         // Update vote data - ensure votes object exists
-        if (productVotes[product.id]) {
-          updatedProduct.votes = productVotes[product.id];
+        if (productVotesData[product.id]) {
+          updatedProduct.votes = productVotesData[product.id];
         } else if (product.votes) {
           updatedProduct.votes = product.votes;
         } else {
