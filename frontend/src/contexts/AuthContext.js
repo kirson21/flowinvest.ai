@@ -50,7 +50,12 @@ export const AuthProvider = ({ children }) => {
           console.log('Development mode: Using test user', testUser);
           setSession(testSession);
           setUser(testUser);
-          setLoading(false); // Important: Set loading to false immediately
+          
+          // Force loading to false after setting user
+          setTimeout(() => {
+            setLoading(false);
+            console.log('Development test user auth state finalized:', { user: testUser.id, loading: false });
+          }, 100);
           
           // Trigger data sync for development test user (non-blocking)
           console.log('Development test user loaded, starting background data sync...');
