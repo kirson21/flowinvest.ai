@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
  */
 export const supabaseDataService = {
   
-  // Debug function to test Supabase connection
+  // Debug function to test Supabase connection and test INSERT operations
   async testSupabaseConnection() {
     try {
       console.log('=== DETAILED SUPABASE DEBUGGING ===');
@@ -23,7 +23,8 @@ export const supabaseDataService = {
           }
         });
         console.log('Raw fetch response status:', response.status);
-        console.log('Raw fetch response:', await response.text());
+        const responseText = await response.text();
+        console.log('Raw fetch response length:', responseText.length, 'characters');
       } catch (fetchError) {
         console.error('Raw fetch failed:', fetchError);
       }
@@ -43,6 +44,35 @@ export const supabaseDataService = {
         .select('id')
         .limit(1);
       console.log('Votes result:', { data: votesData, error: votesError });
+      
+      // Test 4: Try to insert a test vote (if user is authenticated)
+      console.log('Test 4: Test vote insertion...');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log('User authenticated, attempting test insert...');
+        try {
+          const { data: testVoteData, error: testVoteError } = await supabase
+            .from('user_votes')
+            .insert({
+              user_id: user.id,
+              product_id: 'test-product-' + Date.now(),
+              vote_type: 'upvote'
+            })
+            .select()
+            .single();
+          console.log('Test vote insert result:', { data: testVoteData, error: testVoteError });
+          
+          // Clean up test vote if successful
+          if (testVoteData && !testVoteError) {
+            await supabase.from('user_votes').delete().eq('id', testVoteData.id);
+            console.log('Test vote cleaned up successfully');
+          }
+        } catch (insertError) {
+          console.error('Test insert failed:', insertError);
+        }
+      } else {
+        console.log('User not authenticated, skipping insert test');
+      }
       
       return true;
     } catch (error) {
