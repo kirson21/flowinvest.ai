@@ -113,6 +113,9 @@ backend:
     priority: "critical"
     needs_retesting: true
     status_history:
+        - working: false
+          agent: "user"
+          comment: "USER REPORTS VOTING STILL NOT WORKING: Despite previous schema fixes for user_id column, voting functionality still fails with PostgreSQL error 'operator does not exist: uuid = character varying' occurring in the trigger function update_portfolio_vote_counts(). The error indicates that user_votes.product_id is VARCHAR(255) but portfolios.id is UUID, causing type mismatch in the WHERE clause comparison. This is similar to the previous user_id issue but affecting the product_id column. Need to alter user_votes.product_id from VARCHAR to UUID type."
         - working: true
           agent: "main"
           comment: "VOTING AND STAR RATING BUGS FIXED: Successfully resolved 'No API key found in request' errors and star rating display issues. Key fixes: 1) Added authentication checks to all supabaseDataService methods (getUserVotes, saveUserVote, removeUserVote, saveSellerReview) with proper user validation. 2) Fixed missing productVotes state variable in Portfolios component - votes are now properly loaded and stored in component state. 3) Updated loadProductsWithReviews and loadUserPurchases functions to set productVotes state from Supabase data. 4) Added comprehensive logging for debugging authentication and data loading issues. Backend testing confirms 91.7% success rate with all critical voting and star rating systems operational. Authentication system properly enforces login requirements for voting features."
