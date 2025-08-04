@@ -638,6 +638,11 @@ const Portfolios = () => {
   // Load data from Supabase (no more localStorage dependencies)
   useEffect(() => {
     const loadData = async () => {
+      // Test Supabase connection first
+      console.log('=== TESTING SUPABASE CONNECTION ===');
+      const connectionTest = await supabaseDataService.testSupabaseConnection();
+      console.log('Supabase connection test result:', connectionTest);
+      
       await loadProductsWithReviews();
       if (user?.id) {
         await loadUserVotes();
