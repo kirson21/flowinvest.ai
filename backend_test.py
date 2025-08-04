@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend Testing Suite for Comprehensive LocalStorage to Supabase Migration
-Focus: Verify backend stability and functionality after major data persistence migration
-Priority: Ensure no regressions from localStorage to Supabase-only approach
+Backend Testing Suite for Voting and Star Rating System Fixes
+Focus: Verify authentication checks, voting system, and star rating functionality
+Priority: Ensure no API key errors and proper Supabase integration
 """
 
 import requests
