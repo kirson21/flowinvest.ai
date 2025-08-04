@@ -746,7 +746,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Comprehensive LocalStorage to Supabase Migration"
+    - "Fix Voting and Star Rating System Bugs"
   stuck_tasks:
     []
   test_all: false
