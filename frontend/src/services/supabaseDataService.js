@@ -366,18 +366,8 @@ export const supabaseDataService = {
         }
       }
 
-      // Delete existing review to avoid conflicts
-      console.log('🗑️ Deleting existing review for user:', reviewerId, 'seller:', sellerName);
-      const deleteResult = await supabase
-        .from('seller_reviews')
-        .delete()
-        .eq('reviewer_id', reviewerId)
-        .eq('seller_name', sellerName);
-      
-      console.log('🗑️ Delete result:', deleteResult.error ? 'Error' : 'Success');
-
-      // Insert new review
-      console.log('💾 Inserting new review...');
+      // Use UPSERT instead of DELETE + INSERT to avoid race conditions
+      console.log('💾 Upserting review (insert or update if exists)...');
       const insertData = {
         reviewer_id: reviewerId,
         seller_name: sellerName,
@@ -385,17 +375,43 @@ export const supabaseDataService = {
         rating: numRating,
         review_text: reviewText || ''
       };
-      console.log('📝 Insert data:', insertData);
+      console.log('📝 Upsert data:', insertData);
       
-      const { data, error } = await supabase
+      // First try to update existing review
+      const { data: updateData, error: updateError } = await supabase
         .from('seller_reviews')
-        .insert(insertData)
+        .update({
+          seller_id: validSellerId,
+          rating: numRating,
+          review_text: reviewText || '',
+          updated_at: new Date().toISOString()
+        })
+        .eq('reviewer_id', reviewerId)
+        .eq('seller_name', sellerName)
         .select()
         .single();
 
-      if (error) {
-        console.error('❌ Error saving seller review:', error);
-        throw error;
+      let finalData;
+      if (updateError && updateError.code === 'PGRST116') {
+        // No existing review found, insert new one
+        console.log('📝 No existing review, inserting new one...');
+        const { data: insertResult, error: insertError } = await supabase
+          .from('seller_reviews')
+          .insert(insertData)
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error('❌ Error inserting new review:', insertError);
+          throw insertError;
+        }
+        finalData = insertResult;
+      } else if (updateError) {
+        console.error('❌ Error updating review:', updateError);
+        throw updateError;
+      } else {
+        console.log('✅ Updated existing review');
+        finalData = updateData;
       }
 
       console.log('✅ Review saved successfully:', data.id);
