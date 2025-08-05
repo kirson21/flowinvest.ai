@@ -303,7 +303,7 @@ export const supabaseDataService = {
         throw new Error('Rating must be a number between 1 and 5');
       }
       
-      // Check if user is authenticated
+      // Check if user is authenticated and get session
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         console.error('Authentication error in saveSellerReview:', authError);
@@ -315,14 +315,31 @@ export const supabaseDataService = {
         throw new Error('User ID mismatch');
       }
 
+      // Get the current session to ensure we have proper tokens
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.error('Session error in saveSellerReview:', sessionError);
+        throw new Error('No active session found');
+      }
+      
+      console.log('Session validation successful:', { 
+        userId: session.user.id, 
+        hasAccessToken: !!session.access_token,
+        tokenType: session.token_type 
+      });
+
       // First try to delete existing review to avoid conflicts
-      await supabase
+      console.log('Deleting existing review for user:', reviewerId, 'seller:', sellerName);
+      const deleteResult = await supabase
         .from('seller_reviews')
         .delete()
         .eq('reviewer_id', reviewerId)
         .eq('seller_name', sellerName);
+      
+      console.log('Delete operation result:', deleteResult);
 
       // Insert new review
+      console.log('Inserting new review...');
       const { data, error } = await supabase
         .from('seller_reviews')
         .insert({
@@ -337,6 +354,12 @@ export const supabaseDataService = {
 
       if (error) {
         console.error('Error saving seller review:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
 
