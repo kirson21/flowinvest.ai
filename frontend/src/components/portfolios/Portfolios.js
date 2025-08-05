@@ -211,6 +211,21 @@ const Portfolios = () => {
         }
         
         return updatedProduct;
+        } catch (productError) {
+          console.error('Error processing product:', productError, product);
+          // Return a safe fallback product
+          return {
+            ...product,
+            seller: {
+              name: 'Anonymous',
+              bio: 'Product creator on FlowInvestAI marketplace',
+              avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
+              socialLinks: {},
+              specialties: []
+            },
+            votes: { upvotes: 0, downvotes: 0, totalVotes: 0 }
+          };
+        }
       });
       
       // Calculate real investor counts from purchase data
