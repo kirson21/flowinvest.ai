@@ -138,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     user,
     session,
     loading,
+    setUser, // Add setUser to the exported context
     signUp,
     signIn,
     signInWithGoogle,
