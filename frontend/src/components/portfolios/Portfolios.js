@@ -154,7 +154,9 @@ const Portfolios = () => {
       console.log('Set product votes in state:', Object.keys(productVotesData).length);
       
       // Update products with real review data and votes
-      const updatedPortfolios = (allPortfolios || []).map(product => {
+      const updatedPortfolios = [];
+      
+      for (const product of (allPortfolios || [])) {
         try {
           // Extract metadata from images field (where we store extra data as JSON)
           let metadata = {};
@@ -165,6 +167,40 @@ const Portfolios = () => {
             metadata = {};
           }
 
+          // Get the seller name from metadata or product
+          const sellerName = (metadata.seller && metadata.seller.name) || product.seller_info?.name || 'Anonymous';
+          
+          // LOOKUP COMPLETE SELLER PROFILE FROM SUPABASE
+          console.log('Looking up complete seller profile for:', sellerName);
+          const { data: sellerProfile, error: sellerError } = await supabase
+            .from('user_profiles')
+            .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data')
+            .eq('display_name', sellerName)
+            .single();
+          
+          let completeSellerInfo = {
+            name: sellerName,
+            bio: 'Product creator on FlowInvestAI marketplace',
+            avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(sellerName) + '&size=150&background=0097B2&color=ffffff',
+            socialLinks: {},
+            specialties: []
+          };
+          
+          if (sellerProfile && !sellerError) {
+            console.log('Found complete seller profile:', sellerProfile);
+            completeSellerInfo = {
+              name: sellerProfile.display_name || sellerName,
+              bio: sellerProfile.bio || 'Product creator on FlowInvestAI marketplace',
+              avatar: sellerProfile.avatar_url || completeSellerInfo.avatar,
+              socialLinks: sellerProfile.social_links || {},
+              specialties: sellerProfile.specialties || [],
+              experience: sellerProfile.experience || '',
+              sellerData: sellerProfile.seller_data || {}
+            };
+          } else {
+            console.warn('Could not find seller profile for:', sellerName, sellerError);
+          }
+
           let updatedProduct = { 
             ...product,
             // Use metadata from JSON or fallback to basic values
@@ -172,14 +208,13 @@ const Portfolios = () => {
             expectedReturn: metadata.expectedReturn || null,
             minimumInvestment: metadata.minimumInvestment || product.price,
             assetAllocation: metadata.assetAllocation || null,
-            seller: metadata.seller || {
-              name: 'Anonymous',
-              bio: 'Product creator on FlowInvestAI marketplace',
-              avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
-              socialLinks: {},
-              specialties: []
-            },
+            seller: completeSellerInfo, // Use complete seller info from user_profiles
             totalInvestors: metadata.totalInvestors || 0,
+            totalReviews: metadata.totalReviews || 0,
+            rating: metadata.rating || 0,
+            votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
+            images: metadata.actualImages || []
+          };
           totalReviews: metadata.totalReviews || 0,
           rating: metadata.rating || 0,
           votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
