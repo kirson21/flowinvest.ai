@@ -246,6 +246,9 @@ export const supabaseDataService = {
           reviewsMap[review.seller_name] = [];
         }
         reviewsMap[review.seller_name].push({
+          id: review.id || review.reviewer_id, // Add unique ID
+          userName: review.reviewer_name || 'Anonymous User', // Add userName
+          userAvatar: review.reviewer_avatar || null, // Add avatar
           rating: review.rating,
           review: review.review_text,
           date: review.created_at,
