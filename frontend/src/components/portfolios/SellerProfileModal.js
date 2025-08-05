@@ -549,7 +549,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={review.userAvatar} alt={review.userName} />
                             <AvatarFallback className="bg-gray-300 text-gray-700 text-xs">
-                              {review.userName.charAt(0)}
+                              {review.userName ? review.userName.charAt(0).toUpperCase() : 'A'}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
