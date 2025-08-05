@@ -290,6 +290,7 @@ export const supabaseDataService = {
    */
   async saveSellerReview(reviewerId, sellerName, sellerId, rating, reviewText) {
     try {
+      console.log('=== SELLER REVIEW DEBUG START ===');
       console.log('Saving seller review:', { reviewerId, sellerName, rating });
       
       // Validate input data
@@ -303,8 +304,11 @@ export const supabaseDataService = {
         throw new Error('Rating must be a number between 1 and 5');
       }
       
-      // Check if user is authenticated and get session
+      // Comprehensive authentication check
+      console.log('Step 1: Getting user...');
       const { data: { user }, error: authError } = await supabase.auth.getUser();
+      console.log('User result:', { user: user?.id, error: authError });
+      
       if (authError || !user) {
         console.error('Authentication error in saveSellerReview:', authError);
         throw new Error('User not authenticated');
@@ -316,18 +320,20 @@ export const supabaseDataService = {
       }
 
       // Get the current session to ensure we have proper tokens
+      console.log('Step 2: Getting session...');
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Session result:', { 
+        hasSession: !!session, 
+        hasAccessToken: !!session?.access_token,
+        tokenType: session?.token_type,
+        error: sessionError 
+      });
+      
       if (sessionError || !session) {
         console.error('Session error in saveSellerReview:', sessionError);
         throw new Error('No active session found');
       }
       
-      console.log('Session validation successful:', { 
-        userId: session.user.id, 
-        hasAccessToken: !!session.access_token,
-        tokenType: session.token_type 
-      });
-
       // Validate sellerId format if provided
       let validSellerId = null;
       if (sellerId) {
@@ -341,8 +347,21 @@ export const supabaseDataService = {
         }
       }
 
+      // Test simple query first to check API connectivity
+      console.log('Step 3: Testing simple query...');
+      const { data: testData, error: testError } = await supabase
+        .from('seller_reviews')
+        .select('id')
+        .limit(1);
+      console.log('Simple query result:', { data: testData?.length, error: testError });
+      
+      if (testError) {
+        console.error('Simple query failed - API key or auth issue:', testError);
+        throw new Error(`Database connection failed: ${testError.message}`);
+      }
+
       // First try to delete existing review to avoid conflicts
-      console.log('Deleting existing review for user:', reviewerId, 'seller:', sellerName);
+      console.log('Step 4: Deleting existing review for user:', reviewerId, 'seller:', sellerName);
       const deleteResult = await supabase
         .from('seller_reviews')
         .delete()
@@ -352,16 +371,19 @@ export const supabaseDataService = {
       console.log('Delete operation result:', deleteResult);
 
       // Insert new review
-      console.log('Inserting new review...');
+      console.log('Step 5: Inserting new review...');
+      const insertData = {
+        reviewer_id: reviewerId,
+        seller_name: sellerName,
+        seller_id: validSellerId,
+        rating: numRating,
+        review_text: reviewText || ''
+      };
+      console.log('Insert data:', insertData);
+      
       const { data, error } = await supabase
         .from('seller_reviews')
-        .insert({
-          reviewer_id: reviewerId,
-          seller_name: sellerName,
-          seller_id: validSellerId,
-          rating: numRating,
-          review_text: reviewText || ''
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -377,6 +399,7 @@ export const supabaseDataService = {
       }
 
       console.log('Successfully saved seller review:', data);
+      console.log('=== SELLER REVIEW DEBUG END ===');
       return data;
     } catch (error) {
       console.error('Error in saveSellerReview:', error);
