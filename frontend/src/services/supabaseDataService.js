@@ -414,8 +414,8 @@ export const supabaseDataService = {
         finalData = updateData;
       }
 
-      console.log('✅ Review saved successfully:', data.id);
-      return data;
+      console.log('✅ Review saved successfully:', finalData.id);
+      return finalData;
     } catch (error) {
       console.error('❌ Error in saveSellerReview:', error);
       throw error;
