@@ -108,17 +108,28 @@ export const AuthProvider = ({ children }) => {
 
   const signInWithGoogle = useCallback(async () => {
     try {
+      console.log('🔄 Starting Google OAuth sign-in...');
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account' // Force account selection dialog
+          }
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Google OAuth error:', error);
+        throw error;
+      }
       
+      console.log('✅ Google OAuth initiated successfully');
       return { success: true, data };
     } catch (error) {
+      console.error('❌ Google sign-in failed:', error);
       return { success: false, error: error.message };
     }
   }, []);
