@@ -256,10 +256,15 @@ export const supabaseDataService = {
         if (!reviewsMap[review.seller_name]) {
           reviewsMap[review.seller_name] = [];
         }
+        // Extract user profile data (if available)
+        const userProfile = review.user_profiles;
+        const userName = userProfile?.display_name || 'Anonymous User';
+        const userAvatar = userProfile?.avatar_url || null;
+        
         reviewsMap[review.seller_name].push({
-          id: review.id || review.reviewer_id, // Add unique ID
-          userName: review.reviewer_name || 'Anonymous User', // Add userName
-          userAvatar: review.reviewer_avatar || null, // Add avatar
+          id: review.id || review.reviewer_id,
+          userName: userName,
+          userAvatar: userAvatar,
           rating: review.rating,
           review: review.review_text,
           date: review.created_at,
