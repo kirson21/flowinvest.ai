@@ -224,6 +224,10 @@ const Portfolios = () => {
             const socialLinks = sellerProfile.social_links || sellerData.socialLinks || {};
             const specialties = sellerProfile.specialties || sellerData.specialties || [];
             
+            console.log('🔍 Raw seller_data:', sellerData);
+            console.log('🔍 sellerData.socialLinks:', sellerData.socialLinks);
+            console.log('🔍 sellerData.specialties:', sellerData.specialties);
+            
             completeSellerInfo = {
               name: sellerProfile.display_name || sellerName,
               bio: sellerProfile.bio || 'Product creator on FlowInvestAI marketplace',
@@ -234,8 +238,9 @@ const Portfolios = () => {
               sellerData: sellerData
             };
             
-            console.log('📋 Seller social links:', socialLinks);
-            console.log('🎯 Seller specialties:', specialties);
+            console.log('📋 Final seller social links:', socialLinks);
+            console.log('🎯 Final seller specialties:', specialties);
+            console.log('🏆 Complete seller info:', completeSellerInfo);
           } else {
             console.warn('Could not find seller profile for:', sellerName, sellerError);
           }
