@@ -215,41 +215,28 @@ const Portfolios = () => {
             votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
             images: metadata.actualImages || []
           };
-          totalReviews: metadata.totalReviews || 0,
-          rating: metadata.rating || 0,
-          votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
-          images: metadata.actualImages || []
-        };
         
-        // Update review data - check both stored seller and metadata seller
-        const sellerName = (metadata.seller && metadata.seller.name) || (product.seller_info && product.seller_info.name);
-        if (sellerName) {
-          const productReviews = sellerReviews[sellerName] || [];
-          if (productReviews.length > 0) {
-            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
-            updatedProduct = {
-              ...updatedProduct,
-              rating: Math.round(avgRating * 10) / 10,
-              totalReviews: productReviews.length
-            };
-          }
+        // Update review data using the complete seller name
+        const productReviews = sellerReviews[completeSellerInfo.name] || [];
+        if (productReviews.length > 0) {
+          const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
+          updatedProduct = {
+            ...updatedProduct,
+            rating: Math.round(avgRating * 10) / 10,
+            totalReviews: productReviews.length
+          };
         }
         
         // Update vote data - ensure votes object exists
         if (productVotesData[product.id]) {
           updatedProduct.votes = productVotesData[product.id];
-        } else if (product.votes) {
-          updatedProduct.votes = product.votes;
-        } else {
-          // Initialize votes for products
-          updatedProduct.votes = { upvotes: 0, downvotes: 0, totalVotes: 0 };
         }
         
-        return updatedProduct;
+        updatedPortfolios.push(updatedProduct);
         } catch (productError) {
           console.error('Error processing product:', productError, product);
           // Return a safe fallback product
-          return {
+          updatedPortfolios.push({
             ...product,
             seller: {
               name: 'Anonymous',
@@ -259,9 +246,9 @@ const Portfolios = () => {
               specialties: []
             },
             votes: { upvotes: 0, downvotes: 0, totalVotes: 0 }
-          };
+          });
         }
-      });
+      }
       
       // Calculate real investor counts from purchase data
       const portfoliosWithRealInvestors = await calculateRealInvestorCounts(updatedPortfolios);
