@@ -155,29 +155,31 @@ const Portfolios = () => {
       
       // Update products with real review data and votes
       const updatedPortfolios = (allPortfolios || []).map(product => {
-        // Extract metadata from images field (where we store extra data as JSON)
-        let metadata = {};
         try {
-          metadata = typeof product.images === 'string' ? JSON.parse(product.images) : product.images || {};
-        } catch (e) {
-          metadata = {};
-        }
+          // Extract metadata from images field (where we store extra data as JSON)
+          let metadata = {};
+          try {
+            metadata = typeof product.images === 'string' ? JSON.parse(product.images) : product.images || {};
+          } catch (e) {
+            console.warn('Error parsing product metadata:', e);
+            metadata = {};
+          }
 
-        let updatedProduct = { 
-          ...product,
-          // Use metadata from JSON or fallback to basic values
-          riskLevel: product.risk_level || 'Medium',
-          expectedReturn: metadata.expectedReturn || null,
-          minimumInvestment: metadata.minimumInvestment || product.price,
-          assetAllocation: metadata.assetAllocation || null,
-          seller: metadata.seller || {
-            name: 'Anonymous',
-            bio: 'Product creator on FlowInvestAI marketplace',
-            avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
-            socialLinks: {},
-            specialties: []
-          },
-          totalInvestors: metadata.totalInvestors || 0,
+          let updatedProduct = { 
+            ...product,
+            // Use metadata from JSON or fallback to basic values
+            riskLevel: product.risk_level || 'Medium',
+            expectedReturn: metadata.expectedReturn || null,
+            minimumInvestment: metadata.minimumInvestment || product.price,
+            assetAllocation: metadata.assetAllocation || null,
+            seller: metadata.seller || {
+              name: 'Anonymous',
+              bio: 'Product creator on FlowInvestAI marketplace',
+              avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
+              socialLinks: {},
+              specialties: []
+            },
+            totalInvestors: metadata.totalInvestors || 0,
           totalReviews: metadata.totalReviews || 0,
           rating: metadata.rating || 0,
           votes: metadata.votes || { upvotes: 0, downvotes: 0, totalVotes: 0 },
