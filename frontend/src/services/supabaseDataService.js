@@ -243,12 +243,15 @@ export const supabaseDataService = {
       // Get unique reviewer IDs
       const reviewerIds = [...new Set(reviewsData.map(review => review.reviewer_id))];
       console.log('Found reviewer IDs:', reviewerIds);
+      console.log('Review data sample:', reviewsData.slice(0, 2));
 
       // Get user profiles for all reviewers
       const { data: profilesData, error: profilesError } = await supabase
         .from('user_profiles')
         .select('user_id, display_name, avatar_url')
         .in('user_id', reviewerIds);
+
+      console.log('User profiles found:', profilesData?.length, 'for', reviewerIds.length, 'reviewers');
 
       if (profilesError) {
         console.error('Error fetching user profiles:', profilesError);
