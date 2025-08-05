@@ -221,8 +221,15 @@ const Portfolios = () => {
             
             // Extract social links and specialties from seller_data if they exist there
             const sellerData = sellerProfile.seller_data || {};
-            const socialLinks = sellerProfile.social_links || sellerData.socialLinks || {};
-            const specialties = sellerProfile.specialties || sellerData.specialties || [];
+            
+            // Check if top-level fields have actual content, otherwise use seller_data
+            const socialLinks = (sellerProfile.social_links && Object.keys(sellerProfile.social_links).length > 0) 
+              ? sellerProfile.social_links 
+              : sellerData.socialLinks || {};
+              
+            const specialties = (sellerProfile.specialties && sellerProfile.specialties.length > 0) 
+              ? sellerProfile.specialties 
+              : sellerData.specialties || [];
             
             console.log('🔍 Raw seller_data:', sellerData);
             console.log('🔍 sellerData.socialLinks:', sellerData.socialLinks);
