@@ -47,6 +47,7 @@ export const supabaseDataService = {
       
       // Test 4: Skip test insertion to avoid foreign key constraint issues
       console.log('Test 4: Skipping test vote insertion (would violate FK constraint)');
+      const { data: { user } } = await supabase.auth.getUser();
       console.log('User authenticated:', !!user);
       
       return true;
