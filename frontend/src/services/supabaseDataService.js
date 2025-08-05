@@ -226,7 +226,18 @@ export const supabaseDataService = {
       
       let query = supabase
         .from('seller_reviews')
-        .select('seller_name, rating, review_text, created_at, reviewer_id');
+        .select(`
+          id,
+          seller_name, 
+          rating, 
+          review_text, 
+          created_at, 
+          reviewer_id,
+          user_profiles!reviewer_id (
+            display_name,
+            avatar_url
+          )
+        `);
 
       if (sellerNames.length > 0) {
         query = query.in('seller_name', sellerNames);
