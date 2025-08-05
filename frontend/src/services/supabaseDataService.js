@@ -343,7 +343,7 @@ export const supabaseDataService = {
           .from('user_profiles')
           .select('user_id')
           .eq('display_name', sellerName)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single
           
         if (sellerProfile && !sellerError) {
           validSellerId = sellerProfile.user_id;
