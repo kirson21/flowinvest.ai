@@ -328,6 +328,19 @@ export const supabaseDataService = {
         tokenType: session.token_type 
       });
 
+      // Validate sellerId format if provided
+      let validSellerId = null;
+      if (sellerId) {
+        // Check if sellerId is a valid UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(sellerId)) {
+          validSellerId = sellerId;
+        } else {
+          console.warn('Invalid sellerId format, setting to null:', sellerId);
+          validSellerId = null;
+        }
+      }
+
       // First try to delete existing review to avoid conflicts
       console.log('Deleting existing review for user:', reviewerId, 'seller:', sellerName);
       const deleteResult = await supabase
@@ -345,7 +358,7 @@ export const supabaseDataService = {
         .insert({
           reviewer_id: reviewerId,
           seller_name: sellerName,
-          seller_id: sellerId || null,
+          seller_id: validSellerId,
           rating: numRating,
           review_text: reviewText || ''
         })
