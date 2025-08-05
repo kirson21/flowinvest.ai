@@ -224,40 +224,54 @@ export const supabaseDataService = {
     try {
       console.log('Getting seller reviews for:', sellerNames);
       
+      // First get the reviews
       let query = supabase
         .from('seller_reviews')
-        .select(`
-          id,
-          seller_name, 
-          rating, 
-          review_text, 
-          created_at, 
-          reviewer_id,
-          user_profiles!seller_reviews_reviewer_id_fkey(
-            display_name,
-            avatar_url
-          )
-        `);
+        .select('id, seller_name, rating, review_text, created_at, reviewer_id');
 
       if (sellerNames.length > 0) {
         query = query.in('seller_name', sellerNames);
       }
 
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data: reviewsData, error: reviewsError } = await query.order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching seller reviews:', error);
+      if (reviewsError) {
+        console.error('Error fetching seller reviews:', reviewsError);
         return {};
+      }
+
+      // Get unique reviewer IDs
+      const reviewerIds = [...new Set(reviewsData.map(review => review.reviewer_id))];
+      console.log('Found reviewer IDs:', reviewerIds);
+
+      // Get user profiles for all reviewers
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', reviewerIds);
+
+      if (profilesError) {
+        console.error('Error fetching user profiles:', profilesError);
+        // Continue without user data rather than failing completely
+      }
+
+      // Create a lookup map for profiles
+      const profilesMap = {};
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          profilesMap[profile.user_id] = profile;
+        });
       }
 
       // Group by seller name for frontend compatibility
       const reviewsMap = {};
-      data.forEach(review => {
+      reviewsData.forEach(review => {
         if (!reviewsMap[review.seller_name]) {
           reviewsMap[review.seller_name] = [];
         }
-        // Extract user profile data (if available)
-        const userProfile = review.user_profiles;
+        
+        // Get user profile data
+        const userProfile = profilesMap[review.reviewer_id];
         const userName = userProfile?.display_name || 'Anonymous User';
         const userAvatar = userProfile?.avatar_url || null;
         
@@ -272,7 +286,7 @@ export const supabaseDataService = {
         });
       });
 
-      console.log('Successfully loaded seller reviews for sellers:', Object.keys(reviewsMap).length);
+      console.log('Successfully loaded seller reviews with user data for sellers:', Object.keys(reviewsMap).length);
       return reviewsMap;
     } catch (error) {
       console.error('Error in getSellerReviews:', error);
