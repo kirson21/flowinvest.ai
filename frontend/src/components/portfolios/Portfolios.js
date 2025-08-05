@@ -172,11 +172,41 @@ const Portfolios = () => {
           
           // LOOKUP COMPLETE SELLER PROFILE FROM SUPABASE
           console.log('Looking up complete seller profile for:', sellerName);
-          const { data: sellerProfile, error: sellerError } = await supabase
-            .from('user_profiles')
-            .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data')
-            .eq('display_name', sellerName)
-            .single();
+          
+          // Try multiple lookup strategies to find the seller
+          let sellerProfile = null;
+          let sellerError = null;
+          
+          // Strategy 1: Try by display_name
+          if (sellerName && sellerName !== 'Anonymous') {
+            const { data: profileByName, error: nameError } = await supabase
+              .from('user_profiles')
+              .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data, user_id')
+              .eq('display_name', sellerName)
+              .maybeSingle(); // Use maybeSingle instead of single to avoid PGRST116
+              
+            if (profileByName && !nameError) {
+              sellerProfile = profileByName;
+              console.log('✅ Found seller by display_name:', sellerProfile);
+            } else {
+              console.log('⚠️ Seller not found by display_name:', sellerName, nameError?.message);
+              
+              // Strategy 2: Try by partial name match (case insensitive)
+              const { data: profileByPartialName, error: partialError } = await supabase
+                .from('user_profiles')
+                .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data, user_id')
+                .ilike('display_name', `%${sellerName}%`)
+                .limit(1)
+                .maybeSingle();
+                
+              if (profileByPartialName && !partialError) {
+                sellerProfile = profileByPartialName;
+                console.log('✅ Found seller by partial name match:', sellerProfile);
+              } else {
+                console.log('⚠️ Seller not found by partial name either:', partialError?.message);
+              }
+            }
+          }
           
           let completeSellerInfo = {
             name: sellerName,
