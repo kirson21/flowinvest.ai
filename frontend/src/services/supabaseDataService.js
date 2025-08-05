@@ -302,8 +302,7 @@ export const supabaseDataService = {
    */
   async saveSellerReview(reviewerId, sellerName, sellerId, rating, reviewText) {
     try {
-      console.log('=== SELLER REVIEW DEBUG START ===');
-      console.log('Saving seller review:', { reviewerId, sellerName, rating });
+      console.log('🔄 Saving seller review for:', sellerName, 'rating:', rating);
       
       // Validate input data
       if (!reviewerId || !sellerName || !rating) {
@@ -316,38 +315,27 @@ export const supabaseDataService = {
         throw new Error('Rating must be a number between 1 and 5');
       }
       
-      // Comprehensive authentication check
-      console.log('Step 1: Getting user...');
+      // Check authentication
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log('User result:', { user: user?.id, error: authError });
-      
       if (authError || !user) {
-        console.error('Authentication error in saveSellerReview:', authError);
+        console.error('❌ Authentication error:', authError);
         throw new Error('User not authenticated');
       }
       
       if (user.id !== reviewerId) {
-        console.error('User ID mismatch:', { currentUser: user.id, requestedUser: reviewerId });
+        console.error('❌ User ID mismatch:', { currentUser: user.id, requestedUser: reviewerId });
         throw new Error('User ID mismatch');
       }
 
-      // Get the current session to ensure we have proper tokens
-      console.log('Step 2: Getting session...');
+      // Get session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('Session result:', { 
-        hasSession: !!session, 
-        hasAccessToken: !!session?.access_token,
-        tokenType: session?.token_type,
-        error: sessionError 
-      });
-      
       if (sessionError || !session) {
-        console.error('Session error in saveSellerReview:', sessionError);
+        console.error('❌ Session error:', sessionError);
         throw new Error('No active session found');
       }
       
       // Step 2.5: Find seller's actual user ID from user_profiles
-      console.log('Step 2.5: Looking up seller user ID for:', sellerName);
+      console.log('🔎 Looking up seller user ID for:', sellerName);
       let validSellerId = null;
       
       if (sellerName) {
@@ -359,9 +347,9 @@ export const supabaseDataService = {
           
         if (sellerProfile && !sellerError) {
           validSellerId = sellerProfile.user_id;
-          console.log('Found seller user_id:', validSellerId);
+          console.log('✅ Found seller user_id:', validSellerId);
         } else {
-          console.log('Could not find seller in user_profiles:', sellerError);
+          console.log('⚠️ Could not find seller in user_profiles:', sellerError?.message);
           validSellerId = null; // This is fine - seller_id can be null
         }
       }
@@ -372,37 +360,24 @@ export const supabaseDataService = {
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (uuidRegex.test(sellerId)) {
           validSellerId = sellerId;
-          console.log('Valid UUID sellerId provided:', validSellerId);
+          console.log('✅ Valid UUID sellerId provided:', validSellerId);
         } else {
-          console.log('Non-UUID sellerId provided, using looked up seller_id:', validSellerId);
+          console.log('ℹ️ Non-UUID sellerId provided, using looked up seller_id:', validSellerId);
         }
       }
 
-      // Test simple query first to check API connectivity
-      console.log('Step 3: Testing simple query...');
-      const { data: testData, error: testError } = await supabase
-        .from('seller_reviews')
-        .select('id')
-        .limit(1);
-      console.log('Simple query result:', { data: testData?.length, error: testError });
-      
-      if (testError) {
-        console.error('Simple query failed - API key or auth issue:', testError);
-        throw new Error(`Database connection failed: ${testError.message}`);
-      }
-
-      // First try to delete existing review to avoid conflicts
-      console.log('Step 4: Deleting existing review for user:', reviewerId, 'seller:', sellerName);
+      // Delete existing review to avoid conflicts
+      console.log('🗑️ Deleting existing review for user:', reviewerId, 'seller:', sellerName);
       const deleteResult = await supabase
         .from('seller_reviews')
         .delete()
         .eq('reviewer_id', reviewerId)
         .eq('seller_name', sellerName);
       
-      console.log('Delete operation result:', deleteResult);
+      console.log('🗑️ Delete result:', deleteResult.error ? 'Error' : 'Success');
 
       // Insert new review
-      console.log('Step 5: Inserting new review...');
+      console.log('💾 Inserting new review...');
       const insertData = {
         reviewer_id: reviewerId,
         seller_name: sellerName,
@@ -410,7 +385,7 @@ export const supabaseDataService = {
         rating: numRating,
         review_text: reviewText || ''
       };
-      console.log('Insert data:', insertData);
+      console.log('📝 Insert data:', insertData);
       
       const { data, error } = await supabase
         .from('seller_reviews')
@@ -419,21 +394,14 @@ export const supabaseDataService = {
         .single();
 
       if (error) {
-        console.error('Error saving seller review:', error);
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+        console.error('❌ Error saving seller review:', error);
         throw error;
       }
 
-      console.log('Successfully saved seller review:', data);
-      console.log('=== SELLER REVIEW DEBUG END ===');
+      console.log('✅ Review saved successfully:', data.id);
       return data;
     } catch (error) {
-      console.error('Error in saveSellerReview:', error);
+      console.error('❌ Error in saveSellerReview:', error);
       throw error;
     }
   },
