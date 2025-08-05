@@ -586,7 +586,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                               )}
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mt-2">
-                              {review.comment}
+                              {review.review}
                             </p>
                           </div>
                         </div>
