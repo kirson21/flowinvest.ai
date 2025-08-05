@@ -217,16 +217,25 @@ const Portfolios = () => {
           };
           
           if (sellerProfile && !sellerError) {
-            console.log('Found complete seller profile:', sellerProfile);
+            console.log('✅ Found complete seller profile:', sellerProfile);
+            
+            // Extract social links and specialties from seller_data if they exist there
+            const sellerData = sellerProfile.seller_data || {};
+            const socialLinks = sellerProfile.social_links || sellerData.socialLinks || {};
+            const specialties = sellerProfile.specialties || sellerData.specialties || [];
+            
             completeSellerInfo = {
               name: sellerProfile.display_name || sellerName,
               bio: sellerProfile.bio || 'Product creator on FlowInvestAI marketplace',
               avatar: sellerProfile.avatar_url || completeSellerInfo.avatar,
-              socialLinks: sellerProfile.social_links || {},
-              specialties: sellerProfile.specialties || [],
-              experience: sellerProfile.experience || '',
-              sellerData: sellerProfile.seller_data || {}
+              socialLinks: socialLinks,
+              specialties: specialties,
+              experience: sellerProfile.experience || sellerData.experience || '',
+              sellerData: sellerData
             };
+            
+            console.log('📋 Seller social links:', socialLinks);
+            console.log('🎯 Seller specialties:', specialties);
           } else {
             console.warn('Could not find seller profile for:', sellerName, sellerError);
           }
