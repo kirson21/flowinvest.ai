@@ -287,7 +287,14 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       
       // Trigger refresh of marketplace products
       if (onReviewAdded) {
-        onReviewAdded();
+        try {
+          console.log('Calling onReviewAdded callback...');
+          await onReviewAdded();
+          console.log('onReviewAdded callback completed successfully');
+        } catch (callbackError) {
+          console.error('Error in onReviewAdded callback:', callbackError);
+          // Don't let callback errors crash the app
+        }
       }
       
       alert('Review submitted successfully! The seller\'s rating has been updated.');
