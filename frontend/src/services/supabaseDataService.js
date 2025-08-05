@@ -45,34 +45,9 @@ export const supabaseDataService = {
         .limit(1);
       console.log('Votes result:', { data: votesData, error: votesError });
       
-      // Test 4: Try to insert a test vote (if user is authenticated)
-      console.log('Test 4: Test vote insertion...');
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        console.log('User authenticated, attempting test insert...');
-        try {
-          const { data: testVoteData, error: testVoteError } = await supabase
-            .from('user_votes')
-            .insert({
-              user_id: user.id,
-              product_id: crypto.randomUUID(), // Generate proper UUID
-              vote_type: 'upvote'
-            })
-            .select()
-            .single();
-          console.log('Test vote insert result:', { data: testVoteData, error: testVoteError });
-          
-          // Clean up test vote if successful
-          if (testVoteData && !testVoteError) {
-            await supabase.from('user_votes').delete().eq('id', testVoteData.id);
-            console.log('Test vote cleaned up successfully');
-          }
-        } catch (insertError) {
-          console.error('Test insert failed:', insertError);
-        }
-      } else {
-        console.log('User not authenticated, skipping insert test');
-      }
+      // Test 4: Skip test insertion to avoid foreign key constraint issues
+      console.log('Test 4: Skipping test vote insertion (would violate FK constraint)');
+      console.log('User authenticated:', !!user);
       
       return true;
     } catch (error) {
