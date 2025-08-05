@@ -55,7 +55,7 @@ export const supabaseDataService = {
             .from('user_votes')
             .insert({
               user_id: user.id,
-              product_id: 'test-product-' + Date.now(),
+              product_id: crypto.randomUUID(), // Generate proper UUID
               vote_type: 'upvote'
             })
             .select()
