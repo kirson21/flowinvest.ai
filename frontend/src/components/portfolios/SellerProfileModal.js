@@ -557,7 +557,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                               <div>
                                 <div className="flex items-center space-x-2">
                                   <span className="text-sm font-medium text-[#474545] dark:text-white">
-                                    {review.userName}
+                                    {review.userName || 'Anonymous User'}
                                   </span>
                                   {review.verified && (
                                     <CheckCircle className="w-4 h-4 text-green-500" />
