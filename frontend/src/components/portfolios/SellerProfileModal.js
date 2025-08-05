@@ -285,15 +285,20 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       setReviewErrors({});
       setIsReviewModalOpen(false);
       
-      // Trigger refresh of marketplace products
+      // Trigger refresh of marketplace products (with delay to avoid overriding review display)
       if (onReviewAdded) {
         try {
-          console.log('Calling onReviewAdded callback...');
-          await onReviewAdded();
-          console.log('onReviewAdded callback completed successfully');
+          console.log('Calling onReviewAdded callback after delay...');
+          setTimeout(async () => {
+            try {
+              await onReviewAdded();
+              console.log('onReviewAdded callback completed successfully');
+            } catch (callbackError) {
+              console.error('Error in onReviewAdded callback:', callbackError);
+            }
+          }, 1000); // 1 second delay
         } catch (callbackError) {
-          console.error('Error in onReviewAdded callback:', callbackError);
-          // Don't let callback errors crash the app
+          console.error('Error setting up onReviewAdded callback:', callbackError);
         }
       }
       
