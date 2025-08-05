@@ -285,22 +285,9 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       setReviewErrors({});
       setIsReviewModalOpen(false);
       
-      // Trigger refresh of marketplace products (with delay to avoid overriding review display)
-      if (onReviewAdded) {
-        try {
-          console.log('Calling onReviewAdded callback after delay...');
-          setTimeout(async () => {
-            try {
-              await onReviewAdded();
-              console.log('onReviewAdded callback completed successfully');
-            } catch (callbackError) {
-              console.error('Error in onReviewAdded callback:', callbackError);
-            }
-          }, 1000); // 1 second delay
-        } catch (callbackError) {
-          console.error('Error setting up onReviewAdded callback:', callbackError);
-        }
-      }
+      // Don't trigger marketplace refresh - just keep the modal's reviews updated
+      // The marketplace will refresh naturally when users navigate
+      console.log('Review submitted - modal reviews updated, skipping marketplace refresh');
       
       alert('Review submitted successfully! The seller\'s rating has been updated.');
     } catch (error) {
