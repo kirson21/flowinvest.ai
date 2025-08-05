@@ -343,16 +343,17 @@ export const supabaseDataService = {
         throw new Error('No active session found');
       }
       
-      // Validate sellerId format if provided
+      // Validate sellerId format if provided - but be more lenient
       let validSellerId = null;
       if (sellerId) {
         // Check if sellerId is a valid UUID format
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (uuidRegex.test(sellerId)) {
           validSellerId = sellerId;
+          console.log('Valid UUID sellerId:', validSellerId);
         } else {
-          console.warn('Invalid sellerId format, setting to null:', sellerId);
-          validSellerId = null;
+          console.log('Non-UUID sellerId provided, setting to null:', sellerId);
+          validSellerId = null; // This is fine - seller_id can be null
         }
       }
 
