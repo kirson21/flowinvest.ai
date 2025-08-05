@@ -346,17 +346,35 @@ export const supabaseDataService = {
         throw new Error('No active session found');
       }
       
-      // Validate sellerId format if provided - but be more lenient
+      // Step 2.5: Find seller's actual user ID from user_profiles
+      console.log('Step 2.5: Looking up seller user ID for:', sellerName);
       let validSellerId = null;
-      if (sellerId) {
+      
+      if (sellerName) {
+        const { data: sellerProfile, error: sellerError } = await supabase
+          .from('user_profiles')
+          .select('user_id')
+          .eq('display_name', sellerName)
+          .single();
+          
+        if (sellerProfile && !sellerError) {
+          validSellerId = sellerProfile.user_id;
+          console.log('Found seller user_id:', validSellerId);
+        } else {
+          console.log('Could not find seller in user_profiles:', sellerError);
+          validSellerId = null; // This is fine - seller_id can be null
+        }
+      }
+
+      // Validate sellerId format if provided - but be more lenient
+      if (sellerId && !validSellerId) {
         // Check if sellerId is a valid UUID format
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (uuidRegex.test(sellerId)) {
           validSellerId = sellerId;
-          console.log('Valid UUID sellerId:', validSellerId);
+          console.log('Valid UUID sellerId provided:', validSellerId);
         } else {
-          console.log('Non-UUID sellerId provided, setting to null:', sellerId);
-          validSellerId = null; // This is fine - seller_id can be null
+          console.log('Non-UUID sellerId provided, using looked up seller_id:', validSellerId);
         }
       }
 
