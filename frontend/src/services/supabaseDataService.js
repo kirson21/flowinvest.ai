@@ -233,7 +233,7 @@ export const supabaseDataService = {
           review_text, 
           created_at, 
           reviewer_id,
-          user_profiles!reviewer_id (
+          user_profiles!inner(
             display_name,
             avatar_url
           )
