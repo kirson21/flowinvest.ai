@@ -911,9 +911,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                         {/* Purchase Button */}
                         <Button 
                           className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
-                          onClick={() => {
-                            alert(`Purchase ${product.title || product.name} for $${product.price || product.minimumInvestment}! (Mock action)`);
-                          }}
+                          onClick={() => handlePurchase(product)}
                         >
                           <ShoppingCart size={16} className="mr-2" />
                           Purchase Now
