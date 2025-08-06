@@ -427,6 +427,61 @@ const Portfolios = () => {
         console.log('Extracted metadata:', metadata);
         console.log('Seller from metadata:', metadata.seller);
         
+        // ENRICH SELLER DATA - same as marketplace
+        let enrichedSeller = {
+          name: 'Anonymous',
+          bio: 'Product creator on FlowInvestAI marketplace',
+          avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
+          socialLinks: {},
+          specialties: []
+        };
+
+        // Get seller name from metadata
+        const sellerName = (metadata.seller && metadata.seller.name) || purchase.seller_name || 'Anonymous';
+        
+        if (sellerName && sellerName !== 'Anonymous') {
+          // Lookup complete seller profile from Supabase
+          console.log('MY PURCHASES: Looking up seller profile for:', sellerName);
+          try {
+            const { data: sellerProfile, error: sellerError } = await supabase
+              .from('user_profiles')
+              .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data, user_id, created_at')
+              .eq('display_name', sellerName)
+              .maybeSingle();
+
+            if (sellerProfile && !sellerError) {
+              console.log('MY PURCHASES: Found complete seller profile:', sellerProfile);
+              
+              // Extract social links and specialties from seller_data if they exist there
+              const sellerData = sellerProfile.seller_data || {};
+              
+              // Check if top-level fields have actual content, otherwise use seller_data
+              const socialLinks = (sellerProfile.social_links && Object.keys(sellerProfile.social_links).length > 0) 
+                ? sellerProfile.social_links 
+                : sellerData.socialLinks || {};
+                
+              const specialties = (sellerProfile.specialties && sellerProfile.specialties.length > 0) 
+                ? sellerProfile.specialties 
+                : sellerData.specialties || [];
+
+              enrichedSeller = {
+                name: sellerProfile.display_name || sellerName,
+                bio: sellerProfile.bio || 'Product creator on FlowInvestAI marketplace',
+                avatar: sellerProfile.avatar_url || enrichedSeller.avatar,
+                socialLinks: socialLinks,
+                specialties: specialties,
+                experience: sellerProfile.experience || sellerData.experience || '',
+                sellerData: sellerData,
+                memberSince: sellerProfile.created_at ? new Date(sellerProfile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'
+              };
+              
+              console.log('MY PURCHASES: Enriched seller:', enrichedSeller);
+            }
+          } catch (sellerLookupError) {
+            console.warn('MY PURCHASES: Error looking up seller profile:', sellerLookupError);
+          }
+        }
+
         // Use CURRENT marketplace data, not old purchase data
         const processedPurchase = {
           ...purchase,
@@ -438,13 +493,7 @@ const Portfolios = () => {
           expectedReturn: metadata.expectedReturn || null,
           minimumInvestment: metadata.minimumInvestment || productToUse.price,
           assetAllocation: metadata.assetAllocation || null,
-          seller: metadata.seller || {
-            name: 'Anonymous', 
-            bio: 'Product creator on FlowInvestAI marketplace',
-            avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
-            socialLinks: {},
-            specialties: []
-          },
+          seller: enrichedSeller, // Use enriched seller data
           totalInvestors: metadata.totalInvestors || 0,
           totalReviews: metadata.totalReviews || 0,
           rating: metadata.rating || 0,
