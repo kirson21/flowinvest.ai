@@ -1238,14 +1238,28 @@ const Settings = () => {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
-            >
-              {showNotifications ? 'Hide' : 'View'}
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  console.log('Manual refresh: reloading verification status and notifications...');
+                  loadVerificationStatus();
+                  loadNotifications();
+                }}
+                className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+              >
+                Refresh
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+              >
+                {showNotifications ? 'Hide' : 'View'}
+              </Button>
+            </div>
           </div>
 
           {/* Notifications Panel */}
