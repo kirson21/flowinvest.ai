@@ -529,6 +529,7 @@ export const supabaseDataService = {
    */
   async getUserNotifications(userId) {
     try {
+      // Try Supabase first
       const { data, error } = await supabase
         .from('user_notifications')
         .select('*')
@@ -536,13 +537,74 @@ export const supabaseDataService = {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching user notifications:', error);
-        return [];
+        console.warn('Error fetching user notifications from Supabase, checking localStorage:', error);
+        return this.getUserNotificationsFromLocalStorage(userId);
       }
 
-      return data || [];
+      const supabaseNotifications = data || [];
+      
+      // Also check localStorage for verification notifications (fallback compatibility)
+      const localStorageNotifications = this.getUserNotificationsFromLocalStorage(userId);
+      
+      // Combine both sources, removing duplicates by id
+      const allNotifications = [...supabaseNotifications];
+      
+      localStorageNotifications.forEach(localNotification => {
+        const exists = allNotifications.find(n => n.id === localNotification.id);
+        if (!exists) {
+          allNotifications.push(localNotification);
+        }
+      });
+      
+      // Sort by created_at
+      allNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      
+      console.log(`Loaded notifications: ${supabaseNotifications.length} from Supabase, ${localStorageNotifications.length} from localStorage, ${allNotifications.length} total`);
+      return allNotifications;
+
     } catch (error) {
       console.error('Error in getUserNotifications:', error);
+      return this.getUserNotificationsFromLocalStorage(userId);
+    }
+  },
+  
+  // Get notifications from localStorage (for compatibility with verification system)
+  getUserNotificationsFromLocalStorage(userId) {
+    try {
+      // Check both notification storage formats
+      const formats = [
+        'user_notifications',           // verification service format
+        'supabase_user_notifications'   // enhanced format
+      ];
+      
+      let allNotifications = [];
+      
+      formats.forEach(format => {
+        try {
+          const notifications = JSON.parse(localStorage.getItem(format) || '[]');
+          const userNotifications = Array.isArray(notifications) 
+            ? notifications.filter(n => n.user_id === userId)
+            : [];
+          allNotifications = allNotifications.concat(userNotifications);
+        } catch (error) {
+          console.warn(`Error reading ${format}:`, error);
+        }
+      });
+      
+      // Remove duplicates by id
+      const uniqueNotifications = [];
+      const seenIds = new Set();
+      
+      allNotifications.forEach(notification => {
+        if (!seenIds.has(notification.id)) {
+          seenIds.add(notification.id);
+          uniqueNotifications.push(notification);
+        }
+      });
+      
+      return uniqueNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } catch (error) {
+      console.error('Error getting notifications from localStorage:', error);
       return [];
     }
   },
