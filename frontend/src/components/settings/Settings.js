@@ -1659,7 +1659,7 @@ const Settings = () => {
                   ))}
                 </div>
                 
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center pt-4 pb-8">
                   <Button
                     onClick={() => setShowManageProducts(false)}
                     variant="outline"
