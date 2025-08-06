@@ -194,7 +194,7 @@ const Portfolios = () => {
               // Strategy 2: Try by partial name match (case insensitive)
               const { data: profileByPartialName, error: partialError } = await supabase
                 .from('user_profiles')
-                .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data, user_id')
+                .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data, user_id, created_at')
                 .ilike('display_name', `%${sellerName}%`)
                 .limit(1)
                 .maybeSingle();
