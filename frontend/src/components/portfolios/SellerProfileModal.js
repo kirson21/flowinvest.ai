@@ -57,22 +57,8 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
       loadSellerReviews();
       loadSellerProducts();
       loadUserVotes();
-      loadUserPurchases(); // Add this
     }
   }, [isOpen, seller]);
-  
-  const loadUserPurchases = async () => {
-    if (!user?.id) return;
-    
-    try {
-      // Load user purchases from dataSyncService
-      const purchases = await dataSyncService.syncUserPurchases(user.id);
-      setUserPurchases(purchases || []);
-    } catch (error) {
-      console.error('Error loading user purchases:', error);
-      setUserPurchases([]);
-    }
-  };
   
   const loadSellerReviews = async () => {
     try {
