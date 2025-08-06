@@ -96,6 +96,7 @@ const Portfolios = () => {
       }
       
       console.log('All purchases for investor calculation:', allPurchases);
+      console.log('Number of purchases found:', allPurchases?.length || 0);
       
       // Count unique investors per product
       const investorCounts = {};
@@ -105,19 +106,27 @@ const Portfolios = () => {
           investorCounts[productId] = new Set();
         }
         investorCounts[productId].add(purchase.user_id);
+        console.log(`Added investor ${purchase.user_id} to product ${productId}`);
       });
       
       // Convert Set sizes to actual counts
       const finalCounts = {};
       Object.keys(investorCounts).forEach(productId => {
         finalCounts[productId] = investorCounts[productId].size;
+        console.log(`Product ${productId} has ${finalCounts[productId]} investors`);
       });
       
       console.log('Calculated investor counts:', finalCounts);
       
       // Update portfolios with real investor counts
-      const updatedPortfolios = portfolios.map(portfolio => ({
-        ...portfolio,
+      const updatedPortfolios = portfolios.map(portfolio => {
+        const realInvestorCount = finalCounts[portfolio.id] || 0;
+        console.log(`Setting ${portfolio.name} (${portfolio.id}) investor count to: ${realInvestorCount}`);
+        return {
+          ...portfolio,
+          totalInvestors: realInvestorCount
+        };
+      });
         totalInvestors: finalCounts[portfolio.id] || 0
       }));
       
