@@ -142,6 +142,31 @@ const Settings = () => {
       
       // Migrate localStorage data to Supabase on first load
       migrateUserDataIfNeeded();
+      
+      // Set up periodic refresh for verification status and notifications
+      // This helps catch updates from admin approval actions
+      const refreshInterval = setInterval(() => {
+        if (user?.id) {
+          console.log('Periodic refresh: checking verification status and notifications...');
+          loadVerificationStatus();
+          loadNotifications();
+        }
+      }, 10000); // Refresh every 10 seconds
+      
+      // Also do an extra refresh after 3 seconds for immediate updates
+      const immediateRefresh = setTimeout(() => {
+        if (user?.id) {
+          console.log('Immediate refresh: checking for recent updates...');
+          loadVerificationStatus();
+          loadNotifications();
+        }
+      }, 3000);
+      
+      // Cleanup intervals on unmount
+      return () => {
+        clearInterval(refreshInterval);
+        clearTimeout(immediateRefresh);
+      };
     }
   }, [user]);
 
