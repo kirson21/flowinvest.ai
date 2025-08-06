@@ -533,7 +533,13 @@ const Portfolios = () => {
       }));
       
       console.log('=== END MY PURCHASES DEBUG ===');
-      setUserPurchases(processedPurchases);
+      
+      // Apply real investor counts to purchases (same as marketplace)
+      console.log('=== APPLYING INVESTOR COUNTS TO MY PURCHASES ===');
+      const purchasesWithRealInvestors = await calculateRealInvestorCounts(processedPurchases);
+      console.log('My purchases with real investor counts:', purchasesWithRealInvestors.map(p => ({ name: p.name, investors: p.totalInvestors })));
+      
+      setUserPurchases(purchasesWithRealInvestors);
     } catch (error) {
       console.error('Error loading user purchases:', error);
       setUserPurchases([]);
