@@ -335,7 +335,7 @@ export const verificationService = {
     }
   },
 
-  // Fallback: Approve application in localStorage
+  // Fallback: Approve application in localStorage - ENHANCED VERSION
   approveApplicationInLocalStorage(applicationId, adminNotes = '') {
     try {
       const applications = JSON.parse(localStorage.getItem('verification_applications') || '[]');
@@ -354,17 +354,22 @@ export const verificationService = {
 
       localStorage.setItem('verification_applications', JSON.stringify(updatedApplications));
 
-      // Update user verification status
+      // Update user verification status - CRITICAL FIX
       const application = updatedApplications.find(app => app.id === applicationId);
       if (application) {
+        console.log('Updating user profile for approved application:', application.user_id);
+        
+        // Update user profiles with verification status
         const userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
         userProfiles[application.user_id] = {
           ...userProfiles[application.user_id],
-          seller_verification_status: 'verified'
+          seller_verification_status: 'verified',
+          updated_at: new Date().toISOString()
         };
         localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
+        console.log('User profile updated in localStorage');
 
-        // Create success notification
+        // Create success notification - CRITICAL FIX
         this.createNotificationInLocalStorage(
           application.user_id,
           'Seller Verification Approved!',
@@ -372,9 +377,29 @@ export const verificationService = {
           'success',
           applicationId
         );
+        
+        // Also store in supabaseDataService format for cross-compatibility
+        try {
+          const existingNotifications = JSON.parse(localStorage.getItem('supabase_user_notifications') || '[]');
+          const newNotification = {
+            id: Date.now().toString() + '_supabase',
+            user_id: application.user_id,
+            title: 'Seller Verification Approved!',
+            message: 'Congratulations! Your seller verification has been approved. You now have access to all seller features including product creation and seller mode.',
+            type: 'success',
+            related_application_id: applicationId,
+            is_read: false,
+            created_at: new Date().toISOString()
+          };
+          existingNotifications.unshift(newNotification);
+          localStorage.setItem('supabase_user_notifications', JSON.stringify(existingNotifications));
+          console.log('Notification created in both localStorage formats');
+        } catch (error) {
+          console.warn('Error creating supabase format notification:', error);
+        }
       }
 
-      console.log('Application approved in localStorage');
+      console.log('Application approved in localStorage with full user update');
       return application;
     } catch (error) {
       console.error('Error approving application in localStorage:', error);
