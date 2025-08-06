@@ -67,7 +67,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
     
     try {
       // Load user purchases from dataSyncService
-      const purchases = await dataSyncService.loadUserPurchases(user.id);
+      const purchases = await dataSyncService.syncUserPurchases(user.id);
       setUserPurchases(purchases || []);
     } catch (error) {
       console.error('Error loading user purchases:', error);
