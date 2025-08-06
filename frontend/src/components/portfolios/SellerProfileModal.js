@@ -53,32 +53,36 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
   // Load reviews from localStorage and merge with seller.reviews when modal opens
   useEffect(() => {
     if (isOpen && seller) {
-      const storedReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-      const sellerStoredReviews = storedReviews[seller.name] || [];
-      const originalReviews = seller.reviews || [];
-      
-      // Merge stored reviews with original reviews (avoid duplicates by id)
-      const existingIds = new Set(originalReviews.map(r => r.id));
-      const newReviews = sellerStoredReviews.filter(r => !existingIds.has(r.id));
-      const combinedReviews = [...newReviews, ...originalReviews];
-      
-      setAllReviews(combinedReviews);
-      
-      // Calculate average rating
-      if (combinedReviews.length > 0) {
-        const avgRating = combinedReviews.reduce((sum, review) => sum + review.rating, 0) / combinedReviews.length;
-        setSellerRating(Math.round(avgRating * 10) / 10); // Round to 1 decimal
-      } else {
-        setSellerRating(0);
-      }
-
-      // Load seller's products
+      loadSellerReviews();
       loadSellerProducts();
-      
-      // Load user votes
       loadUserVotes();
     }
   }, [isOpen, seller]);
+  
+  const loadSellerReviews = async () => {
+    try {
+      console.log('Loading seller reviews for:', seller.name);
+      
+      // Load reviews from Supabase
+      const sellerReviews = await supabaseDataService.getSellerReviews([seller.name]);
+      const reviewsArray = sellerReviews[seller.name] || [];
+      
+      console.log('Loaded seller reviews:', reviewsArray);
+      setAllReviews(reviewsArray);
+      
+      // Calculate average rating from real reviews
+      if (reviewsArray.length > 0) {
+        const avgRating = reviewsArray.reduce((sum, review) => sum + review.rating, 0) / reviewsArray.length;
+        setSellerRating(Math.round(avgRating * 10) / 10);
+      } else {
+        setSellerRating(0);
+      }
+    } catch (error) {
+      console.error('Error loading seller reviews:', error);
+      setAllReviews([]);
+      setSellerRating(0);
+    }
+  };
 
   const loadSellerProducts = async () => {
     try {
