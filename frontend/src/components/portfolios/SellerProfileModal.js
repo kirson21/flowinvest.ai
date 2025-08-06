@@ -35,6 +35,7 @@ import {
 
 const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
   const { user } = useAuth();
+  const { userPurchases, setUserPurchases } = useApp();
   
   // Review display state (Airbnb style)
   const [showAllReviews, setShowAllReviews] = useState(false);
