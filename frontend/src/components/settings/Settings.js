@@ -24,6 +24,7 @@ import {
   Sun,
   Globe,
   User,
+  Users,
   LogOut,
   Shield,
   Bell,
