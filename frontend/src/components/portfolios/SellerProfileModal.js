@@ -103,9 +103,33 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
       
       console.log('All portfolios from Supabase:', allPortfolios);
       
-      // Load review and vote data for proper display
-      const sellerReviews = JSON.parse(localStorage.getItem('seller_reviews') || '{}');
-      const productVotes = JSON.parse(localStorage.getItem('product_votes') || '{}');
+      // Load real vote data from Supabase (same as marketplace)
+      const { data: allVotes, error: votesError } = await supabase
+        .from('user_votes')
+        .select('product_id, vote_type');
+      
+      if (votesError) {
+        console.error('Error loading votes:', votesError);
+      }
+      
+      // Process votes into product vote data (same logic as marketplace)
+      const productVotesData = {};
+      if (allVotes) {
+        allVotes.forEach(vote => {
+          if (!productVotesData[vote.product_id]) {
+            productVotesData[vote.product_id] = { upvotes: 0, downvotes: 0, totalVotes: 0 };
+          }
+          
+          if (vote.vote_type === 'upvote') {
+            productVotesData[vote.product_id].upvotes++;
+          } else if (vote.vote_type === 'downvote') {
+            productVotesData[vote.product_id].downvotes++;
+          }
+          productVotesData[vote.product_id].totalVotes++;
+        });
+      }
+      
+      console.log('Real product votes data:', productVotesData);
       
       // Process portfolios with same logic as marketplace
       const processedPortfolios = (allPortfolios || []).map(product => {
