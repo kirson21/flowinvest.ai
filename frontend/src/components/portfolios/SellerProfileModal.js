@@ -359,7 +359,15 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
       const updatedPurchases = [...purchases, purchaseData];
       await dataSyncService.saveUserPurchases(user.id, updatedPurchases);
       
-      setUserPurchases(updatedPurchases);
+      // Update parent component's purchases state
+      if (setUserPurchases) {
+        setUserPurchases(updatedPurchases);
+      }
+      
+      // Notify parent to refresh marketplace
+      if (onPurchaseAdded) {
+        await onPurchaseAdded();
+      }
       
       alert(`✅ ${product.title || product.name} purchased successfully!`);
       
