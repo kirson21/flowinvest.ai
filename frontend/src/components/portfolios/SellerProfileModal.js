@@ -34,7 +34,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 
-const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
+const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurchases, setUserPurchases, onPurchaseAdded }) => {
   const { user } = useAuth();
   
   // Review display state (Airbnb style)
@@ -49,7 +49,6 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
   const [sellerRating, setSellerRating] = useState(0);
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [sellerProducts, setSellerProducts] = useState([]);
-  const [userPurchases, setUserPurchases] = useState([]); // Add local userPurchases state
   const [userVotes, setUserVotes] = useState({});
 
   // Load reviews from localStorage and merge with seller.reviews when modal opens
