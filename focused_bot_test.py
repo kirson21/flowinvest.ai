@@ -8,7 +8,7 @@ import json
 import uuid
 from datetime import datetime
 
-BACKEND_URL = "https://a5788070-a9a8-4a59-9a84-ae18d931cf76.preview.emergentagent.com/api"
+BACKEND_URL = "https://00253ee3-ad42-47d4-958c-225cd2b95a8f.preview.emergentagent.com/api"
 
 def test_bot_creation_scenarios():
     """Test the specific scenarios mentioned in the review request"""
