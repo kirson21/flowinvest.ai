@@ -217,14 +217,14 @@ export const dataSyncService = {
       
       const purchaseToSave = {
         id: purchaseId,
-        user_id: purchaseData.user_id,
-        product_id: purchaseData.product_id,
-        product_name: purchaseData.product_name || 'Unknown Product',
-        product_description: purchaseData.product_description || '',
+        user_id: purchaseData.user_id || purchaseData.purchasedBy,
+        portfolio_id: purchaseData.portfolio_id || purchaseData.id, // Use portfolio_id instead of product_id
+        product_name: purchaseData.product_name || purchaseData.name || purchaseData.title || 'Unknown Product',
+        product_description: purchaseData.product_description || purchaseData.description || '',
         price: parseFloat(purchaseData.price) || 0,
         seller_id: purchaseData.seller_id,
-        seller_name: purchaseData.seller_name || 'Unknown Seller',
-        purchased_at: purchaseData.purchased_at || new Date().toISOString(),
+        seller_name: purchaseData.seller_name || (purchaseData.seller && purchaseData.seller.name) || 'Unknown Seller',
+        purchased_at: purchaseData.purchased_at || purchaseData.purchasedAt || new Date().toISOString(),
         status: purchaseData.status || 'completed'
       };
 
