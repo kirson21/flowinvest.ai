@@ -504,9 +504,9 @@ const Portfolios = () => {
         };
         
         // Update review data for proper star rating
-        const sellerName = (metadata.seller && metadata.seller.name);
-        if (sellerName && sellerReviews[sellerName]) {
-          const productReviews = sellerReviews[sellerName] || [];
+        const reviewSellerName = (metadata.seller && metadata.seller.name);
+        if (reviewSellerName && sellerReviews[reviewSellerName]) {
+          const productReviews = sellerReviews[reviewSellerName] || [];
           if (productReviews.length > 0) {
             const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
             processedPurchase.rating = Math.round(avgRating * 10) / 10;
