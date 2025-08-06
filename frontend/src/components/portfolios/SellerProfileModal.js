@@ -462,28 +462,16 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
             </div>
 
             {/* Stats Section */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
               <Card className="p-3 sm:p-4 text-center border-[#0097B2]/20">
                 <div className="text-lg sm:text-2xl font-bold text-[#0097B2]">
-                  {seller.stats?.totalProducts || 0}
+                  {sellerProducts.length}
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600">Products</div>
               </Card>
               <Card className="p-3 sm:p-4 text-center border-[#0097B2]/20">
-                <div className="text-lg sm:text-2xl font-bold text-[#0097B2]">
-                  {seller.stats?.totalSales || 0}
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">Sales</div>
-              </Card>
-              <Card className="p-3 sm:p-4 text-center border-[#0097B2]/20">
-                <div className="text-lg sm:text-2xl font-bold text-green-600">
-                  {seller.stats?.successRate || 0}%
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">Success Rate</div>
-              </Card>
-              <Card className="p-3 sm:p-4 text-center border-[#0097B2]/20">
                 <div className="text-lg sm:text-2xl font-bold text-purple-600">
-                  {seller.stats?.memberSince || 'N/A'}
+                  {seller.memberSince || 'N/A'}
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600">Since</div>
               </Card>
