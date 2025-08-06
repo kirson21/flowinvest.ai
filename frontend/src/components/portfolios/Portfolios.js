@@ -1372,6 +1372,9 @@ const Portfolios = () => {
         isOpen={isSellerModalOpen} 
         onClose={closeSellerModal}
         onReviewAdded={loadProductsWithReviews} // Add callback to refresh products when review is added
+        userPurchases={userPurchases} // Pass current purchases
+        setUserPurchases={setUserPurchases} // Pass purchase setter
+        onPurchaseAdded={loadProductsWithReviews} // Refresh marketplace after purchase
       />
 
       {/* Product Creation Modal */}
