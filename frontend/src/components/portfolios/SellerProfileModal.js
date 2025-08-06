@@ -37,7 +37,6 @@ import {
 
 const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
   const { user } = useAuth();
-  const { userPurchases, setUserPurchases } = useApp();
   
   // Review display state (Airbnb style)
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -51,6 +50,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
   const [sellerRating, setSellerRating] = useState(0);
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [sellerProducts, setSellerProducts] = useState([]);
+  const [userPurchases, setUserPurchases] = useState([]); // Add local userPurchases state
   const [userVotes, setUserVotes] = useState({});
 
   // Load reviews from localStorage and merge with seller.reviews when modal opens
