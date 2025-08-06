@@ -521,7 +521,7 @@ const Portfolios = () => {
         
         console.log('Final processed purchase:', processedPurchase);
         return processedPurchase;
-      });
+      }));
       
       console.log('=== END MY PURCHASES DEBUG ===');
       setUserPurchases(processedPurchases);
