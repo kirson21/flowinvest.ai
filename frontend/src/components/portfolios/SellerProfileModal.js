@@ -509,7 +509,9 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
             <div>
               <h3 className="text-lg font-semibold text-[#474545] dark:text-white mb-3">Connect</h3>
               <div className="flex flex-wrap gap-3">
-                {Object.entries(seller.socialLinks || {}).map(([platform, url]) => (
+                {Object.entries(seller.socialLinks || {})
+                  .filter(([platform, url]) => url && url.trim() !== '') // Only show links with actual URLs
+                  .map(([platform, url]) => (
                   <Button
                     key={platform}
                     variant="outline"
