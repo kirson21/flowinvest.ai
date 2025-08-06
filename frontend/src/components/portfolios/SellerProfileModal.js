@@ -162,23 +162,9 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
           images: metadata.actualImages || []
         };
         
-        // Update review data (same as marketplace)
-        const sellerName = (metadata.seller && metadata.seller.name);
-        if (sellerName && sellerReviews[sellerName]) {
-          const productReviews = sellerReviews[sellerName] || [];
-          if (productReviews.length > 0) {
-            const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
-            updatedProduct = {
-              ...updatedProduct,
-              rating: Math.round(avgRating * 10) / 10,
-              totalReviews: productReviews.length
-            };
-          }
-        }
-        
-        // Update vote data (same as marketplace)
-        if (productVotes[product.id]) {
-          updatedProduct.votes = productVotes[product.id];
+        // Update vote data with real Supabase data
+        if (productVotesData[product.id]) {
+          updatedProduct.votes = productVotesData[product.id];
         }
         
         return updatedProduct;
