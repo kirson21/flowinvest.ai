@@ -1526,7 +1526,7 @@ const Settings = () => {
                             </div>
                             
                             {/* Product Details Grid */}
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                               <div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Price</p>
                                 <p className="text-sm font-medium text-[#474545] dark:text-white">
@@ -1538,6 +1538,15 @@ const Settings = () => {
                                 <p className="text-sm font-medium text-[#474545] dark:text-white">
                                   {product.riskLevel}
                                 </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Investors</p>
+                                <div className="flex items-center space-x-1">
+                                  <Users size={12} className="text-[#0097B2]" />
+                                  <span className="text-sm font-medium text-[#474545] dark:text-white">
+                                    {product.totalInvestors || 0}
+                                  </span>
+                                </div>
                               </div>
                               <div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Community Votes</p>
@@ -1569,7 +1578,7 @@ const Settings = () => {
                               <div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Created</p>
                                 <p className="text-sm font-medium text-[#474545] dark:text-white">
-                                  {new Date(product.createdAt).toLocaleDateString()}
+                                  {product.created_at ? new Date(product.created_at).toLocaleDateString() : 'Unknown'}
                                 </p>
                               </div>
                             </div>
