@@ -270,19 +270,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       console.log('Review saved to Supabase successfully');
       
       // Reload seller reviews to get updated data
-      const updatedSellerReviews = await supabaseDataService.getSellerReviews([seller.name]);
-      
-      // Update local state with fresh review data
-      const sellerReviewsArray = updatedSellerReviews[seller.name] || [];
-      setAllReviews(sellerReviewsArray);
-      
-      // Recalculate rating from fresh data
-      if (sellerReviewsArray.length > 0) {
-        const avgRating = sellerReviewsArray.reduce((sum, review) => sum + review.rating, 0) / sellerReviewsArray.length;
-        setSellerRating(Math.round(avgRating * 10) / 10);
-      } else {
-        setSellerRating(0);
-      }
+      await loadSellerReviews();
       
       // Reset form and close modal
       setReviewData({ rating: 5, comment: '' });
