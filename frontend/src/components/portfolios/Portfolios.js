@@ -181,7 +181,7 @@ const Portfolios = () => {
           if (sellerName && sellerName !== 'Anonymous') {
             const { data: profileByName, error: nameError } = await supabase
               .from('user_profiles')
-              .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data, user_id')
+              .select('display_name, bio, avatar_url, social_links, specialties, experience, seller_data, user_id, created_at')
               .eq('display_name', sellerName)
               .maybeSingle(); // Use maybeSingle instead of single to avoid PGRST116
               
