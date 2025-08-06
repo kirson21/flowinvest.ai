@@ -856,6 +856,18 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
                           
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                              Total Investors
+                            </p>
+                            <div className="flex items-center space-x-1">
+                              <Users size={12} className="text-[#0097B2]" />
+                              <span className="text-sm font-medium text-[#474545] dark:text-white">
+                                {product.totalInvestors || 0}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="col-span-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                               Community Votes
                             </p>
                             <div className="flex items-center space-x-2">
