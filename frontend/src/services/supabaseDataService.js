@@ -667,21 +667,39 @@ export const supabaseDataService = {
    */
   async getUnreadNotificationCount(userId) {
     try {
+      // Try Supabase first
       const { count, error } = await supabase
         .from('user_notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('is_read', false);
 
+      let supabaseCount = 0;
       if (error) {
-        console.error('Error fetching unread notification count:', error);
-        return 0;
+        console.warn('Error fetching unread notification count from Supabase, checking localStorage:', error);
+      } else {
+        supabaseCount = count || 0;
       }
 
-      return count || 0;
+      // Also check localStorage for unread notifications
+      const localStorageNotifications = this.getUserNotificationsFromLocalStorage(userId);
+      const localStorageUnreadCount = localStorageNotifications.filter(n => !n.is_read).length;
+      
+      const totalCount = supabaseCount + localStorageUnreadCount;
+      console.log(`Unread notifications: ${supabaseCount} from Supabase + ${localStorageUnreadCount} from localStorage = ${totalCount} total`);
+      
+      return totalCount;
     } catch (error) {
       console.error('Error in getUnreadNotificationCount:', error);
-      return 0;
+      
+      // Fallback to localStorage only
+      try {
+        const localStorageNotifications = this.getUserNotificationsFromLocalStorage(userId);
+        return localStorageNotifications.filter(n => !n.is_read).length;
+      } catch (localError) {
+        console.error('Error in localStorage fallback:', localError);
+        return 0;
+      }
     }
   },
 
