@@ -406,8 +406,8 @@ const Portfolios = () => {
       
       console.log('Current portfolios from Supabase:', currentPortfolios);
       
-      // Map purchases to current marketplace data
-      const processedPurchases = purchases.map(purchase => {
+      // Process each purchase with current marketplace data and enriched seller info
+      const processedPurchases = await Promise.all(purchases.map(async (purchase) => {
         console.log('Processing purchase:', purchase.id, purchase.title);
         
         // Find the current marketplace data for this purchase
