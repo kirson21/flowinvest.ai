@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
 import { supabase } from '../../lib/supabase';
 import { supabaseDataService } from '../../services/supabaseDataService';
 import { dataSyncService } from '../../services/dataSyncService';
