@@ -242,7 +242,8 @@ const Portfolios = () => {
               socialLinks: socialLinks,
               specialties: specialties,
               experience: sellerProfile.experience || sellerData.experience || '',
-              sellerData: sellerData
+              sellerData: sellerData,
+              memberSince: sellerProfile.created_at ? new Date(sellerProfile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'
             };
             
             console.log('📋 Final seller social links:', socialLinks);
