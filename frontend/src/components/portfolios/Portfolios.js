@@ -127,8 +127,13 @@ const Portfolios = () => {
           totalInvestors: realInvestorCount
         };
       });
-        totalInvestors: finalCounts[portfolio.id] || 0
-      }));
+        };
+      });
+      
+      console.log('=== END INVESTOR COUNTS CALCULATION ===');
+      console.log('Updated portfolios with investor counts:', updatedPortfolios.map(p => ({ name: p.name, investors: p.totalInvestors })));
+      
+      return updatedPortfolios;
       
       console.log('=== END INVESTOR COUNTS CALCULATION ===');
       return updatedPortfolios;
