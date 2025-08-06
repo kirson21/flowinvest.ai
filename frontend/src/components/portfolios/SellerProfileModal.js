@@ -337,8 +337,9 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       return;
     }
 
-    // Check if already purchased
-    const alreadyPurchased = userPurchases.some(p => p.id === product.id);
+    // Check if already purchased - handle case where userPurchases might be undefined
+    const purchases = userPurchases || [];
+    const alreadyPurchased = purchases.some(p => p.id === product.id);
     if (alreadyPurchased) {
       alert('You have already purchased this product!');
       return;
@@ -357,7 +358,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
       await dataSyncService.saveUserPurchase(purchaseData);
       
       // Also update the purchases array
-      const updatedPurchases = [...userPurchases, purchaseData];
+      const updatedPurchases = [...purchases, purchaseData];
       await dataSyncService.saveUserPurchases(user.id, updatedPurchases);
       
       setUserPurchases(updatedPurchases);
