@@ -331,6 +331,47 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded }) => {
     }
   };
 
+  const handlePurchase = async (product) => {
+    if (!user) {
+      alert('Please log in to make a purchase');
+      return;
+    }
+
+    // Check if already purchased
+    const alreadyPurchased = userPurchases.some(p => p.id === product.id);
+    if (alreadyPurchased) {
+      alert('You have already purchased this product!');
+      return;
+    }
+
+    const purchaseData = {
+      ...product,
+      purchaseId: `purchase_${Date.now()}_${user.id}`,
+      purchasedAt: new Date().toISOString(),
+      purchasedBy: user.id,
+      portfolio_id: product.id // Add portfolio_id for investor counting
+    };
+
+    try {
+      // Save individual purchase to Supabase (for investor counting)
+      await dataSyncService.saveUserPurchase(purchaseData);
+      
+      // Also update the purchases array
+      const updatedPurchases = [...userPurchases, purchaseData];
+      await dataSyncService.saveUserPurchases(user.id, updatedPurchases);
+      
+      setUserPurchases(updatedPurchases);
+      
+      alert(`✅ ${product.title || product.name} purchased successfully!`);
+      
+      // Close the modal after purchase
+      setShowAllProducts(false);
+    } catch (error) {
+      console.error('Error saving purchase:', error);
+      alert('❌ Failed to save purchase');
+    }
+  };
+
   // Calculate vote score using the same formula as marketplace
   const calculateVoteScore = (votes) => {
     if (!votes || votes.totalVotes === 0) return 0;
