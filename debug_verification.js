@@ -43,6 +43,8 @@ async function debugVerificationSystem() {
         
         if (appsError) {
             console.error('❌ seller_verification_applications table issue:', appsError.message);
+            console.error('   Full error:', appsError);
+            console.log('   This table may not exist - schema needs to be applied!');
         } else {
             console.log(`✅ seller_verification_applications table exists (${appsData.length} records)`);
             if (appsData.length > 0) {
