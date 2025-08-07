@@ -4,7 +4,7 @@
 -- Create seller_verification_applications table
 CREATE TABLE IF NOT EXISTS seller_verification_applications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
+    user_id UUID NOT NULL REFERENCES user_profiles(user_id) ON DELETE CASCADE,
     
     -- Application Data
     full_name VARCHAR(255) NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS seller_verification_applications (
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     
     -- Admin Review
-    reviewed_by UUID,
+    reviewed_by UUID REFERENCES user_profiles(user_id),
     reviewed_at TIMESTAMP WITH TIME ZONE,
     rejection_reason TEXT,
     admin_notes TEXT,
