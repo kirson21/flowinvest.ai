@@ -220,18 +220,20 @@ export const verificationService = {
     }
   },
 
-  // Create signed URL for secure document viewing (admin panel)
+  // Create signed URL for secure document viewing (admin panel) - Extended expiry
   async createSignedUrlForDocument(filePath) {
     try {
+      // 24 hours expiry for Super Admin convenience
       const { data, error } = await supabase.storage
         .from('verification-documents')
-        .createSignedUrl(filePath, 3600); // 1 hour expiry
+        .createSignedUrl(filePath, 86400); // 24 hours expiry
 
       if (error) {
         console.error('Error creating signed URL:', error);
         throw error;
       }
 
+      console.log('Created signed URL for admin viewing (24h expiry)');
       return data.signedUrl;
     } catch (error) {
       console.error('Error in createSignedUrlForDocument:', error);
