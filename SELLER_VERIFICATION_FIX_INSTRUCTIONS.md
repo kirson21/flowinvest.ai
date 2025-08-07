@@ -138,7 +138,32 @@ DROP TRIGGER IF EXISTS verification_status_update_trigger ON seller_verification
 CREATE TRIGGER verification_status_update_trigger
     AFTER INSERT OR UPDATE ON seller_verification_applications
     FOR EACH ROW
-    EXECUTE FUNCTION update_user_verification_status();
+-- Storage bucket policies for verification-documents (PRIVATE bucket)
+-- Users can upload their own verification documents
+INSERT INTO storage.buckets (id, name, public, avif_autodetection, file_size_limit, allowed_mime_types)
+VALUES ('verification-documents', 'verification-documents', false, false, 10485760, '{"image/*","application/pdf"}')
+ON CONFLICT (id) DO NOTHING;
+
+-- Allow users to upload their own files
+CREATE POLICY "Users can upload own verification files" ON storage.objects
+    FOR INSERT WITH CHECK (
+        bucket_id = 'verification-documents' 
+        AND auth.uid()::text = (storage.foldername(name))[1]
+    );
+
+-- Allow users to view their own files
+CREATE POLICY "Users can view own verification files" ON storage.objects
+    FOR SELECT USING (
+        bucket_id = 'verification-documents' 
+        AND auth.uid()::text = (storage.foldername(name))[1]
+    );
+
+-- Allow super admin to view all verification files
+CREATE POLICY "Super admin can view all verification files" ON storage.objects
+    FOR SELECT USING (
+        bucket_id = 'verification-documents' 
+        AND auth.uid()::text = 'cd0e9717-f85d-4726-81e9-f260394ead58'
+    );
 ```
 
 ### Step 2: Storage Bucket Configuration
