@@ -140,10 +140,10 @@ CREATE TRIGGER verification_status_update_trigger
     EXECUTE FUNCTION update_user_verification_status();
 ```
 
-### Step 2: Create Storage Bucket
-1. **Go to Storage** in Supabase Dashboard
-2. **Create new bucket** named: `verification-documents`
-3. **Set as Public bucket** for file uploads
+### Step 2: Storage Bucket Configuration
+1. **Keep the existing `verification-documents` bucket PRIVATE** ✅
+2. **DO NOT make it public** - it contains sensitive personal data
+3. **Verify RLS policies** are properly configured for secure access
 
 ### Step 3: Test Complete Workflow
 1. **Submit application** from regular user account
