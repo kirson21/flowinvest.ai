@@ -247,7 +247,7 @@ export const verificationService = {
         .from('seller_verification_applications')
         .select(`
           *,
-          user_profiles (
+          user_profiles!seller_verification_applications_user_id_fkey (
             display_name,
             email
           )
