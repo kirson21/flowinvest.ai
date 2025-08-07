@@ -248,8 +248,7 @@ export const verificationService = {
         .select(`
           *,
           user_profiles!seller_verification_applications_user_id_fkey (
-            display_name,
-            email
+            display_name
           )
         `)
         .order('created_at', { ascending: false });
