@@ -1257,15 +1257,7 @@ const Settings = () => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              {/* Notifications toggle */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Enable</span>
-                <Switch
-                  checked={notificationsEnabled}
-                  onCheckedChange={setNotificationsEnabled}
-                />
-              </div>
+            <div className="flex space-x-2">
               <Button
                 variant="outline"
                 size="sm"
