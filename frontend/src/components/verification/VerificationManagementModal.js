@@ -333,19 +333,19 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
                     />
                   </div>
 
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
                     <Button
                       variant="outline"
                       onClick={handleRejectApplication}
                       disabled={isProcessing || !reviewData.rejectionReason.trim()}
-                      className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
+                      className="w-full border-red-300 text-red-700 hover:bg-red-50"
                     >
                       {isProcessing ? 'Processing...' : 'Reject Application'}
                     </Button>
                     <Button
                       onClick={handleApproveApplication}
                       disabled={isProcessing}
-                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      className="w-full bg-green-600 hover:bg-green-700"
                     >
                       {isProcessing ? 'Processing...' : 'Approve Application'}
                     </Button>
