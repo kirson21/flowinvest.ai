@@ -149,30 +149,33 @@ export const verificationService = {
     }
   },
 
-  // Submit verification application
+  // Submit verification application - SUPABASE ONLY VERSION
   async submitVerificationApplication(applicationData) {
     try {
-      // Try Supabase first
-      try {
-        const { data, error } = await supabase
-          .from('seller_verification_applications')
-          .insert([applicationData])
-          .select()
-          .single();
+      console.log('Submitting verification application to Supabase ONLY...');
+      
+      const { data, error } = await supabase
+        .from('seller_verification_applications')
+        .insert([applicationData])
+        .select()
+        .single();
 
-        if (error) {
-          console.warn('Supabase submission failed:', error);
-          // Fall back to localStorage for development
-          return this.submitApplicationToLocalStorage(applicationData);
+      if (error) {
+        console.error('Error creating verification application in Supabase:', error);
+        // Show detailed error to help with troubleshooting
+        if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          throw new Error('Database table missing: Please create the seller_verification_applications table in Supabase. Check the SQL schema file.');
+        } else if (error.code === '42501') {
+          throw new Error('Permission denied: Check RLS policies for seller_verification_applications table.');
         }
-
-        return data;
-      } catch (supabaseError) {
-        console.warn('Supabase not available, using localStorage fallback:', supabaseError);
-        return this.submitApplicationToLocalStorage(applicationData);
+        throw new Error(`Application submission failed: ${error.message}`);
       }
+
+      console.log('Verification application submitted successfully to Supabase:', data);
+      return data;
+
     } catch (error) {
-      console.error('Error submitting verification application:', error);
+      console.error('Error in submitVerificationApplication:', error);
       throw error;
     }
   },
