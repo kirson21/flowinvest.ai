@@ -639,14 +639,14 @@ export const supabaseDataService = {
   },
 
   /**
-   * Mark notification as read - Enhanced with localStorage support (Fixed column issue)
+   * Mark notification as read - Fixed to match actual table schema
    */
   async markNotificationAsRead(notificationId) {
     try {
-      // Try Supabase first (without updated_at column that doesn't exist)
+      // Try Supabase first - using only columns that exist in the schema
       const { data, error } = await supabase
         .from('user_notifications')
-        .update({ is_read: true })
+        .update({ is_read: true })  // Only update is_read, no updated_at column
         .eq('id', notificationId)
         .select()
         .single();
