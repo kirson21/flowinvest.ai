@@ -425,7 +425,7 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 <Card>
                   <CardContent className="p-4 text-center">
                     <div className="text-2xl font-bold text-yellow-600">
