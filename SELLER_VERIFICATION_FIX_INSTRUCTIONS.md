@@ -1,6 +1,7 @@
 # 🔧 SELLER VERIFICATION SYSTEM - COMPLETE FIX
 
-## 📋 Summary
+## 🔒 SECURITY NOTE
+The verification documents bucket contains sensitive personal data (national IDs, addresses, etc.) and must remain **PRIVATE**. The system uses signed URLs for secure, temporary access to documents.
 The seller verification system was using localStorage fallbacks instead of Supabase. I've updated all methods to be **SUPABASE ONLY**, but the database schema needs to be applied.
 
 ## ✅ FIXED COMPONENTS
