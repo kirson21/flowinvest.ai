@@ -639,10 +639,11 @@ export const supabaseDataService = {
   },
 
   /**
-   * Mark notification as read
+   * Mark notification as read - Enhanced with localStorage support
    */
   async markNotificationAsRead(notificationId) {
     try {
+      // Try Supabase first
       const { data, error } = await supabase
         .from('user_notifications')
         .update({ is_read: true, updated_at: new Date().toISOString() })
@@ -650,12 +651,46 @@ export const supabaseDataService = {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error marking notification as read:', error);
-        throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error marking notification as read in Supabase:', error);
+        // Don't throw error, try localStorage instead
+      } else if (!error) {
+        console.log('Notification marked as read in Supabase:', data);
+        return data;
       }
 
-      return data;
+      // Also check/update localStorage notifications
+      const formats = [
+        'user_notifications',           
+        'supabase_user_notifications'   
+      ];
+      
+      let updated = false;
+      formats.forEach(format => {
+        try {
+          const notifications = JSON.parse(localStorage.getItem(format) || '[]');
+          const updatedNotifications = notifications.map(notification => {
+            if (notification.id === notificationId) {
+              updated = true;
+              return { ...notification, is_read: true, updated_at: new Date().toISOString() };
+            }
+            return notification;
+          });
+          
+          if (updated) {
+            localStorage.setItem(format, JSON.stringify(updatedNotifications));
+            console.log(`Notification marked as read in localStorage (${format})`);
+          }
+        } catch (error) {
+          console.warn(`Error updating notification in ${format}:`, error);
+        }
+      });
+
+      if (updated) {
+        return { id: notificationId, is_read: true };
+      }
+
+      throw new Error('Notification not found in Supabase or localStorage');
     } catch (error) {
       console.error('Error in markNotificationAsRead:', error);
       throw error;
