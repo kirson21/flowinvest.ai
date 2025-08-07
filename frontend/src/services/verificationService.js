@@ -248,37 +248,38 @@ export const verificationService = {
     }
   },
 
-  // Get all verification applications (super admin only)
+  // Get all verification applications (super admin only) - SUPABASE ONLY VERSION  
   async getAllApplications() {
     try {
-      // Try Supabase first
-      try {
-        const { data, error } = await supabase
-          .from('seller_verification_applications')
-          .select(`
-            *,
-            user_profiles!seller_verification_applications_user_id_fkey(
-              display_name,
-              email
-            )
-          `)
-          .order('created_at', { ascending: false });
+      console.log('Fetching all applications from Supabase ONLY...');
+      
+      const { data, error } = await supabase
+        .from('seller_verification_applications')
+        .select(`
+          *,
+          user_profiles (
+            display_name,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.warn('Supabase getAllApplications failed:', error);
-          // Fall back to localStorage
-          return this.getAllApplicationsFromLocalStorage();
+      if (error) {
+        console.error('Error fetching applications from Supabase:', error);
+        if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          throw new Error('Database table missing: Please create the seller_verification_applications table in Supabase. Run the SQL schema file.');
+        } else if (error.code === '42501') {
+          throw new Error('Permission denied: Check RLS policies for seller_verification_applications table.');
         }
-
-        return data;
-      } catch (supabaseError) {
-        console.warn('Supabase not available for getAllApplications, using localStorage:', supabaseError);
-        return this.getAllApplicationsFromLocalStorage();
+        throw new Error(`Failed to fetch applications: ${error.message}`);
       }
+
+      console.log(`Fetched ${data?.length || 0} applications from Supabase`);
+      return data || [];
+
     } catch (error) {
       console.error('Error getting all applications:', error);
-      // Final fallback - return empty array to prevent UI crash
-      return [];
+      throw error; // Re-throw instead of returning empty array to make database issues visible
     }
   },
 
