@@ -142,7 +142,7 @@ class SellerVerificationQueryTest:
             # This would be the old problematic query (with email field that doesn't exist)
             query_url = f"{SUPABASE_URL}/rest/v1/seller_verification_applications"
             params = {
-                'select': 'id,user_id,business_name,contact_email,status,created_at,user_profiles(display_name,email)',
+                'select': 'id,user_id,full_name,contact_email,status,created_at,user_profiles(display_name,email)',
                 'order': 'created_at.desc'
             }
             
