@@ -63,17 +63,18 @@ export const verificationService = {
           return await this.uploadFileAsBase64(file, userId, fileType);
         }
 
-        // Get signed URL for secure access (expires in 1 hour) - PRIVATE BUCKET ONLY
+        // Get signed URL for secure access - Extended expiry for Super Admin
+        const expiryTime = 86400; // 24 hours for better admin experience
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('verification-documents')
-          .createSignedUrl(fileName, 3600);
+          .createSignedUrl(fileName, expiryTime);
 
         if (signedUrlError) {
           console.error('Failed to create signed URL for private document:', signedUrlError);
           throw new Error(`Secure file access failed: ${signedUrlError.message}. Verification documents must be securely accessible.`);
         }
 
-        console.log('File uploaded successfully with signed URL');
+        console.log('File uploaded successfully with signed URL (24h expiry)');
 
         return {
           path: data.path,
