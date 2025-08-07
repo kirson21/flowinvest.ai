@@ -463,28 +463,28 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
               {applications.map((application) => (
                 <Card key={application.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
-                            {application.full_name}
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {application.contact_email}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {application.country_residence} • {formatDate(application.created_at)}
-                          </p>
-                        </div>
-                        
-                        <div className="text-center">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                          {application.full_name}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {application.contact_email}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {application.country_residence} • {formatDate(application.created_at)}
+                        </p>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                        <div className="text-center sm:text-left">
                           <Badge className={getStatusColor(application.status)}>
                             {getStatusIcon(application.status)}
                             <span className="ml-1 capitalize">{application.status}</span>
                           </Badge>
                         </div>
                         
-                        <div className="text-right">
+                        <div className="text-center sm:text-right">
                           <div className="text-sm text-gray-600 dark:text-gray-400">
                             Documents: {1 + (application.additional_documents?.length || 0)}
                           </div>
@@ -494,16 +494,17 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
                             </div>
                           )}
                         </div>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewApplication(application)}
+                          className="w-full sm:w-auto"
+                        >
+                          <Eye size={16} className="mr-2" />
+                          Review
+                        </Button>
                       </div>
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewApplication(application)}
-                      >
-                        <Eye size={16} className="mr-2" />
-                        Review
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
