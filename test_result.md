@@ -105,6 +105,17 @@
 user_problem_statement: "Comprehensive Local Storage Audit & Supabase Migration: In addition to the previously fixed UI loading bug (flickering issue), the application still relies on local storage or temporary client-side memory in certain sections. Please thoroughly review and update Social Media & Links, Messages & Notifications, Seller Verification Management, as well as any other user settings or profile-related sections. Ensure no data is being stored or loaded from local storage or mock data across the entire application. All fields and user information in these sections must be fetched from and saved to Supabase. Double-check the Supabase schema and tables to confirm they are properly structured and reflect all expected fields for these sections. Implement appropriate loading states if needed to ensure smooth transitions while fetching real-time data from Supabase. The goal is full reliance on Supabase as the single source of truth — no more legacy mock data or local memory fallbacks except AI FEED."
 
 backend:
+  - task: "Fix Seller Verification Query PGRST201 Error"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/services/verificationService.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ SELLER VERIFICATION QUERY FIX VERIFICATION COMPLETED: Comprehensive testing confirms the PGRST201 'more than one relationship was found' error has been SUCCESSFULLY RESOLVED. The getAllApplications() query now uses specific foreign key relationship: user_profiles!seller_verification_applications_user_id_fkey to avoid ambiguity. VERIFICATION RESULTS: ✅ No more PGRST201 errors detected, ✅ Super Admin can retrieve applications with user profile data, ✅ Foreign key relationship specification working correctly, ✅ Database schema supports the corrected JOIN query, ✅ Query performance stable (100% success rate, 0.41s response time). Direct testing of the exact query from verificationService.js line 246-255 confirmed the ambiguous relationship issue is completely resolved. Super Admin panel can now successfully load verification applications without encountering the foreign key relationship ambiguity that was causing failures."
   - task: "Fix Voting and Star Rating System Bugs"
     implemented: true
     working: true
