@@ -639,14 +639,14 @@ export const supabaseDataService = {
   },
 
   /**
-   * Mark notification as read - Enhanced with localStorage support
+   * Mark notification as read - Enhanced with localStorage support (Fixed column issue)
    */
   async markNotificationAsRead(notificationId) {
     try {
-      // Try Supabase first
+      // Try Supabase first (without updated_at column that doesn't exist)
       const { data, error } = await supabase
         .from('user_notifications')
-        .update({ is_read: true, updated_at: new Date().toISOString() })
+        .update({ is_read: true })
         .eq('id', notificationId)
         .select()
         .single();
@@ -672,7 +672,7 @@ export const supabaseDataService = {
           const updatedNotifications = notifications.map(notification => {
             if (notification.id === notificationId) {
               updated = true;
-              return { ...notification, is_read: true, updated_at: new Date().toISOString() };
+              return { ...notification, is_read: true };
             }
             return notification;
           });
