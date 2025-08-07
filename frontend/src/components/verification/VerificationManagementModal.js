@@ -392,10 +392,10 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
 
   // Applications List View
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
             Seller Verification Management
           </h2>
           <Button
@@ -407,7 +407,7 @@ const VerificationManagementModal = ({ isOpen, onClose }) => {
           </Button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6 pb-8">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0097B2]"></div>
