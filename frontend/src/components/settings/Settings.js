@@ -1401,7 +1401,10 @@ const Settings = () => {
                 </p>
               </div>
             </div>
-            <Switch defaultChecked />
+            <Switch 
+              checked={notificationsEnabled}
+              onCheckedChange={setNotificationsEnabled}
+            />
           </div>
         </CardContent>
       </Card>
