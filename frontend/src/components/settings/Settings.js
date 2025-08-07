@@ -1243,12 +1243,12 @@ const Settings = () => {
               <div className="relative">
                 <Mail className="text-[#0097B2]" size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1 min-w-[16px] h-4 flex items-center justify-center">
-                    {unreadCount}
-                  </span>
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </div>
                 )}
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-medium text-[#474545] dark:text-white">
                   Messages & Notifications
                 </p>
@@ -1257,7 +1257,15 @@ const Settings = () => {
                 </p>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex items-center space-x-2">
+              {/* Notifications toggle */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Enable</span>
+                <Switch
+                  checked={notificationsEnabled}
+                  onCheckedChange={setNotificationsEnabled}
+                />
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -1283,51 +1291,71 @@ const Settings = () => {
 
           {/* Notifications Panel */}
           {showNotifications && (
-            <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
+            <div className="mt-4 space-y-2">
               {notifications.length === 0 ? (
                 <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                   <Mail size={32} className="mx-auto mb-2 opacity-50" />
                   <p>No notifications yet</p>
                 </div>
               ) : (
-                notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-3 rounded-lg border ${
-                      notification.is_read 
-                        ? 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' 
-                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className={`font-medium text-sm ${
+                <>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {(showAllNotifications ? notifications : notifications.slice(0, 3))
+                      .filter(notification => notificationsEnabled || notification.is_read === false) // Show all if enabled, or only unread if disabled
+                      .map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-3 rounded-lg border ${
                           notification.is_read 
-                            ? 'text-gray-700 dark:text-gray-300' 
-                            : 'text-blue-800 dark:text-blue-200'
-                        }`}>
-                          {notification.title}
-                        </h4>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {formatNotificationDate(notification.created_at)}
-                        </p>
+                            ? 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' 
+                            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className={`font-medium text-sm ${
+                              notification.is_read 
+                                ? 'text-gray-700 dark:text-gray-300' 
+                                : 'text-blue-800 dark:text-blue-200'
+                            }`}>
+                              {notification.title}
+                            </h4>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-2">
+                              {formatNotificationDate(notification.created_at)}
+                            </p>
+                          </div>
+                          {!notification.is_read && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => markNotificationAsRead(notification.id)}
+                              className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1"
+                            >
+                              Mark as read
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      {!notification.is_read && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => markNotificationAsRead(notification.id)}
-                          className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1"
-                        >
-                          Mark as read
-                        </Button>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                ))
+                  
+                  {/* View All / Show Less button */}
+                  {notifications.length > 3 && (
+                    <div className="text-center pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAllNotifications(!showAllNotifications)}
+                        className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                      >
+                        {showAllNotifications ? `Show Less` : `View All (${notifications.length})`}
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
