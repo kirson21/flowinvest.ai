@@ -63,24 +63,14 @@ export const verificationService = {
           return await this.uploadFileAsBase64(file, userId, fileType);
         }
 
-        // Get signed URL for secure access (expires in 1 hour)
+        // Get signed URL for secure access (expires in 1 hour) - PRIVATE BUCKET ONLY
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('verification-documents')
           .createSignedUrl(fileName, 3600);
 
         if (signedUrlError) {
-          console.warn('Failed to create signed URL, using public URL as fallback');
-          // Fallback to public URL if signed URL fails
-          const { data: { publicUrl } } = supabase.storage
-            .from('verification-documents')
-            .getPublicUrl(fileName);
-          
-          return {
-            path: data.path,
-            url: publicUrl,
-            fileName: file.name,
-            isSecure: false
-          };
+          console.error('Failed to create signed URL for private document:', signedUrlError);
+          throw new Error(`Secure file access failed: ${signedUrlError.message}. Verification documents must be securely accessible.`);
         }
 
         console.log('File uploaded successfully with signed URL');
