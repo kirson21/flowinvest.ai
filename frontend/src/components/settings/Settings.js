@@ -658,10 +658,27 @@ const Settings = () => {
   // Notification Functions
   const markNotificationAsRead = async (notificationId) => {
     try {
+      console.log('Marking notification as read:', notificationId);
       await supabaseDataService.markNotificationAsRead(notificationId);
-      await loadNotifications(); // Reload notifications
+      
+      // Update the notifications state immediately for instant UI feedback
+      setNotifications(prevNotifications => 
+        prevNotifications.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, is_read: true }
+            : notification
+        )
+      );
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - 1));
+      
+      // Reload to ensure consistency
+      await loadNotifications();
+      
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      setError('Failed to mark notification as read');
     }
   };
 
