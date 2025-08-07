@@ -97,6 +97,8 @@ const Settings = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showAllNotifications, setShowAllNotifications] = useState(false);
 
   // Super Admin Check
   const isSuperAdmin = () => {
