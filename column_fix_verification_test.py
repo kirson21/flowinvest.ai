@@ -59,7 +59,7 @@ class SellerVerificationQueryTest:
             # This is the corrected query that should work
             query_url = f"{SUPABASE_URL}/rest/v1/seller_verification_applications"
             params = {
-                'select': 'id,user_id,business_name,contact_email,status,created_at,user_profiles!seller_verification_applications_user_id_fkey(display_name)',
+                'select': 'id,user_id,full_name,contact_email,status,created_at,user_profiles!seller_verification_applications_user_id_fkey(display_name)',
                 'order': 'created_at.desc'
             }
             
