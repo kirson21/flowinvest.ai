@@ -305,35 +305,41 @@ export const verificationService = {
     }
   },
 
-  // Approve verification application (super admin only)
+  // Approve verification application (super admin only) - SUPABASE ONLY VERSION
   async approveApplication(applicationId, adminNotes = '') {
     try {
-      // Try Supabase first
-      try {
-        const { data, error } = await supabase
-          .from('seller_verification_applications')
-          .update({
-            status: 'approved',
-            reviewed_by: (await supabase.auth.getUser()).data.user?.id,
-            reviewed_at: new Date().toISOString(),
-            admin_notes: adminNotes
-          })
-          .eq('id', applicationId)
-          .select()
-          .single();
+      console.log('Approving application in Supabase ONLY:', applicationId);
+      
+      const { data, error } = await supabase
+        .from('seller_verification_applications')
+        .update({
+          status: 'approved',
+          reviewed_by: (await supabase.auth.getUser()).data.user?.id,
+          reviewed_at: new Date().toISOString(),
+          admin_notes: adminNotes
+        })
+        .eq('id', applicationId)
+        .select()
+        .single();
 
-        if (error) {
-          console.warn('Supabase approve failed, using localStorage:', error);
-          return this.approveApplicationInLocalStorage(applicationId, adminNotes);
+      if (error) {
+        console.error('Error approving application in Supabase:', error);
+        if (error.code === 'PGRST116') {
+          throw new Error('Database table missing: seller_verification_applications table not found.');
+        } else if (error.code === '42501') {
+          throw new Error('Permission denied: Check RLS policies for approving applications.');
         }
-
-        return data;
-      } catch (supabaseError) {
-        console.warn('Supabase not available for approve, using localStorage:', supabaseError);
-        return this.approveApplicationInLocalStorage(applicationId, adminNotes);
+        throw new Error(`Approval failed: ${error.message}`);
       }
+
+      console.log('Application approved successfully in Supabase. Database triggers should have:', data);
+      console.log('- Updated user profile verification status to "verified"');
+      console.log('- Created approval notification for the user');
+      
+      return data;
+
     } catch (error) {
-      console.error('Error approving application:', error);
+      console.error('Error in approveApplication:', error);
       throw error;
     }
   },
