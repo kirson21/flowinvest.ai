@@ -1,1 +1,10 @@
-web: pip install fastapi==0.104.1 "uvicorn[standard]==0.24.0" pydantic==2.5.0 python-multipart==0.0.6 python-dotenv==1.0.0 requests==2.31.0 && python backend/server.py
+# Railway Procfile for Flow Invest
+
+# Backend Service
+web: cd backend && python server.py
+
+# Frontend Service (if needed as separate service)
+# frontend: cd frontend && yarn start
+
+# Database migrations (if needed)
+# release: cd backend && python migrations.py
