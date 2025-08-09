@@ -1,0 +1,19 @@
+# Render Deployment Configuration - RUST-FREE
+services:
+  - type: web
+    name: flowinvest-backend
+    env: python
+    buildCommand: |
+      cd backend
+      pip install --upgrade pip
+      pip install -r requirements-rust-free.txt
+    startCommand: cd backend && python server_minimal.py
+    envVars:
+      - key: PORT
+        value: 8001
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHONPATH
+        value: /opt/render/project/src/backend
+      - key: PYTHONUNBUFFERED
+        value: "1"
