@@ -5,11 +5,6 @@ set -e
 
 echo "🚨 FORCING MINIMAL INSTALLATION - NO RUST COMPILATION"
 
-# Navigate to backend if we're in root
-if [[ -d "backend" ]]; then
-    cd backend
-fi
-
 # Remove any cached pip files that might cause issues
 rm -rf ~/.cache/pip/* 2>/dev/null || true
 rm -rf /tmp/pip-* 2>/dev/null || true
