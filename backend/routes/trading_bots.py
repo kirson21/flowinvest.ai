@@ -140,7 +140,7 @@ async def get_bot_details(
 ):
     """Get detailed information about a specific bot"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         response = supabase.table('trading_bots').select('*').eq('id', bot_id).eq('user_id', current_user["id"]).single().execute()
         
