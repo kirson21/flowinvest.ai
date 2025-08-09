@@ -12,7 +12,7 @@ from services.encryption_service import EncryptionService
 from services.bot_execution_service import BotExecutionService
 from routes.auth import get_current_user
 
-router = APIRouter(prefix="/api/trading-bots", tags=["Trading Bots"])
+router = APIRouter(prefix="/trading-bots", tags=["Trading Bots"])
 
 # Initialize services
 openai_service = OpenAIService()
