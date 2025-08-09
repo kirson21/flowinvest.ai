@@ -104,7 +104,7 @@ async def test_exchange_keys(
 ):
     """Test existing exchange keys"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         # Get encrypted keys
         keys_response = supabase.table('user_exchange_keys').select('*').eq('id', key_id).eq('user_id', current_user["id"]).single().execute()
