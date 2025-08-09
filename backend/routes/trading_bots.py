@@ -281,7 +281,7 @@ async def delete_bot(
 ):
     """Delete a trading bot"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         # Stop bot if active
         await stop_bot(bot_id, current_user)
