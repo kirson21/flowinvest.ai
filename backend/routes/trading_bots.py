@@ -369,7 +369,7 @@ async def _log_bot_activity(
 ):
     """Log bot activity to database"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         log_record = {
             "bot_id": bot_id,
