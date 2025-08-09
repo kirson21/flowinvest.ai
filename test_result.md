@@ -802,7 +802,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Implement AI Trading Bot Constructor Backend Infrastructure"
+    - "Frontend AI Trading Bot Creator Integration"
   stuck_tasks:
     []
   test_all: false
