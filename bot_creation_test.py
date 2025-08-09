@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 
 # Get backend URL from environment
-BACKEND_URL = "https://00253ee3-ad42-47d4-958c-225cd2b95a8f.preview.emergentagent.com/api"
+BACKEND_URL = "https://f4c3ec4e-52e4-413a-8de4-6d93557b7d60.preview.emergentagent.com/api"
 
 class BotCreationTester:
     def __init__(self):
