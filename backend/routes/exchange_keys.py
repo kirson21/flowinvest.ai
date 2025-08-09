@@ -155,7 +155,7 @@ async def delete_exchange_keys(
 ):
     """Delete exchange keys"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         response = supabase.table('user_exchange_keys').delete().eq('id', key_id).eq('user_id', current_user["id"]).execute()
         
