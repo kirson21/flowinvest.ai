@@ -255,7 +255,7 @@ async def get_bot_performance(
 ):
     """Get performance metrics for a specific bot"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         # Verify bot ownership
         bot_response = supabase.table('trading_bots').select('id').eq('id', bot_id).eq('user_id', current_user["id"]).single().execute()
