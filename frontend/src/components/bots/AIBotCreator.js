@@ -1,269 +1,606 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { 
-  ArrowLeft, 
-  MessageSquare, 
-  Send, 
-  Bot, 
-  Sparkles, 
-  Settings,
-  Lightbulb,
-  Zap,
-  Target
-} from 'lucide-react';
+import { Slider } from '../ui/slider';
+import { Switch } from '../ui/switch';
+import { Loader2, Bot, Brain, Zap, TrendingUp, Activity, Shield } from 'lucide-react';
+import api from '../../services/api';
 
-const AIBotCreator = ({ onClose, onSave }) => {
+const AIBotCreator = () => {
   const { t } = useApp();
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'ai',
-      content: 'Hello! I\'m your AI Bot Creation Assistant. I can help you create a custom trading bot using natural language. Just describe what kind of bot you want, and I\'ll configure it for you!',
-      timestamp: new Date()
-    }
-  ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [generatedBot, setGeneratedBot] = useState(null);
-  const messagesEndRef = useRef(null);
+  
+  // State management
+  const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [strategyTemplates, setStrategyTemplates] = useState([]);
+  const [generatedConfig, setGeneratedConfig] = useState(null);
+  const [error, setError] = useState('');
+  
+  // Form data
+  const [formData, setFormData] = useState({
+    aiModel: 'gpt-5',
+    creationMode: 'template', // 'template' or 'custom'
+    selectedTemplate: '',
+    customDescription: '',
+    riskPreferences: {
+      risk_level: 'medium',
+      max_leverage: 10,
+      portfolio_percent_per_trade: 2,
+      preferred_assets: 'Major cryptocurrencies'
+    },
+    customizations: {},
+    botName: '',
+    tradingMode: 'paper'
+  });
 
+  // Load strategy templates on component mount
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
+    loadStrategyTemplates();
+  }, []);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const loadStrategyTemplates = async () => {
+    try {
+      const response = await api.get('/trading-bots/strategy-templates');
+      if (response.data) {
+        setStrategyTemplates(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load strategy templates:', error);
+      setError('Failed to load strategy templates');
+    }
   };
 
-  const suggestedPrompts = [
-    "Create a bot that trades BTC/USDT using RSI + MACD signals with low risk on Binance",
-    "I want a scalping bot for ETH/USDT with quick profits and medium risk",
-    "Build a DCA bot for long-term investment in major cryptocurrencies",
-    "Create a grid trading bot for sideways markets with high frequency"
-  ];
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+  const handleRiskPreferenceChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      riskPreferences: {
+        ...prev.riskPreferences,
+        [field]: value
+      }
+    }));
+  };
 
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    };
+  const generateBotConfig = async () => {
+    setIsLoading(true);
+    setError('');
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsTyping(true);
-
-    // Simulate AI processing delay
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputMessage);
-      const aiMessage = {
-        id: Date.now() + 1,
-        type: 'ai',
-        content: aiResponse.message,
-        timestamp: new Date()
+    try {
+      const requestData = {
+        ai_model: formData.aiModel,
+        risk_preferences: formData.riskPreferences
       };
 
-      setMessages(prev => [...prev, aiMessage]);
-      
-      if (aiResponse.bot) {
-        setGeneratedBot(aiResponse.bot);
+      if (formData.creationMode === 'template') {
+        requestData.strategy_template_id = formData.selectedTemplate;
+        requestData.customizations = formData.customizations;
+      } else {
+        requestData.strategy_description = formData.customDescription;
       }
+
+      const response = await api.post('/trading-bots/generate-bot', requestData);
       
-      setIsTyping(false);
-    }, 2000);
-  };
+      if (response.data.success) {
+        setGeneratedConfig(response.data);
+        setStep(3); // Move to review step
+      } else {
+        setError('Failed to generate bot configuration');
+      }
 
-  const generateAIResponse = (userInput) => {
-    // Mock AI response generation based on user input
-    const lowerInput = userInput.toLowerCase();
-    
-    // Extract key information from user input
-    const strategy = extractStrategy(lowerInput);
-    const exchange = extractExchange(lowerInput);
-    const tradingPair = extractTradingPair(lowerInput);
-    const riskLevel = extractRiskLevel(lowerInput);
-    
-    const bot = {
-      name: `${strategy} Bot`,
-      description: `AI-generated bot based on your requirements: ${userInput.slice(0, 100)}...`,
-      strategy: strategy,
-      exchange: exchange,
-      tradingPair: tradingPair,
-      riskLevel: riskLevel
-    };
-
-    const message = `Great! I've analyzed your request and created a custom trading bot for you. Here's what I've configured:
-
-**Bot Name:** ${bot.name}
-**Strategy:** ${bot.strategy}
-**Exchange:** ${bot.exchange}
-**Trading Pair:** ${bot.tradingPair}
-**Risk Level:** ${bot.riskLevel}
-
-This bot will use ${strategy.toLowerCase()} strategy to trade ${tradingPair} on ${exchange} with ${riskLevel.toLowerCase()} risk settings.
-
-You can review the configuration and create the bot, or ask me to modify any settings!`;
-
-    return { message, bot };
-  };
-
-  const extractStrategy = (input) => {
-    if (input.includes('scalp')) return 'Scalping';
-    if (input.includes('dca') || input.includes('dollar cost')) return 'DCA';
-    if (input.includes('grid')) return 'Grid Trading';
-    if (input.includes('trend')) return 'Trend Following';
-    if (input.includes('rsi') || input.includes('macd')) return 'Technical Analysis';
-    return 'Smart Trading';
-  };
-
-  const extractExchange = (input) => {
-    if (input.includes('binance')) return 'Binance';
-    if (input.includes('bybit')) return 'Bybit';
-    if (input.includes('kraken')) return 'Kraken';
-    return 'Binance'; // Default
-  };
-
-  const extractTradingPair = (input) => {
-    if (input.includes('btc')) return 'BTC/USDT';
-    if (input.includes('eth')) return 'ETH/USDT';
-    if (input.includes('ada')) return 'ADA/USDT';
-    if (input.includes('sol')) return 'SOL/USDT';
-    return 'BTC/USDT'; // Default
-  };
-
-  const extractRiskLevel = (input) => {
-    if (input.includes('low')) return 'Low';
-    if (input.includes('high')) return 'High';
-    return 'Medium'; // Default
-  };
-
-  const handleCreateBot = () => {
-    if (generatedBot) {
-      onSave(generatedBot);
+    } catch (error) {
+      console.error('Bot generation failed:', error);
+      setError(error.response?.data?.detail || 'Bot generation failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSuggestedPrompt = (prompt) => {
-    setInputMessage(prompt);
+  const createBot = async () => {
+    if (!generatedConfig || !formData.botName.trim()) {
+      setError('Please provide a bot name');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const botData = {
+        bot_name: formData.botName,
+        description: generatedConfig.bot_config.description,
+        ai_model: formData.aiModel,
+        bot_config: generatedConfig.bot_config,
+        is_predefined_strategy: formData.creationMode === 'template',
+        trading_mode: formData.tradingMode
+      };
+
+      const response = await api.post('/trading-bots/create', botData);
+      
+      if (response.data) {
+        // Success - redirect to bot management or show success message
+        alert('Bot created successfully!');
+        // Could redirect to bot management page here
+        resetForm();
+      } else {
+        setError('Failed to create bot');
+      }
+
+    } catch (error) {
+      console.error('Bot creation failed:', error);
+      setError(error.response?.data?.detail || 'Bot creation failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return (
-    <div className="p-4 pb-20 max-w-4xl mx-auto h-screen flex flex-col">
-      <div className="flex items-center mb-6">
-        <Button
-          variant="ghost"
-          onClick={onClose}
-          className="mr-4 p-2"
-        >
-          <ArrowLeft size={20} />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-[#474545] dark:text-white">
-            AI Bot Creator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Describe your trading strategy in natural language
+  const resetForm = () => {
+    setStep(1);
+    setGeneratedConfig(null);
+    setError('');
+    setFormData({
+      aiModel: 'gpt-5',
+      creationMode: 'template',
+      selectedTemplate: '',
+      customDescription: '',
+      riskPreferences: {
+        risk_level: 'medium',
+        max_leverage: 10,
+        portfolio_percent_per_trade: 2,
+        preferred_assets: 'Major cryptocurrencies'
+      },
+      customizations: {},
+      botName: '',
+      tradingMode: 'paper'
+    });
+  };
+
+  const getRiskLevelColor = (level) => {
+    const colors = {
+      low: 'bg-green-500',
+      medium: 'bg-yellow-500',
+      high: 'bg-red-500'
+    };
+    return colors[level] || colors.medium;
+  };
+
+  const getTemplateIcon = (strategyType) => {
+    const icons = {
+      'Trend Following': TrendingUp,
+      'Breakout': Zap,
+      'Scalping': Activity,
+      'Default': Bot
+    };
+    const Icon = icons[strategyType] || icons.Default;
+    return <Icon size={24} className="text-[#0097B2]" />;
+  };
+
+  // Step 1: AI Model and Creation Mode Selection
+  if (step === 1) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center space-y-2">
+          <div className="flex items-center justify-center space-x-2">
+            <Brain className="text-[#0097B2]" size={32} />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              AI Trading Bot Creator
+            </h1>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">
+            Create intelligent trading bots powered by GPT-5 or Grok-4
           </p>
         </div>
-      </div>
 
-      <div className="flex-1 flex gap-6">
-        {/* Chat Interface */}
-        <div className="flex-1 flex flex-col">
-          <Card className="flex-1 flex flex-col">
-            <CardHeader>
-              <CardTitle className="flex items-center text-[#474545] dark:text-white">
-                <MessageSquare className="text-purple-600 mr-2" size={20} />
-                AI Assistant
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-0">
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-96">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.type === 'user'
-                          ? 'bg-[#0097B2] text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
-                      }`}
-                    >
-                      <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-                      <div className={`text-xs mt-1 ${
-                        message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                      }`}>
-                        {message.timestamp.toLocaleTimeString()}
-                      </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Bot className="text-[#0097B2]" size={20} />
+              <span>Step 1: Choose AI Model & Creation Mode</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* AI Model Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">AI Model</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div 
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    formData.aiModel === 'gpt-5' 
+                      ? 'border-[#0097B2] bg-[#0097B2]/5' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleInputChange('aiModel', 'gpt-5')}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Brain className="text-[#0097B2]" size={24} />
+                    <div>
+                      <h3 className="font-semibold">GPT-5</h3>
+                      <p className="text-sm text-gray-600">Advanced reasoning & strategy generation</p>
                     </div>
-                  </div>
-                ))}
-                
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Suggested Prompts */}
-              {messages.length === 1 && (
-                <div className="p-4 border-t">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    💡 Try these examples:
-                  </h4>
-                  <div className="space-y-2">
-                    {suggestedPrompts.map((prompt, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSuggestedPrompt(prompt)}
-                        className="w-full text-left justify-start h-auto p-3 text-xs border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <Lightbulb size={14} className="mr-2 text-yellow-500" />
-                        {prompt}
-                      </Button>
-                    ))}
                   </div>
                 </div>
-              )}
+                
+                <div 
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    formData.aiModel === 'grok-4' 
+                      ? 'border-[#0097B2] bg-[#0097B2]/5' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleInputChange('aiModel', 'grok-4')}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Zap className="text-purple-500" size={24} />
+                    <div>
+                      <h3 className="font-semibold">Grok-4</h3>
+                      <p className="text-sm text-gray-600">Fast analysis & real-time insights</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-              {/* Input Area */}
-              <div className="p-4 border-t">
-                <div className="flex space-x-2">
-                  <Input
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    placeholder="Describe your trading bot idea..."
-                    className="flex-1 border-gray-200 dark:border-gray-700"
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={!inputMessage.trim() || isTyping}
-                    className="bg-purple-600 hover:bg-purple-700"
+            {/* Creation Mode Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Creation Mode</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div 
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    formData.creationMode === 'template' 
+                      ? 'border-[#0097B2] bg-[#0097B2]/5' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleInputChange('creationMode', 'template')}
+                >
+                  <div className="text-center">
+                    <Shield className="text-[#0097B2] mx-auto mb-2" size={24} />
+                    <h3 className="font-semibold">Predefined Strategy</h3>
+                    <p className="text-sm text-gray-600">Choose from tested templates</p>
+                  </div>
+                </div>
+                
+                <div 
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    formData.creationMode === 'custom' 
+                      ? 'border-[#0097B2] bg-[#0097B2]/5' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleInputChange('creationMode', 'custom')}
+                >
+                  <div className="text-center">
+                    <Brain className="text-purple-500 mx-auto mb-2" size={24} />
+                    <h3 className="font-semibold">Custom Strategy</h3>
+                    <p className="text-sm text-gray-600">Describe your own strategy</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => setStep(2)} 
+              className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90"
+            >
+              Continue to Strategy Selection
+            </Button>
+          </CardContent>
+        </Card>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Step 2: Strategy Configuration
+  if (step === 2) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Strategy Configuration
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {formData.creationMode === 'template' 
+              ? 'Select a strategy template and customize it' 
+              : 'Describe your custom trading strategy'
+            }
+          </p>
+        </div>
+
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            {formData.creationMode === 'template' ? (
+              // Template Selection
+              <div className="space-y-4">
+                <Label className="text-base font-medium">Choose Strategy Template</Label>
+                <div className="grid gap-4">
+                  {strategyTemplates.map(template => (
+                    <div
+                      key={template.id}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        formData.selectedTemplate === template.id
+                          ? 'border-[#0097B2] bg-[#0097B2]/5'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => handleInputChange('selectedTemplate', template.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3">
+                          {getTemplateIcon(template.strategy_config?.strategy?.type)}
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <h3 className="font-semibold">{template.template_name}</h3>
+                              <Badge className={getRiskLevelColor(template.risk_level)}>
+                                {template.risk_level} risk
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // Custom Strategy Description
+              <div className="space-y-4">
+                <Label className="text-base font-medium">Describe Your Strategy</Label>
+                <Textarea
+                  placeholder="Describe your trading strategy in natural language. For example: 'I want a bot that buys when RSI is oversold and sells when it reaches resistance levels with 5x leverage...'"
+                  value={formData.customDescription}
+                  onChange={(e) => handleInputChange('customDescription', e.target.value)}
+                  rows={6}
+                  className="w-full"
+                />
+              </div>
+            )}
+
+            {/* Risk Preferences */}
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Risk Preferences</Label>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Risk Level */}
+                <div className="space-y-2">
+                  <Label>Risk Level</Label>
+                  <Select 
+                    value={formData.riskPreferences.risk_level} 
+                    onValueChange={(value) => handleRiskPreferenceChange('risk_level', value)}
                   >
-                    <Send size={16} />
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <span>Low Risk</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="medium">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                          <span>Medium Risk</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="high">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                          <span>High Risk</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Max Leverage */}
+                <div className="space-y-2">
+                  <Label>Maximum Leverage: {formData.riskPreferences.max_leverage}x</Label>
+                  <Slider
+                    value={[formData.riskPreferences.max_leverage]}
+                    onValueChange={(value) => handleRiskPreferenceChange('max_leverage', value[0])}
+                    max={20}
+                    min={1}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Portfolio Percentage */}
+                <div className="space-y-2">
+                  <Label>Portfolio % per Trade: {formData.riskPreferences.portfolio_percent_per_trade}%</Label>
+                  <Slider
+                    value={[formData.riskPreferences.portfolio_percent_per_trade]}
+                    onValueChange={(value) => handleRiskPreferenceChange('portfolio_percent_per_trade', value[0])}
+                    max={10}
+                    min={0.5}
+                    step={0.5}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Preferred Assets */}
+                <div className="space-y-2">
+                  <Label>Preferred Assets</Label>
+                  <Input
+                    placeholder="e.g., BTC, ETH, ADA"
+                    value={formData.riskPreferences.preferred_assets}
+                    onChange={(e) => handleRiskPreferenceChange('preferred_assets', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setStep(1)}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button 
+                onClick={generateBotConfig}
+                disabled={isLoading || (formData.creationMode === 'template' && !formData.selectedTemplate) || 
+                         (formData.creationMode === 'custom' && !formData.customDescription.trim())}
+                className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  'Generate Bot Configuration'
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Step 3: Review and Create Bot
+  if (step === 3 && generatedConfig) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Review Bot Configuration
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Review the generated configuration and create your trading bot
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Bot Configuration Preview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Generated Strategy</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="font-medium">Bot Name</Label>
+                <p className="text-sm text-gray-600">{generatedConfig.bot_config.botName}</p>
+              </div>
+              
+              <div>
+                <Label className="font-medium">Description</Label>
+                <p className="text-sm text-gray-600">{generatedConfig.bot_config.description}</p>
+              </div>
+              
+              <div>
+                <Label className="font-medium">Strategy Type</Label>
+                <Badge variant="outline">{generatedConfig.bot_config.strategy.type}</Badge>
+              </div>
+              
+              <div>
+                <Label className="font-medium">Risk Management</Label>
+                <div className="space-y-1 text-sm">
+                  <p>Leverage: {generatedConfig.bot_config.riskManagement.leverage}x</p>
+                  <p>Stop Loss: {generatedConfig.bot_config.riskManagement.stopLossPercent}%</p>
+                  <p>Take Profit: {generatedConfig.bot_config.riskManagement.takeProfitPercent}%</p>
+                  <p>Max Trades: {generatedConfig.bot_config.riskManagement.maxConcurrentTrades}</p>
+                </div>
+              </div>
+              
+              <div>
+                <Label className="font-medium">AI Model Used</Label>
+                <Badge className="bg-[#0097B2]">{generatedConfig.ai_model}</Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bot Creation Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Your Bot</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Bot Name</Label>
+                <Input
+                  placeholder="Enter a name for your bot"
+                  value={formData.botName}
+                  onChange={(e) => handleInputChange('botName', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Trading Mode</Label>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={formData.tradingMode === 'live'}
+                      onCheckedChange={(checked) => handleInputChange('tradingMode', checked ? 'live' : 'paper')}
+                    />
+                    <Label className="text-sm">
+                      {formData.tradingMode === 'live' ? 'Live Trading' : 'Paper Trading'}
+                    </Label>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {formData.tradingMode === 'live' 
+                    ? 'Bot will trade with real money (requires API keys)' 
+                    : 'Bot will simulate trades without real money'
+                  }
+                </p>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="space-y-4">
+                <Button 
+                  onClick={createBot}
+                  disabled={isLoading || !formData.botName.trim()}
+                  className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Bot...
+                    </>
+                  ) : (
+                    'Create Trading Bot'
+                  )}
+                </Button>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setStep(2)}
+                    className="flex-1"
+                  >
+                    Back to Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={resetForm}
+                    className="flex-1"
+                  >
+                    Start Over
                   </Button>
                 </div>
               </div>
@@ -271,138 +608,16 @@ You can review the configuration and create the bot, or ask me to modify any set
           </Card>
         </div>
 
-        {/* Bot Preview */}
-        <div className="w-80">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-[#474545] dark:text-white">
-                <Bot className="text-[#0097B2] mr-2" size={20} />
-                Bot Preview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {generatedBot ? (
-                <div className="space-y-4">
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Sparkles className="text-purple-600" size={16} />
-                      <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
-                        AI Generated
-                      </span>
-                    </div>
-                    <h3 className="font-semibold text-[#474545] dark:text-white mb-2">
-                      {generatedBot.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {generatedBot.description}
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Strategy</label>
-                      <div className="text-sm font-medium text-[#474545] dark:text-white">
-                        {generatedBot.strategy}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Exchange</label>
-                      <div className="text-sm font-medium text-[#474545] dark:text-white">
-                        {generatedBot.exchange}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Trading Pair</label>
-                      <div className="text-sm font-medium text-[#474545] dark:text-white">
-                        {generatedBot.tradingPair}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Risk Level</label>
-                      <Badge 
-                        variant="outline" 
-                        className={`${
-                          generatedBot.riskLevel === 'Low' ? 'border-green-500 text-green-600' :
-                          generatedBot.riskLevel === 'High' ? 'border-red-500 text-red-600' :
-                          'border-yellow-500 text-yellow-600'
-                        }`}
-                      >
-                        {generatedBot.riskLevel}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-2 pt-4">
-                    <Button
-                      onClick={handleCreateBot}
-                      className="flex-1 bg-purple-600 hover:bg-purple-700"
-                    >
-                      <Zap size={16} className="mr-2" />
-                      Create Bot
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
-                      onClick={() => setInputMessage('Please modify the ')}
-                    >
-                      <Settings size={16} />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Bot size={48} className="mx-auto mb-4 text-gray-300" />
-                  <p className="text-sm">
-                    Chat with the AI to generate your custom bot configuration
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle className="text-base text-[#474545] dark:text-white">
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-left"
-                  onClick={() => setInputMessage('Create a conservative long-term investment bot')}
-                >
-                  <Target size={14} className="mr-2" />
-                  Conservative Bot
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-left"
-                  onClick={() => setInputMessage('Build an aggressive scalping bot for quick profits')}
-                >
-                  <Zap size={14} className="mr-2" />
-                  Aggressive Bot
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-left"
-                  onClick={onClose}
-                >
-                  <Settings size={14} className="mr-2" />
-                  Manual Setup
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 };
 
 export default AIBotCreator;
