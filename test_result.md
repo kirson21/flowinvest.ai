@@ -796,7 +796,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix Voting and Star Rating System Bugs"
+    - "Implement AI Trading Bot Constructor Backend Infrastructure"
   stuck_tasks:
     []
   test_all: false
