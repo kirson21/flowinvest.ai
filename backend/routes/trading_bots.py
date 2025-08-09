@@ -24,7 +24,7 @@ bot_execution_service = BotExecutionService()
 async def get_strategy_templates(current_user: dict = Depends(get_current_user)):
     """Get all available predefined strategy templates"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         response = supabase.table('strategy_templates').select('*').eq('is_active', True).execute()
         
