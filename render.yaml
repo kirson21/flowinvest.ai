@@ -4,16 +4,15 @@ services:
     name: flowinvest-backend
     env: python
     buildCommand: |
-      cd backend
       pip install --upgrade pip --no-cache-dir
       pip install --no-cache-dir fastapi==0.104.1 "uvicorn[standard]==0.24.0" pydantic==2.5.0 python-multipart==0.0.6 python-dotenv==1.0.0 requests==2.31.0
-    startCommand: cd backend && python server.py
+    startCommand: python backend/server.py
     envVars:
       - key: PORT
         value: 8001
       - key: ENVIRONMENT
         value: production
       - key: PYTHONPATH
-        value: /opt/render/project/src/backend
+        value: /opt/render/project/src
       - key: PYTHONUNBUFFERED
         value: "1"
