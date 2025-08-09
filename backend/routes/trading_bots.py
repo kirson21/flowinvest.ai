@@ -199,7 +199,7 @@ async def stop_bot(
 ):
     """Stop a trading bot"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         # Update bot status
         response = supabase.table('trading_bots').update({
