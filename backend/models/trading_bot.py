@@ -122,7 +122,7 @@ class ExchangeKeysRequest(BaseModel):
     api_key: str = Field(min_length=1)
     api_secret: str = Field(min_length=1)
     passphrase: Optional[str] = None
-    exchange_account_type: str = Field(default="testnet", regex="^(testnet|mainnet)$")
+    exchange_account_type: str = Field(default="testnet", pattern="^(testnet|mainnet)$")
 
     @validator('api_key', 'api_secret')
     def validate_credentials(cls, v):
