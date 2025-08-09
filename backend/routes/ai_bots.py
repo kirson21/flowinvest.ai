@@ -100,7 +100,7 @@ async def get_user_bots(user_id: str, include_prebuilt: bool = True):
     try:
         # Get bots from Supabase
         if include_prebuilt:
-            response = supabase.table('user_bots').select('*').or_(f'user_id.eq.{user_id},is_prebuilt.eq.true').order('created_at', desc=True).execute()
+            response = supabase.table('user_bots').select('*').eq('user_id', user_id).eq('is_prebuilt', True).order('created_at', desc=True).execute()
         else:
             response = supabase.table('user_bots').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
         
