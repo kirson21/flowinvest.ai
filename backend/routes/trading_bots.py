@@ -78,7 +78,7 @@ async def create_trading_bot(
 ):
     """Create and save a new trading bot"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         # Prepare bot data
         bot_record = {
