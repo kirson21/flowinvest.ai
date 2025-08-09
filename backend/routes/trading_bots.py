@@ -5,12 +5,12 @@ import asyncio
 from datetime import datetime
 import uuid
 
-from ..models.trading_bot import TradingBot, BotConfig, CreateBotRequest, BotResponse
-from ..services.openai_service import OpenAIService
-from ..services.bybit_service import BybitService
-from ..services.encryption_service import EncryptionService
-from ..services.bot_execution_service import BotExecutionService
-from .auth import get_current_user
+from models.trading_bot import TradingBot, BotConfig, CreateBotRequest, BotResponse
+from services.openai_service import OpenAIService
+from services.bybit_service import BybitService
+from services.encryption_service import EncryptionService
+from services.bot_execution_service import BotExecutionService
+from routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/trading-bots", tags=["Trading Bots"])
 
