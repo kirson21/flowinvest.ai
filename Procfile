@@ -1,4 +1,1 @@
-# ULTRA-SIMPLIFIED Procfile - NO Rust compilation
-
-# Backend Service - Using ultra-minimal requirements and ultra-simple server
-web: cd backend && pip install --no-cache-dir -r requirements-ultra-minimal.txt && python server_ultra_simple.py
+web: cd backend && pip install fastapi==0.104.1 uvicorn[standard]==0.24.0 python-multipart==0.0.6 pydantic==2.5.0 python-dotenv==1.0.0 requests==2.31.0 && python server.py
