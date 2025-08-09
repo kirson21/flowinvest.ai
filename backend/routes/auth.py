@@ -262,19 +262,19 @@ async def setup_admin_account():
         except:
             pass
         
-        # Check if user exists in user_profiles table
-        existing_profile = supabase.table('user_profiles').select('*').eq('email', admin_email).execute()
+        # Check if user exists in user_profiles table by user_id
+        existing_profile = supabase.table('user_profiles').select('*').eq('user_id', super_admin_uid).execute()
         
         if existing_profile.data:
             return {
                 "success": True, 
-                "message": f"User profile exists for {admin_email}. Super admin privileges are handled by UID: {super_admin_uid}",
+                "message": f"User profile exists for UID: {super_admin_uid}. Super admin privileges configured.",
                 "user": existing_profile.data[0]
             }
         else:
             return {
                 "success": False,
-                "message": f"User {admin_email} not found. Please sign up first. Super admin UID should be: {super_admin_uid}"
+                "message": f"User profile with UID {super_admin_uid} not found. Please sign up first or use the correct super admin UID."
             }
             
     except Exception as e:
