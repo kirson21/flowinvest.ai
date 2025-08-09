@@ -300,7 +300,7 @@ async def delete_bot(
 # Helper Functions
 async def _generate_from_template(template_id: str, customizations: Dict[str, Any]) -> Dict[str, Any]:
     """Generate bot config from predefined template with customizations"""
-    from ..database import supabase
+    from database import supabase
     
     # Get template
     response = supabase.table('strategy_templates').select('*').eq('id', template_id).single().execute()
