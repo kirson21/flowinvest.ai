@@ -474,7 +474,7 @@ class BotExecutionService:
         """Log trade execution to database"""
         
         try:
-            from ..database import supabase
+            from database import supabase
             
             trade_record = {
                 "bot_id": bot_context["bot_id"],
