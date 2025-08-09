@@ -159,7 +159,7 @@ async def start_bot(
 ):
     """Start a trading bot"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         # Get bot details
         bot_response = supabase.table('trading_bots').select('*').eq('id', bot_id).eq('user_id', current_user["id"]).single().execute()
