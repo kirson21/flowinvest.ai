@@ -83,7 +83,7 @@ async def add_exchange_keys(
 async def get_user_exchange_keys(current_user: dict = Depends(get_current_user)):
     """Get user's exchange keys (encrypted data only, not decrypted)"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         response = supabase.table('user_exchange_keys').select(
             'id, exchange, exchange_account_type, is_active, last_verified_at, created_at'
