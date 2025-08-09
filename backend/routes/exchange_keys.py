@@ -21,7 +21,7 @@ async def add_exchange_keys(
 ):
     """Add encrypted exchange API keys for user"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         # Test connection first
         test_result = await bybit_service.test_connection(
