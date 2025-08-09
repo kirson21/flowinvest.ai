@@ -3,10 +3,10 @@ from typing import Dict, Any
 import uuid
 from datetime import datetime
 
-from ..models.trading_bot import ExchangeKeysRequest
-from ..services.bybit_service import BybitService
-from ..services.encryption_service import EncryptionService
-from .auth import get_current_user
+from models.trading_bot import ExchangeKeysRequest
+from services.bybit_service import BybitService
+from services.encryption_service import EncryptionService
+from routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/exchange-keys", tags=["Exchange Keys"])
 
