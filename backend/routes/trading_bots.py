@@ -122,7 +122,7 @@ async def create_trading_bot(
 async def get_user_bots(current_user: dict = Depends(get_current_user)):
     """Get all trading bots for the current user"""
     try:
-        from ..database import supabase
+        from database import supabase
         
         response = supabase.table('trading_bots').select('*').eq('user_id', current_user["id"]).order('created_at', desc=True).execute()
         
