@@ -139,15 +139,37 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
               <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
                 <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                 <span>AI Bot Creator</span>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
-                  Powered by Grok 4
-                </Badge>
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-1">
-                Describe your trading strategy in natural language and let AI create a perfect bot
+                Create intelligent trading bots with advanced AI models
               </CardDescription>
             </div>
-            <Button variant="ghost" onClick={onClose} size="sm" className="self-end sm:self-auto">×</Button>
+            <div className="flex items-center gap-2">
+              {/* Model Selection Dropdown */}
+              <div className="flex items-center space-x-2">
+                <Label className="text-xs text-gray-600">Model:</Label>
+                <Select value={aiModel} onValueChange={setAiModel}>
+                  <SelectTrigger className="w-24 h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gpt-5">
+                      <div className="flex items-center space-x-2">
+                        <Brain className="text-[#0097B2]" size={14} />
+                        <span>GPT-5</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="grok-4">
+                      <div className="flex items-center space-x-2">
+                        <Zap className="text-purple-500" size={14} />
+                        <span>Grok-4</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button variant="ghost" onClick={onClose} size="sm" className="self-end sm:self-auto">×</Button>
+            </div>
           </div>
         </CardHeader>
 
