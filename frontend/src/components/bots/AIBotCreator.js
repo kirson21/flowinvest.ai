@@ -120,15 +120,15 @@ const AIBotCreator = () => {
         ai_model: formData.aiModel,
         bot_config: generatedConfig.bot_config,
         is_predefined_strategy: formData.creationMode === 'template',
-        trading_mode: formData.tradingMode
+        trading_mode: formData.tradingMode,
+        user_id: null // Will be set when user authentication is implemented
       };
 
       const response = await api.post('/trading-bots/create', botData);
       
-      if (response.data) {
-        // Success - redirect to bot management or show success message
-        alert('Bot created successfully!');
-        // Could redirect to bot management page here
+      if (response.data.success) {
+        // Success - show success message and reset form
+        alert(`Bot created successfully using ${formData.aiModel.toUpperCase()}!`);
         resetForm();
       } else {
         setError('Failed to create bot');
