@@ -5,11 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Textarea } from '../ui/textarea';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from '../ui/label';
 import { Loader2, Brain, TrendingUp, Shield, Zap, CheckCircle, Trash2 } from 'lucide-react';
 
 const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   const { user } = useAuth();
   const [prompt, setPrompt] = useState(editingBot?.description || '');
+  const [aiModel, setAiModel] = useState('gpt-5'); // Default to GPT-5
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedBot, setGeneratedBot] = useState(editingBot || null);
