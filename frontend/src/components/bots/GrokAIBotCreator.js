@@ -276,22 +276,30 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                     <CardTitle className="text-sm">Basic Configuration</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Trading Pair:</span>
-                      <span className="font-medium">{generatedBot.base_coin}/{generatedBot.quote_coin}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Exchange:</span>
-                      <span className="font-medium capitalize">{generatedBot.exchange}</span>
-                    </div>
+                    {(generatedBot.base_coin || generatedBot.quote_coin) && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Trading Pair:</span>
+                        <span className="font-medium">{generatedBot.base_coin || 'BTC'}/{generatedBot.quote_coin || 'USDT'}</span>
+                      </div>
+                    )}
+                    {generatedBot.exchange && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Exchange:</span>
+                        <span className="font-medium capitalize">{generatedBot.exchange}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Strategy:</span>
-                      <span className="font-medium capitalize">{generatedBot.strategy.replace('_', ' ')}</span>
+                      <span className="font-medium capitalize">
+                        {generatedBot.strategy?.type || generatedBot.strategy?.replace('_', ' ') || 'AI Strategy'}
+                      </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Trade Type:</span>
-                      <span className="font-medium uppercase">{generatedBot.trade_type}</span>
-                    </div>
+                    {generatedBot.trade_type && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Trade Type:</span>
+                        <span className="font-medium uppercase">{generatedBot.trade_type}</span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -302,22 +310,32 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Leverage:</span>
+                      <span className="font-medium">
+                        {generatedBot.riskManagement?.leverage || 'N/A'}x
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Profit Target:</span>
-                      <span className="font-medium text-green-600">+{generatedBot.profit_target}%</span>
+                      <span className="font-medium text-green-600">
+                        +{generatedBot.riskManagement?.takeProfitPercent || generatedBot.profit_target || 'N/A'}%
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Stop Loss:</span>
-                      <span className="font-medium text-red-600">-{generatedBot.stop_loss}%</span>
+                      <span className="font-medium text-red-600">
+                        -{generatedBot.riskManagement?.stopLossPercent || generatedBot.stop_loss || 'N/A'}%
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Position Size:</span>
-                      <span className="font-medium">{generatedBot.advanced_settings?.position_size}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Max Drawdown:</span>
-                      <span className="font-medium">{generatedBot.performance_targets?.max_drawdown}%</span>
+                      <span className="text-sm text-gray-600">Max Trades:</span>
+                      <span className="font-medium">
+                        {generatedBot.riskManagement?.maxConcurrentTrades || generatedBot.advanced_settings?.max_positions || 'N/A'}
+                      </span>
                     </div>
                   </CardContent>
+                </Card>
+              </div>
                 </Card>
 
                 {/* Advanced Settings */}
