@@ -252,14 +252,19 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                 <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
                   <div className="flex-1">
                     <h3 className="text-lg sm:text-xl font-semibold flex items-center space-x-2">
-                      {getStrategyIcon(generatedBot.strategy)}
-                      <span className="break-words">{generatedBot.name}</span>
+                      {getStrategyIcon(generatedBot.strategy?.type || generatedBot.strategy)}
+                      <span className="break-words">{generatedBot.botName || generatedBot.name}</span>
                     </h3>
                     <p className="text-gray-600 mt-1 text-xs sm:text-sm">{generatedBot.description}</p>
                   </div>
-                  <Badge className={`${getRiskColor(generatedBot.risk_level)} text-xs mt-2 sm:mt-0`}>
-                    {generatedBot.risk_level} risk
-                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    <Badge className={`${getRiskColor(generatedBot.risk_level)} text-xs mt-2 sm:mt-0`}>
+                      {generatedBot.risk_level || 'medium'} risk
+                    </Badge>
+                    <Badge className={aiModel === 'gpt-5' ? 'bg-[#0097B2] text-white' : 'bg-purple-500 text-white'}>
+                      {aiModel.toUpperCase()}
+                    </Badge>
+                  </div>
                 </div>
               </div>
 
