@@ -38,15 +38,16 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL;
       console.log('Backend URL:', backendUrl);
-      console.log('Making request to:', `${backendUrl}/api/bots/create-with-ai`);
+      console.log('Making request to:', `${backendUrl}/api/trading-bots/generate-bot`);
       
-      const response = await fetch(`${backendUrl}/api/bots/create-with-ai`, {
+      const response = await fetch(`${backendUrl}/api/trading-bots/generate-bot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: prompt,
+          ai_model: aiModel,
+          strategy_description: prompt,
           user_id: user?.id
         })
       });
