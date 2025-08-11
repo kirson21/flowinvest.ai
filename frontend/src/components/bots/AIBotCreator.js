@@ -539,22 +539,24 @@ const AIBotCreator = () => {
               
               <div>
                 <Label className="font-medium">Strategy Type</Label>
-                <Badge variant="outline">{generatedConfig.bot_config.strategy.type}</Badge>
+                <Badge variant="outline">{generatedConfig.bot_config.strategy?.type || generatedConfig.bot_config.strategy}</Badge>
               </div>
               
               <div>
                 <Label className="font-medium">Risk Management</Label>
                 <div className="space-y-1 text-sm">
-                  <p>Leverage: {generatedConfig.bot_config.riskManagement.leverage}x</p>
-                  <p>Stop Loss: {generatedConfig.bot_config.riskManagement.stopLossPercent}%</p>
-                  <p>Take Profit: {generatedConfig.bot_config.riskManagement.takeProfitPercent}%</p>
-                  <p>Max Trades: {generatedConfig.bot_config.riskManagement.maxConcurrentTrades}</p>
+                  <p>Leverage: {generatedConfig.bot_config.riskManagement?.leverage || generatedConfig.bot_config.leverage || 'N/A'}x</p>
+                  <p>Stop Loss: {generatedConfig.bot_config.riskManagement?.stopLossPercent || generatedConfig.bot_config.stop_loss || 'N/A'}%</p>
+                  <p>Take Profit: {generatedConfig.bot_config.riskManagement?.takeProfitPercent || generatedConfig.bot_config.profit_target || 'N/A'}%</p>
+                  <p>Max Trades: {generatedConfig.bot_config.riskManagement?.maxConcurrentTrades || generatedConfig.bot_config.advanced_settings?.max_positions || 'N/A'}</p>
                 </div>
               </div>
               
               <div>
                 <Label className="font-medium">AI Model Used</Label>
-                <Badge className="bg-[#0097B2]">{generatedConfig.ai_model}</Badge>
+                <Badge className={formData.aiModel === 'gpt-5' ? 'bg-[#0097B2]' : 'bg-purple-500'}>
+                  {generatedConfig.ai_model?.toUpperCase() || formData.aiModel.toUpperCase()}
+                </Badge>
               </div>
             </CardContent>
           </Card>
