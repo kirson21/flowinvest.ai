@@ -5,4 +5,4 @@ python-multipart==0.0.6
 aiofiles==23.2.1
 pydantic==2.5.0
 python-dotenv==1.0.0
-openai==1.6.1
+openai>=1.55.3
