@@ -191,14 +191,42 @@ const AIBotCreator = () => {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="text-center space-y-2">
-          <div className="flex items-center justify-center space-x-2">
-            <Brain className="text-[#0097B2]" size={32} />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              AI Trading Bot Creator
-            </h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center space-x-2 flex-1">
+              <Brain className="text-[#0097B2]" size={32} />
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                AI Trading Bot Creator
+              </h1>
+            </div>
+            {/* Model Selection Button */}
+            <div className="flex items-center space-x-2">
+              <Label className="text-sm text-gray-600">Model:</Label>
+              <Select 
+                value={formData.aiModel} 
+                onValueChange={(value) => handleInputChange('aiModel', value)}
+              >
+                <SelectTrigger className="w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-5">
+                    <div className="flex items-center space-x-2">
+                      <Brain className="text-[#0097B2]" size={16} />
+                      <span>GPT-5</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="grok-4">
+                    <div className="flex items-center space-x-2">
+                      <Zap className="text-purple-500" size={16} />
+                      <span>Grok-4</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <p className="text-gray-600 dark:text-gray-400">
-            Create intelligent trading bots powered by GPT-5 or Grok-4
+            Create intelligent trading bots with advanced AI models
           </p>
         </div>
 
