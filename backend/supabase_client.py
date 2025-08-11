@@ -1,5 +1,5 @@
 import os
-from supabase import create_client, Client
+import httpx
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -10,12 +10,113 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
-if not SUPABASE_URL or not SUPABASE_ANON_KEY:
-    raise ValueError("Missing required Supabase environment variables")
+class SimpleSupabaseClient:
+    def __init__(self, url: str, key: str):
+        self.url = url.rstrip('/')
+        self.key = key
+        self.headers = {
+            'apikey': key,
+            'Authorization': f'Bearer {key}',
+            'Content-Type': 'application/json'
+        }
+    
+    def table(self, name: str):
+        return SimpleTable(self, name)
+    
+    def auth(self):
+        return SimpleAuth(self)
 
-# Create Supabase clients
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+class SimpleTable:
+    def __init__(self, client: SimpleSupabaseClient, table_name: str):
+        self.client = client
+        self.table_name = table_name
+        self.base_url = f"{client.url}/rest/v1/{table_name}"
+        self._filters = []
+    
+    def select(self, columns: str = "*"):
+        self._operation = "select"
+        self._select_columns = columns
+        return self
+    
+    def insert(self, data):
+        self._operation = "insert"
+        self._data = data
+        return self
+    
+    def update(self, data):
+        self._operation = "update"  
+        self._data = data
+        return self
+    
+    def eq(self, column: str, value):
+        self._filters.append(f"{column}=eq.{value}")
+        return self
+    
+    def execute(self):
+        try:
+            url = self.base_url
+            if self._filters:
+                url += "?" + "&".join(self._filters)
+            
+            if hasattr(self, '_operation'):
+                if self._operation == "select":
+                    response = httpx.get(url, headers=self.client.headers, timeout=30)
+                elif self._operation == "insert":
+                    response = httpx.post(url, headers=self.client.headers, json=self._data, timeout=30)
+                elif self._operation == "update":
+                    response = httpx.patch(url, headers=self.client.headers, json=self._data, timeout=30)
+                
+                if response.status_code in [200, 201]:
+                    return SimpleResponse(response.json() if response.content else [], None)
+                else:
+                    return SimpleResponse(None, f"HTTP {response.status_code}: {response.text}")
+            else:
+                return SimpleResponse([], None)
+        except Exception as e:
+            return SimpleResponse(None, str(e))
+
+class SimpleAuth:
+    def __init__(self, client):
+        self.client = client
+    
+    def sign_up(self, email: str, password: str):
+        try:
+            url = f"{self.client.url}/auth/v1/signup"
+            data = {"email": email, "password": password}
+            response = httpx.post(url, headers=self.client.headers, json=data, timeout=30)
+            
+            if response.status_code in [200, 201]:
+                return SimpleResponse(response.json(), None)
+            else:
+                return SimpleResponse(None, f"HTTP {response.status_code}: {response.text}")
+        except Exception as e:
+            return SimpleResponse(None, str(e))
+    
+    def sign_in_with_password(self, email: str, password: str):
+        try:
+            url = f"{self.client.url}/auth/v1/token?grant_type=password"
+            data = {"email": email, "password": password}
+            response = httpx.post(url, headers=self.client.headers, json=data, timeout=30)
+            
+            if response.status_code == 200:
+                return SimpleResponse(response.json(), None)
+            else:
+                return SimpleResponse(None, f"HTTP {response.status_code}: {response.text}")
+        except Exception as e:
+            return SimpleResponse(None, str(e))
+
+class SimpleResponse:
+    def __init__(self, data, error):
+        self.data = data
+        self.error = error
+
+# Create clients using the simple implementation
+if SUPABASE_URL and SUPABASE_ANON_KEY:
+    supabase = SimpleSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    supabase_admin = SimpleSupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY or SUPABASE_ANON_KEY)
+else:
+    supabase = None
+    supabase_admin = None
 
 # Database connection helper
 class SupabaseConnection:
