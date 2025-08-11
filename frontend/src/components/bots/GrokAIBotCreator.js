@@ -336,34 +336,6 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                   </CardContent>
                 </Card>
               </div>
-                </Card>
-
-                {/* Advanced Settings */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Advanced Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Timeframe:</span>
-                      <span className="font-medium">{generatedBot.advanced_settings?.timeframe}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Max Trades/Day:</span>
-                      <span className="font-medium">{generatedBot.advanced_settings?.max_trades_per_day}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Trailing Stop:</span>
-                      <span className="font-medium">
-                        {generatedBot.advanced_settings?.trailing_stop ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Suggested Deposit:</span>
-                      <span className="font-medium">${generatedBot.deposit_amount}</span>
-                    </div>
-                  </CardContent>
-                </Card>
 
                 {/* Performance Targets */}
                 <Card>
