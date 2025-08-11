@@ -18,6 +18,12 @@ class BotCreationRequest(BaseModel):
     prompt: str
     user_id: Optional[str] = None
 
+class TradingBotGenerationRequest(BaseModel):
+    ai_model: str  # 'gpt-5' or 'grok-4'
+    strategy_description: str
+    risk_preferences: Optional[Dict[str, Any]] = None
+    user_id: Optional[str] = None
+
 class BotCreationResponse(BaseModel):
     success: bool
     bot_config: Dict[str, Any]
