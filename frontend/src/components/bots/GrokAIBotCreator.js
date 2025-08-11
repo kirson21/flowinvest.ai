@@ -337,28 +337,6 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                 </Card>
               </div>
 
-                {/* Performance Targets */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Performance Targets</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Daily Return:</span>
-                      <span className="font-medium text-green-600">
-                        {generatedBot.performance_targets?.daily_return}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Expected Win Rate:</span>
-                      <span className="font-medium">
-                        {generatedBot.performance_targets?.win_rate}%
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
               {/* Trading Conditions */}
               {generatedBot.advanced_settings?.entry_conditions && (
                 <Card>
