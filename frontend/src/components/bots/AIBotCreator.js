@@ -80,15 +80,12 @@ const AIBotCreator = () => {
     try {
       const requestData = {
         ai_model: formData.aiModel,
-        risk_preferences: formData.riskPreferences
+        strategy_description: formData.creationMode === 'template' 
+          ? `Use ${formData.selectedTemplate} template with these preferences: ${JSON.stringify(formData.riskPreferences)}`
+          : formData.customDescription,
+        risk_preferences: formData.riskPreferences,
+        user_id: null // Will be set when user authentication is implemented
       };
-
-      if (formData.creationMode === 'template') {
-        requestData.strategy_template_id = formData.selectedTemplate;
-        requestData.customizations = formData.customizations;
-      } else {
-        requestData.strategy_description = formData.customDescription;
-      }
 
       const response = await api.post('/trading-bots/generate-bot', requestData);
       
