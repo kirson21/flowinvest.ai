@@ -35,6 +35,94 @@ class BotListResponse(BaseModel):
     bots: list
     total: int
 
+@router.post("/trading-bots/generate-bot")
+async def generate_trading_bot(request: TradingBotGenerationRequest):
+    """Generate trading bot configuration using either GPT-5 or Grok-4"""
+    try:
+        # Validate input
+        if not request.strategy_description or len(request.strategy_description.strip()) < 10:
+            raise HTTPException(status_code=400, detail="Strategy description must be at least 10 characters long")
+        
+        if request.ai_model not in ['gpt-5', 'grok-4']:
+            raise HTTPException(status_code=400, detail="AI model must be either 'gpt-5' or 'grok-4'")
+        
+        # Generate bot configuration using the selected AI model
+        if request.ai_model == 'gpt-5':
+            bot_config = openai_creator.generate_bot_config(request.strategy_description, request.user_id)
+            # Validate the generated configuration
+            if not openai_creator.validate_bot_config(bot_config):
+                raise HTTPException(status_code=400, detail="Generated configuration failed validation")
+        else:  # grok-4
+            bot_config = grok_creator.generate_bot_config(request.strategy_description, request.user_id)
+            # Validate the generated configuration
+            if not grok_creator.validate_bot_config(bot_config):
+                raise HTTPException(status_code=400, detail="Generated configuration failed validation")
+        
+        # Add model information to response
+        bot_config['ai_model'] = request.ai_model
+        
+        return {
+            "success": True,
+            "bot_config": bot_config,
+            "ai_model": request.ai_model,
+            "message": f"Bot configuration generated successfully using {request.ai_model.upper()}"
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+@router.post("/trading-bots/create")
+async def create_trading_bot(bot_data: Dict[str, Any]):
+    """Create and save a trading bot from generated configuration"""
+    try:
+        # Validate required fields
+        required_fields = ['bot_name', 'description', 'ai_model', 'bot_config']
+        for field in required_fields:
+            if field not in bot_data:
+                raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+        
+        # Prepare bot data for Supabase storage
+        supabase_data = {
+            "name": bot_data['bot_name'],
+            "description": bot_data['description'],
+            "ai_model": bot_data['ai_model'],
+            "bot_config": bot_data['bot_config'],
+            "is_predefined_strategy": bot_data.get('is_predefined_strategy', False),
+            "trading_mode": bot_data.get('trading_mode', 'paper'),
+            "status": "inactive",
+            "is_prebuilt": False,
+            "user_id": bot_data.get('user_id'),
+            "daily_pnl": 0,
+            "weekly_pnl": 0,
+            "monthly_pnl": 0,
+            "win_rate": 0,
+            "total_trades": 0,
+            "successful_trades": 0,
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        # Save to Supabase
+        bot_id = str(uuid.uuid4())
+        try:
+            response = supabase.table('user_bots').insert(supabase_data).execute()
+            if response.data:
+                bot_id = response.data[0]['id']
+        except Exception as e:
+            print(f"Error saving to Supabase: {e}")
+            # Continue without saving if Supabase fails
+            pass
+        
+        return {
+            "success": True,
+            "bot_id": bot_id,
+            "message": f"Trading bot '{bot_data['bot_name']}' created successfully using {bot_data['ai_model'].upper()}"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating bot: {str(e)}")
+
 @router.post("/bots/create-with-ai", response_model=BotCreationResponse)
 async def create_bot_with_ai(request: BotCreationRequest):
     """Create a trading bot using Grok 4 AI"""
