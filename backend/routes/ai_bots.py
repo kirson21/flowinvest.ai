@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from services.grok_service import GrokBotCreator
+from services.openai_service import OpenAIBotCreator
 from supabase_client import supabase
 from typing import Optional, Dict, Any
 import uuid
@@ -8,8 +9,9 @@ from datetime import datetime
 
 router = APIRouter()
 
-# Initialize Grok service
+# Initialize AI services
 grok_creator = GrokBotCreator()
+openai_creator = OpenAIBotCreator()
 
 # Pydantic models
 class BotCreationRequest(BaseModel):
