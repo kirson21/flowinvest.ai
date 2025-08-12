@@ -1,6 +1,6 @@
-# Railway Procfile for Flow Invest
+# Flow Invest Procfile
 
-# Backend Service
+# Backend Service - Full server with all AI routes
 web: cd backend && python server.py
 
 # Frontend Service (if needed as separate service)
