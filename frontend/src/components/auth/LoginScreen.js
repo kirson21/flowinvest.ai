@@ -51,10 +51,10 @@ const LoginScreen = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-[#474545] dark:text-white">
-            FlowinvestAI
+            f01i.ai
           </CardTitle>
           <CardDescription className="text-[#474545]/70 dark:text-gray-300">
-            {t('login')} to start investing smart
+            Future-Oriented Life & Investments AI Tools
           </CardDescription>
         </CardHeader>
         <CardContent>
