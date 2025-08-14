@@ -475,7 +475,7 @@ const Portfolios = () => {
 
               enrichedSeller = {
                 name: sellerProfile.display_name || sellerName,
-                bio: sellerProfile.bio || 'Product creator on FlowInvestAI marketplace',
+                bio: sellerProfile.bio || 'Product creator on f01i.ai marketplace',
                 avatar: sellerProfile.avatar_url || enrichedSeller.avatar,
                 socialLinks: socialLinks,
                 specialties: specialties,
