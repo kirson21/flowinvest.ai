@@ -1019,7 +1019,7 @@ const TradingBots = () => {
               </div>
             </div>
           ) : userBots.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
               {userBots.map((bot) => (
                 <UserBotCard key={bot.id} bot={bot} />
               ))}
