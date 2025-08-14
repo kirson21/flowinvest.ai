@@ -14,8 +14,8 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Import routes
-from routes import auth, webhook, verification, ai_bots
+# Import routes (only ai_bots - others disabled due to missing dependencies)
+from routes import ai_bots
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -79,10 +79,7 @@ async def health_check():
 async def get_status():
     return {"status": "ok", "environment": ENVIRONMENT}
 
-# Include route modules
-api_router.include_router(auth.router)
-api_router.include_router(webhook.router)
-api_router.include_router(verification.router)
+# Include route modules (only ai_bots - others disabled due to missing dependencies)
 api_router.include_router(ai_bots.router)
 
 # Include API router
