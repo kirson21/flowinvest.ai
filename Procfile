@@ -1,7 +1,7 @@
-# Flow Invest Procfile
+# f01i.ai Procfile - Mock AI Version (No Rust Dependencies)
 
-# Backend Service - Full server with all AI routes
-web: cd backend && python server.py
+# Backend Service - Mock AI Implementation
+web: cd backend && python server_mock.py
 
 # Frontend Service (if needed as separate service)
 # frontend: cd frontend && yarn start
