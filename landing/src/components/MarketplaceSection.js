@@ -241,11 +241,11 @@ const MarketplaceSection = () => {
   ];
 
   const handleExploreMarketplace = () => {
-    window.open('https://app.f01i.ai', '_blank');
+    window.location.href = '/app';
   };
 
   const handleGetStarted = () => {
-    window.open('https://app.f01i.ai', '_blank');
+    window.location.href = '/app';
   };
 
   const containerVariants = {
