@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    {
+      "source": "/app/:path*",
+      "destination": "https://your-main-app-url.vercel.app/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/app/:path*",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
+    }
+  ]
+}
