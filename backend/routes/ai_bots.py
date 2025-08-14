@@ -144,49 +144,90 @@ async def create_bot_with_ai(request: BotCreationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-# Mock endpoints (no database operations)
+# Bot management endpoints (restored with Supabase storage)
 @router.get("/bots/user/{user_id}")
 async def get_user_bots(user_id: str):
-    """Get user bots (mock response)"""
-    return {
-        "success": True,
-        "bots": [],
-        "message": "Mock response - no bots stored"
-    }
+    """Get all bots for a specific user"""
+    try:
+        if not supabase:
+            return {"success": True, "bots": [], "total": 0}
+            
+        response = supabase.table('user_bots').select('*').eq('user_id', user_id).execute()
+        bots = response.data if response.data else []
+        
+        return {
+            "success": True,
+            "bots": bots,
+            "total": len(bots)
+        }
+        
+    except Exception as e:
+        print(f"Error fetching user bots: {e}")
+        return {"success": True, "bots": [], "total": 0}
 
 @router.post("/bots/{bot_id}/activate")
 async def activate_bot(bot_id: str):
-    """Activate bot (mock)"""
-    return {
-        "success": True,
-        "message": f"Bot {bot_id} activated (mock)"
-    }
+    """Activate a trading bot"""
+    try:
+        if not supabase:
+            return {"success": True, "message": f"Bot {bot_id} activated (mock)"}
+            
+        response = supabase.table('user_bots').update({
+            'status': 'active',
+            'is_active': True
+        }).eq('id', bot_id).execute()
+        
+        return {"success": True, "message": f"Bot {bot_id} activated successfully"}
+            
+    except Exception as e:
+        return {"success": False, "message": f"Failed to activate bot: {str(e)}"}
 
 @router.post("/bots/{bot_id}/deactivate")
 async def deactivate_bot(bot_id: str):
-    """Deactivate bot (mock)"""
-    return {
-        "success": True,
-        "message": f"Bot {bot_id} deactivated (mock)"
-    }
+    """Deactivate a trading bot"""
+    try:
+        if not supabase:
+            return {"success": True, "message": f"Bot {bot_id} deactivated (mock)"}
+            
+        response = supabase.table('user_bots').update({
+            'status': 'inactive',
+            'is_active': False
+        }).eq('id', bot_id).execute()
+        
+        return {"success": True, "message": f"Bot {bot_id} deactivated successfully"}
+            
+    except Exception as e:
+        return {"success": False, "message": f"Failed to deactivate bot: {str(e)}"}
 
 @router.delete("/bots/{bot_id}")
 async def delete_bot(bot_id: str):
-    """Delete bot (mock)"""
-    return {
-        "success": True,
-        "message": f"Bot {bot_id} deleted (mock)"
-    }
+    """Delete a trading bot"""
+    try:
+        if not supabase:
+            return {"success": True, "message": f"Bot {bot_id} deleted (mock)"}
+            
+        response = supabase.table('user_bots').delete().eq('id', bot_id).execute()
+        return {"success": True, "message": f"Bot {bot_id} deleted successfully"}
+        
+    except Exception as e:
+        return {"success": False, "message": f"Failed to delete bot: {str(e)}"}
 
 @router.get("/bots/{bot_id}")
 async def get_bot_details(bot_id: str):
-    """Get bot details (mock)"""
-    return {
-        "success": True,
-        "bot": {
-            "id": bot_id,
-            "name": "Mock Bot",
-            "description": "Mock bot for testing",
-            "status": "inactive"
-        }
-    }
+    """Get detailed information about a specific bot"""
+    try:
+        if not supabase:
+            return {
+                "success": True,
+                "bot": {"id": bot_id, "name": "Mock Bot", "description": "Mock bot", "status": "inactive"}
+            }
+            
+        response = supabase.table('user_bots').select('*').eq('id', bot_id).execute()
+        
+        if response.data and len(response.data) > 0:
+            return {"success": True, "bot": response.data[0]}
+        else:
+            raise HTTPException(status_code=404, detail="Bot not found")
+            
+    except Exception as e:
+        return {"success": False, "message": f"Failed to get bot details: {str(e)}"}
