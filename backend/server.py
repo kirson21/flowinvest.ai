@@ -14,8 +14,8 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Import routes (only ai_bots - others disabled due to missing dependencies)
-from routes import ai_bots
+# Import routes (restored - using httpx-based supabase client)
+from routes import auth, webhook, verification, ai_bots
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
