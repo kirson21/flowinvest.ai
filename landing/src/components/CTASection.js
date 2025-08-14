@@ -192,11 +192,11 @@ const PointingRobot = () => {
 
 const CTASection = () => {
   const handleGetStarted = () => {
-    window.location.href = '/app';
+    window.location.href = '/login';
   };
 
   const handleExploreMarketplace = () => {
-    window.location.href = '/app';
+    window.location.href = '/login';
   };
 
   return (
