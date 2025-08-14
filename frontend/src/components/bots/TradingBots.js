@@ -620,6 +620,14 @@ const TradingBots = () => {
                 </Button>
               </div>
               <Button
+                onClick={() => setSelectedRunBot(bot)}
+                size="sm"
+                className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-xs mb-2"
+              >
+                <Play size={12} className="mr-1" />
+                Run Bot
+              </Button>
+              <Button
                 onClick={() => {
                   if (window.confirm('Are you sure you want to delete this pre-built bot? This will affect all users.')) {
                     handleDeletePreBuiltBot(bot);
