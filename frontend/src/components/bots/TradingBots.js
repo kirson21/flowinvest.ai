@@ -488,113 +488,113 @@ const TradingBots = () => {
     const isConnected = getConnectionStatus(bot);
     
     return (
-      <Card className="hover:shadow-lg transition-all duration-200 group">
-        <CardHeader className="pb-3">
+      <Card className="hover:shadow-md transition-all duration-200 group">
+        <CardHeader className="pb-2 px-3 pt-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Bot className="text-[#0097B2]" size={20} />
-              <CardTitle className="text-lg text-[#474545] dark:text-white">
+              <Bot className="text-[#0097B2]" size={16} />
+              <CardTitle className="text-base text-[#474545] dark:text-white">
                 {bot.name}
               </CardTitle>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5">
               {isConnected ? (
                 <div className="flex items-center space-x-1 text-green-600">
-                  <CheckCircle size={16} />
-                  <span className="text-sm font-medium">Connected</span>
+                  <CheckCircle size={12} />
+                  <span className="text-xs font-medium">Connected</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-1 text-red-600">
-                  <XCircle size={16} />
-                  <span className="text-sm font-medium">Not Connected</span>
+                  <XCircle size={12} />
+                  <span className="text-xs font-medium">Not Connected</span>
                 </div>
               )}
             </div>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
             {bot.description}
           </p>
-          <div className="flex items-center space-x-2 mt-2">
-            <Badge variant="outline" className="border-[#0097B2] text-[#0097B2]">
+          <div className="flex items-center space-x-1.5 mt-1.5">
+            <Badge variant="outline" className="border-[#0097B2] text-[#0097B2] text-xs px-1.5 py-0.5">
               FlowInvest.ai
             </Badge>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
               Pre-built
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-4">
+        <CardContent className="px-3 pb-3">
+          <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('strategy')}
               </p>
-              <p className="text-sm font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white">
                 {bot.strategy}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('exchange')}
               </p>
-              <p className="text-sm font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white">
                 {bot.exchange}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('tradingPair')}
               </p>
-              <p className="text-sm font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white">
                 {bot.tradingPair || bot.trading_pair || 'BTC/USDT'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('riskLevel')}
               </p>
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${getRiskColor(bot.riskLevel || bot.risk_level)}`} />
-                <span className="text-sm font-medium text-[#474545] dark:text-white">
+              <div className="flex items-center space-x-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${getRiskColor(bot.riskLevel || bot.risk_level)}`} />
+                <span className="text-xs font-medium text-[#474545] dark:text-white">
                   {t((bot.riskLevel || bot.risk_level || 'medium').toLowerCase())}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('dailyPnL')}
               </p>
-              <p className={`text-sm font-bold ${(bot.dailyPnL || bot.daily_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs font-bold ${(bot.dailyPnL || bot.daily_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {(bot.dailyPnL || bot.daily_pnl || 0) >= 0 ? '+' : ''}{bot.dailyPnL || bot.daily_pnl || 0}%
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('weeklyPnL')}
               </p>
-              <p className={`text-sm font-bold ${(bot.weeklyPnL || bot.weekly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs font-bold ${(bot.weeklyPnL || bot.weekly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {(bot.weeklyPnL || bot.weekly_pnl || 0) >= 0 ? '+' : ''}{bot.weeklyPnL || bot.weekly_pnl || 0}%
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('monthlyPnL')}
               </p>
-              <p className={`text-sm font-bold ${(bot.monthlyPnL || bot.monthly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs font-bold ${(bot.monthlyPnL || bot.monthly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {(bot.monthlyPnL || bot.monthly_pnl || 0) >= 0 ? '+' : ''}{bot.monthlyPnL || bot.monthly_pnl || 0}%
               </p>
             </div>
           </div>
 
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {t('winRate')}
               </span>
-              <span className="text-sm font-medium text-[#474545] dark:text-white">
+              <span className="text-xs font-medium text-[#474545] dark:text-white">
                 {bot.winRate || bot.win_rate || 75}%
               </span>
             </div>
