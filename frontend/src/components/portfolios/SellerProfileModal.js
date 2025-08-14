@@ -229,7 +229,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
     }
     
     // Fallback to seller.bio or default message
-    return seller.bio || "Product creator on FlowInvestAI marketplace";
+    return seller.bio || "Product creator on f01i.ai marketplace";
   };
 
   // Check if user has purchased from this seller (mock logic for now)
