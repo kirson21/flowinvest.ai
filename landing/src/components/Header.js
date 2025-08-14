@@ -70,7 +70,7 @@ const NavLink = styled(motion.a)`
   }
 `;
 
-const CTAButton = styled(motion.button)`
+const CTAButton = styled(motion.a)`
   background: linear-gradient(135deg, #0097B2 0%, #007a94 100%);
   color: #FAECEC;
   border: none;
@@ -82,10 +82,15 @@ const CTAButton = styled(motion.button)`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 151, 178, 0.3);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 151, 178, 0.4);
+    color: #FAECEC;
   }
 `;
 
