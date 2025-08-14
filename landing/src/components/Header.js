@@ -126,10 +126,6 @@ const Header = () => {
     }
   };
 
-  const handleGetStarted = () => {
-    window.location.assign('/app');
-  };
-
   return (
     <HeaderContainer
       className={isScrolled ? 'scrolled' : ''}
