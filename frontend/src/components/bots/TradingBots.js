@@ -672,51 +672,51 @@ const TradingBots = () => {
     const isConnected = bot.is_active;
     
     return (
-      <Card className="hover:shadow-lg transition-all duration-200 group">
-        <CardHeader className="pb-3">
+      <Card className="hover:shadow-md transition-all duration-200 group">
+        <CardHeader className="pb-2 px-3 pt-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Bot className="text-[#0097B2]" size={20} />
-              <CardTitle className="text-lg text-[#474545] dark:text-white">
+              <Bot className="text-[#0097B2]" size={16} />
+              <CardTitle className="text-base text-[#474545] dark:text-white">
                 {bot.name}
               </CardTitle>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5">
               <Badge 
                 variant={isConnected ? "default" : "secondary"}
-                className={isConnected ? "bg-green-500" : "bg-gray-500"}
+                className={`${isConnected ? "bg-green-500" : "bg-gray-500"} text-xs px-1.5 py-0.5`}
               >
                 {isConnected ? t('connected') : t('not_connected')}
               </Badge>
             </div>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
             {bot.description}
           </p>
-          <div className="flex items-center space-x-2 mt-2">
-            <Badge variant="outline" className="border-purple-500 text-purple-600">
+          <div className="flex items-center space-x-1.5 mt-1.5">
+            <Badge variant="outline" className="border-purple-500 text-purple-600 text-xs px-1.5 py-0.5">
               Personal
             </Badge>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
               {bot.type || 'Custom'}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-4">
+        <CardContent className="px-3 pb-3">
+          <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('strategy')}
               </p>
-              <p className="text-sm font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white">
                 {bot.strategy}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('exchange')}
               </p>
-              <p className="text-sm font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white">
                 {bot.exchange}
               </p>
             </div>
