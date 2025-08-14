@@ -1,7 +1,7 @@
-# f01i.ai Procfile - Mock AI Version (No Rust Dependencies)
+# f01i.ai Procfile - Restored Supabase, Grok-only (no OpenAI/Rust)
 
-# Backend Service - Mock AI Implementation
-web: cd backend && python server_mock.py
+# Backend Service - Full functionality except GPT-5
+web: cd backend && python server.py
 
 # Frontend Service (if needed as separate service)
 # frontend: cd frontend && yarn start
