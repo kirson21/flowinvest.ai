@@ -793,9 +793,9 @@ const TradingBots = () => {
                   }}
                   size="sm"
                   variant="outline"
-                  className="w-full border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                  className="w-full border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs"
                 >
-                  <Bot size={16} className="mr-2" />
+                  <Bot size={12} className="mr-1" />
                   Move to Pre-Built Bots
                 </Button>
               )}
