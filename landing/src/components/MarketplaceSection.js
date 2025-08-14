@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { Star, TrendingUp, Users, Shield } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 const SectionContainer = styled.section`
   padding: 120px 0;
