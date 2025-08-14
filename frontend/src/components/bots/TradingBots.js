@@ -975,7 +975,7 @@ const TradingBots = () => {
               Professional trading bots created and maintained by our AI experts. Connect your exchange to start trading.
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
             {preBuiltBots.map((bot) => (
               <PreBuiltBotCard key={bot.id} bot={bot} />
             ))}
