@@ -604,7 +604,7 @@ const TradingBots = () => {
                   onClick={() => handleEditBot(bot)}
                   size="sm"
                   variant="outline"
-                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs"
+                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs px-3"
                 >
                   <Edit size={12} className="mr-1" />
                   Edit
@@ -613,10 +613,10 @@ const TradingBots = () => {
                   onClick={() => handleMoveToMyBots(bot)}
                   size="sm"
                   variant="outline"
-                  className="flex-1 border-purple-500/20 text-purple-600 hover:bg-purple-50 text-xs"
+                  className="flex-1 border-purple-500/20 text-purple-600 hover:bg-purple-50 text-xs px-3"
                 >
                   <Bot size={12} className="mr-1" />
-                  Move to My Bots
+                  <span className="truncate">Move to My Bots</span>
                 </Button>
               </div>
               <Button
