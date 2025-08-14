@@ -1102,15 +1102,15 @@ const Portfolios = () => {
       
       {/* Edit Button - Only visible to creators and super admin */}
       {canEditProduct(portfolio) && (
-        <div className="absolute top-1.5 right-12 z-10">
+        <div className="absolute top-1 right-1 z-10">
           <Button
             size="sm"
             variant="outline"
             onClick={() => handleEditProduct(portfolio)}
-            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm px-2 py-1 text-xs"
+            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm px-1.5 py-0.5 text-xs h-6 min-w-0"
           >
-            <Edit size={10} className="mr-1" />
-            Edit
+            <Edit size={10} className="mr-0.5" />
+            <span className="hidden sm:inline">Edit</span>
           </Button>
         </div>
       )}
