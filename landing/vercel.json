@@ -1,14 +1,14 @@
 {
-  "rewrites": [
+  "redirects": [
     {
       "source": "/app/:path*",
       "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/:path*",
-      "statusCode": 200
+      "permanent": false
     },
     {
       "source": "/app",
       "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/",
-      "statusCode": 200
+      "permanent": false
     }
   ]
 }
