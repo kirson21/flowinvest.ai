@@ -523,7 +523,7 @@ const TradingBots = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('strategy')}
               </p>
-              <p className="text-xs font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white truncate">
                 {bot.strategy}
               </p>
             </div>
