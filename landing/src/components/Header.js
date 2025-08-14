@@ -173,9 +173,10 @@ const Header = () => {
         </NavLinks>
 
         <CTAButton
+          as="a"
+          href="/app"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={handleGetStarted}
         >
           Get Started Free
         </CTAButton>
