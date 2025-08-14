@@ -50,7 +50,7 @@ export const auth = {
     return await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${currentDomain}/auth/callback`,
+        redirectTo: `${currentDomain}/login/callback`,
         queryParams: {
           access_type: 'offline',
           prompt: 'select_account' // Force account selection dialog
