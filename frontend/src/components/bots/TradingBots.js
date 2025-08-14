@@ -676,12 +676,10 @@ const TradingBots = () => {
               </CardTitle>
             </div>
             <div className="flex items-center space-x-1.5">
-              <Badge 
-                variant={isConnected ? "default" : "secondary"}
-                className={`${isConnected ? "bg-green-500" : "bg-gray-500"} text-xs px-1.5 py-0.5`}
-              >
-                {isConnected ? t('connected') : t('not_connected')}
-              </Badge>
+              <div 
+                className={`w-3 h-3 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
+                title={isConnected ? t('connected') : t('not_connected')}
+              />
             </div>
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
