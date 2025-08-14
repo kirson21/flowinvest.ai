@@ -397,7 +397,7 @@ const ProductCreationModal = ({ isOpen, onClose, onSave }) => {
       const sellerInfo = {
         name: user?.user_metadata?.display_name || user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous',
         avatar: user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.display_name || user?.user_metadata?.name || user?.email || 'User')}&size=150&background=0097B2&color=ffffff`,
-        bio: isSellerMode && savedSellerData.bio && savedSellerData.bio.trim() ? savedSellerData.bio.trim() : "Product creator on FlowInvestAI marketplace",
+        bio: isSellerMode && savedSellerData.bio && savedSellerData.bio.trim() ? savedSellerData.bio.trim() : "Product creator on f01i.ai marketplace",
         // Filter social links to only include those with actual URLs
         socialLinks: isSellerMode ? Object.fromEntries(
           Object.entries(savedSellerData.socialLinks || {}).filter(([key, value]) => value && value.trim())
