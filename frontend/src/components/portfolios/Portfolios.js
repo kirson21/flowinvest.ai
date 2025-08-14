@@ -1097,19 +1097,19 @@ const Portfolios = () => {
     };
 
     return (
-    <Card className="hover:shadow-lg transition-all duration-200 group relative">
+    <Card className="hover:shadow-md transition-all duration-200 group relative">
 
       
       {/* Edit Button - Only visible to creators and super admin */}
       {canEditProduct(portfolio) && (
-        <div className="absolute top-2 right-16 z-10">
+        <div className="absolute top-1.5 right-12 z-10">
           <Button
             size="sm"
             variant="outline"
             onClick={() => handleEditProduct(portfolio)}
-            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm"
+            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm px-2 py-1 text-xs"
           >
-            <Edit size={12} className="mr-1" />
+            <Edit size={10} className="mr-1" />
             Edit
           </Button>
         </div>
@@ -1117,7 +1117,7 @@ const Portfolios = () => {
 
       {/* Super Admin Delete Button - REMOVED - Use edit modal instead */}
       
-      <CardHeader className="pb-3 pt-6">
+      <CardHeader className="pb-2 pt-3 px-3">
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1 pr-2">
             {/* Product Title - Prominently displayed */}
