@@ -142,7 +142,7 @@ const LegalLink = styled.a`
 const Footer = () => {
   const handleLinkClick = (section) => {
     if (section === 'app') {
-      window.open('https://f01i.ai/app', '_blank');
+      window.open('https://app.f01i.ai', '_blank');
     } else {
       const element = document.getElementById(section);
       if (element) {
