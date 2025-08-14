@@ -1289,11 +1289,12 @@ const Portfolios = () => {
             {showMyPurchases && (
               <Button 
                 variant="outline"
-                className="w-full border-red-300 dark:border-red-600 text-red-700 dark:text-red-200 hover:bg-red-50 dark:hover:bg-red-900"
+                size="sm"
+                className="w-full border-red-300 dark:border-red-600 text-red-700 dark:text-red-200 hover:bg-red-50 dark:hover:bg-red-900 text-xs"
                 onClick={() => handleRemovePurchase(portfolio.purchaseId || portfolio.id)}
               >
-                <Trash2 size={16} className="mr-2" />
-                Remove from Purchases
+                <Trash2 size={12} className="mr-1" />
+                <span className="hidden sm:inline">Remove from</span> Purchases
               </Button>
             )}
           </div>
