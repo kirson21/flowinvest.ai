@@ -1206,10 +1206,10 @@ const Portfolios = () => {
           </p>
           <button 
             onClick={() => handleSellerClick(portfolio.seller)}
-            className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent hover:border-[#0097B2]/20"
+            className="w-full flex flex-col sm:flex-row sm:items-center justify-between bg-gray-50 dark:bg-gray-800 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent hover:border-[#0097B2]/20 min-h-16 sm:min-h-12"
           >
-            <div className="flex items-center space-x-1.5 flex-1 min-w-0">
-              <Avatar className="w-5 h-5 flex-shrink-0">
+            <div className="flex items-start sm:items-center space-x-1.5 flex-1 min-w-0 mb-1 sm:mb-0">
+              <Avatar className="w-5 h-5 flex-shrink-0 mt-0.5 sm:mt-0">
                 <AvatarImage src={portfolio.seller?.avatar} alt={portfolio.seller?.name || 'Seller'} />
                 <AvatarFallback className="bg-[#0097B2] text-white text-xs">
                   {portfolio.seller?.name?.charAt(0) || portfolio.seller_name?.charAt(0) || 'S'}
@@ -1237,12 +1237,12 @@ const Portfolios = () => {
                 
                 {/* Seller Specialties */}
                 {portfolio.seller?.specialties && portfolio.seller.specialties.length > 0 && (
-                  <div className="flex flex-wrap gap-0.5 mt-0.5">
+                  <div className="flex flex-wrap gap-0.5 mt-1">
                     {portfolio.seller.specialties.slice(0, 1).map((specialty, index) => (
                       <Badge
                         key={index}
                         variant="outline"
-                        className="text-xs border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5 px-1 py-0 h-4 text-xs"
+                        className="text-xs border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5 px-1 py-0 h-4"
                       >
                         {specialty.length > 8 ? specialty.substring(0, 8) + '...' : specialty}
                       </Badge>
@@ -1259,8 +1259,8 @@ const Portfolios = () => {
                 )}
               </div>
             </div>
-            <div className="text-right flex-shrink-0 ml-1">
-              <div className="flex items-center space-x-0.5 mb-0.5">
+            <div className="text-right sm:text-right text-center flex-shrink-0 sm:ml-1">
+              <div className="flex items-center justify-center sm:justify-end space-x-0.5 mb-0.5">
                 {renderStars(portfolio.rating || 0, portfolio.totalReviews || 0, 8)}
                 <span className="text-xs font-medium text-[#474545] dark:text-white ml-0.5">
                   {(portfolio.totalReviews && portfolio.totalReviews > 0) ? portfolio.rating : 0}
