@@ -301,7 +301,7 @@ const Portfolios = () => {
             ...product,
             seller: {
               name: 'Anonymous',
-              bio: 'Product creator on FlowInvestAI marketplace',
+              bio: 'Product creator on f01i.ai marketplace',
               avatar: 'https://ui-avatars.com/api/?name=Anonymous&size=150&background=0097B2&color=ffffff',
               socialLinks: {},
               specialties: []
