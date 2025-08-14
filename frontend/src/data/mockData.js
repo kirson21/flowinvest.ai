@@ -120,7 +120,7 @@ export const mockUserBots = [
 export const mockPortfolios = [
   {
     id: 1,
-    name: "FlowinvestAI Growth Portfolio",
+    name: "f01i.ai Growth Portfolio",
     description: "Balanced portfolio focused on long-term growth with AI-optimized asset allocation",
     category: "Portfolio Strategies",
     riskLevel: "Medium",
