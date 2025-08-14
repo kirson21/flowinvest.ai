@@ -236,10 +236,6 @@ const DataParticles = () => {
 };
 
 const HeroSection = () => {
-  const handleGetStarted = () => {
-    window.location.href = '/app';
-  };
-
   const handleSeeHowItWorks = () => {
     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
   };
