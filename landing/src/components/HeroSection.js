@@ -232,7 +232,7 @@ const DataParticles = () => {
 
 const HeroSection = () => {
   const handleGetStarted = () => {
-    window.open('https://app.f01i.ai', '_blank');
+    window.location.href = '/app';
   };
 
   const handleSeeHowItWorks = () => {
