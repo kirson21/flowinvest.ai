@@ -1237,20 +1237,20 @@ const Portfolios = () => {
                 
                 {/* Seller Specialties */}
                 {portfolio.seller?.specialties && portfolio.seller.specialties.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="flex flex-wrap gap-0.5 mt-0.5">
                     {portfolio.seller.specialties.slice(0, 1).map((specialty, index) => (
                       <Badge
                         key={index}
                         variant="outline"
-                        className="text-xs border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5 px-1 py-0"
+                        className="text-xs border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5 px-1 py-0 h-4 text-xs"
                       >
-                        {specialty}
+                        {specialty.length > 8 ? specialty.substring(0, 8) + '...' : specialty}
                       </Badge>
                     ))}
                     {portfolio.seller.specialties.length > 1 && (
                       <Badge
                         variant="outline"
-                        className="text-xs border-gray-300 text-gray-500 bg-gray-50 px-1 py-0"
+                        className="text-xs border-gray-300 text-gray-500 bg-gray-50 px-1 py-0 h-4"
                       >
                         +{portfolio.seller.specialties.length - 1}
                       </Badge>
