@@ -2,7 +2,11 @@
   "rewrites": [
     {
       "source": "/app/:path*",
-      "destination": "https://your-main-app-url.vercel.app/:path*"
+      "destination": "https://your-main-app-xyz123.vercel.app/:path*"
+    },
+    {
+      "source": "/app",
+      "destination": "https://your-main-app-xyz123.vercel.app/"
     }
   ],
   "headers": [
