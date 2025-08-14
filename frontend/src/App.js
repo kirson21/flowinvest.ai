@@ -90,6 +90,9 @@ function App() {
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             
             {/* Auth callback route */}
+            <Route path="/login/callback" element={<AuthCallback />} />
+            
+            {/* Legacy callback route redirect */}
             <Route path="/auth/callback" element={<AuthCallback />} />
             
             {/* Protected routes */}
