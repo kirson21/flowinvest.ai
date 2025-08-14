@@ -104,7 +104,7 @@ if __name__ == "__main__":
     
     port = int(os.getenv("PORT", 8001))
     
-    logger.info(f"Starting Flow Invest API on port {port}")
+    logger.info(f"Starting f01i.ai API on port {port}")
     logger.info(f"Environment: {ENVIRONMENT}")
     
     uvicorn.run(
