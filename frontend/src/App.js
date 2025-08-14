@@ -80,11 +80,14 @@ function App() {
         <div className="App">
           <Routes>
             {/* Public routes */}
-            <Route path="/auth" element={
+            <Route path="/login" element={
               <PublicRoute>
                 <RealAuthScreen />
               </PublicRoute>
             } />
+            
+            {/* Legacy auth route redirect */}
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
             
             {/* Auth callback route */}
             <Route path="/auth/callback" element={<AuthCallback />} />
