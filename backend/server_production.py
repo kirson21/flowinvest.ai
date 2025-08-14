@@ -14,8 +14,8 @@ load_dotenv()
 
 # Create FastAPI app
 app = FastAPI(
-    title="Flow Invest API",
-    description="AI-Powered Investment Platform API",
+    title="f01i.ai API",
+    description="Future-Oriented Life & Investments AI Tools API",
     version="1.0.0"
 )
 
