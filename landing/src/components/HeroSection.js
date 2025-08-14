@@ -82,7 +82,7 @@ const ButtonGroup = styled(motion.div)`
   }
 `;
 
-const PrimaryButton = styled(motion.button)`
+const PrimaryButton = styled(motion.a)`
   background: linear-gradient(135deg, #0097B2 0%, #007a94 100%);
   color: #FAECEC;
   border: none;
@@ -94,10 +94,15 @@ const PrimaryButton = styled(motion.button)`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 25px rgba(0, 151, 178, 0.3);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 35px rgba(0, 151, 178, 0.4);
+    color: #FAECEC;
   }
 `;
 
