@@ -241,11 +241,11 @@ const MarketplaceSection = () => {
   ];
 
   const handleExploreMarketplace = () => {
-    window.location.href = '/app';
+    window.location.href = '/login';
   };
 
   const handleGetStarted = () => {
-    window.location.href = '/app';
+    window.location.href = '/login';
   };
 
   const containerVariants = {
