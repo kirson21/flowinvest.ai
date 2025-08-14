@@ -30,8 +30,8 @@ const ProtectedRoute = ({ children }) => {
     console.log('ProtectedRoute: User authenticated, rendering app');
     return children;
   } else {
-    console.log('ProtectedRoute: User not authenticated, redirecting to /auth');
-    return <Navigate to="/auth" replace />;
+    console.log('ProtectedRoute: User not authenticated, redirecting to /login');
+    return <Navigate to="/login" replace />;
   }
 };
 
