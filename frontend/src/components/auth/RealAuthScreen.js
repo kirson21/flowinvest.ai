@@ -118,9 +118,9 @@ const RealAuthScreen = () => {
               WebkitTextFillColor: 'transparent'
             }}
           >
-            FlowinvestAI
+            f01i.ai
           </h1>
-          <p className="text-[#474545]/70 text-lg">AI-Powered Investment Platform</p>
+          <p className="text-[#474545]/70 text-lg">Future-Oriented Life & Investments AI Tools</p>
         </div>
 
         <Card className="border-[#0097B2]/20 shadow-xl">
