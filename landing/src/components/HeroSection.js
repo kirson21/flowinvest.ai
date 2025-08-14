@@ -35,6 +35,7 @@ const HeroContent = styled.div`
     grid-template-columns: 1fr;
     gap: 40px;
     text-align: center;
+    padding: 40px 20px 0;
   }
 `;
 
