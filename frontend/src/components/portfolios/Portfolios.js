@@ -1057,22 +1057,22 @@ const Portfolios = () => {
       const voteScore = calculateVoteScore(safeVotes);
       
       return (
-        <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-2">
+        <div className="flex items-center space-x-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg p-1.5">
           <button
             onClick={() => handleVote(productId, 'upvote')}
-            className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+            className={`flex items-center space-x-1 px-1.5 py-0.5 rounded transition-colors ${
               userVote === 'upvote' 
                 ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' 
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
             }`}
           >
-            <ChevronUp size={16} />
-            <span className="text-sm font-medium">{safeVotes.upvotes || 0}</span>
+            <ChevronUp size={12} />
+            <span className="text-xs font-medium">{safeVotes.upvotes || 0}</span>
           </button>
           
-          <div className="flex flex-col items-center px-2">
+          <div className="flex flex-col items-center px-1">
             <span className="text-xs text-gray-500 dark:text-gray-400">Score</span>
-            <span className={`text-sm font-bold ${
+            <span className={`text-xs font-bold ${
               voteScore > 0 ? 'text-green-600 dark:text-green-400' : 
               voteScore < 0 ? 'text-red-600 dark:text-red-400' : 
               'text-gray-500 dark:text-gray-400'
@@ -1083,14 +1083,14 @@ const Portfolios = () => {
           
           <button
             onClick={() => handleVote(productId, 'downvote')}
-            className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+            className={`flex items-center space-x-1 px-1.5 py-0.5 rounded transition-colors ${
               userVote === 'downvote' 
                 ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' 
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
             }`}
           >
-            <ChevronDown size={16} />
-            <span className="text-sm font-medium">{safeVotes.downvotes || 0}</span>
+            <ChevronDown size={12} />
+            <span className="text-xs font-medium">{safeVotes.downvotes || 0}</span>
           </button>
         </div>
       );
