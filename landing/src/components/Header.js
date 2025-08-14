@@ -122,7 +122,7 @@ const Header = () => {
   };
 
   const handleGetStarted = () => {
-    window.location.href = '/app';
+    window.location.assign('/app');
   };
 
   return (
