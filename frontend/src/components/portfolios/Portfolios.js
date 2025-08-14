@@ -1189,7 +1189,7 @@ const Portfolios = () => {
 
         {/* Asset Allocation - If available */}
         {portfolio.assetAllocation && (
-          <div className="mb-3">
+          <div className="mb-2">
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
               Asset Allocation
             </p>
