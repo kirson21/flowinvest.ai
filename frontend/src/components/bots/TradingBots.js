@@ -510,7 +510,7 @@ const TradingBots = () => {
           </p>
           <div className="flex items-center space-x-1.5 mt-1.5">
             <Badge variant="outline" className="border-[#0097B2] text-[#0097B2] text-xs px-1.5 py-0.5">
-              FlowInvest.ai
+              f01i.ai
             </Badge>
             <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
               Pre-built
