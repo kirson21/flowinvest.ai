@@ -62,7 +62,7 @@ class BotCreationRequest(BaseModel):
 @app.get("/")
 async def root():
     return {
-        "message": "Flow Invest API - AI-Powered Investment Platform",
+        "message": "f01i.ai API - Future-Oriented Life & Investments AI Tools",
         "version": "1.0.0",
         "environment": os.getenv("ENVIRONMENT", "production"),
         "status": "healthy"
