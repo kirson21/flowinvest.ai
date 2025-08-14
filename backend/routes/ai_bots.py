@@ -1,13 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from services.grok_service import GrokBotCreator
+from supabase_client import supabase
 from typing import Optional, Dict, Any
 import uuid
 from datetime import datetime
 
 router = APIRouter()
 
-# Initialize Grok service only
+# Initialize Grok service only (no OpenAI to avoid Rust dependencies)
 grok_creator = GrokBotCreator()
 
 # Pydantic models
