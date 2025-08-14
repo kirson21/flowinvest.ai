@@ -807,7 +807,7 @@ const TradingBots = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white text-xs"
+                  className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white text-xs px-3"
                   onClick={() => setSelectedRunBot(bot)}
                 >
                   <Play className="w-3 h-3 mr-1" />
@@ -816,7 +816,7 @@ const TradingBots = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs"
+                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs px-3"
                   onClick={() => handleEditBot(bot)}
                 >
                   <Edit className="w-3 h-3 mr-1" />
