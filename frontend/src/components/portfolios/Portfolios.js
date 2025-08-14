@@ -1118,25 +1118,25 @@ const Portfolios = () => {
       {/* Super Admin Delete Button - REMOVED - Use edit modal instead */}
       
       <CardHeader className="pb-2 pt-3 px-3">
-        <div className="flex items-start justify-between mb-2">
+        <div className="flex items-start justify-between mb-1.5">
           <div className="flex-1 pr-2">
             {/* Product Title - Prominently displayed */}
-            <CardTitle className="text-xl font-bold text-[#474545] dark:text-white mb-2 leading-tight">
+            <CardTitle className="text-lg font-bold text-[#474545] dark:text-white mb-1.5 leading-tight">
               {portfolio.title || portfolio.name}
             </CardTitle>
             
             {/* Short Description - Limited to 140 chars */}
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
               {portfolio.description}
             </p>
             
             {/* Price and Category */}
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="flex items-center text-lg font-bold text-[#0097B2]">
-                <DollarSign size={16} className="mr-1" />
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="flex items-center text-base font-bold text-[#0097B2]">
+                <DollarSign size={14} className="mr-1" />
                 {portfolio.price || portfolio.minimumInvestment}
               </div>
-              <Badge variant="outline" className="border-[#0097B2]/30 text-[#0097B2]">
+              <Badge variant="outline" className="border-[#0097B2]/30 text-[#0097B2] text-xs px-1.5 py-0.5">
                 {portfolio.category || 'Portfolio'}
               </Badge>
             </div>
