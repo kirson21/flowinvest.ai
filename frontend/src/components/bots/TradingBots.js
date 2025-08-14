@@ -969,7 +969,7 @@ const TradingBots = () => {
         <TabsContent value="prebuilt" className="space-y-4">
           <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
-              🤖 FlowInvest.ai Pre-built Bots
+              🤖 f01i.ai Pre-built Bots
             </h3>
             <p className="text-xs text-blue-600 dark:text-blue-300">
               Professional trading bots created and maintained by our AI experts. Connect your exchange to start trading.
