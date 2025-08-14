@@ -54,7 +54,9 @@ const Title = styled(motion.h1)`
   background-clip: text;
 
   @media (max-width: 768px) {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    line-height: 1.2;
+    margin-bottom: 20px;
   }
 `;
 
