@@ -824,10 +824,10 @@ const TradingBots = () => {
                   }}
                   size="sm"
                   variant="outline"
-                  className="w-full border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs"
+                  className="w-full border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs px-2"
                 >
                   <Bot size={12} className="mr-1" />
-                  Move to Pre-Built Bots
+                  <span className="truncate">Move to Pre-Built Bots</span>
                 </Button>
               )}
             </div>
