@@ -219,7 +219,7 @@ const Portfolios = () => {
           
           let completeSellerInfo = {
             name: sellerName,
-            bio: 'Product creator on FlowInvestAI marketplace',
+            bio: 'Product creator on f01i.ai marketplace',
             avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(sellerName) + '&size=150&background=0097B2&color=ffffff',
             socialLinks: {},
             specialties: []
