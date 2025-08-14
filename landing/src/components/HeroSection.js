@@ -271,9 +271,10 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           >
             <PrimaryButton
+              as="a"
+              href="/app"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleGetStarted}
             >
               Get Started
             </PrimaryButton>
