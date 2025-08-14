@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/app/:path*",
-      "destination": "https://your-main-app-xyz123.vercel.app/:path*"
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/:path*"
     },
     {
       "source": "/app",
-      "destination": "https://your-main-app-xyz123.vercel.app/"
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/"
     }
   ],
   "headers": [
