@@ -79,7 +79,10 @@ async def health_check():
 async def get_status():
     return {"status": "ok", "environment": ENVIRONMENT}
 
-# Include route modules (only ai_bots - others disabled due to missing dependencies)
+# Include route modules (restored - using httpx-based supabase client)
+api_router.include_router(auth.router)
+api_router.include_router(webhook.router)
+api_router.include_router(verification.router)
 api_router.include_router(ai_bots.router)
 
 # Include API router
