@@ -499,15 +499,9 @@ const TradingBots = () => {
             </div>
             <div className="flex items-center space-x-1.5">
               {isConnected ? (
-                <div className="flex items-center space-x-1 text-green-600">
-                  <CheckCircle size={12} />
-                  <span className="text-xs font-medium">Connected</span>
-                </div>
+                <div className="w-3 h-3 rounded-full bg-green-500" title="Connected" />
               ) : (
-                <div className="flex items-center space-x-1 text-red-600">
-                  <XCircle size={12} />
-                  <span className="text-xs font-medium">Not Connected</span>
-                </div>
+                <div className="w-3 h-3 rounded-full bg-red-500" title="Not Connected" />
               )}
             </div>
           </div>
