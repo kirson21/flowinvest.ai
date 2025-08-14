@@ -803,23 +803,23 @@ const TradingBots = () => {
           ) : (
             // Not connected bots: Run Bot, Edit Bot, and super admin controls
             <div className="space-y-2">
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-1.5 sm:space-y-0 sm:space-x-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                  className="flex-1 bg-[#0097B2] hover:bg-[#0097B2]/90 text-white text-xs"
                   onClick={() => setSelectedRunBot(bot)}
                 >
-                  <Play className="w-4 h-4 mr-2" />
+                  <Play className="w-3 h-3 mr-1" />
                   Run Bot
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs"
                   onClick={() => handleEditBot(bot)}
                 >
-                  <Edit className="w-4 h-4 mr-2" />
+                  <Edit className="w-3 h-3 mr-1" />
                   Edit
                 </Button>
               </div>
