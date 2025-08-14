@@ -721,48 +721,48 @@ const TradingBots = () => {
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('tradingPair')}
               </p>
-              <p className="text-sm font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white">
                 {bot.trading_pair}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('riskLevel')}
               </p>
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${getRiskColor(bot.risk_level)}`} />
-                <span className="text-sm font-medium text-[#474545] dark:text-white">
+              <div className="flex items-center space-x-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${getRiskColor(bot.risk_level)}`} />
+                <span className="text-xs font-medium text-[#474545] dark:text-white">
                   {t(bot.risk_level?.toLowerCase() || 'medium')}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('dailyPnL')}
               </p>
-              <p className={`text-sm font-bold ${(bot.daily_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs font-bold ${(bot.daily_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {(bot.daily_pnl || 0) >= 0 ? '+' : ''}{bot.daily_pnl || 0}%
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('weeklyPnL')}
               </p>
-              <p className={`text-sm font-bold ${(bot.weekly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs font-bold ${(bot.weekly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {(bot.weekly_pnl || 0) >= 0 ? '+' : ''}{bot.weekly_pnl || 0}%
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('monthlyPnL')}
               </p>
-              <p className={`text-sm font-bold ${(bot.monthly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs font-bold ${(bot.monthly_pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {(bot.monthly_pnl || 0) >= 0 ? '+' : ''}{bot.monthly_pnl || 0}%
               </p>
             </div>
