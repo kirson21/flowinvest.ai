@@ -13,6 +13,12 @@ const HeroContainer = styled.section`
   position: relative;
   background: linear-gradient(135deg, #474545 0%, #3a3838 50%, #474545 100%);
   overflow: hidden;
+  padding-top: 80px;
+
+  @media (max-width: 768px) {
+    padding-top: 120px;
+    min-height: calc(100vh - 40px);
+  }
 `;
 
 const HeroContent = styled.div`
