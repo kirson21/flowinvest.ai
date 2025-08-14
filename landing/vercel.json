@@ -2,22 +2,13 @@
   "rewrites": [
     {
       "source": "/app/:path*",
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/:path*"
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/:path*",
+      "statusCode": 200
     },
     {
       "source": "/app",
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/app/:path*",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
-        }
-      ]
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/",
+      "statusCode": 200
     }
   ]
 }
