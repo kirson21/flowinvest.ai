@@ -1027,14 +1027,14 @@ const Portfolios = () => {
     return stars;
   };
 
-  const SocialIcon = ({ platform, url }) => {
+  const SocialIcon = ({ platform, url, size = 16 }) => {
     const icons = {
-      telegram: <MessageCircle size={16} className="text-blue-500" />,
-      twitter: <Twitter size={16} className="text-blue-400" />,
-      instagram: <Instagram size={16} className="text-pink-500" />,
-      linkedin: <Linkedin size={16} className="text-blue-700" />,
-      youtube: <Youtube size={16} className="text-red-500" />,
-      website: <Globe size={16} className="text-gray-600" />
+      telegram: <MessageCircle size={size} className="text-blue-500" />,
+      twitter: <Twitter size={size} className="text-blue-400" />,
+      instagram: <Instagram size={size} className="text-pink-500" />,
+      linkedin: <Linkedin size={size} className="text-blue-700" />,
+      youtube: <Youtube size={size} className="text-red-500" />,
+      website: <Globe size={size} className="text-gray-600" />
     };
     
     return (
@@ -1042,7 +1042,7 @@ const Portfolios = () => {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        className="p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
       >
         {icons[platform]}
       </a>
