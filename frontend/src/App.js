@@ -106,10 +106,10 @@ function App() {
             <Route path="/dashboard" element={<Navigate to="/app" replace />} />
             
             {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<Navigate to="/app" replace />} />
             
             {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/app" replace />} />
           </Routes>
         </div>
       </Router>
