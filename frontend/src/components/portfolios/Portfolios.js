@@ -1146,12 +1146,12 @@ const Portfolios = () => {
       
       <CardContent className="px-3 pb-3">
         {/* Enhanced Metadata Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+        <div className="grid grid-cols-2 gap-1.5 mb-2 text-xs">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
               Risk Level
             </p>
-            <div className="flex items-center space-x-1.5">
+            <div className="flex items-center space-x-1">
               <div className={`w-1.5 h-1.5 rounded-full ${getRiskColor(portfolio.riskLevel)}`} />
               <span className={`text-xs font-medium ${getRiskTextColor(portfolio.riskLevel)}`}>
                 {portfolio.riskLevel}
