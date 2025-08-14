@@ -531,7 +531,7 @@ const TradingBots = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('exchange')}
               </p>
-              <p className="text-xs font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white truncate">
                 {bot.exchange}
               </p>
             </div>
@@ -539,7 +539,7 @@ const TradingBots = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
                 {t('tradingPair')}
               </p>
-              <p className="text-xs font-medium text-[#474545] dark:text-white">
+              <p className="text-xs font-medium text-[#474545] dark:text-white truncate">
                 {bot.tradingPair || bot.trading_pair || 'BTC/USDT'}
               </p>
             </div>
