@@ -1200,36 +1200,36 @@ const Portfolios = () => {
         )}
 
         {/* Seller Information - Clickable */}
-        <div className="mb-3">
-          <p className="text-xs font-medium text-[#474545] dark:text-white mb-1.5">
+        <div className="mb-2">
+          <p className="text-xs font-medium text-[#474545] dark:text-white mb-1">
             Seller Information
           </p>
           <button 
             onClick={() => handleSellerClick(portfolio.seller)}
-            className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent hover:border-[#0097B2]/20"
+            className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent hover:border-[#0097B2]/20"
           >
-            <div className="flex items-center space-x-2">
-              <Avatar className="w-6 h-6">
+            <div className="flex items-center space-x-1.5 flex-1 min-w-0">
+              <Avatar className="w-5 h-5 flex-shrink-0">
                 <AvatarImage src={portfolio.seller?.avatar} alt={portfolio.seller?.name || 'Seller'} />
                 <AvatarFallback className="bg-[#0097B2] text-white text-xs">
                   {portfolio.seller?.name?.charAt(0) || portfolio.seller_name?.charAt(0) || 'S'}
                 </AvatarFallback>
               </Avatar>
-              <div className="text-left">
-                <p className="text-xs font-medium text-[#474545] dark:text-white">
+              <div className="text-left flex-1 min-w-0">
+                <p className="text-xs font-medium text-[#474545] dark:text-white truncate">
                   {portfolio.seller?.name || portfolio.seller_name || 'Unknown Seller'}
                 </p>
-                <div className="flex items-center space-x-1 mt-0.5">
+                <div className="flex items-center space-x-0.5 mt-0.5">
                   {portfolio.seller?.socialLinks && Object.entries(portfolio.seller.socialLinks)
                     .filter(([platform, url]) => url && url.trim()) // Only show platforms with actual URLs
                     .slice(0, 2)
                     .map(([platform, url]) => (
-                      <SocialIcon key={platform} platform={platform} url={url} size={10} />
+                      <SocialIcon key={platform} platform={platform} url={url} size={8} />
                     ))
                   }
                   {portfolio.seller?.socialLinks && 
                     Object.entries(portfolio.seller.socialLinks).filter(([platform, url]) => url && url.trim()).length > 2 && (
-                    <span className="text-xs text-gray-500 ml-1">
+                    <span className="text-xs text-gray-500 ml-0.5">
                       +{Object.entries(portfolio.seller.socialLinks).filter(([platform, url]) => url && url.trim()).length - 2}
                     </span>
                   )}
@@ -1259,10 +1259,10 @@ const Portfolios = () => {
                 )}
               </div>
             </div>
-            <div className="text-right">
-              <div className="flex items-center space-x-1 mb-0.5">
-                {renderStars(portfolio.rating || 0, portfolio.totalReviews || 0, 10)}
-                <span className="text-xs font-medium text-[#474545] dark:text-white ml-1">
+            <div className="text-right flex-shrink-0 ml-1">
+              <div className="flex items-center space-x-0.5 mb-0.5">
+                {renderStars(portfolio.rating || 0, portfolio.totalReviews || 0, 8)}
+                <span className="text-xs font-medium text-[#474545] dark:text-white ml-0.5">
                   {(portfolio.totalReviews && portfolio.totalReviews > 0) ? portfolio.rating : 0}
                 </span>
               </div>
