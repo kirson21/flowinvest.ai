@@ -192,11 +192,11 @@ const PointingRobot = () => {
 
 const CTASection = () => {
   const handleGetStarted = () => {
-    window.open('https://f01i.ai/app', '_blank');
+    window.open('https://app.f01i.ai', '_blank');
   };
 
   const handleExploreMarketplace = () => {
-    window.open('https://f01i.ai/app', '_blank');
+    window.open('https://app.f01i.ai', '_blank');
   };
 
   return (
