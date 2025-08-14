@@ -605,23 +605,23 @@ const TradingBots = () => {
           {isSuperAdmin() ? (
             // Super Admin: Full control buttons
             <div className="space-y-2">
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-1.5 sm:space-y-0 sm:space-x-2">
                 <Button
                   onClick={() => handleEditBot(bot)}
                   size="sm"
                   variant="outline"
-                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                  className="flex-1 border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5 text-xs"
                 >
-                  <Edit size={16} className="mr-2" />
+                  <Edit size={12} className="mr-1" />
                   Edit
                 </Button>
                 <Button
                   onClick={() => handleMoveToMyBots(bot)}
                   size="sm"
                   variant="outline"
-                  className="flex-1 border-purple-500/20 text-purple-600 hover:bg-purple-50"
+                  className="flex-1 border-purple-500/20 text-purple-600 hover:bg-purple-50 text-xs"
                 >
-                  <Bot size={16} className="mr-2" />
+                  <Bot size={12} className="mr-1" />
                   Move to My Bots
                 </Button>
               </div>
@@ -633,9 +633,9 @@ const TradingBots = () => {
                 }}
                 size="sm"
                 variant="outline"
-                className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                className="w-full border-red-200 text-red-600 hover:bg-red-50 text-xs"
               >
-                <Trash2 size={16} className="mr-2" />
+                <Trash2 size={12} className="mr-1" />
                 Delete Bot
               </Button>
             </div>
@@ -647,9 +647,9 @@ const TradingBots = () => {
                 setManageBotType('prebuilt');
               }}
               size="sm"
-              className="w-full bg-green-600 hover:bg-green-700"
+              className="w-full bg-green-600 hover:bg-green-700 text-xs"
             >
-              <Cog size={16} className="mr-2" />
+              <Cog size={12} className="mr-1" />
               Manage
             </Button>
           ) : (
@@ -657,9 +657,9 @@ const TradingBots = () => {
             <Button
               onClick={() => setSelectedRunBot(bot)}
               size="sm"
-              className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90"
+              className="w-full bg-[#0097B2] hover:bg-[#0097B2]/90 text-xs"
             >
-              <Play size={16} className="mr-2" />
+              <Play size={12} className="mr-1" />
               Run Bot
             </Button>
           )}
