@@ -194,7 +194,7 @@ const DataParticles = () => {
   const particleCount = 50;
 
   useEffect(() => {
-    if (particlesRef.current) {
+    if (particlesRef.current && particlesRef.current.geometry) {
       const positions = new Float32Array(particleCount * 3);
       
       for (let i = 0; i < particleCount; i++) {
@@ -203,7 +203,7 @@ const DataParticles = () => {
         positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
       }
       
-      particlesRef.current.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particlesRef.current.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     }
   }, []);
 
