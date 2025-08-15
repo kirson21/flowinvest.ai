@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from supabase_client import supabase, supabase_admin
 from typing import Optional
 import os
@@ -8,13 +8,13 @@ import os
 router = APIRouter()
 security = HTTPBearer()
 
-# Pydantic models
+# Simplified Pydantic models - avoid EmailStr which can cause typing issues
 class EmailPasswordSignIn(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class EmailPasswordSignUp(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     full_name: Optional[str] = None
     country: Optional[str] = None
