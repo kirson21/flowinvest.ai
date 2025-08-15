@@ -175,43 +175,59 @@ const BackgroundOrbs = styled.div`
   }
 `;
 
-// Floating particles around the robot
-const FloatingParticles = () => {
-  const particlesRef = useRef();
-  const particleCount = 30;
+// Floating particles around the robot - now using CSS animation
+const FloatingParticles = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
 
-  useFrame((state) => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
-    }
-  });
-
-  const particles = [];
-  for (let i = 0; i < particleCount; i++) {
-    const x = (Math.random() - 0.5) * 8;
-    const y = (Math.random() - 0.5) * 8;
-    const z = (Math.random() - 0.5) * 8;
-    
-    particles.push(
-      <mesh key={i} position={[x, y, z]}>
-        <sphereGeometry args={[0.02, 8, 8]} />
-        <meshStandardMaterial 
-          color="#FAECEC" 
-          emissive="#0097B2" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.6} 
-        />
-      </mesh>
-    );
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #0097B2;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: float-particle 6s ease-in-out infinite;
   }
 
-  return (
-    <group ref={particlesRef}>
-      {particles}
-    </group>
-  );
-};
+  &::before {
+    top: 20%;
+    left: 20%;
+    animation-delay: 0s;
+  }
+
+  &::after {
+    top: 60%;
+    right: 30%;
+    animation-delay: 3s;
+  }
+
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+      opacity: 0.6;
+    }
+    25% {
+      transform: translateY(-20px) translateX(10px);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-10px) translateX(-10px);
+      opacity: 0.8;
+    }
+    75% {
+      transform: translateY(-30px) translateX(5px);
+      opacity: 0.9;
+    }
+  }
+`;
 
 const HeroSection = () => {
   const handleSeeHowItWorks = () => {
