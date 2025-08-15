@@ -48,13 +48,7 @@ class OpenAIWebhookRequest(BaseModel):
     """OpenAI API response format for webhook"""
     choices: List[Choice]
     source: Optional[str] = Field(default="AI Generated", description="Source of the news")
-    timestamp: Optional[str] = Field(default=None, description="ISO datetime string")
-
-    @validator('timestamp', always=True)
-    def set_timestamp(cls, v):
-        if v is None:
-            return datetime.utcnow().isoformat()
-        return v
+    timestamp: Optional[str] = Field(default_factory=lambda: datetime.utcnow().isoformat(), description="ISO datetime string")
 
 class FeedEntry(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
