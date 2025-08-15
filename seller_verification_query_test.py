@@ -12,7 +12,7 @@ from datetime import datetime
 import uuid
 
 # Get backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://ai-invest-hub-3.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://ai-landing-3d-1.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class BackendTester:
