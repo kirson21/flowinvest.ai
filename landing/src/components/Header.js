@@ -104,7 +104,7 @@ const MobileMenu = styled(motion.div)`
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(0, 151, 178, 0.1);
   padding: 20px;
-  z-index: 999;
+  z-index: 1001;
 
   @media (max-width: 768px) {
     display: ${props => props.isOpen ? 'block' : 'none'};
