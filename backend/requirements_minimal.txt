@@ -1,0 +1,7 @@
+fastapi==0.88.0
+uvicorn==0.20.0
+python-dotenv==1.0.0
+pydantic==1.10.13
+httpx==0.24.1
+# Minimal dependencies - no Rust compilation required
+# All packages are pure Python or have pre-compiled wheels
