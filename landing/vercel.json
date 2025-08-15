@@ -6,19 +6,19 @@
     },
     {
       "source": "/login",
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/login"
+      "destination": "https://f01i.app/login"
     },
     {
       "source": "/login/callback",
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/login/callback"
+      "destination": "https://f01i.app/login/callback"
     },
     {
       "source": "/app/:path*",
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/app/:path*"
+      "destination": "https://f01i.app/app/:path*"
     },
     {
       "source": "/app",
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/app"
+      "destination": "https://f01i.app/app"
     }
   ]
 }
