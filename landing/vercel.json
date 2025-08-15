@@ -1,14 +1,24 @@
 {
-  "redirects": [
+  "rewrites": [
     {
-      "source": "/login",
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/login",
-      "permanent": false
+      "source": "/api/:path*",
+      "destination": "https://flowinvest-ai.onrender.com/api/:path*"
     },
     {
-      "source": "/app/:path*", 
-      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/app/:path*",
-      "permanent": false
+      "source": "/login",
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/login"
+    },
+    {
+      "source": "/login/callback",
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/login/callback"
+    },
+    {
+      "source": "/app/:path*",
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/app/:path*"
+    },
+    {
+      "source": "/app",
+      "destination": "https://flowinvestaiapp-kirsons-projects.vercel.app/app"
     }
   ]
 }
