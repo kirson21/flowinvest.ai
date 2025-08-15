@@ -3,22 +3,6 @@
     {
       "source": "/api/:path*",
       "destination": "https://flowinvest-ai.onrender.com/api/:path*"
-    },
-    {
-      "source": "/login",
-      "destination": "https://f01i.app/login"
-    },
-    {
-      "source": "/login/callback",
-      "destination": "https://f01i.app/login/callback"
-    },
-    {
-      "source": "/app/:path*",
-      "destination": "https://f01i.app/app/:path*"
-    },
-    {
-      "source": "/app",
-      "destination": "https://f01i.app/app"
     }
   ]
 }
