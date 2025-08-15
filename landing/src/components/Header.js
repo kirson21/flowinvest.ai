@@ -99,7 +99,6 @@ const CTAButton = styled(motion.a)`
 `;
 
 const MobileMenu = styled(motion.div)`
-  display: none;
   position: fixed;
   top: 80px;
   left: 0;
@@ -109,9 +108,18 @@ const MobileMenu = styled(motion.div)`
   border-bottom: 1px solid rgba(0, 151, 178, 0.1);
   padding: 20px;
   z-index: 1001;
+  display: none;
 
   @media (max-width: 768px) {
-    display: ${props => props.isOpen ? 'block' : 'none'};
+    display: block;
+  }
+
+  &.mobile-menu-hidden {
+    display: none;
+  }
+
+  &.mobile-menu-visible {
+    display: block;
   }
 `;
 
