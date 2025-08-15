@@ -175,12 +175,7 @@ const CTASection = () => {
       <BackgroundOrbs />
       
       <BackgroundCanvas>
-        <Canvas camera={{ position: [0, 2, 8], fov: 45 }}>
-          <ambientLight intensity={0.3} />
-          <directionalLight position={[10, 10, 5]} intensity={0.5} />
-          <pointLight position={[0, 0, 5]} intensity={0.3} color="#0097B2" />
-          <PointingRobot />
-        </Canvas>
+        <Robot3D scale={0.6} />
       </BackgroundCanvas>
 
       <Container>
