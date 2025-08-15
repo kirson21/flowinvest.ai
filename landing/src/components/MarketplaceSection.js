@@ -64,11 +64,34 @@ const BotCard = styled(motion.div)`
   padding: 30px;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 151, 178, 0.2);
     border-color: rgba(0, 151, 178, 0.4);
+  }
+
+  /* Montek-style hover gradient overlay */
+  &::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    opacity: 0;
+    transform: scale(1, 0.2);
+    transition: all 500ms ease;
+    background: linear-gradient(to top, #0097B2 0%, #FAECEC 100%);
+    z-index: -1;
+    border-radius: 20px;
+  }
+
+  &:hover::before {
+    opacity: 0.1;
+    transform: scale(1, 1);
   }
 `;
 
