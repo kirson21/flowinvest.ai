@@ -243,10 +243,54 @@ const Header = () => {
           Get Started Free
         </CTAButton>
 
-        <MobileMenuButton whileTap={{ scale: 0.95 }}>
-          ☰
+        <MobileMenuButton whileTap={{ scale: 0.95 }} onClick={toggleMobileMenu}>
+          {isMobileMenuOpen ? '✕' : '☰'}
         </MobileMenuButton>
       </Nav>
+
+      <MobileMenu 
+        isOpen={isMobileMenuOpen}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ 
+          opacity: isMobileMenuOpen ? 1 : 0, 
+          y: isMobileMenuOpen ? 0 : -20 
+        }}
+        transition={{ duration: 0.3 }}
+      >
+        <MobileNavLink
+          whileTap={{ scale: 0.95 }}
+          onClick={() => scrollToSection('why')}
+        >
+          Why f01i.ai
+        </MobileNavLink>
+        <MobileNavLink
+          whileTap={{ scale: 0.95 }}
+          onClick={() => scrollToSection('how-it-works')}
+        >
+          How It Works
+        </MobileNavLink>
+        <MobileNavLink
+          whileTap={{ scale: 0.95 }}
+          onClick={() => scrollToSection('features')}
+        >
+          Features
+        </MobileNavLink>
+        <MobileNavLink
+          whileTap={{ scale: 0.95 }}
+          onClick={() => scrollToSection('marketplace')}
+        >
+          Marketplace
+        </MobileNavLink>
+        
+        <MobileCTAButton
+          as="a"
+          href="https://f01i.app/login"
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          Get Started Free
+        </MobileCTAButton>
+      </MobileMenu>
     </HeaderContainer>
   );
 };
