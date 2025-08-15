@@ -280,7 +280,7 @@ const HeroSection = () => {
         </TextContent>
 
         <CanvasContainer>
-          <Robot3D position={[0, -1, 0]} scale={0.8} />
+          <Robot3D position={[0, -1, 0]} scale={1.2} bottom={true} />
           <FloatingParticles />
         </CanvasContainer>
       </HeroContent>
