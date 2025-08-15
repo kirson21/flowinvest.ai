@@ -268,7 +268,7 @@ const HeroSection = () => {
           >
             <PrimaryButton
               as="a"
-              href="/login"
+              href="https://f01i.app/login"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
