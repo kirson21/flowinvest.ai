@@ -94,16 +94,63 @@ const CTAButton = styled(motion.a)`
   }
 `;
 
-const MobileMenuButton = styled(motion.button)`
+const MobileMenu = styled(motion.div)`
   display: none;
-  background: none;
-  border: none;
-  color: #FAECEC;
-  font-size: 24px;
-  cursor: pointer;
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  background: rgba(71, 69, 69, 0.98);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 151, 178, 0.1);
+  padding: 20px;
+  z-index: 999;
 
   @media (max-width: 768px) {
-    display: block;
+    display: ${props => props.isOpen ? 'block' : 'none'};
+  }
+`;
+
+const MobileNavLink = styled(motion.div)`
+  color: #FAECEC;
+  font-weight: 500;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(0, 151, 178, 0.1);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    color: #0097B2;
+  }
+`;
+
+const MobileCTAButton = styled(motion.a)`
+  background: linear-gradient(135deg, #0097B2 0%, #007a94 100%);
+  color: #FAECEC;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 151, 178, 0.3);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  width: 100%;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 151, 178, 0.4);
+    color: #FAECEC;
   }
 `;
 
