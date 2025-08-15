@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Sphere, MeshDistortMaterial } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import styled from 'styled-components';
-import * as THREE from 'three';
+import Robot3D from './Robot3D';
 
 const HeroContainer = styled.section`
   min-height: 100vh;
@@ -126,11 +126,11 @@ const SecondaryButton = styled(motion.button)`
 `;
 
 const CanvasContainer = styled.div`
-  height: 500px;
+  height: 600px;
   position: relative;
 
   @media (max-width: 768px) {
-    height: 300px;
+    height: 400px;
   }
 `;
 
@@ -177,49 +177,10 @@ const BackgroundOrbs = styled.div`
   }
 `;
 
-// 3D Robot/AI Sphere Component
-const AIOrb = () => {
-  const meshRef = useRef();
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime) * 0.1;
-      meshRef.current.rotation.y += 0.01;
-    }
-  });
-
-  return (
-    <Sphere ref={meshRef} args={[1, 100, 200]} scale={2}>
-      <MeshDistortMaterial
-        color="#0097B2"
-        attach="material"
-        distort={0.3}
-        speed={2}
-        roughness={0}
-        transparent
-        opacity={0.8}
-      />
-    </Sphere>
-  );
-};
-
-const DataParticles = () => {
+// Floating particles around the robot
+const FloatingParticles = () => {
   const particlesRef = useRef();
-  const particleCount = 50;
-
-  useEffect(() => {
-    if (particlesRef.current && particlesRef.current.geometry) {
-      const positions = new Float32Array(particleCount * 3);
-      
-      for (let i = 0; i < particleCount; i++) {
-        positions[i * 3] = (Math.random() - 0.5) * 10;
-        positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-      }
-      
-      particlesRef.current.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    }
-  }, []);
+  const particleCount = 30;
 
   useFrame((state) => {
     if (particlesRef.current) {
@@ -227,11 +188,30 @@ const DataParticles = () => {
     }
   });
 
+  const particles = [];
+  for (let i = 0; i < particleCount; i++) {
+    const x = (Math.random() - 0.5) * 8;
+    const y = (Math.random() - 0.5) * 8;
+    const z = (Math.random() - 0.5) * 8;
+    
+    particles.push(
+      <mesh key={i} position={[x, y, z]}>
+        <sphereGeometry args={[0.02, 8, 8]} />
+        <meshStandardMaterial 
+          color="#FAECEC" 
+          emissive="#0097B2" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.6} 
+        />
+      </mesh>
+    );
+  }
+
   return (
-    <points ref={particlesRef}>
-      <bufferGeometry />
-      <pointsMaterial color="#FAECEC" size={0.05} transparent opacity={0.6} />
-    </points>
+    <group ref={particlesRef}>
+      {particles}
+    </group>
   );
 };
 
@@ -286,12 +266,25 @@ const HeroSection = () => {
         </TextContent>
 
         <CanvasContainer>
-          <Canvas camera={{ position: [0, 0, 5] }}>
-            <ambientLight intensity={0.5} />
+          <Canvas camera={{ position: [0, 2, 8], fov: 45 }}>
+            <ambientLight intensity={0.4} />
             <directionalLight position={[10, 10, 5]} intensity={1} />
-            <AIOrb />
-            <DataParticles />
-            <OrbitControls enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+            <pointLight position={[-10, -10, -10]} intensity={0.3} color="#0097B2" />
+            
+            {/* Main Robot */}
+            <Robot3D position={[0, -1, 0]} scale={0.8} />
+            
+            {/* Floating Particles */}
+            <FloatingParticles />
+            
+            <OrbitControls 
+              enablePan={false} 
+              enableZoom={false} 
+              autoRotate 
+              autoRotateSpeed={0.3}
+              minPolarAngle={Math.PI / 3}
+              maxPolarAngle={Math.PI / 1.5}
+            />
           </Canvas>
         </CanvasContainer>
       </HeroContent>
