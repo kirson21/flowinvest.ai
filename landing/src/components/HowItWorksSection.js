@@ -127,6 +127,12 @@ const StepVisual = styled.div`
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 151, 178, 0.4);
+  }
 
   &::before {
     content: '';
@@ -139,6 +145,27 @@ const StepVisual = styled.div`
     border-radius: 50%;
     transform: translate(-50%, -50%);
     animation: pulse 3s ease-in-out infinite;
+  }
+
+  /* Montek-style hover gradient overlay */
+  &::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    opacity: 0;
+    transform: scale(1, 0.2);
+    transition: all 500ms ease;
+    background: linear-gradient(to top, #0097B2 0%, #FAECEC 100%);
+    z-index: -1;
+    border-radius: 20px;
+  }
+
+  &:hover::after {
+    opacity: 0.1;
+    transform: scale(1, 1);
   }
 
   @keyframes pulse {
