@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial } from '@react-three/drei';
 import styled from 'styled-components';
+import Robot3D from './Robot3D';
 
 const SectionContainer = styled.section`
   padding: 120px 0;
@@ -116,7 +116,7 @@ const BackgroundCanvas = styled.div`
   right: 0;
   bottom: 0;
   z-index: 1;
-  opacity: 0.3;
+  opacity: 0.4;
 `;
 
 const BackgroundOrbs = styled.div`
@@ -162,30 +162,21 @@ const BackgroundOrbs = styled.div`
   }
 `;
 
-// 3D Robot pointing at buttons
+// Pointing Robot component
 const PointingRobot = () => {
-  const meshRef = useRef();
+  const robotRef = useRef();
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.2;
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1;
+    if (robotRef.current) {
+      // Gentle swaying motion as if robot is pointing at buttons
+      robotRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
+      robotRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.2;
     }
   });
 
   return (
-    <group position={[2, 0, 0]}>
-      <Sphere ref={meshRef} args={[0.8, 32, 32]} scale={1.2}>
-        <MeshDistortMaterial
-          color="#0097B2"
-          attach="material"
-          distort={0.2}
-          speed={1.5}
-          roughness={0}
-          transparent
-          opacity={0.6}
-        />
-      </Sphere>
+    <group ref={robotRef} position={[3, -1, 0]} rotation={[0, -0.5, 0]}>
+      <Robot3D scale={0.6} />
     </group>
   );
 };
@@ -204,9 +195,10 @@ const CTASection = () => {
       <BackgroundOrbs />
       
       <BackgroundCanvas>
-        <Canvas camera={{ position: [0, 0, 5] }}>
+        <Canvas camera={{ position: [0, 2, 8], fov: 45 }}>
           <ambientLight intensity={0.3} />
           <directionalLight position={[10, 10, 5]} intensity={0.5} />
+          <pointLight position={[0, 0, 5]} intensity={0.3} color="#0097B2" />
           <PointingRobot />
         </Canvas>
       </BackgroundCanvas>
@@ -238,7 +230,7 @@ const CTASection = () => {
         >
           <PrimaryButton
             whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileTrap={{ scale: 0.95 }}
             onClick={handleGetStarted}
           >
             Get Started Free
