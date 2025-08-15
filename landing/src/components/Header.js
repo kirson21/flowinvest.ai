@@ -92,6 +92,10 @@ const CTAButton = styled(motion.a)`
     box-shadow: 0 6px 20px rgba(0, 151, 178, 0.4);
     color: #FAECEC;
   }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const MobileMenu = styled(motion.div)`
