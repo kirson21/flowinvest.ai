@@ -280,26 +280,8 @@ const HeroSection = () => {
         </TextContent>
 
         <CanvasContainer>
-          <Canvas camera={{ position: [0, 2, 8], fov: 45 }}>
-            <ambientLight intensity={0.4} />
-            <directionalLight position={[10, 10, 5]} intensity={1} />
-            <pointLight position={[-10, -10, -10]} intensity={0.3} color="#0097B2" />
-            
-            {/* Main Robot */}
-            <Robot3D position={[0, -1, 0]} scale={0.8} />
-            
-            {/* Floating Particles */}
-            <FloatingParticles />
-            
-            <OrbitControls 
-              enablePan={false} 
-              enableZoom={false} 
-              autoRotate 
-              autoRotateSpeed={0.3}
-              minPolarAngle={Math.PI / 3}
-              maxPolarAngle={Math.PI / 1.5}
-            />
-          </Canvas>
+          <Robot3D position={[0, -1, 0]} scale={0.8} />
+          <FloatingParticles />
         </CanvasContainer>
       </HeroContent>
     </HeroContainer>
