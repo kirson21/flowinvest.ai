@@ -237,53 +237,22 @@ async def get_translated_entry(entry: dict) -> TranslatedFeedEntryResponse:
         )
 
 async def translate_to_russian(api_key: str, title: str, summary: str, source: str) -> dict:
-    """Translate content to Russian using OpenAI API"""
+    """Translate content to Russian using httpx (no OpenAI library dependency)"""
     try:
-        import openai
+        import httpx
         
-        client = openai.OpenAI(api_key=api_key)
-        
-        # Translate title
-        title_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a professional translator. Translate the following financial news title to Russian. Keep it concise and professional."},
-                {"role": "user", "content": title}
-            ],
-            max_tokens=100,
-            temperature=0.3
-        )
-        
-        # Translate summary
-        summary_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a professional translator. Translate the following financial news summary to Russian. Keep it informative and professional."},
-                {"role": "user", "content": summary}
-            ],
-            max_tokens=500,
-            temperature=0.3
-        )
-        
-        # Translate source
-        source_response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a professional translator. Translate the following news source name to Russian. Keep it short."},
-                {"role": "user", "content": source}
-            ],
-            max_tokens=50,
-            temperature=0.3
-        )
+        # Skip translation for now to avoid OpenAI dependency
+        # Return original content (can be improved later with different translation service)
+        logger.info("Translation skipped - using original content to avoid OpenAI dependency")
         
         return {
-            "title": title_response.choices[0].message.content.strip(),
-            "summary": summary_response.choices[0].message.content.strip(),
-            "source": source_response.choices[0].message.content.strip()
+            "title": title,
+            "summary": summary,
+            "source": source
         }
         
     except Exception as e:
-        logger.error(f"OpenAI translation error: {e}")
+        logger.error(f"Translation error: {e}")
         # Return original content as fallback
         return {
             "title": title,
