@@ -65,12 +65,49 @@ const BenefitCard = styled(motion.div)`
   padding: 40px;
   text-align: center;
   backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 151, 178, 0.2) 0%, rgba(250, 236, 236, 0.1) 100%);
+    transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+  }
 
   &:hover {
     transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 151, 178, 0.2);
-    border-color: rgba(0, 151, 178, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 151, 178, 0.3);
+    border-color: rgba(0, 151, 178, 0.6);
+    background: linear-gradient(135deg, rgba(0, 151, 178, 0.15) 0%, rgba(250, 236, 236, 0.1) 100%);
+  }
+
+  &:hover::before {
+    left: 0%;
+  }
+
+  &:nth-child(1):hover {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(0, 151, 178, 0.1) 100%);
+    border-color: rgba(255, 107, 107, 0.4);
+    box-shadow: 0 20px 40px rgba(255, 107, 107, 0.2);
+  }
+
+  &:nth-child(2):hover {
+    background: linear-gradient(135deg, rgba(72, 187, 120, 0.15) 0%, rgba(0, 151, 178, 0.1) 100%);
+    border-color: rgba(72, 187, 120, 0.4);
+    box-shadow: 0 20px 40px rgba(72, 187, 120, 0.2);
+  }
+
+  &:nth-child(3):hover {
+    background: linear-gradient(135deg, rgba(126, 58, 242, 0.15) 0%, rgba(0, 151, 178, 0.1) 100%);
+    border-color: rgba(126, 58, 242, 0.4);
+    box-shadow: 0 20px 40px rgba(126, 58, 242, 0.2);
   }
 `;
 
