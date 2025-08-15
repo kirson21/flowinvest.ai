@@ -261,7 +261,7 @@ const Header = () => {
       </Nav>
 
       <MobileMenu 
-        isOpen={isMobileMenuOpen}
+        className={isMobileMenuOpen ? 'mobile-menu-visible' : 'mobile-menu-hidden'}
         initial={{ opacity: 0, y: -20 }}
         animate={{ 
           opacity: isMobileMenuOpen ? 1 : 0, 
