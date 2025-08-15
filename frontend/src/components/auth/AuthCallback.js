@@ -21,7 +21,7 @@ const AuthCallback = () => {
 
         if (session) {
           setUser(session.user);
-          navigate('/dashboard');
+          navigate('/app');
         } else {
           navigate('/login');
         }
