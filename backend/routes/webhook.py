@@ -5,7 +5,9 @@ import os
 import logging
 import sys
 from pathlib import Path
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
+
+# Simplified models - avoid validator which can cause typing issues
 import uuid
 
 # Setup logging
