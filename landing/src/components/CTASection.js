@@ -118,28 +118,46 @@ const BackgroundCanvas = styled.div`
   opacity: 0.4;
 `;
 
-// Pointing Robot component - now using CSS positioning instead of Three.js
-const PointingRobot = styled.div`
+const BackgroundOrbs = styled.div`
   position: absolute;
-  right: 10%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 200px;
-  height: 200px;
-  z-index: 2;
-  animation: float-point 4s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
 
-  @keyframes float-point {
-    0%, 100% {
-      transform: translateY(-50%) translateX(0px) rotate(0deg);
-    }
-    50% {
-      transform: translateY(-60%) translateX(-10px) rotate(-5deg);
-    }
+  &::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0, 151, 178, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
   }
 
-  @media (max-width: 768px) {
-    display: none;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    right: 10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(250, 236, 236, 0.05) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) scale(1);
+    }
+    50% {
+      transform: translateY(-30px) scale(1.1);
+    }
   }
 `;
 
