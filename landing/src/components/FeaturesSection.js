@@ -70,6 +70,27 @@ const FeatureCard = styled(motion.div)`
     height: 4px;
     background: linear-gradient(90deg, #0097B2 0%, #007a94 100%);
   }
+
+  /* Montek-style hover gradient overlay */
+  &::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    opacity: 0;
+    transform: scale(1, 0.2);
+    transition: all 500ms ease;
+    background: linear-gradient(to top, #0097B2 0%, #FAECEC 100%);
+    z-index: -1;
+    border-radius: 20px;
+  }
+
+  &:hover::after {
+    opacity: 0.1;
+    transform: scale(1, 1);
+  }
 `;
 
 const IconWrapper = styled.div`
