@@ -175,7 +175,7 @@ const CTASection = () => {
       <BackgroundOrbs />
       
       <BackgroundCanvas>
-        <Robot3D scale={0.6} />
+        <Robot3D scale={1.0} bottom={true} />
       </BackgroundCanvas>
 
       <Container>
