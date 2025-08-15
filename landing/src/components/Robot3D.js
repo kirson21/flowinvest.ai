@@ -89,7 +89,12 @@ const Robot3D = ({ position = [0, 0, 0], scale = 1, bottom = false }) => {
     >
       <spline-viewer 
         url="https://prod.spline.design/AqtlWJlNbO-ZMkvz/scene.splinecode"
-        style={{ width: '100%', height: '100%' }}
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          cursor: 'pointer',
+          pointerEvents: 'auto'
+        }}
       />
     </div>
   );
