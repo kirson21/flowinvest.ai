@@ -88,14 +88,22 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
       
       if (userProfiles && userProfiles.length > 0) {
         const profile = userProfiles[0]; // Take the first match
+        
+        // Check seller_data field first, then fallback to top-level fields
+        const sellerData = profile.seller_data || {};
+        const specialties = sellerData.specialties || profile.specialties || [];
+        const socialLinks = sellerData.socialLinks || profile.social_links || {};
+        
         setSellerProfileData({
-          specialties: profile.specialties || [],
-          social_links: profile.social_links || {},
+          specialties: specialties,
+          social_links: socialLinks,
           bio: profile.bio || '',
           experience: profile.experience || ''
         });
         
         console.log('Loaded seller profile data:', profile);
+        console.log('Using specialties from seller_data:', specialties);
+        console.log('Using social links from seller_data:', socialLinks);
       } else {
         console.log('No user profile found for seller:', seller.name);
         // Keep default empty data
