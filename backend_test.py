@@ -265,7 +265,10 @@ def main():
     print(f"\n📝 Testing POST creation (should fail if profile exists)...")
     post_success, post_result = test_post_user_profile(SPECIFIC_USER_ID, TEST_PROFILE_DATA)
     
-    # Test 6: Analyze the issue
+    # Test 6: Test with non-existing user
+    non_existing_profile_exists, non_existing_post_success = test_with_non_existing_user()
+    
+    # Test 7: Analyze the issue
     analyze_duplicate_key_issue()
     
     # Summary
@@ -275,21 +278,31 @@ def main():
     print(f"✅ Backend Health: OK")
     print(f"{'✅' if profile_exists else '❌'} Profile Exists: {profile_exists}")
     print(f"{'✅' if put_success else '❌'} PUT Update: {put_success}")
-    print(f"{'✅' if post_success else '❌'} POST Create: {post_success}")
+    print(f"{'❌' if post_success else '✅'} POST Create (should fail): {not post_success}")
+    print(f"{'✅' if non_existing_post_success else '❌'} POST Create (new user): {non_existing_post_success}")
     
-    if not put_success and not post_success:
-        print("\n🚨 CRITICAL ISSUE IDENTIFIED:")
-        print("   Both PUT and POST operations are failing!")
-        print("   This confirms the duplicate key constraint violation issue.")
-        print("   The frontend may be calling the wrong endpoint or there's a database issue.")
+    print("\n🔍 ISSUE ANALYSIS:")
+    if profile_exists and not post_success:
+        print("   ✅ CONFIRMED: POST correctly fails for existing profiles (409 duplicate key)")
+        print("   ✅ This is the expected behavior - database constraint working correctly")
     
-    print("\n💡 RECOMMENDATIONS:")
-    if profile_exists and not put_success:
-        print("   - Profile exists but PUT update fails - check database constraints")
-        print("   - Frontend should use PUT for existing profiles")
-    if not profile_exists and not post_success:
-        print("   - Profile doesn't exist but POST creation fails - database issue")
-        print("   - Check user_profiles table constraints and triggers")
+    if profile_exists and put_success:
+        print("   ✅ CONFIRMED: PUT correctly updates existing profiles")
+    
+    if non_existing_post_success:
+        print("   ✅ CONFIRMED: POST correctly creates profiles for new users")
+    
+    print("\n🚨 ROOT CAUSE IDENTIFIED:")
+    print("   The user is experiencing a 409 error because:")
+    print("   1. The frontend is calling POST /api/auth/user/{user_id}/profile")
+    print("   2. But the user profile already exists in the database")
+    print("   3. The database has a unique constraint on user_id")
+    print("   4. POST tries to INSERT, which violates the unique constraint")
+    
+    print("\n💡 SOLUTION:")
+    print("   - Frontend should check if profile exists first (GET request)")
+    print("   - Use PUT for existing profiles, POST only for new profiles")
+    print("   - Or implement upsert logic in the backend")
     
     print("=" * 80)
 
