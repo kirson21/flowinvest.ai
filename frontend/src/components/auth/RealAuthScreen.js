@@ -109,17 +109,13 @@ const RealAuthScreen = () => {
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <h1 
-            className="text-4xl font-bold mb-2"
-            style={{ 
-              fontFamily: 'Comfortaa, sans-serif',
-              background: 'linear-gradient(135deg, #474545 0%, #0097B2 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}
-          >
-            f01i.ai
-          </h1>
+          <div className="flex justify-center">
+            <img 
+              src="/f01i_logo.svg" 
+              alt="f01i.ai" 
+              style={{ height: '60px', width: 'auto' }}
+            />
+          </div>
           <p className="text-[#474545]/70 text-lg">Future-Oriented Life & Investments AI Tools</p>
         </div>
 
