@@ -849,9 +849,12 @@ const Settings = () => {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      const result = await logout();
+      const result = await signOut();
       if (!result.success) {
         setError('Failed to logout: ' + result.error);
+      } else {
+        // Clear local app state as well
+        window.location.href = '/login';
       }
     } catch (error) {
       console.error('Logout error:', error);
