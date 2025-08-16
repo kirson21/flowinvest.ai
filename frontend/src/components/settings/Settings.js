@@ -598,6 +598,10 @@ const Settings = () => {
         phone: profileData.phone.trim(),
         bio: profileData.bio.trim(),
         avatar_url: profileData.avatar_url,
+        social_links: profileData.social_links || {},
+        specialties: profileData.specialties || [],
+        experience: profileData.experience || '',
+        seller_data: profileData.seller_data || {},
         updated_at: new Date().toISOString()
       };
 
