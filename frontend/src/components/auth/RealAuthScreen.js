@@ -110,7 +110,6 @@ const RealAuthScreen = () => {
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center">
-            <h1 style={{color: 'red', fontSize: '48px'}}>DEBUG: REAL AUTH SCREEN</h1>
             <img 
               src="/f01i_logo.png" 
               alt="f01i.ai" 
