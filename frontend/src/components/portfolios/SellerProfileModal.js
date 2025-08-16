@@ -523,7 +523,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
                     {seller.name}
                   </CardTitle>
                   <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                    {seller.experience} • Investment Specialist
+                    {sellerProfileData.experience || seller.experience} • Investment Specialist
                   </p>
                   <div className="flex items-center space-x-4 mt-2">
                     <div className="flex items-center">
