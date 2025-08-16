@@ -601,20 +601,28 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
             <div>
               <h3 className="text-lg font-semibold text-[#474545] dark:text-white mb-3">Connect</h3>
               <div className="flex flex-wrap gap-3">
-                {Object.entries(seller.socialLinks || {})
+                {Object.entries(sellerProfileData.social_links || {})
                   .filter(([platform, url]) => url && url.trim() !== '') // Only show links with actual URLs
-                  .map(([platform, url]) => (
-                  <Button
-                    key={platform}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(url, '_blank')}
-                    className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-xs sm:text-sm"
-                  >
-                    {getSocialIcon(platform)}
-                    <span className="ml-2 capitalize">{platform}</span>
-                  </Button>
-                ))}
+                  .length > 0 ? (
+                  Object.entries(sellerProfileData.social_links || {})
+                    .filter(([platform, url]) => url && url.trim() !== '') // Only show links with actual URLs
+                    .map(([platform, url]) => (
+                    <Button
+                      key={platform}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(url, '_blank')}
+                      className="border-[#0097B2]/20 hover:bg-[#0097B2]/5 text-xs sm:text-sm"
+                    >
+                      {getSocialIcon(platform)}
+                      <span className="ml-2 capitalize">{platform}</span>
+                    </Button>
+                  ))
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+                    No social links available
+                  </p>
+                )}
               </div>
             </div>
 
