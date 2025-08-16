@@ -18,16 +18,10 @@ BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'http://localhost:8001')
 API_BASE = f"{BACKEND_URL}/api"
 SPECIFIC_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
 
-# Test data for profile updates
+# Test data for profile updates (using only existing columns)
 TEST_PROFILE_DATA = {
-    "display_name": "Test Super Admin",
-    "bio": "Testing profile update functionality",
-    "location": "Test Location",
-    "website": "https://test.example.com",
-    "social_links": {
-        "twitter": "https://twitter.com/test",
-        "linkedin": "https://linkedin.com/in/test"
-    }
+    "display_name": "Test Super Admin Updated",
+    "bio": "Testing profile update functionality - updated"
 }
 
 def test_backend_health():
