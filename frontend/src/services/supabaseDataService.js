@@ -454,22 +454,15 @@ export const supabaseDataService = {
    */
   async saveUserProfile(userId, profileData) {
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .upsert({
-          user_id: userId,
-          ...profileData,
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error saving user profile:', error);
-        throw error;
-      }
-
-      return data;
+      // Use the centralized database.updateUserProfile to avoid conflicts
+      const { database } = await import('../lib/supabase');
+      return await database.updateUserProfile(userId, {
+        display_name: profileData.display_name,
+        phone: profileData.phone,
+        bio: profileData.bio,
+        avatar_url: profileData.avatar_url,
+        updated_at: new Date().toISOString()
+      });
     } catch (error) {
       console.error('Error in saveUserProfile:', error);
       throw error;
