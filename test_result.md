@@ -105,6 +105,17 @@
 user_problem_statement: "Comprehensive Local Storage Audit & Supabase Migration: In addition to the previously fixed UI loading bug (flickering issue), the application still relies on local storage or temporary client-side memory in certain sections. Please thoroughly review and update Social Media & Links, Messages & Notifications, Seller Verification Management, as well as any other user settings or profile-related sections. Ensure no data is being stored or loaded from local storage or mock data across the entire application. All fields and user information in these sections must be fetched from and saved to Supabase. Double-check the Supabase schema and tables to confirm they are properly structured and reflect all expected fields for these sections. Implement appropriate loading states if needed to ensure smooth transitions while fetching real-time data from Supabase. The goal is full reliance on Supabase as the single source of truth — no more legacy mock data or local memory fallbacks except AI FEED."
 
 backend:
+  - task: "Fix Profile Update 409 Duplicate Key Error"
+    implemented: true
+    working: false
+    file: "/app/backend/routes/auth.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL PROFILE UPDATE ISSUE IDENTIFIED AND ROOT CAUSE CONFIRMED: Comprehensive backend testing has definitively identified the exact cause of the user's 409 'duplicate key value violates unique constraint user_profiles_user_id_key' error. TESTING RESULTS: ✅ Backend Health Check - All endpoints operational (GET /api/, /api/status, /api/health, /api/auth/health), ✅ User Profile Exists - User cd0e9717-f85d-4726-81e9-f260394ead58 profile found in database, ✅ PUT Update Works - Profile updates successfully via PUT /api/auth/user/{user_id}/profile, ❌ POST Creation Fails - POST /api/auth/user/{user_id}/profile returns 409 duplicate key error for existing profiles. ROOT CAUSE ANALYSIS: The user is experiencing the 409 error because: 1) Frontend is calling POST /api/auth/user/{user_id}/profile for profile updates, 2) User profile already exists in database with unique constraint on user_id, 3) POST endpoint tries to INSERT new record, violating unique constraint, 4) Backend logs confirm exact error: 'duplicate key value violates unique constraint user_profiles_user_id_key'. BACKEND BEHAVIOR VERIFICATION: ✅ POST correctly fails for existing profiles (expected behavior), ✅ PUT correctly updates existing profiles, ❌ Database schema issue - foreign key constraint prevents creation for non-existing users. SOLUTION REQUIRED: Frontend must use GET to check if profile exists, then use PUT for updates and POST only for new profiles. The backend endpoints are working correctly - this is a frontend routing/logic issue."
   - task: "Fix Seller Verification Query PGRST201 Error"
     implemented: true
     working: true
