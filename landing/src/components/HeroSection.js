@@ -327,7 +327,13 @@ const HeroSection = () => {
 
         <CanvasContainer>
           <Robot3D position={[0, -1, 0]} scale={1.2} bottom={true} />
-          <FloatingParticles />
+          <FloatingParticles>
+            <div className="particle-1"></div>
+            <div className="particle-2"></div>
+            <div className="particle-3"></div>
+            <div className="particle-4"></div>
+            <div className="particle-5"></div>
+          </FloatingParticles>
         </CanvasContainer>
       </HeroContent>
     </HeroContainer>
