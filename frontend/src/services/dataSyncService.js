@@ -385,32 +385,28 @@ export const dataSyncService = {
   // Save user profile to Supabase with localStorage fallback
   async saveUserProfile(userId, profileUpdates) {
     try {
-      console.log('Saving user profile to Supabase:', profileUpdates);
+      console.log('Saving user profile via centralized service:', profileUpdates);
       
-      const profileData = {
-        user_id: userId,
-        ...profileUpdates,
+      // Use the centralized database.updateUserProfile to avoid conflicts
+      const { database } = await import('../lib/supabase');
+      const data = await database.updateUserProfile(userId, {
+        display_name: profileUpdates.display_name,
+        phone: profileUpdates.phone,
+        bio: profileUpdates.bio,
+        avatar_url: profileUpdates.avatar_url,
         updated_at: new Date().toISOString()
-      };
+      });
 
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .upsert([profileData], { onConflict: 'user_id' })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Supabase profile save failed:', error);
-        // Fallback to localStorage
-        console.warn('Using localStorage fallback for profile save');
+      if (data) {
+        console.log('User profile saved via centralized service successfully');
+        return data;
+      } else {
+        console.warn('Centralized profile save returned null, using localStorage fallback');
         this.saveUserProfileToLocalStorage(userId, profileUpdates);
         return profileUpdates;
       }
-
-      console.log('User profile saved to Supabase successfully');
-      return data;
     } catch (error) {
-      console.error('Error saving user profile:', error);
+      console.error('Error saving user profile via centralized service:', error);
       // Fallback to localStorage
       this.saveUserProfileToLocalStorage(userId, profileUpdates);
       return profileUpdates;
