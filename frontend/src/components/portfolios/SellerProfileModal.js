@@ -579,15 +579,21 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
             <div>
               <h3 className="text-lg font-semibold text-[#474545] dark:text-white mb-3">Specialties</h3>
               <div className="flex flex-wrap gap-2">
-                {seller.specialties?.map((specialty, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="outline" 
-                    className="border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5"
-                  >
-                    {specialty}
-                  </Badge>
-                ))}
+                {sellerProfileData.specialties?.length > 0 ? (
+                  sellerProfileData.specialties.map((specialty, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="outline" 
+                      className="border-[#0097B2]/30 text-[#0097B2] bg-[#0097B2]/5"
+                    >
+                      {specialty}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+                    No specialties listed yet
+                  </p>
+                )}
               </div>
             </div>
 
