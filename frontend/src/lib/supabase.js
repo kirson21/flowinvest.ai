@@ -112,22 +112,53 @@ export const database = {
         console.error('Error updating auth user:', authError)
       }
       
-      // Then update or create user profile in custom table
-      const { data, error } = await supabase
+      // Check if profile already exists
+      const { data: existingProfile, error: checkError } = await supabase
         .from('user_profiles')
-        .upsert({
-          user_id: userId,
-          display_name: updates.display_name,
-          phone: updates.phone,
-          bio: updates.bio,
-          avatar_url: updates.avatar_url,
-          updated_at: updates.updated_at
-        }, { 
-          onConflict: 'user_id',
-          ignoreDuplicates: false 
-        })
-        .select()
+        .select('user_id')
+        .eq('user_id', userId)
         .single()
+      
+      let data, error;
+      
+      if (existingProfile && !checkError) {
+        // Profile exists - UPDATE it
+        console.log('Profile exists, updating...');
+        const result = await supabase
+          .from('user_profiles')
+          .update({
+            display_name: updates.display_name,
+            phone: updates.phone,
+            bio: updates.bio,
+            avatar_url: updates.avatar_url,
+            updated_at: updates.updated_at
+          })
+          .eq('user_id', userId)
+          .select()
+          .single();
+        
+        data = result.data;
+        error = result.error;
+      } else {
+        // Profile doesn't exist - CREATE it
+        console.log('Profile does not exist, creating...');
+        const result = await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: userId,
+            display_name: updates.display_name,
+            phone: updates.phone,
+            bio: updates.bio,
+            avatar_url: updates.avatar_url,
+            created_at: updates.updated_at,
+            updated_at: updates.updated_at
+          })
+          .select()
+          .single();
+        
+        data = result.data;
+        error = result.error;
+      }
       
       if (error) {
         console.error('Error updating user profile:', error)
