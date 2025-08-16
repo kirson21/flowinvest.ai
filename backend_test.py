@@ -185,6 +185,37 @@ def test_database_direct_query():
         print(f"  ❌ Error with direct database query: {e}")
         return False
 
+def test_with_non_existing_user():
+    """Test profile operations with a non-existing user"""
+    print(f"\n🔍 Testing with Non-Existing User...")
+    
+    non_existing_user_id = "00000000-0000-0000-0000-000000000000"
+    
+    # Test GET for non-existing user
+    profile_exists, _ = test_get_user_profile(non_existing_user_id)
+    
+    if not profile_exists:
+        # Test POST for non-existing user (should work)
+        print(f"\n📝 Testing POST creation for non-existing user...")
+        post_success, post_result = test_post_user_profile(non_existing_user_id, TEST_PROFILE_DATA)
+        
+        if post_success:
+            print(f"  ✅ Profile created successfully for non-existing user")
+            # Clean up - delete the created profile
+            try:
+                import sys
+                sys.path.append('/app/backend')
+                from supabase_client import supabase_admin
+                if supabase_admin:
+                    supabase_admin.table('user_profiles').delete().eq('user_id', non_existing_user_id).execute()
+                    print(f"  🧹 Cleaned up test profile")
+            except:
+                pass
+        else:
+            print(f"  ❌ Failed to create profile for non-existing user")
+    
+    return profile_exists, post_success if not profile_exists else False
+
 def analyze_duplicate_key_issue():
     """Analyze the duplicate key constraint issue"""
     print(f"\n🔍 Analyzing Duplicate Key Constraint Issue...")
