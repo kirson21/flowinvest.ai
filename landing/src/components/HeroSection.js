@@ -175,7 +175,7 @@ const BackgroundOrbs = styled.div`
   }
 `;
 
-// Floating particles around the robot - now using CSS animation
+// Enhanced floating particles around the robot - more circles
 const FloatingParticles = styled.div`
   position: absolute;
   top: 0;
@@ -183,47 +183,93 @@ const FloatingParticles = styled.div`
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
+  overflow: hidden;
 
   &::before,
   &::after {
     content: '';
     position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #0097B2;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: float-particle 8s ease-in-out infinite;
+  }
+
+  &::before {
+    top: 15%;
+    left: 15%;
+    animation-delay: 0s;
+  }
+
+  &::after {
+    top: 70%;
+    right: 20%;
+    animation-delay: 4s;
+  }
+
+  /* Additional particles using pseudo-elements */
+  .particle-1,
+  .particle-2,
+  .particle-3,
+  .particle-4,
+  .particle-5 {
+    position: absolute;
     width: 4px;
     height: 4px;
-    background: #0097B2;
+    background: #FAECEC;
     border-radius: 50%;
     opacity: 0.6;
     animation: float-particle 6s ease-in-out infinite;
   }
 
-  &::before {
-    top: 20%;
-    left: 20%;
-    animation-delay: 0s;
+  .particle-1 {
+    top: 25%;
+    right: 15%;
+    animation-delay: 1s;
   }
 
-  &::after {
-    top: 60%;
-    right: 30%;
+  .particle-2 {
+    bottom: 20%;
+    left: 25%;
+    animation-delay: 2s;
+  }
+
+  .particle-3 {
+    top: 45%;
+    left: 10%;
     animation-delay: 3s;
+  }
+
+  .particle-4 {
+    top: 60%;
+    right: 35%;
+    animation-delay: 5s;
+  }
+
+  .particle-5 {
+    bottom: 35%;
+    right: 10%;
+    animation-delay: 6s;
   }
 
   @keyframes float-particle {
     0%, 100% {
-      transform: translateY(0px) translateX(0px);
+      transform: translateY(0px) translateX(0px) scale(1);
       opacity: 0.6;
     }
     25% {
-      transform: translateY(-20px) translateX(10px);
+      transform: translateY(-30px) translateX(15px) scale(1.2);
       opacity: 1;
     }
     50% {
-      transform: translateY(-10px) translateX(-10px);
+      transform: translateY(-15px) translateX(-20px) scale(0.8);
       opacity: 0.8;
     }
     75% {
-      transform: translateY(-30px) translateX(5px);
+      transform: translateY(-40px) translateX(10px) scale(1.1);
       opacity: 0.9;
     }
   }
