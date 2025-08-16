@@ -394,6 +394,10 @@ export const dataSyncService = {
         phone: profileUpdates.phone,
         bio: profileUpdates.bio,
         avatar_url: profileUpdates.avatar_url,
+        social_links: profileUpdates.social_links || {},
+        specialties: profileUpdates.specialties || [],
+        experience: profileUpdates.experience || '',
+        seller_data: profileUpdates.seller_data || {},
         updated_at: new Date().toISOString()
       });
 
