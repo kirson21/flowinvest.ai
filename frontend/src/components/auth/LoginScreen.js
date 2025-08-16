@@ -42,8 +42,8 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FAECEC] to-[#0097B2]/10 dark:from-[#474545] dark:to-[#0097B2]/20 p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+    <div className="min-h-screen flex items-center justify-center bg-[#474545] p-4">
+      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-gradient-to-br from-[#0097B2] to-[#474545] rounded-2xl flex items-center justify-center">
