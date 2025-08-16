@@ -55,17 +55,18 @@ const Robot3D = ({ position = [0, 0, 0], scale = 1, bottom = false }) => {
   const containerStyle = {
     position: 'absolute',
     top: bottom ? 'auto' : '50%',
-    bottom: bottom ? '0' : 'auto',
+    bottom: bottom ? '-10%' : 'auto', // Move even lower - into negative territory
     left: '50%',
     transform: bottom 
       ? `translateX(-50%) scale(${scale})` 
       : `translate(-50%, -50%) scale(${scale})`,
     width: '100%',
-    height: bottom ? '80%' : '100%',
+    height: bottom ? '90%' : '100%',
     zIndex: 3,
     mixBlendMode: 'normal',
     cursor: 'pointer',
-    transition: 'transform 0.3s ease'
+    transition: 'transform 0.3s ease',
+    opacity: 0.7 // 70% transparency as requested
   };
 
   return (
