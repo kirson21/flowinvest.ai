@@ -216,7 +216,11 @@ const Header = () => {
           whileHover={{ scale: 1.05 }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          f01i.ai
+          <img 
+            src="/f01i_logo.png" 
+            alt="f01i.ai" 
+            style={{ height: '40px', width: 'auto' }}
+          />
         </Logo>
         
         <NavLinks>
