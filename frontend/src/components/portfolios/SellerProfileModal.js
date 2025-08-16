@@ -57,8 +57,53 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
       loadSellerReviews();
       loadSellerProducts();
       loadUserVotes();
+      loadSellerProfileData(); // Add this new function
     }
   }, [isOpen, seller]);
+
+  // New state for real seller profile data
+  const [sellerProfileData, setSellerProfileData] = useState({
+    specialties: [],
+    social_links: {},
+    bio: '',
+    experience: ''
+  });
+
+  const loadSellerProfileData = async () => {
+    try {
+      console.log('Loading seller profile data for:', seller.name);
+      
+      // Try to find the seller's user profile in the database
+      const { data: userProfiles, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .ilike('display_name', seller.name);
+      
+      if (error) {
+        console.error('Error loading seller profile data:', error);
+        return;
+      }
+      
+      console.log('Found user profiles for seller:', userProfiles);
+      
+      if (userProfiles && userProfiles.length > 0) {
+        const profile = userProfiles[0]; // Take the first match
+        setSellerProfileData({
+          specialties: profile.specialties || [],
+          social_links: profile.social_links || {},
+          bio: profile.bio || '',
+          experience: profile.experience || ''
+        });
+        
+        console.log('Loaded seller profile data:', profile);
+      } else {
+        console.log('No user profile found for seller:', seller.name);
+        // Keep default empty data
+      }
+    } catch (error) {
+      console.error('Error in loadSellerProfileData:', error);
+    }
+  };
   
   const loadSellerReviews = async () => {
     try {
