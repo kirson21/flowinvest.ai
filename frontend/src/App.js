@@ -80,6 +80,13 @@ function App() {
         <div className="App">
           <Routes>
             {/* Public routes */}
+            <Route path="/test-login" element={
+              <div style={{backgroundColor: '#474545', minHeight: '100vh', color: 'white', padding: '50px'}}>
+                <h1>TEST LOGIN ROUTE</h1>
+                <img src="/f01i_logo.png" alt="logo test" style={{height: '60px'}} />
+              </div>
+            } />
+
             <Route path="/login" element={
               <PublicRoute>
                 <RealAuthScreen />
