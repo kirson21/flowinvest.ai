@@ -17,7 +17,7 @@ const Container = styled.div`
 
 const FooterContent = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr;
   gap: 60px;
   margin-bottom: 40px;
 
