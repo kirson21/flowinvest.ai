@@ -13,8 +13,8 @@ const Robot3D = ({ position = [0, 0, 0], scale = 1, bottom = false }) => {
         document.head.appendChild(script);
         
         script.onload = () => {
-          // Remove Spline logo and branding
-          setTimeout(() => {
+          // Enhanced branding removal - multiple attempts
+          const removeBranding = () => {
             const splineElements = document.querySelectorAll('spline-viewer');
             splineElements.forEach(element => {
               try {
@@ -23,28 +23,59 @@ const Robot3D = ({ position = [0, 0, 0], scale = 1, bottom = false }) => {
                   const logo = element.shadowRoot.querySelector('#logo');
                   if (logo) {
                     logo.style.display = 'none';
+                    logo.style.visibility = 'hidden';
+                    logo.style.opacity = '0';
                   }
                   
-                  // Hide "built with spline" text
-                  const builtWith = element.shadowRoot.querySelector('[class*="built"], [class*="spline"], [style*="built"]');
-                  if (builtWith) {
-                    builtWith.style.display = 'none';
-                  }
+                  // Hide any branding containers
+                  const brandingSelectors = [
+                    '[class*="built"]', 
+                    '[class*="spline"]', 
+                    '[id*="logo"]',
+                    '[class*="watermark"]',
+                    '[class*="badge"]',
+                    'a[href*="spline"]',
+                    'div[style*="position: absolute"][style*="bottom"]'
+                  ];
                   
-                  // Hide any watermark or branding text
-                  const textElements = element.shadowRoot.querySelectorAll('div, span, p, a');
-                  textElements.forEach(textEl => {
+                  brandingSelectors.forEach(selector => {
+                    const elements = element.shadowRoot.querySelectorAll(selector);
+                    elements.forEach(el => {
+                      el.style.display = 'none';
+                      el.style.visibility = 'hidden';
+                      el.style.opacity = '0';
+                    });
+                  });
+
+                  // Hide text containing "spline"
+                  const allTextElements = element.shadowRoot.querySelectorAll('*');
+                  allTextElements.forEach(textEl => {
                     if (textEl.textContent && textEl.textContent.toLowerCase().includes('spline')) {
                       textEl.style.display = 'none';
                     }
                   });
                 }
+
+                // Also try to hide any external branding on the element itself
+                const style = document.createElement('style');
+                style.textContent = `
+                  spline-viewer::part(logo) { display: none !important; }
+                  spline-viewer [class*="logo"] { display: none !important; }
+                  spline-viewer [class*="watermark"] { display: none !important; }
+                `;
+                document.head.appendChild(style);
+                
               } catch (e) {
                 // Ignore shadow DOM access errors
-                console.log('Spline branding removal skipped');
+                console.log('Advanced branding removal attempted');
               }
             });
-          }, 3000);
+          };
+
+          // Remove branding multiple times with delays
+          setTimeout(removeBranding, 1000);
+          setTimeout(removeBranding, 3000);
+          setTimeout(removeBranding, 5000);
         };
       }
     };
