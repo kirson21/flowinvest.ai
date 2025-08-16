@@ -221,14 +221,6 @@ const Footer = () => {
           </FooterSection>
 
           <FooterSection>
-            <SectionTitle>Resources</SectionTitle>
-            <FooterLink whileHover={{ x: 5 }}>Documentation</FooterLink>
-            <FooterLink whileHover={{ x: 5 }}>API Reference</FooterLink>
-            <FooterLink whileHover={{ x: 5 }}>Tutorials</FooterLink>
-            <FooterLink whileHover={{ x: 5 }}>Community</FooterLink>
-          </FooterSection>
-
-          <FooterSection>
             <SectionTitle>Company</SectionTitle>
             <FooterLink whileHover={{ x: 5 }}>About Us</FooterLink>
             <FooterLink whileHover={{ x: 5 }}>Careers</FooterLink>
