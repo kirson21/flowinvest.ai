@@ -848,6 +848,7 @@ const Settings = () => {
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       const result = await logout();
       if (!result.success) {
         setError('Failed to logout: ' + result.error);
@@ -855,6 +856,8 @@ const Settings = () => {
     } catch (error) {
       console.error('Logout error:', error);
       setError('Failed to logout');
+    } finally {
+      setLoading(false);
     }
   };
 
