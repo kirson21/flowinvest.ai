@@ -82,25 +82,7 @@ function App() {
             {/* Public routes */}
             <Route path="/login" element={
               <PublicRoute>
-                <div style={{
-                  backgroundColor: '#474545',
-                  minHeight: '100vh',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontFamily: 'Arial'
-                }}>
-                  <div style={{textAlign: 'center'}}>
-                    <img 
-                      src="/f01i_logo.png" 
-                      alt="f01i.ai"
-                      style={{height: '60px', marginBottom: '20px'}}
-                    />
-                    <h1>DIRECT LOGIN COMPONENT</h1>
-                    <p>Dark grey background with logo</p>
-                  </div>
-                </div>
+                <RealAuthScreen />
               </PublicRoute>
             } />
             
