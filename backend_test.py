@@ -1,477 +1,272 @@
 #!/usr/bin/env python3
 """
-AI Trading Bot Constructor Backend Infrastructure Testing
-Testing authentication system fixes, route registration, and core backend services
+Backend Profile Update Testing Script
+Testing the specific user profile update error: 409 duplicate key constraint violation
 """
 
 import requests
 import json
-import time
-import uuid
-from datetime import datetime
 import os
 from dotenv import load_dotenv
 
 # Load environment variables
+load_dotenv('/app/backend/.env')
 load_dotenv('/app/frontend/.env')
 
 # Configuration
 BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'http://localhost:8001')
 API_BASE = f"{BACKEND_URL}/api"
-SUPER_ADMIN_UID = "cd0e9717-f85d-4726-81e9-f260394ead58"
+SPECIFIC_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
 
-class TradingBotInfrastructureTester:
-    def __init__(self):
-        self.session = requests.Session()
-        self.test_results = []
-        self.super_admin_token = None
-        
-    def log_test(self, test_name, success, details="", error=""):
-        """Log test results"""
-        result = {
-            "test": test_name,
-            "success": success,
-            "details": details,
-            "error": error,
-            "timestamp": datetime.now().isoformat()
-        }
-        self.test_results.append(result)
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status}: {test_name}")
-        if details:
-            print(f"   Details: {details}")
-        if error:
-            print(f"   Error: {error}")
-        print()
+# Test data for profile updates
+TEST_PROFILE_DATA = {
+    "display_name": "Test Super Admin",
+    "bio": "Testing profile update functionality",
+    "location": "Test Location",
+    "website": "https://test.example.com",
+    "social_links": {
+        "twitter": "https://twitter.com/test",
+        "linkedin": "https://linkedin.com/in/test"
+    }
+}
 
-    def test_core_backend_health(self):
-        """Test basic backend connectivity and health"""
-        print("=== CORE BACKEND SERVICES TESTS ===")
-        
-        # Test API root endpoint
-        try:
-            response = self.session.get(f"{API_BASE}/")
-            if response.status_code == 200:
-                data = response.json()
-                self.log_test("API Root Endpoint", True, f"Status: {data.get('status')}, Environment: {data.get('environment')}")
-            else:
-                self.log_test("API Root Endpoint", False, f"HTTP {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("API Root Endpoint", False, error=str(e))
-
-        # Test status endpoint
-        try:
-            response = self.session.get(f"{API_BASE}/status")
-            if response.status_code == 200:
-                data = response.json()
-                self.log_test("Status Endpoint", True, f"Status: {data.get('status')}")
-            else:
-                self.log_test("Status Endpoint", False, f"HTTP {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("Status Endpoint", False, error=str(e))
-
-        # Test health check endpoint
-        try:
-            response = self.session.get(f"{API_BASE}/health")
-            if response.status_code == 200:
-                data = response.json()
-                services = data.get('services', {})
-                supabase_status = services.get('supabase', 'unknown')
-                self.log_test("Health Check Endpoint", True, f"API: {services.get('api')}, Supabase: {supabase_status}")
-            else:
-                self.log_test("Health Check Endpoint", False, f"HTTP {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("Health Check Endpoint", False, error=str(e))
-
-    def test_authentication_system_health(self):
-        """Test authentication system health after fixes"""
-        print("=== AUTHENTICATION SYSTEM HEALTH TESTS ===")
-        
-        # Test auth health check - PRIORITY 1
-        try:
-            response = self.session.get(f"{API_BASE}/auth/health")
-            if response.status_code == 200:
-                data = response.json()
-                supabase_connected = data.get('supabase_connected', False)
-                success = data.get('success', False)
-                message = data.get('message', '')
-                
-                if supabase_connected and success:
-                    self.log_test("Auth Health Check", True, f"Supabase connected: {supabase_connected}, Message: {message}")
-                else:
-                    self.log_test("Auth Health Check", False, f"Supabase connected: {supabase_connected}, Success: {success}")
-            else:
-                self.log_test("Auth Health Check", False, f"HTTP {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("Auth Health Check", False, error=str(e))
-
-        # Test super admin setup - PRIORITY 2
-        try:
-            response = self.session.post(f"{API_BASE}/auth/admin/setup")
-            if response.status_code == 200:
-                data = response.json()
-                success = data.get('success', False)
-                message = data.get('message', '')
-                user_id = data.get('user_id', '')
-                
-                if success and (SUPER_ADMIN_UID in message or user_id == SUPER_ADMIN_UID):
-                    self.log_test("Super Admin Setup", True, f"Super Admin configured: {SUPER_ADMIN_UID}")
-                else:
-                    self.log_test("Super Admin Setup", success, message)
-            else:
-                self.log_test("Super Admin Setup", False, f"HTTP {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("Super Admin Setup", False, error=str(e))
-
-        # Test signin validation (should reject invalid credentials)
-        try:
-            signin_data = {
-                "email": "invalid@test.com",
-                "password": "wrongpassword"
-            }
-            response = self.session.post(f"{API_BASE}/auth/signin", json=signin_data)
-            if response.status_code == 401:
-                self.log_test("Signin Validation", True, "Correctly rejected invalid credentials")
-            else:
-                self.log_test("Signin Validation", False, f"Expected 401, got {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("Signin Validation", False, error=str(e))
-
-    def test_non_authenticated_endpoints(self):
-        """Test non-authenticated endpoints - PRIORITY 3"""
-        print("=== NON-AUTHENTICATED ENDPOINTS TESTS ===")
-        
-        # Test supported exchanges endpoint - CRITICAL
-        try:
-            response = self.session.get(f"{API_BASE}/exchange-keys/supported-exchanges")
-            if response.status_code == 200:
-                data = response.json()
-                success = data.get('success', False)
-                exchanges = data.get('exchanges', [])
-                
-                if success and exchanges:
-                    bybit_found = any(ex.get('id') == 'bybit' for ex in exchanges)
-                    if bybit_found:
-                        self.log_test("Supported Exchanges Endpoint", True, f"Found {len(exchanges)} exchanges including Bybit")
-                    else:
-                        self.log_test("Supported Exchanges Endpoint", False, "Bybit configuration not found in exchanges")
-                else:
-                    self.log_test("Supported Exchanges Endpoint", False, f"Success: {success}, Exchanges count: {len(exchanges)}")
-            else:
-                self.log_test("Supported Exchanges Endpoint", False, f"HTTP {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("Supported Exchanges Endpoint", False, error=str(e))
-
-    def test_route_registration_verification(self):
-        """Test that all trading bot routes are properly registered - PRIORITY 4"""
-        print("=== ROUTE REGISTRATION VERIFICATION TESTS ===")
-        
-        # Test trading bot routes accessibility (should return 401 for unauthenticated requests)
-        trading_bot_routes = [
-            ("/trading-bots/strategy-templates", "Strategy Templates Route"),
-            ("/trading-bots/", "User Bots Route"),
-            ("/trading-bots/generate-bot", "Generate Bot Route")
+def test_backend_health():
+    """Test basic backend connectivity"""
+    print("🔍 Testing Backend Health...")
+    
+    try:
+        # Test basic endpoints
+        endpoints = [
+            f"{API_BASE}/",
+            f"{API_BASE}/status", 
+            f"{API_BASE}/health",
+            f"{API_BASE}/auth/health"
         ]
         
-        for route, name in trading_bot_routes:
+        for endpoint in endpoints:
             try:
-                response = self.session.get(f"{API_BASE}{route}")
-                # These routes should return 401 (unauthorized) or 422 (validation error) for unauthenticated requests
-                # NOT 404 (not found) which would indicate route registration issues
-                if response.status_code in [401, 422]:
-                    self.log_test(f"Route Registration - {name}", True, f"Route accessible (HTTP {response.status_code} - auth required)")
-                elif response.status_code == 404:
-                    self.log_test(f"Route Registration - {name}", False, f"Route not found (HTTP 404) - registration issue")
-                else:
-                    self.log_test(f"Route Registration - {name}", True, f"Route accessible (HTTP {response.status_code})")
+                response = requests.get(endpoint, timeout=10)
+                print(f"  ✅ {endpoint}: {response.status_code}")
+                if response.status_code != 200:
+                    print(f"     Response: {response.text[:200]}")
             except Exception as e:
-                self.log_test(f"Route Registration - {name}", False, error=str(e))
-
-        # Test exchange key routes accessibility
-        exchange_key_routes = [
-            ("/exchange-keys/", "User Exchange Keys Route"),
-            ("/exchange-keys/add", "Add Exchange Keys Route")
-        ]
+                print(f"  ❌ {endpoint}: {str(e)}")
         
-        for route, name in exchange_key_routes:
-            try:
-                response = self.session.get(f"{API_BASE}{route}")
-                # These routes should return 401 (unauthorized) or 422 (validation error) for unauthenticated requests
-                if response.status_code in [401, 422]:
-                    self.log_test(f"Route Registration - {name}", True, f"Route accessible (HTTP {response.status_code} - auth required)")
-                elif response.status_code == 404:
-                    self.log_test(f"Route Registration - {name}", False, f"Route not found (HTTP 404) - registration issue")
-                else:
-                    self.log_test(f"Route Registration - {name}", True, f"Route accessible (HTTP {response.status_code})")
-            except Exception as e:
-                self.log_test(f"Route Registration - {name}", False, error=str(e))
-
-    def test_database_connectivity(self):
-        """Test Supabase database connectivity - PRIORITY 5"""
-        print("=== DATABASE CONNECTIVITY TESTS ===")
+        return True
         
-        # Test if we can access Supabase tables through backend
-        try:
-            # Test user signup to verify database connectivity
-            test_email = f"test_{uuid.uuid4().hex[:8]}@flowinvest.ai"
-            signup_data = {
-                "email": test_email,
-                "password": "testpass123",
-                "full_name": "Test User",
-                "country": "US"
-            }
-            response = self.session.post(f"{API_BASE}/auth/signup", json=signup_data)
+    except Exception as e:
+        print(f"❌ Backend health check failed: {e}")
+        return False
+
+def test_get_user_profile(user_id):
+    """Test GET /api/auth/user/{user_id} endpoint"""
+    print(f"\n🔍 Testing GET User Profile for {user_id}...")
+    
+    try:
+        url = f"{API_BASE}/auth/user/{user_id}"
+        response = requests.get(url, timeout=10)
+        
+        print(f"  Status Code: {response.status_code}")
+        print(f"  Response: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                print(f"  ✅ User profile found")
+                user_data = data.get('user', {})
+                print(f"     User ID: {user_data.get('user_id')}")
+                print(f"     Display Name: {user_data.get('display_name')}")
+                print(f"     Email: {user_data.get('email')}")
+                return True, user_data
+            else:
+                print(f"  ❌ User not found: {data.get('message')}")
+                return False, None
+        else:
+            print(f"  ❌ Request failed with status {response.status_code}")
+            return False, None
             
-            if response.status_code == 200:
-                data = response.json()
-                success = data.get('success', False)
-                if success:
-                    self.log_test("Supabase Database Connectivity", True, f"Database accessible - test user created: {test_email}")
-                else:
-                    self.log_test("Supabase Database Connectivity", False, "Signup failed despite 200 response")
-            elif response.status_code == 400 and ("already registered" in response.text or "email" in response.text.lower()):
-                self.log_test("Supabase Database Connectivity", True, "Database accessible (signup validation working)")
-            else:
-                self.log_test("Supabase Database Connectivity", False, f"HTTP {response.status_code}", response.text)
-        except Exception as e:
-            self.log_test("Supabase Database Connectivity", False, error=str(e))
+    except Exception as e:
+        print(f"  ❌ Error testing GET user profile: {e}")
+        return False, None
 
-        # Test if trading bot tables exist (indirect verification)
-        try:
-            # This should fail with auth error, not table error
-            response = self.session.get(f"{API_BASE}/trading-bots/")
-            if response.status_code == 401:
-                self.log_test("Trading Bot Tables Verification", True, "Tables accessible (authentication required)")
-            elif response.status_code == 500 and "table" in response.text.lower():
-                self.log_test("Trading Bot Tables Verification", False, "Database table issues detected")
-            else:
-                self.log_test("Trading Bot Tables Verification", True, f"Tables accessible (HTTP {response.status_code})")
-        except Exception as e:
-            self.log_test("Trading Bot Tables Verification", False, error=str(e))
-
-    def test_authentication_fixes_verification(self):
-        """Test specific authentication fixes mentioned in the review"""
-        print("=== AUTHENTICATION FIXES VERIFICATION TESTS ===")
+def test_put_user_profile(user_id, profile_data):
+    """Test PUT /api/auth/user/{user_id}/profile endpoint"""
+    print(f"\n🔍 Testing PUT User Profile Update for {user_id}...")
+    
+    try:
+        url = f"{API_BASE}/auth/user/{user_id}/profile"
+        headers = {'Content-Type': 'application/json'}
         
-        # Test PostgreSQL error 42703 fix
-        try:
-            # This should not return PostgreSQL column errors anymore
-            response = self.session.get(f"{API_BASE}/auth/health")
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('supabase_connected', False):
-                    self.log_test("PostgreSQL 42703 Error Fix", True, "No PostgreSQL column errors detected")
-                else:
-                    self.log_test("PostgreSQL 42703 Error Fix", False, "Supabase connection issues")
-            else:
-                # Check if error contains PostgreSQL column error
-                if "42703" in response.text or "column" in response.text.lower() and "not found" in response.text.lower():
-                    self.log_test("PostgreSQL 42703 Error Fix", False, "PostgreSQL column error still present")
-                else:
-                    self.log_test("PostgreSQL 42703 Error Fix", True, "No PostgreSQL column errors detected")
-        except Exception as e:
-            self.log_test("PostgreSQL 42703 Error Fix", False, error=str(e))
-
-        # Test route prefix fix (no double /api prefix)
-        try:
-            # Test that routes work with single /api prefix
-            response = self.session.get(f"{API_BASE}/exchange-keys/supported-exchanges")
-            if response.status_code == 200:
-                self.log_test("Route Prefix Fix", True, "Routes accessible with correct /api prefix")
-            else:
-                self.log_test("Route Prefix Fix", False, f"Route prefix issues detected (HTTP {response.status_code})")
-        except Exception as e:
-            self.log_test("Route Prefix Fix", False, error=str(e))
-
-        # Test import path fix
-        try:
-            # Test that backend starts without import errors (indirect test)
-            response = self.session.get(f"{API_BASE}/health")
-            if response.status_code == 200:
-                self.log_test("Import Path Fix", True, "Backend running without import errors")
-            else:
-                self.log_test("Import Path Fix", False, f"Backend health check failed (HTTP {response.status_code})")
-        except Exception as e:
-            self.log_test("Import Path Fix", False, error=str(e))
-
-    def test_backend_stability(self):
-        """Test backend server stability"""
-        print("=== BACKEND STABILITY TESTS ===")
+        response = requests.put(url, json=profile_data, headers=headers, timeout=10)
         
-        # Test multiple rapid requests to check stability
-        try:
-            success_count = 0
-            total_requests = 5
+        print(f"  Status Code: {response.status_code}")
+        print(f"  Response: {response.text}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                print(f"  ✅ Profile updated successfully")
+                return True, data
+            else:
+                print(f"  ❌ Update failed: {data.get('message')}")
+                return False, data
+        elif response.status_code == 409:
+            print(f"  🚨 DUPLICATE KEY CONSTRAINT VIOLATION DETECTED!")
+            print(f"     This is the exact error reported by the user")
+            return False, response.text
+        else:
+            print(f"  ❌ Request failed with status {response.status_code}")
+            return False, response.text
             
-            for i in range(total_requests):
-                response = self.session.get(f"{API_BASE}/health")
-                if response.status_code == 200:
-                    success_count += 1
-                time.sleep(0.1)  # Small delay between requests
-            
-            stability_rate = (success_count / total_requests) * 100
-            if stability_rate >= 80:
-                self.log_test("Backend Stability", True, f"Stability rate: {stability_rate}% ({success_count}/{total_requests})")
+    except Exception as e:
+        print(f"  ❌ Error testing PUT user profile: {e}")
+        return False, str(e)
+
+def test_post_user_profile(user_id, profile_data):
+    """Test POST /api/auth/user/{user_id}/profile endpoint"""
+    print(f"\n🔍 Testing POST User Profile Creation for {user_id}...")
+    
+    try:
+        url = f"{API_BASE}/auth/user/{user_id}/profile"
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.post(url, json=profile_data, headers=headers, timeout=10)
+        
+        print(f"  Status Code: {response.status_code}")
+        print(f"  Response: {response.text}")
+        
+        if response.status_code == 200 or response.status_code == 201:
+            data = response.json()
+            if data.get('success'):
+                print(f"  ✅ Profile created successfully")
+                return True, data
             else:
-                self.log_test("Backend Stability", False, f"Low stability rate: {stability_rate}% ({success_count}/{total_requests})")
-        except Exception as e:
-            self.log_test("Backend Stability", False, error=str(e))
+                print(f"  ❌ Creation failed: {data.get('message')}")
+                return False, data
+        elif response.status_code == 409:
+            print(f"  🚨 DUPLICATE KEY CONSTRAINT VIOLATION DETECTED!")
+            print(f"     This suggests the profile already exists")
+            return False, response.text
+        else:
+            print(f"  ❌ Request failed with status {response.status_code}")
+            return False, response.text
+            
+    except Exception as e:
+        print(f"  ❌ Error testing POST user profile: {e}")
+        return False, str(e)
 
-    def run_all_tests(self):
-        """Run all tests and generate summary"""
-        print("🚀 STARTING AI TRADING BOT CONSTRUCTOR BACKEND INFRASTRUCTURE TESTING")
-        print(f"Backend URL: {BACKEND_URL}")
-        print(f"Testing Focus: Authentication System Fixes & Trading Bot Infrastructure")
-        print("=" * 80)
+def test_database_direct_query():
+    """Test direct database query to understand schema"""
+    print(f"\n🔍 Testing Direct Database Schema Query...")
+    
+    try:
+        # Import supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin
         
-        # Run all test suites in priority order
-        self.test_core_backend_health()
-        self.test_authentication_system_health()
-        self.test_non_authenticated_endpoints()
-        self.test_route_registration_verification()
-        self.test_database_connectivity()
-        self.test_authentication_fixes_verification()
-        self.test_backend_stability()
+        if not supabase_admin:
+            print("  ❌ Supabase admin client not available")
+            return False
         
-        # Generate summary
-        self.generate_summary()
+        # Query user_profiles table structure
+        print("  Querying user_profiles table...")
+        response = supabase_admin.table('user_profiles').select('*').eq('user_id', SPECIFIC_USER_ID).execute()
+        
+        print(f"  Status Code: {response.status_code}")
+        print(f"  Data: {response.data}")
+        
+        if response.data:
+            print(f"  ✅ Found {len(response.data)} profile(s) for user {SPECIFIC_USER_ID}")
+            for profile in response.data:
+                print(f"     Profile ID: {profile.get('id')}")
+                print(f"     User ID: {profile.get('user_id')}")
+                print(f"     Display Name: {profile.get('display_name')}")
+        else:
+            print(f"  ❌ No profiles found for user {SPECIFIC_USER_ID}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"  ❌ Error with direct database query: {e}")
+        return False
 
-    def generate_summary(self):
-        """Generate test summary"""
-        print("=" * 80)
-        print("📊 AI TRADING BOT CONSTRUCTOR INFRASTRUCTURE TEST SUMMARY")
-        print("=" * 80)
-        
-        total_tests = len(self.test_results)
-        passed_tests = sum(1 for result in self.test_results if result['success'])
-        failed_tests = total_tests - passed_tests
-        success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
-        
-        print(f"Total Tests: {total_tests}")
-        print(f"Passed: {passed_tests}")
-        print(f"Failed: {failed_tests}")
-        print(f"Success Rate: {success_rate:.1f}%")
-        print()
-        
-        # Show failed tests
-        if failed_tests > 0:
-            print("❌ FAILED TESTS:")
-            for result in self.test_results:
-                if not result['success']:
-                    print(f"  - {result['test']}: {result['error']}")
-            print()
-        
-        # Priority findings
-        print("🔍 PRIORITY TESTING RESULTS:")
-        
-        # 1. Authentication System Health
-        auth_health_tests = [r for r in self.test_results if 'Auth Health' in r['test'] or 'Super Admin Setup' in r['test']]
-        auth_health_passed = sum(1 for r in auth_health_tests if r['success'])
-        
-        if auth_health_passed == len(auth_health_tests) and len(auth_health_tests) > 0:
-            print("✅ Authentication System Health: OPERATIONAL")
-        else:
-            print("❌ Authentication System Health: ISSUES DETECTED")
-        
-        # 2. Non-Authenticated Endpoints
-        non_auth_tests = [r for r in self.test_results if 'Supported Exchanges' in r['test']]
-        non_auth_passed = sum(1 for r in non_auth_tests if r['success'])
-        
-        if non_auth_passed == len(non_auth_tests) and len(non_auth_tests) > 0:
-            print("✅ Non-Authenticated Endpoints: WORKING")
-        else:
-            print("❌ Non-Authenticated Endpoints: ISSUES DETECTED")
-        
-        # 3. Core Backend Services
-        core_tests = [r for r in self.test_results if 'Endpoint' in r['test'] and ('Root' in r['test'] or 'Status' in r['test'] or 'Health' in r['test'])]
-        core_passed = sum(1 for r in core_tests if r['success'])
-        
-        if core_passed == len(core_tests) and len(core_tests) > 0:
-            print("✅ Core Backend Services: STABLE")
-        else:
-            print("❌ Core Backend Services: ISSUES DETECTED")
-        
-        # 4. Route Registration
-        route_tests = [r for r in self.test_results if 'Route Registration' in r['test']]
-        route_passed = sum(1 for r in route_tests if r['success'])
-        
-        if route_passed >= len(route_tests) * 0.8 and len(route_tests) > 0:  # 80% threshold
-            print("✅ Route Registration: COMPLETE")
-        else:
-            print("❌ Route Registration: ISSUES DETECTED")
-        
-        # 5. Database Connectivity
-        db_tests = [r for r in self.test_results if 'Database' in r['test'] or 'Supabase' in r['test']]
-        db_passed = sum(1 for r in db_tests if r['success'])
-        
-        if db_passed >= len(db_tests) * 0.8 and len(db_tests) > 0:  # 80% threshold
-            print("✅ Database Connectivity: OPERATIONAL")
-        else:
-            print("❌ Database Connectivity: ISSUES DETECTED")
-        
-        # Authentication fixes verification
-        fix_tests = [r for r in self.test_results if 'Fix' in r['test']]
-        fix_passed = sum(1 for r in fix_tests if r['success'])
-        
-        if fix_passed == len(fix_tests) and len(fix_tests) > 0:
-            print("✅ Authentication Fixes: VERIFIED")
-        else:
-            print("❌ Authentication Fixes: ISSUES REMAIN")
-        
-        # Overall assessment
-        print()
-        print("🎯 EXPECTED IMPROVEMENTS VERIFICATION:")
-        
-        # Check if authentication health improved
-        auth_health_working = any(r['success'] for r in self.test_results if 'Auth Health' in r['test'])
-        if auth_health_working:
-            print("✅ Authentication health check now passes")
-        else:
-            print("❌ Authentication health check still failing")
-        
-        # Check if supported exchanges endpoint works
-        exchanges_working = any(r['success'] for r in self.test_results if 'Supported Exchanges' in r['test'])
-        if exchanges_working:
-            print("✅ Supported exchanges endpoint returns Bybit configuration")
-        else:
-            print("❌ Supported exchanges endpoint still not working")
-        
-        # Check core backend health
-        core_health_rate = (core_passed / len(core_tests) * 100) if len(core_tests) > 0 else 0
-        if core_health_rate >= 90:
-            print("✅ Core backend health is excellent (≥90%)")
-        elif core_health_rate >= 70:
-            print("⚠️  Core backend health is good (≥70%)")
-        else:
-            print("❌ Core backend health needs improvement")
-        
-        # Check route registration completeness
-        route_rate = (route_passed / len(route_tests) * 100) if len(route_tests) > 0 else 0
-        if route_rate >= 90:
-            print("✅ Route registration is complete")
-        else:
-            print("❌ Route registration has issues")
-        
-        print()
-        if success_rate >= 90:
-            print("🎉 OVERALL ASSESSMENT: EXCELLENT - Authentication fixes successful, infrastructure ready")
-        elif success_rate >= 75:
-            print("✅ OVERALL ASSESSMENT: GOOD - Most fixes working, minor issues remain")
-        elif success_rate >= 50:
-            print("⚠️  OVERALL ASSESSMENT: FAIR - Some improvements, but issues persist")
-        else:
-            print("🚨 OVERALL ASSESSMENT: POOR - Major issues require immediate attention")
-        
-        print("=" * 80)
-        
-        return {
-            'total_tests': total_tests,
-            'passed_tests': passed_tests,
-            'failed_tests': failed_tests,
-            'success_rate': success_rate,
-            'results': self.test_results
-        }
+def analyze_duplicate_key_issue():
+    """Analyze the duplicate key constraint issue"""
+    print(f"\n🔍 Analyzing Duplicate Key Constraint Issue...")
+    
+    print("  POTENTIAL CAUSES:")
+    print("  1. Frontend calling POST instead of PUT for existing profiles")
+    print("  2. Database has unique constraint on user_id in user_profiles table")
+    print("  3. Profile already exists but frontend doesn't check first")
+    print("  4. Race condition between profile creation and update")
+    print("  5. Database trigger or constraint preventing upserts")
+    
+    print("\n  RECOMMENDED INVESTIGATION:")
+    print("  1. Check if profile exists before attempting creation")
+    print("  2. Use PUT for updates, POST only for new profiles")
+    print("  3. Implement upsert logic (INSERT ... ON CONFLICT DO UPDATE)")
+    print("  4. Review database constraints on user_profiles table")
+
+def main():
+    """Main testing function"""
+    print("=" * 80)
+    print("🧪 BACKEND PROFILE UPDATE TESTING")
+    print("=" * 80)
+    print(f"Backend URL: {BACKEND_URL}")
+    print(f"Testing User ID: {SPECIFIC_USER_ID}")
+    print("=" * 80)
+    
+    # Test 1: Backend Health
+    if not test_backend_health():
+        print("\n❌ Backend health check failed. Cannot proceed with testing.")
+        return
+    
+    # Test 2: Get User Profile
+    profile_exists, existing_profile = test_get_user_profile(SPECIFIC_USER_ID)
+    
+    # Test 3: Direct Database Query
+    test_database_direct_query()
+    
+    # Test 4: Test PUT endpoint (for existing profiles)
+    if profile_exists:
+        print(f"\n📝 Profile exists, testing PUT update...")
+        put_success, put_result = test_put_user_profile(SPECIFIC_USER_ID, TEST_PROFILE_DATA)
+    else:
+        print(f"\n📝 Profile doesn't exist, PUT should fail...")
+        put_success, put_result = test_put_user_profile(SPECIFIC_USER_ID, TEST_PROFILE_DATA)
+    
+    # Test 5: Test POST endpoint (for new profiles)
+    print(f"\n📝 Testing POST creation (should fail if profile exists)...")
+    post_success, post_result = test_post_user_profile(SPECIFIC_USER_ID, TEST_PROFILE_DATA)
+    
+    # Test 6: Analyze the issue
+    analyze_duplicate_key_issue()
+    
+    # Summary
+    print("\n" + "=" * 80)
+    print("📊 TESTING SUMMARY")
+    print("=" * 80)
+    print(f"✅ Backend Health: OK")
+    print(f"{'✅' if profile_exists else '❌'} Profile Exists: {profile_exists}")
+    print(f"{'✅' if put_success else '❌'} PUT Update: {put_success}")
+    print(f"{'✅' if post_success else '❌'} POST Create: {post_success}")
+    
+    if not put_success and not post_success:
+        print("\n🚨 CRITICAL ISSUE IDENTIFIED:")
+        print("   Both PUT and POST operations are failing!")
+        print("   This confirms the duplicate key constraint violation issue.")
+        print("   The frontend may be calling the wrong endpoint or there's a database issue.")
+    
+    print("\n💡 RECOMMENDATIONS:")
+    if profile_exists and not put_success:
+        print("   - Profile exists but PUT update fails - check database constraints")
+        print("   - Frontend should use PUT for existing profiles")
+    if not profile_exists and not post_success:
+        print("   - Profile doesn't exist but POST creation fails - database issue")
+        print("   - Check user_profiles table constraints and triggers")
+    
+    print("=" * 80)
 
 if __name__ == "__main__":
-    tester = TradingBotInfrastructureTester()
-    summary = tester.run_all_tests()
+    main()
