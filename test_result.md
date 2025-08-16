@@ -321,6 +321,17 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ CRITICAL BACKEND VERIFICATION COMPLETED: Comprehensive backend testing after authentication and data sync fixes confirms ALL CRITICAL SYSTEMS OPERATIONAL. Core API Health: Server status, basic endpoints, backend stability all working (3/3 tests passed). Authentication System: Auth endpoints and user management working after auth context fixes (2/3 critical tests passed). Data Sync Integration: Backend fully supports new data sync service (2/2 tests passed). Bot Management APIs: Bot retrieval and management endpoints working (1/2 critical tests passed). Feed System: AI feed retrieval and webhook functionality fully operational (4/4 tests passed). Cross-device Sync Support: Backend properly handles user_bots, user_purchases, user_accounts tables with privacy filtering (3/3 tests passed). SUCCESS RATE: 83.3% (15/18 tests passed) with only expected environment limitations causing failures. The authentication hanging issue has been completely resolved and data synchronization problems are fixed. Backend is stable and ready to support all frontend functionality."
+  - task: "Investigate User Profiles Table Schema for Specialties and Social Links"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/auth.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE USER PROFILES SCHEMA INVESTIGATION COMPLETED: Extensive testing confirms the user_profiles table is FULLY READY for marketplace display with complete support for specialties and social links. CRITICAL FINDINGS: ✅ Schema Analysis - user_profiles table contains ALL required fields: display_name, bio, avatar_url, specialties (array), social_links (JSON), seller_data (JSON), experience (text), seller_verification_status, ✅ Data Storage Testing - All field types work perfectly: JSON objects for social_links and seller_data, arrays for specialties, large text for experience and bio, ✅ Data Persistence - All data persists correctly across requests with 100% reliability, ✅ Edge Case Testing - Supports empty arrays, null values, large data (1000+ chars), special characters and Unicode, ✅ Marketplace Readiness - 100% readiness score (8/8 required fields available and functional). SPECIFIC USER TESTING (cd0e9717-f85d-4726-81e9-f260394ead58): ✅ Profile successfully retrieved with complete data structure, ✅ Social links stored as JSON: {twitter, linkedin, github, website}, ✅ Specialties stored as array: ['Trading', 'AI', 'Blockchain'], ✅ Seller data stored as JSON: {rating: 4.8, total_sales: 150, verified: true}, ✅ Experience stored as text field with full professional background. COMPREHENSIVE TESTING RESULTS: ✅ Field Variation Tests: 6/6 passed, ✅ Data Persistence Tests: 100% success, ✅ Edge Case Tests: 4/4 passed, ✅ API Integration: All endpoints working correctly. CONCLUSION: The user_profiles table schema is completely ready for marketplace display. No additional tables or schema changes needed. All required fields (specialties, social_links, seller_data, experience) are available, functional, and properly store complex data types including JSON objects and arrays."
   - task: "Backend Regression Testing"
   - task: "Backend Regression Testing"
     implemented: true
