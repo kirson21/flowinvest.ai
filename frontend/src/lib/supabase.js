@@ -131,6 +131,10 @@ export const database = {
             phone: updates.phone,
             bio: updates.bio,
             avatar_url: updates.avatar_url,
+            social_links: updates.social_links || {},
+            specialties: updates.specialties || [],
+            experience: updates.experience || '',
+            seller_data: updates.seller_data || {},
             updated_at: updates.updated_at
           })
           .eq('user_id', userId)
