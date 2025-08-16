@@ -50,8 +50,12 @@ const LoginScreen = () => {
               <div className="text-white font-bold text-2xl">F</div>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-[#474545] dark:text-white">
-            f01i.ai
+          <CardTitle className="text-2xl font-bold text-[#474545] dark:text-white flex items-center justify-center">
+            <img 
+              src="/f01i_logo.svg" 
+              alt="f01i.ai" 
+              style={{ height: '48px', width: 'auto' }}
+            />
           </CardTitle>
           <CardDescription className="text-[#474545]/70 dark:text-gray-300">
             Future-Oriented Life & Investments AI Tools
