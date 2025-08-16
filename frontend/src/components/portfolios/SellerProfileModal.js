@@ -555,7 +555,7 @@ const SellerProfileModal = ({ seller, isOpen, onClose, onReviewAdded, userPurcha
             <div>
               <h3 className="text-lg font-semibold text-[#474545] dark:text-white mb-3">About</h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base leading-relaxed">
-                {getSellerBio()}
+                {sellerProfileData.bio || getSellerBio()}
               </p>
             </div>
 
