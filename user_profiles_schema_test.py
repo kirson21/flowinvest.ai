@@ -344,7 +344,12 @@ def main():
     investigate_related_tables()
     
     # Test 6: Test JSON Field Storage
-    json_success, json_profile = test_json_field_storage()
+    json_result = test_json_field_storage()
+    if isinstance(json_result, tuple):
+        json_success, json_profile = json_result
+    else:
+        json_success = json_result
+        json_profile = None
     
     # Test 7: Analysis and Recommendations
     analyze_schema_findings()
