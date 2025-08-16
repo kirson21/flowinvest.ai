@@ -847,7 +847,15 @@ const Settings = () => {
   };
 
   const handleLogout = async () => {
-    await auth.signOut();
+    try {
+      const result = await logout();
+      if (!result.success) {
+        setError('Failed to logout: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      setError('Failed to logout');
+    }
   };
 
   return (
