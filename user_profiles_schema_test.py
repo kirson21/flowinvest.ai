@@ -338,7 +338,15 @@ def main():
     
     # Test 4: Test Profile Update with New Fields
     if api_success or db_success:
-        update_success, updated_profile = test_profile_update_with_new_fields(TARGET_USER_ID)
+        update_result = test_profile_update_with_new_fields(TARGET_USER_ID)
+        if isinstance(update_result, tuple):
+            update_success, updated_profile = update_result
+        else:
+            update_success = update_result
+            updated_profile = None
+    else:
+        update_success = False
+        updated_profile = None
     
     # Test 5: Investigate Related Tables
     investigate_related_tables()
