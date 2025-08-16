@@ -111,7 +111,7 @@ const RealAuthScreen = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center">
             <img 
-              src="/f01i_logo.svg" 
+              src="/f01i_logo.png" 
               alt="f01i.ai" 
               style={{ height: '60px', width: 'auto' }}
             />
