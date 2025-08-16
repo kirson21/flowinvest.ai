@@ -122,6 +122,9 @@ export const database = {
           bio: updates.bio,
           avatar_url: updates.avatar_url,
           updated_at: updates.updated_at
+        }, { 
+          onConflict: 'user_id',
+          ignoreDuplicates: false 
         })
         .select()
         .single()
