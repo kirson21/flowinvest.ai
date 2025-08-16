@@ -105,7 +105,7 @@ const RealAuthScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-red-500 flex items-center justify-center p-4" style={{backgroundColor: '#474545'}}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#474545'}}>
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
