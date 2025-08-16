@@ -62,11 +62,29 @@ export const AppProvider = ({ children, initialUser = null }) => {
     localStorage.setItem('flow-invest-user', JSON.stringify(userData));
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    localStorage.removeItem('flow-invest-auth');
-    localStorage.removeItem('flow-invest-user');
+  const logout = async () => {
+    try {
+      // First, sign out from Supabase
+      const { supabase } = await import('../lib/supabase');
+      await supabase.auth.signOut();
+      
+      // Then clear local state
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('flow-invest-auth');
+      localStorage.removeItem('flow-invest-user');
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Still clear local state even if Supabase fails
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('flow-invest-auth');
+      localStorage.removeItem('flow-invest-user');
+      
+      return { success: false, error: error.message };
+    }
   };
 
   const t = (key) => {
