@@ -376,48 +376,51 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
 async def get_user_transactions(user_id: str, limit: int = 50, offset: int = 0):
     """Get user's transaction history"""
     try:
-        if not supabase:
+        if not supabase_admin:
             return {"success": False, "message": "Database not available"}
         
-        response = supabase_admin.table('transactions')\
-            .select('*')\
-            .eq('user_id', user_id)\
-            .order('created_at', False)\
-            .limit(limit)\
-            .execute()
-        
-        # Also get transactions where user is the seller
-        seller_response = supabase_admin.table('transactions')\
-            .select('*')\
-            .eq('seller_id', user_id)\
-            .order('created_at', False)\
-            .limit(limit)\
-            .execute()
-        
-        # Combine and sort results
-        all_transactions = []
-        if response.data:
-            all_transactions.extend(response.data)
-        if seller_response.data:
-            all_transactions.extend(seller_response.data)
-        
-        # Remove duplicates and sort by created_at
-        seen_ids = set()
-        unique_transactions = []
-        for tx in all_transactions:
-            if tx['id'] not in seen_ids:
-                seen_ids.add(tx['id'])
-                unique_transactions.append(tx)
-        
-        # Sort by created_at descending
-        unique_transactions.sort(key=lambda x: x.get('created_at', ''), reverse=True)
-        
-        # Apply limit
-        limited_transactions = unique_transactions[:limit]
-        
-        if limited_transactions:
+        # Check if transactions table exists, return empty list if not
+        try:
+            response = supabase_admin.table('transactions')\
+                .select('*')\
+                .eq('user_id', user_id)\
+                .order('created_at', False)\
+                .limit(limit)\
+                .execute()
+            
+            # Also get transactions where user is the seller
+            seller_response = supabase_admin.table('transactions')\
+                .select('*')\
+                .eq('seller_id', user_id)\
+                .order('created_at', False)\
+                .limit(limit)\
+                .execute()
+            
+            # Combine and sort results
+            all_transactions = []
+            if response.data:
+                all_transactions.extend(response.data)
+            if seller_response.data:
+                all_transactions.extend(seller_response.data)
+            
+            # Remove duplicates and sort by created_at
+            seen_ids = set()
+            unique_transactions = []
+            for tx in all_transactions:
+                if tx['id'] not in seen_ids:
+                    seen_ids.add(tx['id'])
+                    unique_transactions.append(tx)
+            
+            # Sort by created_at descending
+            unique_transactions.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+            
+            # Apply limit
+            limited_transactions = unique_transactions[:limit]
+            
             return {"success": True, "transactions": limited_transactions}
-        else:
+            
+        except Exception as table_error:
+            print(f"Transactions table not available: {table_error}")
             return {"success": True, "transactions": []}
             
     except Exception as e:
