@@ -312,12 +312,18 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
         new_balance = current_balance + amount_change
         
         # Update balance
-        update_response = supabase.table('user_accounts').upsert({
-            'user_id': user_id,
+        update_response = supabase.table('user_accounts').update({
             'balance': new_balance,
-            'currency': 'USD',
-            'updated_at': 'now()'
-        }).execute()
+            'currency': 'USD'
+        }).eq('user_id', user_id).execute()
+        
+        if not update_response.data:
+            # If update failed, try insert (upsert behavior)
+            supabase.table('user_accounts').insert({
+                'user_id': user_id,
+                'balance': new_balance,
+                'currency': 'USD'
+            }).execute()
         
         # Create transaction record
         supabase.table('transactions').insert({
