@@ -1953,6 +1953,118 @@ const Settings = () => {
       </div>
     )}
 
+    {/* Withdraw Modal */}
+    {showWithdrawModal && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl text-[#474545] dark:text-white">
+                Withdraw Funds
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowWithdrawModal(false);
+                  setWithdrawAmount('');
+                }}
+                className="p-2"
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <div className="text-center p-4 bg-[#0097B2]/5 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Available Balance</p>
+              <div className="flex items-center justify-center space-x-2">
+                <DollarSign className="w-6 h-6 text-[#0097B2]" />
+                <span className="text-3xl font-bold text-[#0097B2]">
+                  {accountBalance.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="withdraw-amount">Withdraw Amount ($)</Label>
+              <Input
+                id="withdraw-amount"
+                type="number"
+                min="0.01"
+                max={accountBalance}
+                step="0.01"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+                placeholder="Enter amount to withdraw"
+                className="border-[#0097B2]/20 focus:border-[#0097B2]"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Maximum: ${accountBalance.toFixed(2)}
+              </p>
+            </div>
+
+            {withdrawAmount && parseFloat(withdrawAmount) > 0 && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Current Balance:</span>
+                  <span className="font-medium">${accountBalance.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Withdraw Amount:</span>
+                  <span className="font-medium text-red-600">-${parseFloat(withdrawAmount || 0).toFixed(2)}</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between items-center font-semibold">
+                  <span className="text-[#474545] dark:text-white">Remaining Balance:</span>
+                  <span className={`text-lg ${(accountBalance - parseFloat(withdrawAmount || 0)) >= 0 ? 'text-[#0097B2]' : 'text-red-600'}`}>
+                    ${Math.max(0, accountBalance - parseFloat(withdrawAmount || 0)).toFixed(2)}
+                  </span>
+                </div>
+                
+                {parseFloat(withdrawAmount || 0) > accountBalance && (
+                  <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                    <p className="text-xs text-red-600 dark:text-red-400">
+                      ⚠️ Insufficient funds. Maximum withdrawal: ${accountBalance.toFixed(2)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex space-x-3 pt-4">
+              <Button
+                onClick={() => {
+                  setShowWithdrawModal(false);
+                  setWithdrawAmount('');
+                }}
+                variant="outline"
+                className="flex-1 border-gray-300 hover:bg-gray-50"
+              >
+                Cancel  
+              </Button>
+              <Button
+                onClick={handleWithdraw}
+                disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > accountBalance}
+                variant="outline"
+                className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
+              >
+                <Minus className="w-4 h-4 mr-2" />
+                Withdraw
+              </Button>
+            </div>
+
+            <div className="text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                💡 Mock withdrawal - funds will be removed from your account
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
+
     {/* Seller Verification Required Modal */}
     <VerificationRequiredModal
       isOpen={isVerificationRequiredOpen}
