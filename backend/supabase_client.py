@@ -76,8 +76,8 @@ class SupabaseQuery:
         self.filters.append(f"{column}=like.{value}")
         return self
     
-    def order(self, column: str, ascending: bool = True):
-        order_dir = "asc" if ascending else "desc"
+    def order(self, column: str, desc: bool = False):
+        order_dir = "desc" if desc else "asc"
         self.filters.append(f"order={column}.{order_dir}")
         return self
     
