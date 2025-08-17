@@ -126,7 +126,7 @@ class BalanceUpdateRequest(BaseModel):
     transaction_type: str = "topup"  # topup, withdrawal
     description: Optional[str] = None
 
-@router.get("/api/auth/test")
+@router.get("/auth/test")
 async def test_route():
     """Test route"""
     return {"message": "Test route works"}
