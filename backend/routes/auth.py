@@ -126,16 +126,30 @@ class BalanceUpdateRequest(BaseModel):
     transaction_type: str = "topup"  # topup, withdrawal
     description: Optional[str] = None
 
-@router.get("/auth/test")
-async def test_route():
-    """Test route"""
-    return {"message": "Test route works"}
-
 @router.get("/auth/user/{user_id}/balance")
 async def get_user_balance(user_id: str):
     """Get user's current account balance"""
     try:
-        return {"success": True, "balance": 100.0, "currency": "USD"}
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+            
+        response = supabase_admin.table('user_accounts').select('balance, currency').eq('user_id', user_id).execute()
+        
+        if response.data and len(response.data) > 0:
+            return {
+                "success": True, 
+                "balance": float(response.data[0]['balance']) if response.data[0]['balance'] else 0.0,
+                "currency": response.data[0].get('currency', 'USD')
+            }
+        else:
+            # Create account with zero balance if doesn't exist
+            supabase_admin.table('user_accounts').insert({
+                'user_id': user_id,
+                'balance': 0.0,
+                'currency': 'USD'
+            }).execute()
+            return {"success": True, "balance": 0.0, "currency": "USD"}
+            
     except Exception as e:
         return {"success": False, "message": f"Failed to get balance: {str(e)}"}
 
