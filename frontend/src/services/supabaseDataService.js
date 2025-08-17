@@ -791,6 +791,148 @@ export const supabaseDataService = {
   },
 
   // ========================================
+  // TRANSACTION MANAGEMENT
+  // ========================================
+
+  /**
+   * Check if user has sufficient balance for purchase
+   */
+  async checkSufficientBalance(userId, amount) {
+    try {
+      const balance = await this.getAccountBalance(userId);
+      return {
+        sufficient: balance >= amount,
+        currentBalance: balance,
+        requiredAmount: amount,
+        shortfall: Math.max(0, amount - balance)
+      };
+    } catch (error) {
+      console.error('Error checking balance:', error);
+      return {
+        sufficient: false,
+        currentBalance: 0,
+        requiredAmount: amount,
+        shortfall: amount
+      };
+    }
+  },
+
+  /**
+   * Process marketplace purchase with balance validation
+   */
+  async processMarketplacePurchase(buyerId, sellerId, productId, amount, description = null) {
+    try {
+      console.log('Processing marketplace purchase:', {
+        buyerId, sellerId, productId, amount, description
+      });
+
+      // Use backend API for server-side validation
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${buyerId}/process-transaction`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          seller_id: sellerId,
+          product_id: productId,
+          amount: parseFloat(amount),
+          description: description
+        })
+      });
+
+      const result = await response.json();
+      console.log('Purchase transaction result:', result);
+
+      return result;
+    } catch (error) {
+      console.error('Error processing marketplace purchase:', error);
+      return {
+        success: false,
+        error: 'network_error',
+        message: 'Failed to connect to payment processor'
+      };
+    }
+  },
+
+  /**
+   * Update user balance (topup/withdrawal)
+   */
+  async updateUserBalance(userId, amount, transactionType = 'topup', description = null) {
+    try {
+      console.log('Updating user balance:', {
+        userId, amount, transactionType, description
+      });
+
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/update-balance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: parseFloat(amount),
+          transaction_type: transactionType,
+          description: description
+        })
+      });
+
+      const result = await response.json();
+      console.log('Balance update result:', result);
+
+      return result;
+    } catch (error) {
+      console.error('Error updating balance:', error);
+      return {
+        success: false,
+        message: 'Failed to update balance'
+      };
+    }
+  },
+
+  /**
+   * Get user transaction history
+   */
+  async getUserTransactions(userId, limit = 50, offset = 0) {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/transactions?limit=${limit}&offset=${offset}`);
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        return result.transactions || [];
+      }
+      
+      console.error('Error fetching transactions:', result.message);
+      return [];
+    } catch (error) {
+      console.error('Error in getUserTransactions:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Withdraw funds (mock implementation)
+   */
+  async withdrawFunds(userId, amount, description = null) {
+    try {
+      return await this.updateUserBalance(
+        userId, 
+        amount, 
+        'withdrawal', 
+        description || `Withdrawal of $${amount.toFixed(2)}`
+      );
+    } catch (error) {
+      console.error('Error withdrawing funds:', error);
+      return {
+        success: false,
+        message: 'Failed to withdraw funds'
+      };
+    }
+  },
+
+  // ========================================
   // DATA MIGRATION UTILITIES
   // ========================================
 
