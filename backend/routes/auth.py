@@ -262,7 +262,7 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
     except Exception as e:
         return {"success": False, "message": f"Failed to process transaction: {str(e)}"}
 
-@router.post("/api/auth/user/{user_id}/update-balance")
+@router.post("/auth/user/{user_id}/update-balance")
 async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
     """Update user balance (topup/withdrawal)"""
     try:
