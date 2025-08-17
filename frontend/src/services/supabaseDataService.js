@@ -864,7 +864,7 @@ export const supabaseDataService = {
         userId, amount, transactionType, description
       });
 
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       const response = await fetch(`${backendUrl}/api/auth/user/${userId}/update-balance`, {
         method: 'POST',
         headers: {
