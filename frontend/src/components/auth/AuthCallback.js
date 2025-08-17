@@ -13,13 +13,36 @@ const AuthCallback = () => {
         console.log('🔄 Processing OAuth callback...');
         console.log('🔍 Current URL:', window.location.href);
         
-        // Get the current session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Check if there's a Supabase error in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        console.log('📊 Session check result:', { session: !!session, error });
+        const error = urlParams.get('error') || hashParams.get('error');
+        const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
         
         if (error) {
-          console.error('❌ Error getting session:', error);
+          console.error('🚫 OAuth Error in URL:', error);
+          console.error('📝 Error Description:', decodeURIComponent(errorDescription || ''));
+          
+          if (error === 'server_error' && errorDescription?.includes('Database+error+saving+new+user')) {
+            console.error('💾 SUPABASE DATABASE ERROR: Cannot create new users');
+            console.error('🔧 Solution: Check Supabase Dashboard → Database permissions/storage');
+            
+            // Show user-friendly error message
+            alert(`❌ Account Creation Error\n\nThere's a temporary issue with creating new accounts. This is a database configuration problem.\n\nPlease:\n1. Try again in a few minutes\n2. Contact support if the issue persists\n\nError: ${decodeURIComponent(errorDescription || '')}`);
+          }
+          
+          navigate('/login');
+          return;
+        }
+        
+        // Get the current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        console.log('📊 Session check result:', { session: !!session, error: sessionError });
+        
+        if (sessionError) {
+          console.error('❌ Error getting session:', sessionError);
           navigate('/login');
           return;
         }
