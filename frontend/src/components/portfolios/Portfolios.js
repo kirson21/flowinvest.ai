@@ -558,38 +558,190 @@ const Portfolios = () => {
     }
   };
 
-  // Handle product purchase
+  // Handle product purchase with balance validation
   const handlePurchase = async (product) => {
     if (!user) {
       alert('Please log in to make a purchase');
       return;
     }
 
-    const purchaseData = {
-      ...product,
-      purchaseId: `purchase_${Date.now()}_${user.id}`,
-      purchasedAt: new Date().toISOString(),
-      purchasedBy: user.id,
-      portfolio_id: product.id // Add portfolio_id for investor counting
-    };
-
     try {
-      // Save individual purchase to Supabase (for investor counting)
-      await dataSyncService.saveUserPurchase(purchaseData);
+      console.log('=== MARKETPLACE PURCHASE WITH BALANCE VALIDATION ===');
+      console.log('Product:', product.title, 'Price:', product.price);
+      console.log('Buyer:', user.id);
       
-      // Also update the purchases array
-      const updatedPurchases = [...userPurchases, purchaseData];
-      await dataSyncService.saveUserPurchases(user.id, updatedPurchases);
+      // Get seller ID - need to determine who created this product
+      let sellerId = null;
       
-      setUserPurchases(updatedPurchases);
+      // Try to get seller ID from the seller object or product metadata
+      if (product.seller && product.seller.name && product.seller.name !== 'Anonymous') {
+        // Look up seller by display name
+        const { data: sellerProfile, error: sellerError } = await supabase
+          .from('user_profiles')
+          .select('user_id')
+          .eq('display_name', product.seller.name)
+          .maybeSingle();
+          
+        if (sellerProfile && !sellerError) {
+          sellerId = sellerProfile.user_id;
+          console.log('Found seller ID:', sellerId);
+        }
+      }
       
-      // Refresh marketplace to update investor counts
-      await loadProductsWithReviews();
+      // Fallback: try to get seller from product's created_by field
+      if (!sellerId && product.user_id) {
+        sellerId = product.user_id;
+        console.log('Using product user_id as seller:', sellerId);
+      }
       
-      alert('✅ Product purchased successfully!');
+      // Final fallback: get from the portfolios table directly
+      if (!sellerId) {
+        const { data: portfolioData, error: portfolioError } = await supabase
+          .from('portfolios')
+          .select('user_id')
+          .eq('id', product.id)
+          .single();
+          
+        if (portfolioData && !portfolioError) {
+          sellerId = portfolioData.user_id;
+          console.log('Found seller ID from portfolios table:', sellerId);
+        }
+      }
+      
+      if (!sellerId) {
+        console.error('Could not determine seller ID for product:', product);
+        alert('❌ Unable to process purchase: Seller information not found');
+        return;
+      }
+      
+      // Prevent self-purchase
+      if (sellerId === user.id) {
+        alert('❌ You cannot purchase your own product');
+        return;
+      }
+      
+      const purchaseAmount = parseFloat(product.price || product.minimumInvestment || 0);
+      
+      if (purchaseAmount <= 0) {
+        alert('❌ Invalid product price');
+        return;
+      }
+      
+      // Show purchase confirmation with balance info
+      const balanceCheck = await supabaseDataService.checkSufficientBalance(user.id, purchaseAmount);
+      console.log('Balance check result:', balanceCheck);
+      
+      let confirmMessage = `Purchase "${product.title}" for $${purchaseAmount.toFixed(2)}?\n\n`;
+      confirmMessage += `Your current balance: $${balanceCheck.currentBalance.toFixed(2)}\n`;
+      
+      if (balanceCheck.sufficient) {
+        confirmMessage += `After purchase: $${(balanceCheck.currentBalance - purchaseAmount).toFixed(2)}`;
+      } else {
+        // Show insufficient funds dialog
+        const shortfall = balanceCheck.shortfall;
+        const topUpSuggestion = Math.ceil(shortfall / 10) * 10; // Round up to nearest $10
+        
+        const shouldTopUp = window.confirm(
+          `❌ Insufficient Funds\n\n` +
+          `Product price: $${purchaseAmount.toFixed(2)}\n` +
+          `Your balance: $${balanceCheck.currentBalance.toFixed(2)}\n` +
+          `You need: $${shortfall.toFixed(2)} more\n\n` +
+          `Would you like to top up your account with $${topUpSuggestion}?\n` +
+          `(This will give you $${(topUpSuggestion - shortfall).toFixed(2)} extra for future purchases)`
+        );
+        
+        if (shouldTopUp) {
+          // Perform top-up
+          const topUpResult = await supabaseDataService.updateUserBalance(
+            user.id, 
+            topUpSuggestion, 
+            'topup', 
+            `Top-up for purchase of ${product.title}`
+          );
+          
+          if (topUpResult.success) {
+            alert(`✅ Account topped up with $${topUpSuggestion.toFixed(2)}!\nNew balance: $${topUpResult.new_balance.toFixed(2)}\n\nNow proceeding with purchase...`);
+            // Reload balance display
+            await loadAccountBalance();
+          } else {
+            alert('❌ Failed to top up account: ' + (topUpResult.message || 'Unknown error'));
+            return;
+          }
+        } else {
+          // User declined to top up
+          return;
+        }
+      }
+      
+      // Final confirmation for purchase
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+      
+      console.log('Processing purchase with server-side validation...');
+      
+      // Process purchase with server-side balance validation
+      const purchaseResult = await supabaseDataService.processMarketplacePurchase(
+        user.id,
+        sellerId,
+        product.id,
+        purchaseAmount,
+        `Purchase of "${product.title}"`
+      );
+      
+      console.log('Purchase result:', purchaseResult);
+      
+      if (purchaseResult.success) {
+        // Create purchase record for My Purchases section
+        const purchaseData = {
+          ...product,
+          purchaseId: `purchase_${Date.now()}_${user.id}`,
+          purchasedAt: new Date().toISOString(),
+          purchasedBy: user.id,
+          portfolio_id: product.id,
+          seller_id: sellerId
+        };
+
+        // Save to user_purchases table for tracking
+        await dataSyncService.saveUserPurchase(purchaseData);
+        
+        // Update local state
+        const updatedPurchases = [...userPurchases, purchaseData];
+        setUserPurchases(updatedPurchases);
+        
+        // Refresh marketplace to update investor counts and balance display
+        await loadProductsWithReviews();
+        await loadAccountBalance();
+        
+        // Show success message
+        alert(
+          `✅ Purchase Successful!\n\n` +
+          `Product: ${product.title}\n` +
+          `Amount charged: $${purchaseResult.amount_charged.toFixed(2)}\n` +
+          `Your new balance: $${purchaseResult.buyer_new_balance.toFixed(2)}\n\n` +
+          `The seller will receive $${purchaseResult.seller_received.toFixed(2)} (after 10% platform fee)`
+        );
+        
+      } else {
+        // Handle purchase failure
+        let errorMessage = '❌ Purchase Failed\n\n';
+        
+        if (purchaseResult.error === 'insufficient_funds') {
+          errorMessage += `Insufficient funds.\n`;
+          errorMessage += `Required: $${purchaseResult.required_amount.toFixed(2)}\n`;
+          errorMessage += `Your balance: $${purchaseResult.current_balance.toFixed(2)}`;
+        } else {
+          errorMessage += purchaseResult.message || 'Unknown error occurred';
+        }
+        
+        alert(errorMessage);
+      }
+      
+      console.log('=== END MARKETPLACE PURCHASE ===');
+      
     } catch (error) {
-      console.error('Error saving purchase:', error);
-      alert('❌ Failed to save purchase');
+      console.error('Error during purchase:', error);
+      alert('❌ Failed to process purchase: ' + error.message);
     }
   };
 
