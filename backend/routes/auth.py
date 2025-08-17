@@ -194,13 +194,13 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
         try:
             # 1. Deduct amount from buyer's balance
             new_buyer_balance = current_balance - transaction.amount
-            supabase.table('user_accounts').update({
+            supabase_admin.table('user_accounts').update({
                 'balance': new_buyer_balance,
                 'updated_at': 'now()'
             }).eq('user_id', user_id).execute()
             
             # 2. Add seller amount to seller's balance (create account if doesn't exist)
-            seller_balance_response = supabase.table('user_accounts').select('balance').eq('user_id', transaction.seller_id).execute()
+            seller_balance_response = supabase_admin.table('user_accounts').select('balance').eq('user_id', transaction.seller_id).execute()
             
             if not seller_balance_response.data or len(seller_balance_response.data) == 0:
                 # Create seller account
