@@ -161,16 +161,93 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
             return {"success": False, "message": "Database not available"}
         
         # Call the database function to process the purchase
-        response = supabase.rpc('process_marketplace_purchase', {
-            'p_buyer_id': user_id,
-            'p_seller_id': transaction.seller_id,
-            'p_product_id': transaction.product_id,
-            'p_amount': transaction.amount,
-            'p_description': transaction.description or f"Purchase of product {transaction.product_id}"
-        }).execute()
+        # Since we don't have rpc support, we'll implement the logic here
         
-        if response.data:
-            result = response.data
+        # First check buyer's balance
+        balance_response = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        
+        if not balance_response.data or len(balance_response.data) == 0:
+            # Create account with zero balance if doesn't exist
+            supabase.table('user_accounts').insert({
+                'user_id': user_id,
+                'balance': 0.0,
+                'currency': 'USD'
+            }).execute()
+            current_balance = 0.0
+        else:
+            current_balance = float(balance_response.data[0]['balance']) if balance_response.data[0]['balance'] else 0.0
+        
+        # Check if buyer has sufficient funds
+        if current_balance < transaction.amount:
+            return {
+                'success': False,
+                'error': 'insufficient_funds',
+                'message': 'Insufficient balance to complete purchase',
+                'current_balance': current_balance,
+                'required_amount': transaction.amount
+            }
+        
+        # Calculate fees (10% platform fee)
+        platform_fee = transaction.amount * 0.10
+        seller_amount = transaction.amount * 0.90
+        
+        try:
+            # 1. Deduct amount from buyer's balance
+            new_buyer_balance = current_balance - transaction.amount
+            supabase.table('user_accounts').update({
+                'balance': new_buyer_balance,
+                'updated_at': 'now()'
+            }).eq('user_id', user_id).execute()
+            
+            # 2. Add seller amount to seller's balance (create account if doesn't exist)
+            seller_balance_response = supabase.table('user_accounts').select('balance').eq('user_id', transaction.seller_id).execute()
+            
+            if not seller_balance_response.data or len(seller_balance_response.data) == 0:
+                # Create seller account
+                supabase.table('user_accounts').insert({
+                    'user_id': transaction.seller_id,
+                    'balance': seller_amount,
+                    'currency': 'USD'
+                }).execute()
+            else:
+                current_seller_balance = float(seller_balance_response.data[0]['balance']) if seller_balance_response.data[0]['balance'] else 0.0
+                new_seller_balance = current_seller_balance + seller_amount
+                supabase.table('user_accounts').update({
+                    'balance': new_seller_balance,
+                    'updated_at': 'now()'
+                }).eq('user_id', transaction.seller_id).execute()
+            
+            # 3. Create transaction record for the purchase
+            transaction_record = supabase.table('transactions').insert({
+                'user_id': user_id,
+                'seller_id': transaction.seller_id,
+                'product_id': transaction.product_id,
+                'transaction_type': 'purchase',
+                'amount': transaction.amount,
+                'platform_fee': platform_fee,
+                'net_amount': seller_amount,
+                'status': 'completed',
+                'description': transaction.description or f"Purchase of product {transaction.product_id}"
+            }).execute()
+            
+            transaction_id = transaction_record.data[0]['id'] if transaction_record.data else None
+            
+            result = {
+                'success': True,
+                'transaction_id': transaction_id,
+                'amount_charged': transaction.amount,
+                'platform_fee': platform_fee,
+                'seller_received': seller_amount,
+                'buyer_new_balance': new_buyer_balance
+            }
+            
+        except Exception as e:
+            # Return error if transaction fails
+            return {
+                'success': False,
+                'error': 'transaction_failed',
+                'message': f'Failed to process purchase: {str(e)}'
+            }
             
             # Create notification for buyer
             if result.get('success'):
