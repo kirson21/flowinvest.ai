@@ -11,9 +11,12 @@ const AuthCallback = () => {
     const handleAuthCallback = async () => {
       try {
         console.log('🔄 Processing OAuth callback...');
+        console.log('🔍 Current URL:', window.location.href);
         
-        // First, try to get the session from the URL fragments
+        // Get the current session
         const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log('📊 Session check result:', { session: !!session, error });
         
         if (error) {
           console.error('❌ Error getting session:', error);
@@ -21,94 +24,79 @@ const AuthCallback = () => {
           return;
         }
 
-        // If we have a session, process it
         if (session && session.user) {
           console.log('✅ Session found for user:', session.user.email);
-          await processUserSession(session);
-        } else {
-          console.log('⏳ No immediate session, waiting for auth state change...');
+          console.log('👤 User metadata:', session.user.user_metadata);
           
-          // Set up listener for auth state changes with timeout
-          const timeoutId = setTimeout(() => {
-            console.log('⏰ Timeout waiting for auth state change, redirecting to login');
-            navigate('/login');
-          }, 10000); // 10 second timeout
+          // Set user in auth context
+          setUser(session.user);
           
-          const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('🔄 Auth state change:', event, session?.user?.email);
+          try {
+            // Check if user profile exists in database
+            console.log('🔍 Checking for existing user profile...');
+            const { data: existingProfile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('user_id, display_name')
+              .eq('user_id', session.user.id)
+              .single();
             
-            if (event === 'SIGNED_IN' && session && session.user) {
-              clearTimeout(timeoutId);
-              authListener.subscription.unsubscribe();
-              await processUserSession(session);
+            if (profileError && profileError.code !== 'PGRST116') {
+              console.error('❌ Error checking user profile:', profileError);
             }
-          });
+            
+            // If no profile exists, create one for new OAuth users
+            if (!existingProfile) {
+              console.log('🆕 Creating new user profile for OAuth user...');
+              
+              const newProfile = {
+                user_id: session.user.id,
+                display_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+                email: session.user.email,
+                avatar_url: session.user.user_metadata?.avatar_url || '',
+                phone: '',
+                bio: '',
+                social_links: {},
+                specialties: [],
+                experience: '',
+                seller_data: {
+                  rating: 0,
+                  totalSales: 0,
+                  isVerified: false,
+                  joinDate: new Date().toISOString()
+                },
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+              
+              const { data: newProfileData, error: createError } = await supabase
+                .from('user_profiles')
+                .insert(newProfile)
+                .select()
+                .single();
+              
+              if (createError) {
+                console.error('❌ Error creating user profile:', createError);
+                // Continue anyway - user can still access the app
+              } else {
+                console.log('✅ User profile created successfully:', newProfileData?.display_name);
+              }
+            } else {
+              console.log('✅ Existing user profile found:', existingProfile.display_name);
+            }
+          } catch (profileError) {
+            console.error('❌ Error with profile operations:', profileError);
+            // Continue anyway
+          }
+          
+          // Navigate to main app
+          console.log('🚀 Redirecting to main app...');
+          navigate('/app');
+        } else {
+          console.log('❌ No session found, redirecting to login');
+          navigate('/login');
         }
       } catch (error) {
         console.error('❌ Error handling auth callback:', error);
-        navigate('/login');
-      }
-    };
-
-    const processUserSession = async (session) => {
-      try {
-        console.log('✅ Processing user session for:', session.user.email);
-        
-        // Set user in auth context
-        setUser(session.user);
-        
-        // Check if user profile exists
-        const { data: existingProfile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('user_id')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error('❌ Error checking user profile:', profileError);
-        }
-        
-        // Create profile if it doesn't exist
-        if (!existingProfile) {
-          console.log('🆕 Creating new user profile...');
-          
-          const { error: createError } = await supabase
-            .from('user_profiles')
-            .insert({
-              user_id: session.user.id,
-              display_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-              email: session.user.email,
-              avatar_url: session.user.user_metadata?.avatar_url || '',
-              phone: '',
-              bio: '',
-              social_links: {},
-              specialties: [],
-              experience: '',
-              seller_data: {
-                rating: 0,
-                totalSales: 0,
-                isVerified: false,
-                joinDate: new Date().toISOString()
-              },
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-          
-          if (createError) {
-            console.error('❌ Error creating user profile:', createError);
-          } else {
-            console.log('✅ User profile created successfully');
-          }
-        } else {
-          console.log('✅ Existing user profile found');
-        }
-        
-        // Navigate to main app
-        console.log('🚀 Redirecting to main app...');
-        navigate('/app');
-        
-      } catch (error) {
-        console.error('❌ Error processing user session:', error);
         navigate('/login');
       }
     };
