@@ -135,11 +135,11 @@ async def get_user_balance(user_id: str):
             
         response = supabase.table('user_accounts').select('balance, currency').eq('user_id', user_id).execute()
         
-        if response.data:
+        if response.data and len(response.data) > 0:
             return {
                 "success": True, 
-                "balance": float(response.data['balance']) if response.data['balance'] else 0.0,
-                "currency": response.data.get('currency', 'USD')
+                "balance": float(response.data[0]['balance']) if response.data[0]['balance'] else 0.0,
+                "currency": response.data[0].get('currency', 'USD')
             }
         else:
             # Create account with zero balance if doesn't exist
