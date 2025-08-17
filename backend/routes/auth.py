@@ -143,7 +143,7 @@ async def get_user_balance(user_id: str):
             }
         else:
             # Create account with zero balance if doesn't exist
-            supabase.table('user_accounts').insert({
+            supabase_admin.table('user_accounts').insert({
                 'user_id': user_id,
                 'balance': 0.0,
                 'currency': 'USD'
