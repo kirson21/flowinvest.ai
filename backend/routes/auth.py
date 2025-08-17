@@ -287,8 +287,18 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
         amount_change = balance_update.amount if balance_update.transaction_type == "topup" else -balance_update.amount
         
         # Get current balance first
-        current_response = supabase.table('user_accounts').select('balance').eq('user_id', user_id).single().execute()
-        current_balance = float(current_response.data['balance']) if current_response.data and current_response.data['balance'] else 0.0
+        current_response = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        
+        if not current_response.data or len(current_response.data) == 0:
+            # Create account with zero balance if doesn't exist
+            supabase.table('user_accounts').insert({
+                'user_id': user_id,
+                'balance': 0.0,
+                'currency': 'USD'
+            }).execute()
+            current_balance = 0.0
+        else:
+            current_balance = float(current_response.data[0]['balance']) if current_response.data[0]['balance'] else 0.0
         
         # Check for sufficient funds on withdrawal
         if balance_update.transaction_type == "withdrawal" and current_balance < balance_update.amount:
