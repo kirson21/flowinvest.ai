@@ -131,7 +131,7 @@ async def test_route():
     """Test route"""
     return {"message": "Test route works"}
 
-@router.get("/api/auth/user/{user_id}/balance")
+@router.get("/auth/user/{user_id}/balance")
 async def get_user_balance(user_id: str):
     """Get user's current account balance"""
     try:
