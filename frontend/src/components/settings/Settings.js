@@ -1029,14 +1029,25 @@ const Settings = () => {
                     Available for transactions and purchases
                   </p>
                 </div>
-                <Button
-                  onClick={() => setShowTopUpModal(true)}
-                  className="bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
-                  size="sm"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Top Up
-                </Button>
+                <div className="flex flex-col space-y-2">
+                  <Button
+                    onClick={() => setShowTopUpModal(true)}
+                    className="bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Top Up
+                  </Button>
+                  <Button
+                    onClick={() => setShowWithdrawModal(true)}
+                    variant="outline"
+                    className="border-[#0097B2]/30 text-[#0097B2] hover:bg-[#0097B2]/5"
+                    size="sm"
+                  >
+                    <Minus className="w-4 h-4 mr-2" />
+                    Withdraw
+                  </Button>
+                </div>
               </div>
             </div>
 
