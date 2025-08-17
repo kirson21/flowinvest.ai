@@ -133,7 +133,7 @@ async def get_user_balance(user_id: str):
         if not supabase:
             return {"success": False, "message": "Database not available"}
             
-        response = supabase.table('user_accounts').select('balance, currency').eq('user_id', user_id).single().execute()
+        response = supabase.table('user_accounts').select('balance, currency').eq('user_id', user_id).execute()
         
         if response.data:
             return {
