@@ -408,8 +408,8 @@ async def get_user_transactions(user_id: str, limit: int = 50, offset: int = 0):
         # Apply limit
         limited_transactions = unique_transactions[:limit]
         
-        if response.data:
-            return {"success": True, "transactions": response.data}
+        if limited_transactions:
+            return {"success": True, "transactions": limited_transactions}
         else:
             return {"success": True, "transactions": []}
             
