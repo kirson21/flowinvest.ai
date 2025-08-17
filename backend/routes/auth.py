@@ -376,7 +376,7 @@ async def get_user_transactions(user_id: str, limit: int = 50, offset: int = 0):
         if not supabase:
             return {"success": False, "message": "Database not available"}
         
-        response = supabase.table('transactions')\
+        response = supabase_admin.table('transactions')\
             .select('*')\
             .eq('user_id', user_id)\
             .order('created_at', False)\
@@ -384,7 +384,7 @@ async def get_user_transactions(user_id: str, limit: int = 50, offset: int = 0):
             .execute()
         
         # Also get transactions where user is the seller
-        seller_response = supabase.table('transactions')\
+        seller_response = supabase_admin.table('transactions')\
             .select('*')\
             .eq('seller_id', user_id)\
             .order('created_at', False)\
