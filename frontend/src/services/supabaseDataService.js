@@ -827,8 +827,10 @@ export const supabaseDataService = {
       });
 
       // Use backend API for server-side validation
-      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-      const response = await fetch(`${backendUrl}/api/auth/user/${buyerId}/process-transaction`, {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const fullUrl = `${backendUrl}/api/auth/user/${buyerId}/process-transaction`;
+      console.log('Calling backend URL:', fullUrl);
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
