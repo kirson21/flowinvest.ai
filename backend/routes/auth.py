@@ -358,7 +358,7 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
     except Exception as e:
         return {"success": False, "message": f"Failed to update balance: {str(e)}"}
 
-@router.get("/api/auth/user/{user_id}/transactions")
+@router.get("/auth/user/{user_id}/transactions")
 async def get_user_transactions(user_id: str, limit: int = 50, offset: int = 0):
     """Get user's transaction history"""
     try:
