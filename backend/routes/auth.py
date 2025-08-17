@@ -204,7 +204,7 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
             
             if not seller_balance_response.data or len(seller_balance_response.data) == 0:
                 # Create seller account
-                supabase.table('user_accounts').insert({
+                supabase_admin.table('user_accounts').insert({
                     'user_id': transaction.seller_id,
                     'balance': seller_amount,
                     'currency': 'USD'
@@ -212,13 +212,13 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
             else:
                 current_seller_balance = float(seller_balance_response.data[0]['balance']) if seller_balance_response.data[0]['balance'] else 0.0
                 new_seller_balance = current_seller_balance + seller_amount
-                supabase.table('user_accounts').update({
+                supabase_admin.table('user_accounts').update({
                     'balance': new_seller_balance,
                     'updated_at': 'now()'
                 }).eq('user_id', transaction.seller_id).execute()
             
             # 3. Create transaction record for the purchase
-            transaction_record = supabase.table('transactions').insert({
+            transaction_record = supabase_admin.table('transactions').insert({
                 'user_id': user_id,
                 'seller_id': transaction.seller_id,
                 'product_id': transaction.product_id,
