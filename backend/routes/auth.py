@@ -157,14 +157,14 @@ async def get_user_balance(user_id: str):
 async def process_transaction(user_id: str, transaction: TransactionRequest):
     """Process marketplace purchase with balance validation"""
     try:
-        if not supabase:
+        if not supabase_admin:
             return {"success": False, "message": "Database not available"}
         
         # Call the database function to process the purchase
         # Since we don't have rpc support, we'll implement the logic here
         
         # First check buyer's balance
-        balance_response = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        balance_response = supabase_admin.table('user_accounts').select('balance').eq('user_id', user_id).execute()
         
         if not balance_response.data or len(balance_response.data) == 0:
             # Create account with zero balance if doesn't exist
