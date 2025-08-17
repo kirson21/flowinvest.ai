@@ -280,18 +280,22 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
 async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
     """Update user balance (topup/withdrawal)"""
     try:
-        if not supabase:
+        if not supabase_admin:
             return {"success": False, "message": "Database not available"}
+        
+        # Validate amount
+        if balance_update.amount <= 0:
+            return {"success": False, "message": "Amount must be greater than zero"}
         
         # For topup, add amount; for withdrawal, subtract amount
         amount_change = balance_update.amount if balance_update.transaction_type == "topup" else -balance_update.amount
         
         # Get current balance first
-        current_response = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        current_response = supabase_admin.table('user_accounts').select('balance').eq('user_id', user_id).execute()
         
         if not current_response.data or len(current_response.data) == 0:
             # Create account with zero balance if doesn't exist
-            supabase.table('user_accounts').insert({
+            supabase_admin.table('user_accounts').insert({
                 'user_id': user_id,
                 'balance': 0.0,
                 'currency': 'USD'
@@ -312,21 +316,21 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
         new_balance = current_balance + amount_change
         
         # Update balance
-        update_response = supabase.table('user_accounts').update({
+        update_response = supabase_admin.table('user_accounts').update({
             'balance': new_balance,
             'currency': 'USD'
         }).eq('user_id', user_id).execute()
         
         if not update_response.data:
             # If update failed, try insert (upsert behavior)
-            supabase.table('user_accounts').insert({
+            supabase_admin.table('user_accounts').insert({
                 'user_id': user_id,
                 'balance': new_balance,
                 'currency': 'USD'
             }).execute()
         
         # Create transaction record
-        supabase.table('transactions').insert({
+        supabase_admin.table('transactions').insert({
             'user_id': user_id,
             'transaction_type': balance_update.transaction_type,
             'amount': balance_update.amount,
@@ -344,7 +348,7 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
                 else f"You have withdrawn ${balance_update.amount:.2f}. New balance: ${new_balance:.2f}"
             )
             
-            supabase.table('user_notifications').insert({
+            supabase_admin.table('user_notifications').insert({
                 'user_id': user_id,
                 'title': f"{balance_update.transaction_type.title()} Successful",
                 'message': notification_message,
