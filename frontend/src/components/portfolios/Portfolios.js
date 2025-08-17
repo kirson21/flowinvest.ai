@@ -81,6 +81,20 @@ const Portfolios = () => {
     'Trading Tools'
   ];
 
+  // Load account balance
+  const loadAccountBalance = async () => {
+    try {
+      if (!user?.id) return;
+      console.log('Loading account balance...');
+      const balance = await supabaseDataService.getAccountBalance(user.id);
+      setAccountBalance(balance);
+      console.log('Loaded account balance:', balance);
+    } catch (error) {
+      console.error('Error loading account balance:', error);
+      setAccountBalance(0);
+    }
+  };
+
   // Calculate real investor count from Supabase purchase data
   const calculateRealInvestorCounts = async (portfolios) => {
     try {
