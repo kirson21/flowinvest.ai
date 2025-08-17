@@ -286,20 +286,79 @@ const Settings = () => {
     try {
       const amount = parseFloat(topUpAmount);
       
-      // Update balance using Supabase service
-      console.log('Saving account balance to Supabase:', amount);
-      const newBalance = await supabaseDataService.saveAccountBalance(user?.id, accountBalance + amount);
-      setAccountBalance(newBalance);
+      // Use the new balance system with server-side validation
+      console.log('Processing top-up via balance system...');
+      const result = await supabaseDataService.updateUserBalance(
+        user?.id, 
+        amount, 
+        'topup', 
+        `Account top-up of $${amount.toFixed(2)}`
+      );
       
-      // Reset and close modal
-      setTopUpAmount('');
-      setShowTopUpModal(false);
-      
-      setMessage(`Successfully topped up $${amount.toFixed(2)}! Your new balance is $${newBalance.toFixed(2)}`);
-      setTimeout(() => setMessage(''), 4000);
+      if (result.success) {
+        setAccountBalance(result.new_balance);
+        
+        // Reset and close modal
+        setTopUpAmount('');
+        setShowTopUpModal(false);
+        
+        setMessage(`✅ Successfully topped up $${amount.toFixed(2)}! Your new balance is $${result.new_balance.toFixed(2)}`);
+        setTimeout(() => setMessage(''), 4000);
+      } else {
+        setError('❌ Failed to top up account: ' + (result.message || 'Unknown error'));
+        setTimeout(() => setError(''), 4000);
+      }
     } catch (error) {
       console.error('Error topping up account:', error);
-      alert('Failed to top up account. Please try again.');
+      setError('❌ Failed to top up account. Please try again.');
+      setTimeout(() => setError(''), 4000);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+
+    const amount = parseFloat(withdrawAmount);
+    
+    // Check if user has sufficient balance
+    if (amount > accountBalance) {
+      alert(`❌ Insufficient funds. Your current balance is $${accountBalance.toFixed(2)}`);
+      return;
+    }
+
+    // Confirm withdrawal
+    if (!window.confirm(`Withdraw $${amount.toFixed(2)} from your account?\n\nYour new balance will be $${(accountBalance - amount).toFixed(2)}`)) {
+      return;
+    }
+
+    try {
+      console.log('Processing withdrawal via balance system...');
+      const result = await supabaseDataService.withdrawFunds(
+        user?.id, 
+        amount, 
+        `Account withdrawal of $${amount.toFixed(2)}`
+      );
+      
+      if (result.success) {
+        setAccountBalance(result.new_balance);
+        
+        // Reset and close modal
+        setWithdrawAmount('');
+        setShowWithdrawModal(false);
+        
+        setMessage(`✅ Successfully withdrew $${amount.toFixed(2)}! Your new balance is $${result.new_balance.toFixed(2)}`);
+        setTimeout(() => setMessage(''), 4000);
+      } else {
+        setError('❌ Failed to withdraw funds: ' + (result.message || 'Unknown error'));
+        setTimeout(() => setError(''), 4000);
+      }
+    } catch (error) {
+      console.error('Error withdrawing funds:', error);
+      setError('❌ Failed to withdraw funds. Please try again.');
+      setTimeout(() => setError(''), 4000);
     }
   };
 
