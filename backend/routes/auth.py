@@ -272,8 +272,6 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
                     print(f"Failed to create notifications: {notification_error}")
             
             return result
-        else:
-            return {"success": False, "message": "Failed to process transaction"}
             
     except Exception as e:
         return {"success": False, "message": f"Failed to process transaction: {str(e)}"}
