@@ -156,6 +156,9 @@ const RealAuthScreen = () => {
 
               {/* Sign In Tab */}
               <TabsContent value="signin">
+                <div style={{backgroundColor: '#f0f8ff', padding: '10px', marginBottom: '10px', color: 'black'}}>
+                  🔵 SIGN IN FORM ACTIVE
+                </div>
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
                     <Label htmlFor="signin-email">Email</Label>
