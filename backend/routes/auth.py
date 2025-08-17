@@ -168,7 +168,7 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
         
         if not balance_response.data or len(balance_response.data) == 0:
             # Create account with zero balance if doesn't exist
-            supabase.table('user_accounts').insert({
+            supabase_admin.table('user_accounts').insert({
                 'user_id': user_id,
                 'balance': 0.0,
                 'currency': 'USD'
