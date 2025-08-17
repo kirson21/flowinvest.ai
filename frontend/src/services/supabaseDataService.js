@@ -899,8 +899,10 @@ export const supabaseDataService = {
    */
   async getUserTransactions(userId, limit = 50, offset = 0) {
     try {
-      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/transactions?limit=${limit}&offset=${offset}`);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const fullUrl = `${backendUrl}/api/auth/user/${userId}/transactions?limit=${limit}&offset=${offset}`;
+      console.log('Calling backend URL:', fullUrl);
+      const response = await fetch(fullUrl);
       
       const result = await response.json();
       
