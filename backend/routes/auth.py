@@ -130,10 +130,10 @@ class BalanceUpdateRequest(BaseModel):
 async def get_user_balance(user_id: str):
     """Get user's current account balance"""
     try:
-        if not supabase:
+        if not supabase_admin:
             return {"success": False, "message": "Database not available"}
             
-        response = supabase.table('user_accounts').select('balance, currency').eq('user_id', user_id).execute()
+        response = supabase_admin.table('user_accounts').select('balance, currency').eq('user_id', user_id).execute()
         
         if response.data and len(response.data) > 0:
             return {
