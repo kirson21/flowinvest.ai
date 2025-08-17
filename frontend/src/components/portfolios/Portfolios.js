@@ -969,6 +969,7 @@ const Portfolios = () => {
       if (user?.id) {
         await loadUserVotes();
         await loadUserPurchases();
+        await loadAccountBalance();
       }
     };
     
