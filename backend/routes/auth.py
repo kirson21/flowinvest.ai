@@ -329,18 +329,21 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
                 'currency': 'USD'
             }).execute()
         
-        # Create transaction record
-        supabase_admin.table('transactions').insert({
-            'user_id': user_id,
-            'transaction_type': balance_update.transaction_type,
-            'amount': balance_update.amount,
-            'platform_fee': 0.0,
-            'net_amount': balance_update.amount,
-            'status': 'completed',
-            'description': balance_update.description or f"{balance_update.transaction_type.title()} of ${balance_update.amount:.2f}"
-        }).execute()
+        # Create transaction record (skip if table doesn't exist)
+        try:
+            supabase_admin.table('transactions').insert({
+                'user_id': user_id,
+                'transaction_type': balance_update.transaction_type,
+                'amount': balance_update.amount,
+                'platform_fee': 0.0,
+                'net_amount': balance_update.amount,
+                'status': 'completed',
+                'description': balance_update.description or f"{balance_update.transaction_type.title()} of ${balance_update.amount:.2f}"
+            }).execute()
+        except Exception as tx_error:
+            print(f"Failed to create transaction record (table may not exist): {tx_error}")
         
-        # Create notification
+        # Create notification (skip if table doesn't exist)
         try:
             notification_message = (
                 f"Your account has been topped up with ${balance_update.amount:.2f}. New balance: ${new_balance:.2f}" 
@@ -356,7 +359,7 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
                 'is_read': False
             }).execute()
         except Exception as notification_error:
-            print(f"Failed to create notification: {notification_error}")
+            print(f"Failed to create notification (table may not exist): {notification_error}")
         
         return {
             "success": True, 
