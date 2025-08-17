@@ -93,7 +93,7 @@ async def update_user_profile(user_id: str, profile_data: dict):
     except Exception as e:
         return {"success": False, "message": f"Failed to update profile: {str(e)}"}
 
-@router.post("/api/auth/user/{user_id}/profile")
+@router.post("/auth/user/{user_id}/profile")
 async def create_user_profile(user_id: str, profile_data: dict):
     """Create user profile"""
     try:
