@@ -128,6 +128,8 @@ const Settings = () => {
   const [accountBalance, setAccountBalance] = useState(0);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
 
   // Voting state
   const [userVotes, setUserVotes] = useState({});
