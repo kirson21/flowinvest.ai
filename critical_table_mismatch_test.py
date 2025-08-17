@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime
 
 # Get backend URL from environment
-BACKEND_URL = "https://ai-landing-3d-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://foli-deploy-fix.preview.emergentagent.com/api"
 
 class CriticalTableMismatchVerifier:
     def __init__(self):

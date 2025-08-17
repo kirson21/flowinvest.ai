@@ -21,7 +21,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://ai-landing-3d-1.preview.emergentagent.com"
+BACKEND_URL = "https://foli-deploy-fix.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test user data
