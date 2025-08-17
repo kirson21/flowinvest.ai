@@ -153,7 +153,7 @@ async def get_user_balance(user_id: str):
     except Exception as e:
         return {"success": False, "message": f"Failed to get balance: {str(e)}"}
 
-@router.post("/auth/user/{user_id}/process-transaction")
+@router.post("/api/auth/user/{user_id}/process-transaction")
 async def process_transaction(user_id: str, transaction: TransactionRequest):
     """Process marketplace purchase with balance validation"""
     try:
