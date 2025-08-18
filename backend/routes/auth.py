@@ -131,6 +131,80 @@ async def test_deployment():
     """Test if new deployment is working"""
     return {"message": "New deployment working!", "timestamp": "2025-08-18T13:10:00Z"}
 
+@router.post("/auth/user/{user_id}/sync-balance")
+async def sync_balance(user_id: str):
+    """Sync balance between frontend and backend systems"""
+    print(f"\n=== BALANCE SYNC ENDPOINT HIT ===")
+    print(f"Syncing balance for user_id: {user_id}")
+    
+    try:
+        if not supabase_admin:
+            print("❌ Database not available")
+            return {"success": False, "message": "Database not available"}
+        
+        # Get current backend balance
+        backend_response = supabase_admin.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        backend_balance = 0.0
+        if backend_response.data and len(backend_response.data) > 0:
+            backend_balance = float(backend_response.data[0]['balance']) if backend_response.data[0]['balance'] else 0.0
+        
+        print(f"Current backend balance: {backend_balance}")
+        
+        # Get the balance from the regular supabase client (what frontend was using)
+        frontend_response = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        frontend_balance = 0.0
+        if frontend_response.data and len(frontend_response.data) > 0:
+            frontend_balance = float(frontend_response.data[0]['balance']) if frontend_response.data[0]['balance'] else 0.0
+        
+        print(f"Current frontend balance: {frontend_balance}")
+        
+        # Use the higher balance as the correct one
+        correct_balance = max(backend_balance, frontend_balance)
+        print(f"Using correct balance: {correct_balance}")
+        
+        # Update backend balance to match
+        if correct_balance != backend_balance:
+            print(f"Updating backend balance from {backend_balance} to {correct_balance}")
+            supabase_admin.table('user_accounts').upsert({
+                'user_id': user_id,
+                'balance': correct_balance,
+                'currency': 'USD'
+            }).execute()
+        
+        # Create a transaction record for the sync
+        try:
+            if correct_balance > backend_balance:
+                supabase_admin.table('transactions').insert({
+                    'user_id': user_id,
+                    'transaction_type': 'topup',
+                    'amount': correct_balance - backend_balance,
+                    'platform_fee': 0.0,
+                    'net_amount': correct_balance - backend_balance,
+                    'status': 'completed',
+                    'description': f'Balance sync: restored ${correct_balance - backend_balance:.2f}'
+                }).execute()
+        except Exception as tx_error:
+            print(f"Failed to create sync transaction record: {tx_error}")
+        
+        result = {
+            "success": True,
+            "message": "Balance synced successfully",
+            "previous_backend_balance": backend_balance,
+            "previous_frontend_balance": frontend_balance,
+            "new_balance": correct_balance
+        }
+        
+        print(f"Sync result: {result}")
+        print("=== END BALANCE SYNC ENDPOINT ===\n")
+        return result
+        
+    except Exception as e:
+        print(f"❌ Exception in sync_balance: {e}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END BALANCE SYNC ENDPOINT (ERROR) ===\n")
+        return {"success": False, "message": f"Failed to sync balance: {str(e)}"}
+
 @router.get("/auth/user/{user_id}/balance")
 async def get_user_balance(user_id: str):
     """Get user's current account balance"""
