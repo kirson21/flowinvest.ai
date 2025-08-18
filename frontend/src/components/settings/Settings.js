@@ -1488,16 +1488,28 @@ const Settings = () => {
                     ))}
                   </div>
                   
-                  {/* View All / Show Less button */}
-                  {notifications.length > 3 && (
-                    <div className="text-center pt-2">
+                  {/* View All / Show Less and Delete All buttons */}
+                  {notifications.length > 0 && (
+                    <div className="flex items-center justify-center gap-2 pt-2">
+                      {notifications.length > 3 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAllNotifications(!showAllNotifications)}
+                          className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                        >
+                          {showAllNotifications ? `Show Less` : `View All (${notifications.length})`}
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowAllNotifications(!showAllNotifications)}
-                        className="border-[#0097B2]/20 text-[#0097B2] hover:bg-[#0097B2]/5"
+                        onClick={handleDeleteAllNotifications}
+                        className="border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        title="Delete all notifications"
                       >
-                        {showAllNotifications ? `Show Less` : `View All (${notifications.length})`}
+                        <Trash2 size={14} className="mr-1" />
+                        Delete All
                       </Button>
                     </div>
                   )}
