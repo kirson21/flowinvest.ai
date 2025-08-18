@@ -279,33 +279,53 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
 @router.post("/auth/user/{user_id}/update-balance")
 async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
     """Update user balance (topup/withdrawal)"""
+    print(f"\n=== UPDATE BALANCE ENDPOINT HIT ===")
+    print(f"Received request for user_id: {user_id}")
+    print(f"Request data: {balance_update}")
+    print(f"Amount: {balance_update.amount}")
+    print(f"Transaction type: {balance_update.transaction_type}")
+    print(f"Description: {balance_update.description}")
+    
     try:
         if not supabase_admin:
+            print("❌ Database not available")
             return {"success": False, "message": "Database not available"}
+        
+        print("✅ Database client available")
         
         # Validate amount
         if balance_update.amount <= 0:
+            print(f"❌ Invalid amount: {balance_update.amount}")
             return {"success": False, "message": "Amount must be greater than zero"}
+        
+        print(f"✅ Amount validation passed: {balance_update.amount}")
         
         # For topup, add amount; for withdrawal, subtract amount
         amount_change = balance_update.amount if balance_update.transaction_type == "topup" else -balance_update.amount
+        print(f"Amount change calculated: {amount_change}")
         
         # Get current balance first
+        print(f"Fetching current balance for user: {user_id}")
         current_response = supabase_admin.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        print(f"Current balance query response: {current_response}")
         
         if not current_response.data or len(current_response.data) == 0:
+            print("No existing account found, creating new account")
+            current_balance = 0.0
             # Create account with zero balance if doesn't exist
             supabase_admin.table('user_accounts').insert({
                 'user_id': user_id,
                 'balance': 0.0,
                 'currency': 'USD'
             }).execute()
-            current_balance = 0.0
+            print("✅ New account created")
         else:
             current_balance = float(current_response.data[0]['balance']) if current_response.data[0]['balance'] else 0.0
+            print(f"Current balance found: {current_balance}")
         
         # Check for sufficient funds on withdrawal
         if balance_update.transaction_type == "withdrawal" and current_balance < balance_update.amount:
+            print(f"❌ Insufficient funds: {current_balance} < {balance_update.amount}")
             return {
                 "success": False, 
                 "message": "Insufficient funds for withdrawal",
@@ -314,24 +334,30 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
             }
         
         new_balance = current_balance + amount_change
+        print(f"New balance calculated: {new_balance}")
         
         # Update balance
+        print("Updating balance in database...")
         update_response = supabase_admin.table('user_accounts').update({
             'balance': new_balance,
             'currency': 'USD'
         }).eq('user_id', user_id).execute()
+        print(f"Balance update response: {update_response}")
         
         if not update_response.data:
+            print("Update failed, trying insert (upsert behavior)...")
             # If update failed, try insert (upsert behavior)
-            supabase_admin.table('user_accounts').insert({
+            insert_response = supabase_admin.table('user_accounts').insert({
                 'user_id': user_id,
                 'balance': new_balance,
                 'currency': 'USD'
             }).execute()
+            print(f"Insert response: {insert_response}")
         
         # Create transaction record (skip if table doesn't exist)
         try:
-            supabase_admin.table('transactions').insert({
+            print("Creating transaction record...")
+            tx_response = supabase_admin.table('transactions').insert({
                 'user_id': user_id,
                 'transaction_type': balance_update.transaction_type,
                 'amount': balance_update.amount,
@@ -340,36 +366,49 @@ async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
                 'status': 'completed',
                 'description': balance_update.description or f"{balance_update.transaction_type.title()} of ${balance_update.amount:.2f}"
             }).execute()
+            print(f"Transaction record created: {tx_response}")
         except Exception as tx_error:
             print(f"Failed to create transaction record (table may not exist): {tx_error}")
         
         # Create notification (skip if table doesn't exist)
         try:
+            print("Creating notification...")
             notification_message = (
                 f"Your account has been topped up with ${balance_update.amount:.2f}. New balance: ${new_balance:.2f}" 
                 if balance_update.transaction_type == "topup" 
                 else f"You have withdrawn ${balance_update.amount:.2f}. New balance: ${new_balance:.2f}"
             )
             
-            supabase_admin.table('user_notifications').insert({
+            notification_response = supabase_admin.table('user_notifications').insert({
                 'user_id': user_id,
                 'title': f"{balance_update.transaction_type.title()} Successful",
                 'message': notification_message,
                 'type': 'success',
                 'is_read': False
             }).execute()
+            print(f"Notification created: {notification_response}")
         except Exception as notification_error:
             print(f"Failed to create notification (table may not exist): {notification_error}")
         
-        return {
+        print(f"✅ Balance updated: {user_id} - {balance_update.transaction_type} ${balance_update.amount} - New balance: ${new_balance}")
+        
+        result = {
             "success": True, 
             "message": f"{balance_update.transaction_type.title()} successful",
             "previous_balance": current_balance,
             "new_balance": new_balance,
             "amount_changed": amount_change
         }
+        print(f"Returning success result: {result}")
+        print("=== END UPDATE BALANCE ENDPOINT ===\n")
+        return result
         
     except Exception as e:
+        print(f"❌ Exception in update_balance: {e}")
+        print(f"Exception type: {type(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END UPDATE BALANCE ENDPOINT (ERROR) ===\n")
         return {"success": False, "message": f"Failed to update balance: {str(e)}"}
 
 @router.get("/auth/user/{user_id}/transactions")
