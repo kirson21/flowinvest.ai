@@ -205,6 +205,33 @@ async def sync_balance(user_id: str):
         print("=== END BALANCE SYNC ENDPOINT (ERROR) ===\n")
         return {"success": False, "message": f"Failed to sync balance: {str(e)}"}
 
+@router.get("/auth/user/{user_id}/notifications")
+async def get_user_notifications(user_id: str, limit: int = 50, offset: int = 0):
+    """Get user notifications"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Getting notifications for user {user_id}, limit: {limit}, offset: {offset}")
+        
+        response = supabase_admin.table('user_notifications')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .order('created_at', desc=True)\
+            .limit(limit)\
+            .execute()
+        
+        print(f"Notifications response: {response}")
+        
+        return {
+            "success": True,
+            "notifications": response.data if response.data else []
+        }
+        
+    except Exception as e:
+        print(f"Error getting notifications: {e}")
+        return {"success": False, "message": f"Failed to get notifications: {str(e)}"}
+
 @router.delete("/auth/user/{user_id}/notifications/{notification_id}")
 async def delete_notification(user_id: str, notification_id: str):
     """Delete a specific notification"""
