@@ -1,8 +1,9 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 import sys
 import os
 import logging
+import time
 
 # Add the backend directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__)))
@@ -33,6 +34,42 @@ app = FastAPI(
     docs_url="/docs" if ENVIRONMENT == "development" else None,
     redoc_url="/redoc" if ENVIRONMENT == "development" else None
 )
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # Log incoming request
+    print(f"\n🌐 INCOMING REQUEST:")
+    print(f"   Method: {request.method}")
+    print(f"   URL: {request.url}")
+    print(f"   Path: {request.url.path}")
+    print(f"   Query: {request.url.query}")
+    print(f"   Headers: {dict(request.headers)}")
+    
+    # Get request body if it's a POST/PUT/PATCH
+    if request.method in ["POST", "PUT", "PATCH"]:
+        try:
+            body = await request.body()
+            if body:
+                print(f"   Body: {body.decode('utf-8')}")
+            else:
+                print(f"   Body: (empty)")
+        except Exception as e:
+            print(f"   Body: (could not read: {e})")
+    
+    response = await call_next(request)
+    
+    # Log response
+    process_time = time.time() - start_time
+    print(f"📤 RESPONSE:")
+    print(f"   Status: {response.status_code}")
+    print(f"   Process time: {process_time:.4f}s")
+    print(f"   Response headers: {dict(response.headers)}")
+    print("=" * 60)
+    
+    return response
 
 # CORS middleware - configured for production
 allowed_origins = [
