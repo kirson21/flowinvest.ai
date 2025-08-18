@@ -862,34 +862,74 @@ export const supabaseDataService = {
    */
   async updateUserBalance(userId, amount, transactionType = 'topup', description = null) {
     try {
-      console.log('Updating user balance:', {
+      console.log('=== UPDATE USER BALANCE DEBUG ===');
+      console.log('Input parameters:', {
         userId, amount, transactionType, description
       });
 
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       const fullUrl = `${backendUrl}/api/auth/user/${userId}/update-balance`;
-      console.log('Calling backend URL:', fullUrl);
+      console.log('Backend URL from env:', process.env.REACT_APP_BACKEND_URL);
+      console.log('Fallback URL used:', 'http://localhost:8001');
+      console.log('Final constructed URL:', fullUrl);
+      console.log('Request method: POST');
+      console.log('Request headers: Content-Type: application/json');
+      
+      const requestBody = {
+        amount: parseFloat(amount),
+        transaction_type: transactionType,
+        description: description
+      };
+      console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
+      console.log('Making fetch request...');
       const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          amount: parseFloat(amount),
-          transaction_type: transactionType,
-          description: description
-        })
+        body: JSON.stringify(requestBody)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response statusText:', response.statusText);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        console.error('❌ HTTP Error:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('❌ Response body:', errorText);
+        return {
+          success: false,
+          message: `HTTP ${response.status}: ${errorText}`,
+          debug: {
+            status: response.status,
+            statusText: response.statusText,
+            url: fullUrl,
+            body: errorText
+          }
+        };
+      }
+
       const result = await response.json();
-      console.log('Balance update result:', result);
+      console.log('✅ Success response:', result);
+      console.log('=== END UPDATE USER BALANCE DEBUG ===');
 
       return result;
     } catch (error) {
-      console.error('Error updating balance:', error);
+      console.error('=== UPDATE USER BALANCE ERROR ===');
+      console.error('❌ Network/parsing error:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.log('=== END UPDATE USER BALANCE ERROR ===');
       return {
         success: false,
-        message: 'Failed to update balance'
+        message: 'Network error: ' + error.message,
+        debug: {
+          error: error.name,
+          message: error.message
+        }
       };
     }
   },
