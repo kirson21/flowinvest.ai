@@ -996,6 +996,62 @@ export const supabaseDataService = {
   },
 
   /**
+   * Delete a specific notification
+   */
+  async deleteNotification(userId, notificationId) {
+    try {
+      console.log('🗑️ Deleting notification:', notificationId);
+      
+      // Use backend API for consistent deletion
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/notifications/${notificationId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        console.error('❌ Delete notification API failed:', response.status);
+        return { success: false, message: `HTTP ${response.status}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ Notification deleted:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting notification:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  /**
+   * Delete all notifications for a user
+   */
+  async deleteAllNotifications(userId) {
+    try {
+      console.log('🗑️ Deleting all notifications for user:', userId);
+      
+      // Use backend API for consistent deletion
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/notifications`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        console.error('❌ Delete all notifications API failed:', response.status);
+        return { success: false, message: `HTTP ${response.status}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ All notifications deleted:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting all notifications:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  /**
    * Withdraw funds (mock implementation)
    */
   async withdrawFunds(userId, amount, description = null) {
