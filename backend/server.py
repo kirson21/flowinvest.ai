@@ -65,6 +65,7 @@ async def log_requests(request: Request, call_next):
 # CORS middleware - configured for production
 allowed_origins = [
     "https://f01i.ai",
+    "https://f01i.app",  # User's actual frontend domain
     "https://app.f01i.ai", 
     "https://flowinvestaiapp-kirsons-projects.vercel.app",
     "http://localhost:3000",
