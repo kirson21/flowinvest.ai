@@ -315,6 +315,55 @@ const Settings = () => {
     }
   };
 
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      console.log('Deleting notification:', notificationId);
+      const result = await supabaseDataService.deleteNotification(user?.id, notificationId);
+      
+      if (result.success) {
+        // Remove the notification from local state
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+        // Update unread count
+        await loadUnreadNotificationCount();
+        setMessage('✅ Notification deleted successfully');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        setError('❌ Failed to delete notification: ' + (result.message || 'Unknown error'));
+        setTimeout(() => setError(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      setError('❌ Failed to delete notification. Please try again.');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleDeleteAllNotifications = async () => {
+    if (!window.confirm('Are you sure you want to delete all notifications? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      console.log('Deleting all notifications...');
+      const result = await supabaseDataService.deleteAllNotifications(user?.id);
+      
+      if (result.success) {
+        // Clear all notifications from local state
+        setNotifications([]);
+        setUnreadCount(0);
+        setMessage('✅ All notifications deleted successfully');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        setError('❌ Failed to delete all notifications: ' + (result.message || 'Unknown error'));
+        setTimeout(() => setError(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+      setError('❌ Failed to delete all notifications. Please try again.');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   const handleWithdraw = async () => {
     if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
       alert('Please enter a valid amount');
