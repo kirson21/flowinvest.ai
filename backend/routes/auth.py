@@ -205,6 +205,52 @@ async def sync_balance(user_id: str):
         print("=== END BALANCE SYNC ENDPOINT (ERROR) ===\n")
         return {"success": False, "message": f"Failed to sync balance: {str(e)}"}
 
+@router.delete("/auth/user/{user_id}/notifications/{notification_id}")
+async def delete_notification(user_id: str, notification_id: str):
+    """Delete a specific notification"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Deleting notification {notification_id} for user {user_id}")
+        
+        # Delete the notification
+        response = supabase_admin.table('user_notifications').delete().eq('id', notification_id).eq('user_id', user_id).execute()
+        
+        print(f"Delete response: {response}")
+        
+        return {
+            "success": True,
+            "message": "Notification deleted successfully"
+        }
+        
+    except Exception as e:
+        print(f"Error deleting notification: {e}")
+        return {"success": False, "message": f"Failed to delete notification: {str(e)}"}
+
+@router.delete("/auth/user/{user_id}/notifications")
+async def delete_all_notifications(user_id: str):
+    """Delete all notifications for a user"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Deleting all notifications for user {user_id}")
+        
+        # Delete all notifications for the user
+        response = supabase_admin.table('user_notifications').delete().eq('user_id', user_id).execute()
+        
+        print(f"Delete all response: {response}")
+        
+        return {
+            "success": True,
+            "message": "All notifications deleted successfully"
+        }
+        
+    except Exception as e:
+        print(f"Error deleting all notifications: {e}")
+        return {"success": False, "message": f"Failed to delete notifications: {str(e)}"}
+
 @router.get("/auth/debug/env")
 async def debug_environment():
     """Debug endpoint to check environment variables"""
