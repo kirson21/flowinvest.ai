@@ -205,6 +205,24 @@ async def sync_balance(user_id: str):
         print("=== END BALANCE SYNC ENDPOINT (ERROR) ===\n")
         return {"success": False, "message": f"Failed to sync balance: {str(e)}"}
 
+@router.get("/auth/debug/env")
+async def debug_environment():
+    """Debug endpoint to check environment variables"""
+    import os
+    
+    env_info = {
+        "SUPABASE_URL": bool(os.environ.get("SUPABASE_URL")),
+        "SUPABASE_ANON_KEY": bool(os.environ.get("SUPABASE_ANON_KEY")),
+        "SUPABASE_SERVICE_KEY": bool(os.environ.get("SUPABASE_SERVICE_KEY")),
+        "SUPABASE_SERVICE_ROLE_KEY": bool(os.environ.get("SUPABASE_SERVICE_ROLE_KEY")),
+        "supabase_admin_available": bool(supabase_admin),
+        "SUPABASE_URL_VALUE": os.environ.get("SUPABASE_URL", "NOT_SET"),
+        "service_key_prefix": os.environ.get("SUPABASE_SERVICE_KEY", "NOT_SET")[:20] + "..." if os.environ.get("SUPABASE_SERVICE_KEY") else "NOT_SET",
+        "service_role_key_prefix": os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "NOT_SET")[:20] + "..." if os.environ.get("SUPABASE_SERVICE_ROLE_KEY") else "NOT_SET"
+    }
+    
+    return {"environment": env_info}
+
 @router.get("/auth/user/{user_id}/balance")
 async def get_user_balance(user_id: str):
     """Get user's current account balance"""
