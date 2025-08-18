@@ -223,6 +223,47 @@ async def debug_environment():
     
     return {"environment": env_info}
 
+@router.post("/auth/user/{user_id}/set-balance")
+async def set_balance_direct(user_id: str, balance_data: dict):
+    """Directly set user balance (admin function)"""
+    try:
+        amount = float(balance_data.get('amount', 0))
+        print(f"Setting balance directly for {user_id} to {amount}")
+        
+        # Use raw SQL to bypass RLS if needed
+        if supabase_admin:
+            # First try normal upsert
+            response = supabase_admin.table('user_accounts').select('*').eq('user_id', user_id).execute()
+            print(f"Current account check: {response.data}")
+            
+            # Force upsert with admin privileges
+            upsert_response = supabase_admin.table('user_accounts').upsert({
+                'user_id': user_id,
+                'balance': amount,
+                'currency': 'USD',
+                'updated_at': 'now()'
+            }).execute()
+            print(f"Upsert response: {upsert_response.data}")
+            
+            # Verify the update worked
+            verify_response = supabase_admin.table('user_accounts').select('*').eq('user_id', user_id).execute()
+            print(f"Verification response: {verify_response.data}")
+            
+            return {
+                "success": True,
+                "message": f"Balance set to ${amount}",
+                "new_balance": amount,
+                "verification": verify_response.data
+            }
+        else:
+            return {"success": False, "message": "Admin client not available"}
+            
+    except Exception as e:
+        print(f"Error setting balance: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return {"success": False, "message": f"Failed to set balance: {str(e)}"}
+
 @router.get("/auth/user/{user_id}/balance")
 async def get_user_balance(user_id: str):
     """Get user's current account balance"""
