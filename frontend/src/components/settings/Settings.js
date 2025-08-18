@@ -335,6 +335,12 @@ const Settings = () => {
     }
 
     try {
+      console.log('=== FRONTEND ENVIRONMENT DEBUG ===');
+      console.log('process.env.REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
+      console.log('import.meta.env.REACT_APP_BACKEND_URL:', import.meta?.env?.REACT_APP_BACKEND_URL);  
+      console.log('window.location.origin:', window.location.origin);
+      console.log('=== END FRONTEND ENVIRONMENT DEBUG ===');
+      
       console.log('Processing withdrawal via balance system...');
       const result = await supabaseDataService.withdrawFunds(
         user?.id, 
@@ -352,6 +358,7 @@ const Settings = () => {
         setMessage(`✅ Successfully withdrew $${amount.toFixed(2)}! Your new balance is $${result.new_balance.toFixed(2)}`);
         setTimeout(() => setMessage(''), 4000);
       } else {
+        console.error('Withdrawal failed with result:', result);
         setError('❌ Failed to withdraw funds: ' + (result.message || 'Unknown error'));
         setTimeout(() => setError(''), 4000);
       }
