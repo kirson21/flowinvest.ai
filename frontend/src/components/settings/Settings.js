@@ -324,7 +324,8 @@ const Settings = () => {
         // Remove the notification from local state
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
         // Update unread count
-        await loadUnreadNotificationCount();
+        const newUnreadCount = await supabaseDataService.getUnreadNotificationCount(user?.id);
+        setUnreadCount(newUnreadCount);
         setMessage('✅ Notification deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } else {
