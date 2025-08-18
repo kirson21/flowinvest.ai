@@ -48,17 +48,6 @@ async def log_requests(request: Request, call_next):
     print(f"   Query: {request.url.query}")
     print(f"   Headers: {dict(request.headers)}")
     
-    # Get request body if it's a POST/PUT/PATCH
-    if request.method in ["POST", "PUT", "PATCH"]:
-        try:
-            body = await request.body()
-            if body:
-                print(f"   Body: {body.decode('utf-8')}")
-            else:
-                print(f"   Body: (empty)")
-        except Exception as e:
-            print(f"   Body: (could not read: {e})")
-    
     response = await call_next(request)
     
     # Log response
@@ -66,7 +55,6 @@ async def log_requests(request: Request, call_next):
     print(f"📤 RESPONSE:")
     print(f"   Status: {response.status_code}")
     print(f"   Process time: {process_time:.4f}s")
-    print(f"   Response headers: {dict(response.headers)}")
     print("=" * 60)
     
     return response
