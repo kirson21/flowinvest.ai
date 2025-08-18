@@ -134,28 +134,57 @@ async def test_deployment():
 @router.get("/auth/user/{user_id}/balance")
 async def get_user_balance(user_id: str):
     """Get user's current account balance"""
+    print(f"\n=== GET BALANCE ENDPOINT HIT ===")
+    print(f"Requested user_id: {user_id}")
+    
     try:
         if not supabase_admin:
+            print("❌ Database not available")
             return {"success": False, "message": "Database not available"}
             
+        print("✅ Database client available")
+        print(f"Querying user_accounts table for user_id: {user_id}")
+        
         response = supabase_admin.table('user_accounts').select('balance, currency').eq('user_id', user_id).execute()
         
+        print(f"Database response: {response}")
+        print(f"Response data: {response.data}")
+        print(f"Response count: {response.count if hasattr(response, 'count') else 'N/A'}")
+        
         if response.data and len(response.data) > 0:
-            return {
+            balance_value = response.data[0]['balance']
+            currency_value = response.data[0].get('currency', 'USD')
+            print(f"Found balance record: balance={balance_value}, currency={currency_value}")
+            
+            result = {
                 "success": True, 
-                "balance": float(response.data[0]['balance']) if response.data[0]['balance'] else 0.0,
-                "currency": response.data[0].get('currency', 'USD')
+                "balance": float(balance_value) if balance_value else 0.0,
+                "currency": currency_value
             }
+            print(f"Returning result: {result}")
+            print("=== END GET BALANCE ENDPOINT ===\n")
+            return result
         else:
+            print("No balance record found, creating new account with zero balance")
             # Create account with zero balance if doesn't exist
-            supabase_admin.table('user_accounts').insert({
+            insert_response = supabase_admin.table('user_accounts').insert({
                 'user_id': user_id,
                 'balance': 0.0,
                 'currency': 'USD'
             }).execute()
-            return {"success": True, "balance": 0.0, "currency": "USD"}
+            print(f"Insert response: {insert_response}")
+            
+            result = {"success": True, "balance": 0.0, "currency": "USD"}
+            print(f"Returning new account result: {result}")
+            print("=== END GET BALANCE ENDPOINT ===\n")
+            return result
             
     except Exception as e:
+        print(f"❌ Exception in get_balance: {e}")
+        print(f"Exception type: {type(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END GET BALANCE ENDPOINT (ERROR) ===\n")
         return {"success": False, "message": f"Failed to get balance: {str(e)}"}
 
 @router.post("/auth/user/{user_id}/process-transaction")
