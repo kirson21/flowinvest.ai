@@ -740,10 +740,45 @@ export const supabaseDataService = {
   // ========================================
 
   /**
-   * Get user account balance
+   * Get user account balance (now uses backend API for consistency)
    */
   async getAccountBalance(userId) {
     try {
+      console.log('🔄 Getting account balance via backend API for consistency...');
+      
+      // Use backend API to ensure consistency with balance operations
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/balance`);
+      
+      if (!response.ok) {
+        console.error('❌ Backend balance API failed:', response.status);
+        // Fallback to direct Supabase query
+        return await this.getAccountBalanceDirect(userId);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Backend balance result:', result);
+      
+      if (result.success) {
+        return result.balance;
+      } else {
+        console.error('❌ Backend balance error:', result.message);
+        // Fallback to direct Supabase query
+        return await this.getAccountBalanceDirect(userId);
+      }
+    } catch (error) {
+      console.error('❌ Error getting balance via backend:', error);
+      // Fallback to direct Supabase query
+      return await this.getAccountBalanceDirect(userId);
+    }
+  },
+
+  /**
+   * Get user account balance directly from Supabase (fallback method)
+   */
+  async getAccountBalanceDirect(userId) {
+    try {
+      console.log('🔄 Getting account balance directly from Supabase (fallback)...');
       const { data, error } = await supabase
         .from('user_accounts')
         .select('balance')
@@ -755,9 +790,11 @@ export const supabaseDataService = {
         return 0;
       }
 
-      return data?.balance || 0;
+      const balance = data?.balance || 0;
+      console.log('💰 Direct Supabase balance:', balance);
+      return balance;
     } catch (error) {
-      console.error('Error in getAccountBalance:', error);
+      console.error('Error in getAccountBalanceDirect:', error);
       return 0;
     }
   },
