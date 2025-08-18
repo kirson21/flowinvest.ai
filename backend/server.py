@@ -119,28 +119,48 @@ async def get_status():
 
 # Include route modules (using httpx-based supabase client - no Rust dependencies)
 try:
+    print("=== LOADING AUTH ROUTES ===")
     api_router.include_router(auth.router)
+    print(f"✅ Auth routes loaded successfully - {len(auth.router.routes)} routes added")
+    for route in auth.router.routes:
+        print(f"   {route.methods} {route.path}")
     logger.info("Auth routes loaded successfully")
 except Exception as e:
+    print(f"❌ Auth routes failed to load: {e}")
+    import traceback
+    print("Full traceback:")
+    traceback.print_exc()
     logger.warning(f"Auth routes failed to load: {e}")
 
 try:
+    print("=== LOADING WEBHOOK ROUTES ===")
     api_router.include_router(webhook.router)
+    print(f"✅ Webhook routes loaded successfully")
     logger.info("Webhook routes loaded successfully")
 except Exception as e:
+    print(f"❌ Webhook routes failed to load: {e}")
     logger.warning(f"Webhook routes failed to load: {e}")
 
 try:
+    print("=== LOADING VERIFICATION ROUTES ===")
     api_router.include_router(verification.router)
+    print(f"✅ Verification routes loaded successfully")
     logger.info("Verification routes loaded successfully")
 except Exception as e:
+    print(f"❌ Verification routes failed to load: {e}")
     logger.warning(f"Verification routes failed to load: {e}")
 
 try:
+    print("=== LOADING AI BOTS ROUTES ===")
     api_router.include_router(ai_bots.router)
+    print(f"✅ AI bots routes loaded successfully")
     logger.info("AI bots routes loaded successfully")
 except Exception as e:
+    print(f"❌ AI bots routes failed to load: {e}")
     logger.warning(f"AI bots routes failed to load: {e}")
+
+print("=== ROUTE LOADING COMPLETE ===")
+print(f"Total API routes loaded: {len(api_router.routes)}")
 
 # Include API router
 app.include_router(api_router, prefix="/api")
