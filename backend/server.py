@@ -1,3 +1,6 @@
+# CGI compatibility for Python 3.13+
+import cgi_compat
+
 from fastapi import FastAPI, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 import sys
