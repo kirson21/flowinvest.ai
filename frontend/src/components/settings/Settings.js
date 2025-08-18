@@ -1462,16 +1462,27 @@ const Settings = () => {
                               {formatNotificationDate(notification.created_at)}
                             </p>
                           </div>
-                          {!notification.is_read && (
+                          <div className="flex items-center space-x-2 ml-3">
+                            {!notification.is_read && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => markNotificationAsRead(notification.id)}
+                                className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1"
+                              >
+                                Mark as read
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => markNotificationAsRead(notification.id)}
-                              className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1"
+                              onClick={() => handleDeleteNotification(notification.id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 p-1"
+                              title="Delete notification"
                             >
-                              Mark as read
+                              <Trash2 size={14} />
                             </Button>
-                          )}
+                          </div>
                         </div>
                       </div>
                     ))}
