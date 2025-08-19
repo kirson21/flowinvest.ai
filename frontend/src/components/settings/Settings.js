@@ -18,6 +18,7 @@ import VerificationManagementModal from '../verification/VerificationManagementM
 import { verificationService } from '../../services/verificationService';
 import { dataSyncService } from '../../services/dataSyncService';
 import { supabaseDataService } from '../../services/supabaseDataService';
+import SubscriptionManagement from './SubscriptionManagement';
 import { 
   Settings as SettingsIcon,
   Moon,
