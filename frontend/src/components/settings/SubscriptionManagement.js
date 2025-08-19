@@ -298,9 +298,6 @@ const SubscriptionManagement = ({ user, onClose }) => {
                   {upgrading ? 'Processing...' : getButtonText(plan)}
                 </button>
 
-                {/* Popular Badge - positioned at top middle like current plan */}
-                {getPopularBadge(plan)}
-
                 {/* Coming Soon Overlay */}
                 {plan.coming_soon && (
                   <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 rounded-lg flex items-center justify-center">
@@ -312,9 +309,6 @@ const SubscriptionManagement = ({ user, onClose }) => {
                     </div>
                   </div>
                 )}
-
-                {/* Popular Badge - positioned in the middle */}
-                {getPopularBadge(plan)}
               </div>
             ))}
           </div>
