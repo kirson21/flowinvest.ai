@@ -396,7 +396,7 @@ async def get_subscription_plans():
             {
                 "id": "pro",
                 "name": "Pro Plan",
-                "price": 200,
+                "price": 49,
                 "currency": "USD",
                 "billing_period": "month",
                 "coming_soon": True,
