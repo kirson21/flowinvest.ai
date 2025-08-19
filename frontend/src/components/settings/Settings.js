@@ -1072,6 +1072,16 @@ const Settings = () => {
               )}
             </div>
 
+            {/* Subscription Badge */}
+            <div className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Current Plan
+                </p>
+              </div>
+              <SubscriptionProfileBadge user={user} />
+            </div>
+
             {/* Account Balance Section */}
             <div className="bg-gradient-to-r from-[#0097B2]/5 to-[#0097B2]/10 p-4 rounded-lg border border-[#0097B2]/20">
               <div className="flex items-center justify-between">
