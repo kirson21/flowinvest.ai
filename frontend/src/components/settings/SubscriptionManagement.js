@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Crown, Zap, X } from 'lucide-react';
-import supabaseDataService from '../../services/supabaseDataService';
+import { supabaseDataService } from '../../services/supabaseDataService';
 
 const SubscriptionManagement = ({ user, onClose }) => {
   const [subscription, setSubscription] = useState(null);
