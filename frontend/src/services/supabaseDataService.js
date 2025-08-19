@@ -1086,6 +1086,65 @@ export const supabaseDataService = {
   },
 
   /**
+   * Get user's subscription limits overview
+   */
+  async getUserSubscriptionLimits(userId) {
+    try {
+      console.log('🔄 Getting user subscription limits...');
+      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/subscription/limits`);
+      
+      if (!response.ok) {
+        console.error('❌ Limits API failed:', response.status);
+        return { success: false, message: `HTTP ${response.status}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ Limits result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error getting subscription limits:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  /**
+   * Check if user can create more resources based on subscription limits
+   */
+  async checkSubscriptionLimit(userId, resourceType, currentCount = 0) {
+    try {
+      console.log('🔄 Checking subscription limit...', { userId, resourceType, currentCount });
+      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/subscription/check-limit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resource_type: resourceType,
+          current_count: currentCount
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('❌ Limit check API failed:', response.status);
+        return { success: false, message: `HTTP ${response.status}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ Limit check result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error checking subscription limit:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  /**
    * Cancel user subscription
    */
   async cancelSubscription(userId) {
