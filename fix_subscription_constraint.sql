@@ -14,7 +14,7 @@ CHECK (plan_type IN ('free', 'plus', 'pro', 'super_admin'));
 -- Verify the fix
 SELECT 'Constraint updated successfully - super_admin plan type now allowed' as status;
 
--- Show current constraint definition
+-- Show current constraint definition (optional)
 SELECT 
     conname as constraint_name,
     pg_get_constraintdef(oid) as constraint_definition
