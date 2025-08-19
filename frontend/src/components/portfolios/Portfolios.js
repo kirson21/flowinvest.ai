@@ -996,11 +996,40 @@ const Portfolios = () => {
     setSelectedSeller(null);
   };
 
-  const handleCreateProduct = () => {
+  const handleCreateProduct = async () => {
     if (!canAccessSellerFeatures()) {
       setIsVerificationRequiredOpen(true);
       return;
     }
+
+    // Check subscription limits for marketplace products
+    if (user?.id) {
+      try {
+        // Count current products by this user
+        const currentUserProducts = portfolios.filter(p => p.user_id === user.id).length;
+        
+        // Check subscription limit
+        const limitCheck = await supabaseDataService.checkSubscriptionLimit(
+          user.id, 
+          'marketplace_products', 
+          currentUserProducts
+        );
+        
+        if (limitCheck.success && !limitCheck.can_create) {
+          // User has reached their limit
+          setSubscriptionLimitData({
+            ...limitCheck,
+            current_count: currentUserProducts
+          });
+          setIsSubscriptionLimitModalOpen(true);
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking subscription limits:', error);
+        // Allow creation if error (graceful fallback)
+      }
+    }
+
     setIsProductCreationOpen(true);
   };
 
