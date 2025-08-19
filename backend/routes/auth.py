@@ -595,7 +595,7 @@ async def cancel_user_subscription(user_id: str):
 
 @router.get("/auth/subscription/plans")
 async def get_subscription_plans():
-    """Get available subscription plans"""
+    """Get available subscription plans (excludes Super Admin)"""
     return {
         "success": True,
         "plans": [
