@@ -401,31 +401,55 @@ async def get_user_subscription(user_id: str):
         
         print(f"Getting subscription for user {user_id}")
         
-        response = supabase_admin.table('subscriptions').select('*').eq('user_id', user_id).execute()
-        
-        if response.data and len(response.data) > 0:
-            subscription = response.data[0]  # Get the first subscription
-            # Check if subscription has expired
-            if subscription.get('end_date'):
-                from datetime import datetime, timezone
-                end_date = datetime.fromisoformat(subscription['end_date'].replace('Z', '+00:00'))
-                if end_date < datetime.now(timezone.utc):
-                    # Subscription expired, downgrade to free
+        # Super admin check by UUID
+        if user_id == 'cd0e9717-f85d-4726-81e9-f260394ead58':
+            # Check if super admin subscription exists, if not create it
+            response = supabase_admin.table('subscriptions')\
+                .select('*')\
+                .eq('user_id', user_id)\
+                .execute()
+            
+            if not response.data or len(response.data) == 0:
+                # Create super admin subscription
+                super_admin_sub = {
+                    'user_id': user_id,
+                    'plan_type': 'super_admin',
+                    'status': 'active',
+                    'start_date': 'now()',
+                    'end_date': None,
+                    'renewal': False,
+                    'price_paid': 0.0,
+                    'currency': 'USD',
+                    'limits': None
+                }
+                
+                create_response = supabase_admin.table('subscriptions').insert(super_admin_sub).execute()
+                subscription = create_response.data[0] if create_response.data else super_admin_sub
+            else:
+                subscription = response.data[0]
+                # Update to super_admin if not already
+                if subscription.get('plan_type') != 'super_admin':
                     supabase_admin.table('subscriptions').update({
-                        'plan_type': 'free',
-                        'status': 'expired',
-                        'end_date': None
+                        'plan_type': 'super_admin',
+                        'status': 'active',
+                        'limits': None
                     }).eq('user_id', user_id).execute()
-                    
-                    subscription['plan_type'] = 'free'
-                    subscription['status'] = 'expired'
+                    subscription['plan_type'] = 'super_admin'
+                    subscription['limits'] = None
             
             return {
                 "success": True,
                 "subscription": subscription
             }
-        else:
-            # Create default free subscription if none exists
+        
+        # Get user's subscription
+        response = supabase_admin.table('subscriptions')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        if not response.data or len(response.data) == 0:
+            # Create default free subscription
             default_sub = {
                 'user_id': user_id,
                 'plan_type': 'free',
@@ -433,7 +457,13 @@ async def get_user_subscription(user_id: str):
                 'start_date': 'now()',
                 'end_date': None,
                 'renewal': False,
-                'price_paid': 0.0
+                'price_paid': 0.0,
+                'currency': 'USD',
+                'limits': {
+                    'ai_bots': 1,
+                    'manual_bots': 2,
+                    'marketplace_products': 1
+                }
             }
             
             create_response = supabase_admin.table('subscriptions').insert(default_sub).execute()
@@ -442,7 +472,44 @@ async def get_user_subscription(user_id: str):
                 "success": True,
                 "subscription": create_response.data[0] if create_response.data else default_sub
             }
-            
+        
+        subscription = response.data[0]
+        plan_type = subscription.get('plan_type', 'free')
+        
+        # Ensure limits are set for non-super-admin plans
+        if plan_type != 'super_admin' and not subscription.get('limits'):
+            default_limits = {
+                "free": {"ai_bots": 1, "manual_bots": 2, "marketplace_products": 1},
+                "plus": {"ai_bots": 3, "manual_bots": 5, "marketplace_products": 10},
+                "pro": {"ai_bots": -1, "manual_bots": -1, "marketplace_products": -1}
+            }
+            subscription['limits'] = default_limits.get(plan_type, default_limits["free"])
+        
+        # Check if subscription has expired
+        if subscription.get('end_date'):
+            from datetime import datetime, timezone
+            try:
+                end_date = datetime.fromisoformat(subscription['end_date'].replace('Z', '+00:00'))
+                if end_date < datetime.now(timezone.utc):
+                    # Subscription expired, downgrade to free
+                    supabase_admin.table('subscriptions').update({
+                        'plan_type': 'free',
+                        'status': 'expired',
+                        'end_date': None,
+                        'limits': {"ai_bots": 1, "manual_bots": 2, "marketplace_products": 1}
+                    }).eq('user_id', user_id).execute()
+                    
+                    subscription['plan_type'] = 'free'
+                    subscription['status'] = 'expired'
+                    subscription['limits'] = {"ai_bots": 1, "manual_bots": 2, "marketplace_products": 1}
+            except Exception as date_error:
+                print(f"Error parsing end_date: {date_error}")
+        
+        return {
+            "success": True,
+            "subscription": subscription
+        }
+        
     except Exception as e:
         print(f"Error getting subscription: {e}")
         return {"success": False, "message": f"Failed to get subscription: {str(e)}"}
