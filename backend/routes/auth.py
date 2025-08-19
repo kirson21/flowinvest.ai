@@ -223,18 +223,68 @@ async def get_user_subscription_limits(user_id: str):
         
         print(f"Getting subscription limits for user {user_id}")
         
-        # Use the database function to get limits
-        response = supabase_admin.rpc('get_user_limits_overview', {
-            'p_user_id': user_id
-        }).execute()
+        # Super admin check by UUID
+        if user_id == 'cd0e9717-f85d-4726-81e9-f260394ead58':
+            return {
+                "success": True,
+                "subscription": {
+                    "plan_type": "super_admin",
+                    "limits": None,  # No limits for super admin
+                    "is_super_admin": True,
+                    "status": "active"
+                }
+            }
         
-        if response.data:
-            result = response.data
-            print(f"Limits result: {result}")
-            return result
+        # Get user's subscription
+        response = supabase_admin.table('subscriptions')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        if not response.data or len(response.data) == 0:
+            # Default to free plan if no subscription found
+            return {
+                "success": True,
+                "subscription": {
+                    "plan_type": "free",
+                    "limits": {
+                        "ai_bots": 1,
+                        "manual_bots": 2,
+                        "marketplace_products": 1
+                    },
+                    "is_super_admin": False,
+                    "status": "active"
+                }
+            }
+        
+        subscription = response.data[0]
+        plan_type = subscription.get('plan_type', 'free')
+        is_super_admin = plan_type == 'super_admin'
+        
+        # Get limits based on plan type
+        if is_super_admin:
+            limits = None  # No limits
         else:
-            return {"success": False, "message": "Failed to get subscription limits"}
-            
+            # Default limits based on plan
+            default_limits = {
+                "free": {"ai_bots": 1, "manual_bots": 2, "marketplace_products": 1},
+                "plus": {"ai_bots": 3, "manual_bots": 5, "marketplace_products": 10},
+                "pro": {"ai_bots": -1, "manual_bots": -1, "marketplace_products": -1}
+            }
+            limits = subscription.get('limits') or default_limits.get(plan_type, default_limits["free"])
+        
+        return {
+            "success": True,
+            "subscription": {
+                "plan_type": plan_type,
+                "limits": limits,
+                "is_super_admin": is_super_admin,
+                "status": subscription.get('status', 'active'),
+                "start_date": subscription.get('start_date'),
+                "end_date": subscription.get('end_date')
+            }
+        }
+        
     except Exception as e:
         print(f"Error getting subscription limits: {e}")
         return {"success": False, "message": f"Failed to get subscription limits: {str(e)}"}
