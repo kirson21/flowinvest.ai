@@ -122,10 +122,10 @@ const SubscriptionManagement = ({ user, onClose }) => {
 
   const getPlanIcon = (planId) => {
     switch (planId) {
-      case 'free': return '🆓';
-      case 'plus': return '⭐';
-      case 'pro': return '👑';
-      default: return '📦';
+      case 'free': return <Check size={24} className="text-green-500" />;
+      case 'plus': return <Zap size={24} className="text-yellow-500" />;
+      case 'pro': return <Crown size={24} className="text-purple-500" />;
+      default: return <Check size={24} className="text-gray-500" />;
     }
   };
 
