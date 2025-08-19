@@ -2159,6 +2159,14 @@ const Settings = () => {
       isOpen={isVerificationManagementOpen}
       onClose={() => setIsVerificationManagementOpen(false)}
     />
+
+    {/* Subscription Management Modal */}
+    {showSubscriptionModal && (
+      <SubscriptionManagement
+        user={user}
+        onClose={() => setShowSubscriptionModal(false)}
+      />
+    )}
     </>
   );
 };
