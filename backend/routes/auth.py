@@ -298,20 +298,96 @@ async def check_subscription_limit(user_id: str, limit_check: LimitCheckRequest)
         
         print(f"Checking limit for user {user_id}: {limit_check.resource_type} (current: {limit_check.current_count})")
         
-        # Use the database function to check limits
-        response = supabase_admin.rpc('check_subscription_limit', {
-            'p_user_id': user_id,
-            'p_resource_type': limit_check.resource_type,
-            'p_current_count': limit_check.current_count
-        }).execute()
+        # Super admin check by UUID
+        if user_id == 'cd0e9717-f85d-4726-81e9-f260394ead58':
+            return {
+                "success": True,
+                "can_create": True,
+                "limit_reached": False,
+                "current_count": limit_check.current_count,
+                "limit": -1,  # Unlimited
+                "plan_type": "super_admin",
+                "is_super_admin": True
+            }
         
-        if response.data:
-            result = response.data
-            print(f"Limit check result: {result}")
-            return result
-        else:
-            return {"success": False, "message": "Failed to check subscription limit"}
+        # Get user's subscription
+        response = supabase_admin.table('subscriptions')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        # Default to free plan if no subscription
+        if not response.data or len(response.data) == 0:
+            default_limits = {
+                "ai_bots": 1,
+                "manual_bots": 2,
+                "marketplace_products": 1
+            }
+            limit = default_limits.get(limit_check.resource_type, 1)
             
+            return {
+                "success": True,
+                "can_create": limit_check.current_count < limit,
+                "limit_reached": limit_check.current_count >= limit,
+                "current_count": limit_check.current_count,
+                "limit": limit,
+                "plan_type": "free",
+                "is_super_admin": False
+            }
+        
+        subscription = response.data[0]
+        plan_type = subscription.get('plan_type', 'free')
+        
+        # Super admin has no limits
+        if plan_type == 'super_admin':
+            return {
+                "success": True,
+                "can_create": True,
+                "limit_reached": False,
+                "current_count": limit_check.current_count,
+                "limit": -1,
+                "plan_type": plan_type,
+                "is_super_admin": True
+            }
+        
+        # Get limits from subscription or use defaults
+        limits = subscription.get('limits', {})
+        if not limits:
+            # Fallback to default limits based on plan
+            default_limits = {
+                "free": {"ai_bots": 1, "manual_bots": 2, "marketplace_products": 1},
+                "plus": {"ai_bots": 3, "manual_bots": 5, "marketplace_products": 10},
+                "pro": {"ai_bots": -1, "manual_bots": -1, "marketplace_products": -1}
+            }
+            limits = default_limits.get(plan_type, default_limits["free"])
+        
+        limit = limits.get(limit_check.resource_type, 1)
+        
+        # If limit is -1, it means unlimited
+        if limit == -1:
+            return {
+                "success": True,
+                "can_create": True,
+                "limit_reached": False,
+                "current_count": limit_check.current_count,
+                "limit": -1,
+                "plan_type": plan_type,
+                "is_super_admin": False
+            }
+        
+        # Check if limit is reached
+        can_create = limit_check.current_count < limit
+        
+        return {
+            "success": True,
+            "can_create": can_create,
+            "limit_reached": not can_create,
+            "current_count": limit_check.current_count,
+            "limit": limit,
+            "plan_type": plan_type,
+            "is_super_admin": False
+        }
+        
     except Exception as e:
         print(f"Error checking subscription limit: {e}")
         return {"success": False, "message": f"Failed to check subscription limit: {str(e)}"}
