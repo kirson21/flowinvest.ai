@@ -1585,6 +1585,7 @@ const Settings = () => {
             Two-Factor Authentication
           </Button>
           <Button
+            onClick={() => setShowSubscriptionModal(true)}
             variant="outline"
             className="w-full justify-start border-[#0097B2]/20 hover:bg-[#0097B2]/5"
           >
