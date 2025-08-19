@@ -667,24 +667,6 @@ async def get_subscription_plans():
                     "white_label": True
                 },
                 "description": "Ultimate plan for professional traders"
-            },
-            {
-                "id": "super_admin",
-                "name": "Super Admin",
-                "price": 0,
-                "currency": "USD",
-                "billing_period": "lifetime",
-                "special": True,
-                "features": [
-                    "Unlimited access to all features",
-                    "Admin dashboard access",
-                    "User management capabilities",
-                    "System configuration access",
-                    "Advanced analytics and reporting",
-                    "Priority support"
-                ],
-                "limitations": None,
-                "description": "Full administrative access"
             }
         ]
     }
