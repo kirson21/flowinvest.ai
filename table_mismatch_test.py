@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 
 # Get backend URL from environment
-BACKEND_URL = "https://foli-deploy-fix.preview.emergentagent.com/api"
+BACKEND_URL = "https://investai-hub.preview.emergentagent.com/api"
 
 class TableMismatchTester:
     def __init__(self):

@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://foli-deploy-fix.preview.emergentagent.com/api"
+BACKEND_URL = "https://investai-hub.preview.emergentagent.com/api"
 SUPABASE_URL = "https://pmfwqmaykidbvjhcqjrr.supabase.co"
 SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtZndxbWF5a2lkYnZqaGNxanJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MDk2MjUsImV4cCI6MjA2Nzk4NTYyNX0.BsJ0128ME7WhH-CBRb3_LTV5NvsDkVev07SzOalAb-E"
 SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtZndxbWF5a2lkYnZqaGNxanJyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQwOTYyNSwiZXhwIjoyMDY3OTg1NjI1fQ.XiC_Nf3BR8etEqXRDUggG8sBgZA5lcwipd2GPu_a_tU"
