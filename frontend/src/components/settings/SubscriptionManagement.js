@@ -252,7 +252,7 @@ const SubscriptionManagement = ({ user, onClose }) => {
 
                 {/* Plan Header */}
                 <div className="text-center mb-6">
-                  <div className="text-4xl mb-2">{getPlanIcon(plan.id)}</div>
+                  <div className="flex justify-center mb-3">{getPlanIcon(plan.id)}</div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                     {plan.name}
                   </h3>
