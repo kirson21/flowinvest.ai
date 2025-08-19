@@ -61,6 +61,10 @@ const Portfolios = () => {
   const [verificationStatus, setVerificationStatus] = useState('unverified');
   const [productVotes, setProductVotes] = useState({});
   const [accountBalance, setAccountBalance] = useState(0);
+  
+  // Subscription limit modal state
+  const [isSubscriptionLimitModalOpen, setIsSubscriptionLimitModalOpen] = useState(false);
+  const [subscriptionLimitData, setSubscriptionLimitData] = useState(null);
 
   // Super Admin Check
   const isSuperAdmin = () => {
