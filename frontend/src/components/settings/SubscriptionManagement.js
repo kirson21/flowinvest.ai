@@ -145,9 +145,9 @@ const SubscriptionManagement = ({ user, onClose }) => {
   const getPopularBadge = (plan) => {
     if (plan.popular) {
       return (
-        <div className="absolute -top-3 right-4">
-          <div className="bg-gradient-to-r from-orange-400 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-medium">
-            популярный
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-12">
+          <div className="bg-gradient-to-r from-orange-400 to-pink-500 text-white text-xs px-4 py-1 rounded-full font-medium shadow-lg">
+            Popular
           </div>
         </div>
       );
