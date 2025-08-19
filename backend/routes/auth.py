@@ -210,6 +210,62 @@ class SubscriptionUpgradeRequest(BaseModel):
     price: float
     duration_days: Optional[int] = 30
 
+class LimitCheckRequest(BaseModel):
+    resource_type: str  # 'ai_bots', 'manual_bots', 'marketplace_products'
+    current_count: Optional[int] = 0
+
+@router.get("/auth/user/{user_id}/subscription/limits")
+async def get_user_subscription_limits(user_id: str):
+    """Get user's subscription limits overview"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Getting subscription limits for user {user_id}")
+        
+        # Use the database function to get limits
+        response = supabase_admin.rpc('get_user_limits_overview', {
+            'p_user_id': user_id
+        }).execute()
+        
+        if response.data:
+            result = response.data
+            print(f"Limits result: {result}")
+            return result
+        else:
+            return {"success": False, "message": "Failed to get subscription limits"}
+            
+    except Exception as e:
+        print(f"Error getting subscription limits: {e}")
+        return {"success": False, "message": f"Failed to get subscription limits: {str(e)}"}
+
+@router.post("/auth/user/{user_id}/subscription/check-limit")
+async def check_subscription_limit(user_id: str, limit_check: LimitCheckRequest):
+    """Check if user can create more resources based on subscription limits"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Checking limit for user {user_id}: {limit_check.resource_type} (current: {limit_check.current_count})")
+        
+        # Use the database function to check limits
+        response = supabase_admin.rpc('check_subscription_limit', {
+            'p_user_id': user_id,
+            'p_resource_type': limit_check.resource_type,
+            'p_current_count': limit_check.current_count
+        }).execute()
+        
+        if response.data:
+            result = response.data
+            print(f"Limit check result: {result}")
+            return result
+        else:
+            return {"success": False, "message": "Failed to check subscription limit"}
+            
+    except Exception as e:
+        print(f"Error checking subscription limit: {e}")
+        return {"success": False, "message": f"Failed to check subscription limit: {str(e)}"}
+
 @router.get("/auth/user/{user_id}/subscription")
 async def get_user_subscription(user_id: str):
     """Get user's current subscription details"""
