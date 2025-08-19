@@ -232,12 +232,12 @@ const SubscriptionManagement = ({ user, onClose }) => {
         </div>
 
         {/* Plans Grid */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 pb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {plans.map((plan) => (
               <div
                 key={plan.id}
-                className={`relative border rounded-lg p-6 ${
+                className={`relative border rounded-lg p-6 pb-8 ${
                   plan.popular
                     ? 'border-[#0097B2] ring-2 ring-[#0097B2]/20'
                     : 'border-gray-300 dark:border-gray-600'
