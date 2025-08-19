@@ -448,7 +448,8 @@ async def get_subscription_plans():
                     "product_slots": 10,
                     "telegram_notifications": True,
                     "api_access": True
-                }
+                },
+                "description": "Most popular plan for serious traders"
             },
             {
                 "id": "pro",
