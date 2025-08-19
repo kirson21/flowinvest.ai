@@ -309,6 +309,9 @@ const SubscriptionManagement = ({ user, onClose }) => {
                     </div>
                   </div>
                 )}
+
+                {/* Popular Badge - positioned in the middle */}
+                {getPopularBadge(plan)}
               </div>
             ))}
           </div>
