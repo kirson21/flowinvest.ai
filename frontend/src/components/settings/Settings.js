@@ -19,6 +19,7 @@ import { verificationService } from '../../services/verificationService';
 import { dataSyncService } from '../../services/dataSyncService';
 import { supabaseDataService } from '../../services/supabaseDataService';
 import SubscriptionManagement from './SubscriptionManagement';
+import SubscriptionProfileBadge from '../common/SubscriptionProfileBadge';
 import { 
   Settings as SettingsIcon,
   Moon,
