@@ -995,6 +995,123 @@ export const supabaseDataService = {
     }
   },
 
+  // ========================================
+  // SUBSCRIPTION MANAGEMENT
+  // ========================================
+
+  /**
+   * Get user's current subscription
+   */
+  async getUserSubscription(userId) {
+    try {
+      console.log('🔄 Getting user subscription...');
+      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/subscription`);
+      
+      if (!response.ok) {
+        console.error('❌ Subscription API failed:', response.status);
+        return { success: false, message: `HTTP ${response.status}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ Subscription result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error getting subscription:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  /**
+   * Get available subscription plans
+   */
+  async getSubscriptionPlans() {
+    try {
+      console.log('🔄 Getting subscription plans...');
+      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/subscription/plans`);
+      
+      if (!response.ok) {
+        console.error('❌ Plans API failed:', response.status);
+        return { success: false, message: `HTTP ${response.status}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ Plans result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error getting plans:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  /**
+   * Upgrade user subscription
+   */
+  async upgradeSubscription(userId, planType, price) {
+    try {
+      console.log('🔄 Upgrading subscription...', { userId, planType, price });
+      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/subscription/upgrade`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plan_type: planType,
+          price: parseFloat(price),
+          duration_days: 30
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('❌ Upgrade API failed:', response.status);
+        const errorText = await response.text();
+        return { success: false, message: `HTTP ${response.status}: ${errorText}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ Upgrade result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error upgrading subscription:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  /**
+   * Cancel user subscription
+   */
+  async cancelSubscription(userId) {
+    try {
+      console.log('🔄 Cancelling subscription...', userId);
+      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/subscription/cancel`, {
+        method: 'POST'
+      });
+      
+      if (!response.ok) {
+        console.error('❌ Cancel API failed:', response.status);
+        return { success: false, message: `HTTP ${response.status}` };
+      }
+      
+      const result = await response.json();
+      console.log('✅ Cancel result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error cancelling subscription:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
   /**
    * Delete a specific notification
    */
