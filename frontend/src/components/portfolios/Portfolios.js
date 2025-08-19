@@ -1673,6 +1673,25 @@ const Portfolios = () => {
         }}
       />
 
+      {/* Subscription Limit Modal */}
+      <SubscriptionLimitModal
+        isOpen={isSubscriptionLimitModalOpen}
+        onClose={() => setIsSubscriptionLimitModalOpen(false)}
+        limitData={subscriptionLimitData}
+        resourceType="marketplace_products"
+        onUpgrade={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          // TODO: Open subscription management modal or redirect to settings
+          console.log('Navigate to subscription upgrade');
+        }}
+        onManageExisting={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          // Switch to "My Products" view to allow user to delete existing products
+          setShowMyPurchases(false);
+          console.log('Navigate to manage existing products');
+        }}
+      />
+
       {/* Seller Verification Required Modal */}
       <VerificationRequiredModal
         isOpen={isVerificationRequiredOpen}
