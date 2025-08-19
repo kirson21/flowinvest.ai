@@ -232,8 +232,8 @@ const SubscriptionManagement = ({ user, onClose }) => {
         </div>
 
         {/* Plans Grid */}
-        <div className="p-6 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="p-6 pb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
             {plans.map((plan) => (
               <div
                 key={plan.id}
