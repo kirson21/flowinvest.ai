@@ -219,10 +219,10 @@ async def get_user_subscription(user_id: str):
         
         print(f"Getting subscription for user {user_id}")
         
-        response = supabase_admin.table('subscriptions').select('*').eq('user_id', user_id).single().execute()
+        response = supabase_admin.table('subscriptions').select('*').eq('user_id', user_id).execute()
         
-        if response.data:
-            subscription = response.data
+        if response.data and len(response.data) > 0:
+            subscription = response.data[0]  # Get the first subscription
             # Check if subscription has expired
             if subscription.get('end_date'):
                 from datetime import datetime, timezone
