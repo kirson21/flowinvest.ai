@@ -423,7 +423,8 @@ async def get_subscription_plans():
                     "ai_bots": 1,
                     "manual_bots": 2,
                     "product_slots": 1
-                }
+                },
+                "description": "Perfect for getting started with AI-powered trading"
             },
             {
                 "id": "plus",
