@@ -315,12 +315,12 @@ const SubscriptionManagement = ({ user, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="px-6 py-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+          <div className="text-center text-sm text-gray-600 dark:text-gray-400 space-y-2">
             <p>
               💡 All subscription payments are deducted from your account balance.
             </p>
-            <p className="mt-1">
+            <p>
               Need more funds?{' '}
               <button
                 onClick={onClose}
