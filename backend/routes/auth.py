@@ -205,6 +205,220 @@ async def sync_balance(user_id: str):
         print("=== END BALANCE SYNC ENDPOINT (ERROR) ===\n")
         return {"success": False, "message": f"Failed to sync balance: {str(e)}"}
 
+class SubscriptionUpgradeRequest(BaseModel):
+    plan_type: str
+    price: float
+    duration_days: Optional[int] = 30
+
+@router.get("/auth/user/{user_id}/subscription")
+async def get_user_subscription(user_id: str):
+    """Get user's current subscription details"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Getting subscription for user {user_id}")
+        
+        response = supabase_admin.table('subscriptions').select('*').eq('user_id', user_id).single().execute()
+        
+        if response.data:
+            subscription = response.data
+            # Check if subscription has expired
+            if subscription.get('end_date'):
+                from datetime import datetime, timezone
+                end_date = datetime.fromisoformat(subscription['end_date'].replace('Z', '+00:00'))
+                if end_date < datetime.now(timezone.utc):
+                    # Subscription expired, downgrade to free
+                    supabase_admin.table('subscriptions').update({
+                        'plan_type': 'free',
+                        'status': 'expired',
+                        'end_date': None
+                    }).eq('user_id', user_id).execute()
+                    
+                    subscription['plan_type'] = 'free'
+                    subscription['status'] = 'expired'
+            
+            return {
+                "success": True,
+                "subscription": subscription
+            }
+        else:
+            # Create default free subscription if none exists
+            default_sub = {
+                'user_id': user_id,
+                'plan_type': 'free',
+                'status': 'active',
+                'start_date': 'now()',
+                'end_date': None,
+                'renewal': False,
+                'price_paid': 0.0
+            }
+            
+            create_response = supabase_admin.table('subscriptions').insert(default_sub).execute()
+            
+            return {
+                "success": True,
+                "subscription": create_response.data[0] if create_response.data else default_sub
+            }
+            
+    except Exception as e:
+        print(f"Error getting subscription: {e}")
+        return {"success": False, "message": f"Failed to get subscription: {str(e)}"}
+
+@router.post("/auth/user/{user_id}/subscription/upgrade")
+async def upgrade_user_subscription(user_id: str, upgrade_request: SubscriptionUpgradeRequest):
+    """Upgrade user subscription with balance deduction"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Upgrading subscription for user {user_id} to {upgrade_request.plan_type} for ${upgrade_request.price}")
+        
+        # Use the database function to handle the upgrade
+        response = supabase_admin.rpc('upgrade_subscription', {
+            'p_user_id': user_id,
+            'p_plan_type': upgrade_request.plan_type,
+            'p_price': upgrade_request.price
+        }).execute()
+        
+        if response.data:
+            result = response.data
+            
+            # Create success notification if upgrade succeeded
+            if result.get('success'):
+                try:
+                    supabase_admin.table('user_notifications').insert({
+                        'user_id': user_id,
+                        'title': f'Subscription Upgraded to {upgrade_request.plan_type.title()}',
+                        'message': f'Your subscription has been upgraded to {upgrade_request.plan_type.title()} plan for ${upgrade_request.price:.2f}. Enjoy your new features!',
+                        'type': 'success',
+                        'is_read': False
+                    }).execute()
+                except Exception as notification_error:
+                    print(f"Failed to create upgrade notification: {notification_error}")
+            
+            return result
+        else:
+            return {"success": False, "message": "Failed to process subscription upgrade"}
+            
+    except Exception as e:
+        print(f"Error upgrading subscription: {e}")
+        return {"success": False, "message": f"Failed to upgrade subscription: {str(e)}"}
+
+@router.post("/auth/user/{user_id}/subscription/cancel")
+async def cancel_user_subscription(user_id: str):
+    """Cancel user subscription (downgrade to free)"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"Cancelling subscription for user {user_id}")
+        
+        # Update subscription to free plan
+        response = supabase_admin.table('subscriptions').update({
+            'plan_type': 'free',
+            'status': 'cancelled',
+            'end_date': None,
+            'renewal': False
+        }).eq('user_id', user_id).execute()
+        
+        # Create notification
+        try:
+            supabase_admin.table('user_notifications').insert({
+                'user_id': user_id,
+                'title': 'Subscription Cancelled',
+                'message': 'Your subscription has been cancelled and downgraded to the Free plan. You can upgrade again anytime.',
+                'type': 'info',
+                'is_read': False
+            }).execute()
+        except Exception as notification_error:
+            print(f"Failed to create cancellation notification: {notification_error}")
+        
+        return {
+            "success": True,
+            "message": "Subscription cancelled successfully",
+            "subscription": response.data[0] if response.data else {}
+        }
+        
+    except Exception as e:
+        print(f"Error cancelling subscription: {e}")
+        return {"success": False, "message": f"Failed to cancel subscription: {str(e)}"}
+
+@router.get("/auth/subscription/plans")
+async def get_subscription_plans():
+    """Get available subscription plans"""
+    return {
+        "success": True,
+        "plans": [
+            {
+                "id": "free",
+                "name": "Free Plan",
+                "price": 0,
+                "currency": "USD",
+                "billing_period": "month",
+                "features": [
+                    "Access to AI news feed + push notifications",
+                    "Create & manage 1 AI trading bot",
+                    "Create & manage 2 manual bots",
+                    "Connect to ready-made bots from f01i.ai",
+                    "For marketplace sellers: 1 product slot"
+                ],
+                "limitations": {
+                    "ai_bots": 1,
+                    "manual_bots": 2,
+                    "product_slots": 1
+                }
+            },
+            {
+                "id": "plus",
+                "name": "Plus Plan",
+                "price": 10,
+                "currency": "USD",
+                "billing_period": "month",
+                "popular": True,
+                "features": [
+                    "Access to AI news feed + push notifications",
+                    "Telegram notifications + filters",
+                    "Create & manage 3 AI trading bots",
+                    "Create & manage 5 manual bots",
+                    "API access for copytrading integration",
+                    "Connect to ready-made bots from f01i.ai",
+                    "For marketplace sellers: up to 10 product slots"
+                ],
+                "limitations": {
+                    "ai_bots": 3,
+                    "manual_bots": 5,
+                    "product_slots": 10,
+                    "telegram_notifications": True,
+                    "api_access": True
+                }
+            },
+            {
+                "id": "pro",
+                "name": "Pro Plan",
+                "price": 200,
+                "currency": "USD",
+                "billing_period": "month",
+                "coming_soon": True,
+                "features": [
+                    "All Plus features",
+                    "Unlimited AI and manual bots",
+                    "Priority support",
+                    "Advanced analytics",
+                    "White-label options",
+                    "Custom integrations"
+                ],
+                "limitations": {
+                    "ai_bots": -1,  # -1 means unlimited
+                    "manual_bots": -1,
+                    "product_slots": -1,
+                    "priority_support": True,
+                    "white_label": True
+                }
+            }
+        ]
+    }
+
 @router.get("/auth/user/{user_id}/notifications")
 async def get_user_notifications(user_id: str, limit: int = 50, offset: int = 0):
     """Get user notifications"""
