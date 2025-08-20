@@ -1105,14 +1105,42 @@ const TradingBots = () => {
             </div>
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <Button
-                onClick={() => setShowAICreator(true)}
+                onClick={async () => {
+                  // Check AI bot creation limits before opening AI Creator
+                  const limitCheck = await checkBotCreationLimits('ai_generated');
+                  if (!limitCheck.canCreate) {
+                    setSubscriptionLimitData(limitCheck.limitData);
+                    setPendingBotCreation({
+                      type: 'ai_generated',
+                      data: null,
+                      source: 'ai_creator_button'
+                    });
+                    setIsSubscriptionLimitModalOpen(true);
+                    return;
+                  }
+                  setShowAICreator(true);
+                }}
                 className="bg-purple-600 hover:bg-purple-700"
               >
                 <MessageSquare size={16} className="mr-2" />
                 AI Creator
               </Button>
               <Button
-                onClick={() => setShowAdvancedBuilder(true)}
+                onClick={async () => {
+                  // Check manual bot creation limits before opening Advanced Builder
+                  const limitCheck = await checkBotCreationLimits('manual');
+                  if (!limitCheck.canCreate) {
+                    setSubscriptionLimitData(limitCheck.limitData);
+                    setPendingBotCreation({
+                      type: 'manual',
+                      data: null,
+                      source: 'advanced_builder_button'
+                    });
+                    setIsSubscriptionLimitModalOpen(true);
+                    return;
+                  }
+                  setShowAdvancedBuilder(true);
+                }}
                 variant="outline"
                 className="border-[#0097B2]/20 hover:bg-[#0097B2]/5"
               >
