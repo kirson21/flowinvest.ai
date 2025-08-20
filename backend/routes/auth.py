@@ -375,6 +375,19 @@ async def check_subscription_limit(user_id: str, limit_check: LimitCheckRequest)
                 "is_super_admin": False
             }
         
+        # Validate current_count is non-negative
+        if limit_check.current_count < 0:
+            return {
+                "success": False,
+                "message": "Invalid current_count: must be non-negative",
+                "can_create": False,
+                "limit_reached": True,
+                "current_count": limit_check.current_count,
+                "limit": limit,
+                "plan_type": plan_type,
+                "is_super_admin": False
+            }
+        
         # Check if limit is reached
         can_create = limit_check.current_count < limit
         
