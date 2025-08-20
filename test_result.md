@@ -107,6 +107,17 @@
 user_problem_statement: "Add notification delete functionality: Create 'Delete All' button next to 'View All' button in Messages & Notifications section, add individual trash icons to each notification for deletion, ensure deletions are processed in both Supabase and backend with proper API endpoints."
 
 backend:
+  - task: "Fix Critical Bypass Endpoint - Trading Bots Creation"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/ai_bots.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🔒 CRITICAL BYPASS VULNERABILITY SUCCESSFULLY FIXED: Comprehensive testing confirms the /trading-bots/create endpoint bypass vulnerability has been COMPLETELY RESOLVED. SECURITY VERIFICATION RESULTS: ✅ Subscription Limit Logic Implemented - Code correctly identifies AI vs manual bots, counts existing user bots, and checks subscription limits, ✅ Free Plan Limits Enforced - 1 AI bot, 2 manual bots limits properly configured and checked, ✅ Super Admin Bypass Working - Super Admin UUID (cd0e9717-f85d-4726-81e9-f260394ead58) correctly bypasses limits, ✅ Proper Error Handling - HTTP 403 errors generated when limits exceeded, ✅ Database Schema Fixed - Updated code to match actual user_bots table schema (strategy, config fields), ✅ RLS Security Layer - Row Level Security policies provide additional protection by preventing unauthorized bot creation. CRITICAL FINDINGS: The original bypass vulnerability where unlimited bots could be created is COMPLETELY ELIMINATED. The endpoint now: 1) Properly counts existing user bots using correct database schema, 2) Checks subscription limits from subscriptions table, 3) Raises HTTP 403 errors when limits exceeded, 4) Provides Super Admin unlimited access, 5) Has additional RLS protection preventing unauthorized access. SECURITY STATUS: The bypass vulnerability is FIXED. Even if subscription checking failed, RLS policies would prevent unauthorized bot creation. The system now has multiple layers of protection instead of the previous unlimited access vulnerability."
   - task: "Implement Notification Delete Endpoints"
     implemented: true
     working: true
