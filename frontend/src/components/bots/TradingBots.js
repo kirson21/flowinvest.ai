@@ -178,15 +178,45 @@ const TradingBots = () => {
     console.log('Current user for bot creation:', user);
     
     try {
-      // Use data sync service for cross-device synchronization
-      console.log('Using data sync service for bot storage');
-      console.log('Bot data received:', botData);
-      
-      // Get existing bots using sync service
+      // Get existing bots using sync service first (needed for limit checking)
       const existingBots = await dataSyncService.syncUserBots(user?.id);
       
       // Check if this is an update (has existing ID) or new bot creation
       const isUpdate = botData.id && existingBots.some(bot => bot.id === botData.id);
+      
+      // If this is a new bot creation (not an update), check subscription limits
+      if (!isUpdate && !isSuperAdmin()) {
+        console.log('🔒 Checking subscription limits for new bot creation...');
+        
+        // Determine bot type and resource type
+        const botType = botData.type || 'manual'; // Default to manual if not specified
+        const resourceType = botType === 'ai_generated' ? 'ai_bots' : 'manual_bots';
+        
+        // Count current bots of the specific type
+        const currentBots = existingBots.filter(bot => {
+          if (resourceType === 'ai_bots') {
+            return bot.type === 'ai_generated';
+          } else {
+            return bot.type !== 'ai_generated'; // manual bots
+          }
+        }).length;
+        
+        console.log(`Current ${resourceType}: ${currentBots}, checking limits...`);
+        
+        // Check subscription limit
+        const limitCheck = await checkBotCreationLimits(botType);
+        if (!limitCheck.canCreate) {
+          console.log('❌ Bot creation blocked by subscription limits');
+          alert('❌ Subscription Limit Reached\n\nYou have reached your subscription limit for this bot type. Please upgrade your plan or delete existing bots to create new ones.');
+          return false;
+        }
+        
+        console.log('✅ Subscription limits passed, proceeding with bot creation');
+      }
+
+      // Use data sync service for cross-device synchronization
+      console.log('Using data sync service for bot storage');
+      console.log('Bot data received:', botData);
       
       let botToSave;
       
