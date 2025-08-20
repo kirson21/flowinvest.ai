@@ -71,9 +71,12 @@ const TradingBots = () => {
       // Count current bots of the specific type
       const currentUserBots = userBots.filter(bot => {
         if (resourceType === 'ai_bots') {
+          // AI bots are created by AI Creator with type 'ai_generated'
           return bot.type === 'ai_generated';
         } else {
-          return bot.type !== 'ai_generated'; // manual bots
+          // Manual bots are created by Advanced Builder with type 'advanced' or other manual types
+          // Exclude AI-generated bots from manual count
+          return bot.type === 'advanced' || (bot.type && bot.type !== 'ai_generated');
         }
       }).length;
       
