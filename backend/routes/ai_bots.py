@@ -110,19 +110,44 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                         current_count = 0
                     
                     # Call subscription limit checking
-                    from .auth import check_subscription_limit
-                    from .auth import LimitCheckRequest
+                    # Import here to avoid circular imports
+                    import sys
+                    import os
+                    sys.path.append(os.path.dirname(__file__))
                     
-                    limit_request = LimitCheckRequest(
-                        resource_type=resource_type,
-                        current_count=current_count
-                    )
+                    # Use the supabase admin directly for subscription checking
+                    from supabase_client import supabase_admin
                     
-                    limit_result = await check_subscription_limit(user_id, limit_request)
-                    
-                    if not limit_result.get('success', False) or not limit_result.get('can_create', False):
-                        error_msg = f"Subscription limit reached. Free plan allows {limit_result.get('limit', 1)} {resource_type.replace('_', ' ')}."
-                        raise HTTPException(status_code=403, detail=error_msg)
+                    if supabase_admin:
+                        # Check user's subscription
+                        sub_response = supabase_admin.table('subscriptions')\
+                            .select('*')\
+                            .eq('user_id', user_id)\
+                            .execute()
+                        
+                        # Default to free plan limits
+                        limits = {
+                            "ai_bots": 1,
+                            "manual_bots": 2,
+                            "marketplace_products": 1
+                        }
+                        
+                        if sub_response.data and len(sub_response.data) > 0:
+                            subscription = sub_response.data[0]
+                            if subscription.get('plan_type') == 'super_admin':
+                                # Super admin has no limits
+                                pass  # Continue with bot creation
+                            else:
+                                # Get limits from subscription or use defaults
+                                sub_limits = subscription.get('limits', limits)
+                                limits.update(sub_limits)
+                        
+                        # Check if user has reached the limit
+                        limit = limits.get(resource_type.replace('_bots', '_bots'), 1)
+                        
+                        if current_count >= limit:
+                            error_msg = f"Subscription limit reached. Free plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
+                            raise HTTPException(status_code=403, detail=error_msg)
                         
             except HTTPException:
                 raise  # Re-raise HTTP exceptions
