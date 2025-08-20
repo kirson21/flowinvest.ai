@@ -1681,8 +1681,13 @@ const Portfolios = () => {
         resourceType="marketplace_products"
         onUpgrade={() => {
           setIsSubscriptionLimitModalOpen(false);
-          // TODO: Open subscription management modal or redirect to settings
-          console.log('Navigate to subscription upgrade');
+          // Navigate to settings tab and open subscription management
+          setActiveTab('settings');
+          // Small delay to ensure settings component is mounted before triggering modal
+          setTimeout(() => {
+            // Trigger subscription management modal by dispatching a custom event
+            window.dispatchEvent(new CustomEvent('openSubscriptionManagement'));
+          }, 100);
         }}
         onManageExisting={() => {
           setIsSubscriptionLimitModalOpen(false);
