@@ -92,15 +92,25 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
             try:
                 if supabase:
                     existing_response = supabase.table('user_bots')\
-                        .select('ai_model')\
+                        .select('strategy,description,name')\
                         .eq('user_id', user_id)\
                         .execute()
                     
                     if existing_response.data:
                         current_count = 0
                         for bot in existing_response.data:
-                            existing_ai_model = (bot.get('ai_model') or '').lower()
-                            existing_is_ai = bool(existing_ai_model and existing_ai_model != 'manual')
+                            # Determine if existing bot is AI-generated or manual
+                            # AI bots typically have strategy field or AI-related keywords in description/name
+                            bot_strategy = (bot.get('strategy') or '').lower()
+                            bot_description = (bot.get('description') or '').lower()
+                            bot_name = (bot.get('name') or '').lower()
+                            
+                            # Check if this is an AI bot based on strategy or AI keywords
+                            existing_is_ai = (
+                                bot_strategy in ['momentum', 'steady_growth', 'scalping', 'swing'] or
+                                'ai' in bot_description or 'grok' in bot_description or 
+                                'generated' in bot_description or 'algorithm' in bot_description
+                            )
                             
                             if resource_type == 'ai_bots' and existing_is_ai:
                                 current_count += 1
