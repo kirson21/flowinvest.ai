@@ -160,6 +160,14 @@ const AIBotCreator = () => {
       return;
     }
 
+    // Check subscription limits before creating AI bot
+    const limitCheck = await checkAIBotCreationLimits();
+    if (!limitCheck.canCreate) {
+      setSubscriptionLimitData(limitCheck.limitData);
+      setIsSubscriptionLimitModalOpen(true);
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -171,7 +179,7 @@ const AIBotCreator = () => {
         bot_config: generatedConfig.bot_config,
         is_predefined_strategy: formData.creationMode === 'template',
         trading_mode: formData.tradingMode,
-        user_id: null // Will be set when user authentication is implemented
+        user_id: user?.id // Use actual user ID
       };
 
       const response = await api.post('/trading-bots/create', botData);
