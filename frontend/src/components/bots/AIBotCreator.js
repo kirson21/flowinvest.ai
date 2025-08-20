@@ -17,6 +17,7 @@ import SubscriptionLimitModal from '../common/SubscriptionLimitModal';
 
 const AIBotCreator = () => {
   const { t } = useApp();
+  const { user } = useAuth();
   
   // State management
   const [step, setStep] = useState(1);
@@ -24,6 +25,10 @@ const AIBotCreator = () => {
   const [strategyTemplates, setStrategyTemplates] = useState([]);
   const [generatedConfig, setGeneratedConfig] = useState(null);
   const [error, setError] = useState('');
+  
+  // Subscription limit modal state
+  const [isSubscriptionLimitModalOpen, setIsSubscriptionLimitModalOpen] = useState(false);
+  const [subscriptionLimitData, setSubscriptionLimitData] = useState(null);
   
   // Form data
   const [formData, setFormData] = useState({
