@@ -3,6 +3,7 @@ import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { database, supabase } from '../../lib/supabase';
 import { dataSyncService } from '../../services/dataSyncService';
+import { supabaseDataService } from '../../services/supabaseDataService';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
