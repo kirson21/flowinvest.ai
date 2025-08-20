@@ -1234,8 +1234,13 @@ const TradingBots = () => {
         resourceType={pendingBotCreation?.type === 'ai_generated' ? 'ai_bots' : 'manual_bots'}
         onUpgrade={() => {
           setIsSubscriptionLimitModalOpen(false);
-          // TODO: Open subscription management or navigate to settings
-          console.log('Navigate to subscription upgrade');
+          // Navigate to settings tab and open subscription management
+          setActiveTab('settings');
+          // Small delay to ensure settings component is mounted before triggering modal
+          setTimeout(() => {
+            // Trigger subscription management modal by dispatching a custom event
+            window.dispatchEvent(new CustomEvent('openSubscriptionManagement'));
+          }, 100);
         }}
         onManageExisting={() => {
           setIsSubscriptionLimitModalOpen(false);
