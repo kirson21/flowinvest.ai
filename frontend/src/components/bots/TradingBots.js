@@ -1165,7 +1165,21 @@ const TradingBots = () => {
               </p>
               <div className="flex justify-center">
                 <Button
-                  onClick={() => setShowAICreator(true)}
+                  onClick={async () => {
+                    // Check AI bot creation limits before opening AI Creator (same as main button)
+                    const limitCheck = await checkBotCreationLimits('ai_generated');
+                    if (!limitCheck.canCreate) {
+                      setSubscriptionLimitData(limitCheck.limitData);
+                      setPendingBotCreation({
+                        type: 'ai_generated',
+                        data: null,
+                        source: 'empty_state_ai_creator_button'
+                      });
+                      setIsSubscriptionLimitModalOpen(true);
+                      return;
+                    }
+                    setShowAICreator(true);
+                  }}
                   className="bg-purple-600 hover:bg-purple-700"
                 >
                   <MessageSquare size={16} className="mr-2" />
