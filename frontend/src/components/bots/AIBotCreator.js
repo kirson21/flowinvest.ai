@@ -13,6 +13,7 @@ import { Slider } from '../ui/slider';
 import { Switch } from '../ui/switch';
 import { Loader2, Bot, Brain, Zap, TrendingUp, Activity, Shield } from 'lucide-react';
 import api from '../../services/api';
+import SubscriptionLimitModal from '../common/SubscriptionLimitModal';
 
 const AIBotCreator = () => {
   const { t } = useApp();
