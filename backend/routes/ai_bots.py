@@ -236,12 +236,16 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
         try:
             if supabase:
                 response = supabase.table('user_bots').insert(supabase_data).execute()
-                if response.data:
+                if response.data and len(response.data) > 0:
                     bot_id = response.data[0].get('id', bot_id)
+                    print(f"Bot successfully saved to database with ID: {bot_id}")
+                else:
+                    print(f"Bot creation failed - no data returned from Supabase")
+                    raise HTTPException(status_code=500, detail="Failed to create bot - database error")
         except Exception as e:
             print(f"Error saving to Supabase: {e}")
-            # Continue without saving if Supabase fails
-            pass
+            # Don't continue with graceful fallback for bot creation - this should fail
+            raise HTTPException(status_code=500, detail=f"Failed to create bot: {str(e)}")
         
         return {
             "success": True,
