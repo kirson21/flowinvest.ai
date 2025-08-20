@@ -57,6 +57,50 @@ const TradingBots = () => {
     return user?.id === SUPER_ADMIN_UID;
   };
 
+  // Check subscription limits before bot creation
+  const checkBotCreationLimits = async (botType) => {
+    if (!user?.id || isSuperAdmin()) {
+      return { canCreate: true }; // Super admin has no limits
+    }
+
+    try {
+      // Determine resource type based on bot type
+      const resourceType = botType === 'ai_generated' ? 'ai_bots' : 'manual_bots';
+      
+      // Count current bots of the specific type
+      const currentUserBots = userBots.filter(bot => {
+        if (resourceType === 'ai_bots') {
+          return bot.type === 'ai_generated';
+        } else {
+          return bot.type !== 'ai_generated'; // manual bots
+        }
+      }).length;
+      
+      // Check subscription limit
+      const limitCheck = await supabaseDataService.checkSubscriptionLimit(
+        user.id, 
+        resourceType, 
+        currentUserBots
+      );
+      
+      if (limitCheck.success && !limitCheck.can_create) {
+        // User has reached their limit
+        return {
+          canCreate: false,
+          limitData: {
+            ...limitCheck,
+            current_count: currentUserBots
+          }
+        };
+      }
+      
+      return { canCreate: true };
+    } catch (error) {
+      console.error('Error checking bot creation limits:', error);
+      return { canCreate: true }; // Allow creation if error (graceful fallback)
+    }
+  };
+
   // Load user bots and sync pre-built bots from Supabase
   useEffect(() => {
     loadPreBuiltBots();
