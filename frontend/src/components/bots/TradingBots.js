@@ -45,6 +45,11 @@ const TradingBots = () => {
   const [selectedManageBot, setSelectedManageBot] = useState(null);
   const [manageBotType, setManageBotType] = useState('user'); // 'user' or 'prebuilt'
   const [forceUpdate, setForceUpdate] = useState(0); // For forcing re-renders
+  
+  // Subscription limit modal state
+  const [isSubscriptionLimitModalOpen, setIsSubscriptionLimitModalOpen] = useState(false);
+  const [subscriptionLimitData, setSubscriptionLimitData] = useState(null);
+  const [pendingBotCreation, setPendingBotCreation] = useState(null); // Store bot creation context
 
   // Super Admin Check
   const isSuperAdmin = () => {
