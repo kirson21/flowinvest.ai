@@ -29,6 +29,7 @@ import RunBotModal from './RunBotModal';
 import BotDetailsModal from './BotDetailsModal';
 import BotManagementModal from './BotManagementModal';
 import GrokAIBotCreator from './GrokAIBotCreator';
+import SubscriptionLimitModal from '../common/SubscriptionLimitModal';
 
 const TradingBots = () => {
   const { t } = useApp();
