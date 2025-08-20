@@ -702,7 +702,30 @@ const AIBotCreator = () => {
     );
   }
 
-  return null;
+  return (
+    <>
+      {/* Subscription Limit Modal */}
+      <SubscriptionLimitModal
+        isOpen={isSubscriptionLimitModalOpen}
+        onClose={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          setSubscriptionLimitData(null);
+        }}
+        limitData={subscriptionLimitData}
+        resourceType="ai_bots"
+        onUpgrade={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          // TODO: Open subscription management or navigate to settings
+          console.log('Navigate to subscription upgrade');
+        }}
+        onManageExisting={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          // TODO: Navigate to bot management to allow deletion
+          console.log('Navigate to bot management to delete existing AI bots');
+        }}
+      />
+    </>
+  );
 };
 
 export default AIBotCreator;
