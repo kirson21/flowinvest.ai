@@ -169,7 +169,7 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
         supabase_data = {
             "name": bot_data['bot_name'],
             "description": bot_data['description'],
-            "ai_model": bot_data['ai_model'],
+            "strategy": "ai_generated" if bot_data['ai_model'] != 'manual' else "manual",
             "bot_config": bot_data['bot_config'],
             "is_predefined_strategy": bot_data.get('is_predefined_strategy', False),
             "trading_mode": bot_data.get('trading_mode', 'paper'),
