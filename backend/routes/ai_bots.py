@@ -75,6 +75,56 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
             if field not in bot_data:
                 raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
         
+        # CRITICAL: Check subscription limits before creating bot
+        user_id = bot_data.get('user_id')
+        if user_id:
+            # Determine bot type - AI bots vs manual bots
+            ai_model = bot_data.get('ai_model', '').lower()
+            is_ai_bot = bool(ai_model and ai_model != 'manual')
+            resource_type = 'ai_bots' if is_ai_bot else 'manual_bots'
+            
+            # Count current user bots of this type
+            try:
+                if supabase:
+                    existing_response = supabase.table('user_bots')\
+                        .select('ai_model')\
+                        .eq('user_id', user_id)\
+                        .execute()
+                    
+                    if existing_response.data:
+                        current_count = 0
+                        for bot in existing_response.data:
+                            existing_ai_model = (bot.get('ai_model') or '').lower()
+                            existing_is_ai = bool(existing_ai_model and existing_ai_model != 'manual')
+                            
+                            if resource_type == 'ai_bots' and existing_is_ai:
+                                current_count += 1
+                            elif resource_type == 'manual_bots' and not existing_is_ai:
+                                current_count += 1
+                    else:
+                        current_count = 0
+                    
+                    # Call subscription limit checking
+                    from .auth import check_subscription_limit
+                    from .auth import LimitCheckRequest
+                    
+                    limit_request = LimitCheckRequest(
+                        resource_type=resource_type,
+                        current_count=current_count
+                    )
+                    
+                    limit_result = await check_subscription_limit(user_id, limit_request)
+                    
+                    if not limit_result.get('success', False) or not limit_result.get('can_create', False):
+                        error_msg = f"Subscription limit reached. Free plan allows {limit_result.get('limit', 1)} {resource_type.replace('_', ' ')}."
+                        raise HTTPException(status_code=403, detail=error_msg)
+                        
+            except HTTPException:
+                raise  # Re-raise HTTP exceptions
+            except Exception as e:
+                print(f"Warning: Could not check subscription limits: {e}")
+                # Continue with bot creation if limit checking fails (graceful fallback)
+        
         # Prepare bot data for Supabase storage
         supabase_data = {
             "name": bot_data['bot_name'],
