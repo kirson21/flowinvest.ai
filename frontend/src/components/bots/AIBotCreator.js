@@ -64,6 +64,48 @@ const AIBotCreator = () => {
     }
   };
 
+  // Super Admin Check
+  const isSuperAdmin = () => {
+    const SUPER_ADMIN_UID = 'cd0e9717-f85d-4726-81e9-f260394ead58';
+    return user?.id === SUPER_ADMIN_UID;
+  };
+
+  // Check subscription limits before AI bot creation
+  const checkAIBotCreationLimits = async () => {
+    if (!user?.id || isSuperAdmin()) {
+      return { canCreate: true }; // Super admin has no limits
+    }
+
+    try {
+      // TODO: Get actual bot count from user's bots data
+      // For now, we'll assume current count from the backend API
+      const currentAIBots = 0; // This should be fetched from actual user bots
+      
+      // Check subscription limit for AI bots
+      const limitCheck = await supabaseDataService.checkSubscriptionLimit(
+        user.id, 
+        'ai_bots', 
+        currentAIBots
+      );
+      
+      if (limitCheck.success && !limitCheck.can_create) {
+        // User has reached their AI bot limit
+        return {
+          canCreate: false,
+          limitData: {
+            ...limitCheck,
+            current_count: currentAIBots
+          }
+        };
+      }
+      
+      return { canCreate: true };
+    } catch (error) {
+      console.error('Error checking AI bot creation limits:', error);
+      return { canCreate: true }; // Allow creation if error (graceful fallback)
+    }
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
