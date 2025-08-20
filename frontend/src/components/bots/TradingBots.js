@@ -35,6 +35,7 @@ import SubscriptionLimitModal from '../common/SubscriptionLimitModal';
 const TradingBots = () => {
   const { t } = useApp();
   const { user } = useAuth();
+  const { setActiveTab } = useApp();
   const [preBuiltBots, setPreBuiltBots] = useState([]);
   const [userBots, setUserBots] = useState([]);
   const [loadingBots, setLoadingBots] = useState(true);
