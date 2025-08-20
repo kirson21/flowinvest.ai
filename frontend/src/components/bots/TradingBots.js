@@ -1154,6 +1154,28 @@ const TradingBots = () => {
           isPrebuilt={manageBotType === 'prebuilt'}
         />
       )}
+
+      {/* Subscription Limit Modal */}
+      <SubscriptionLimitModal
+        isOpen={isSubscriptionLimitModalOpen}
+        onClose={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          setPendingBotCreation(null);
+          setSubscriptionLimitData(null);
+        }}
+        limitData={subscriptionLimitData}
+        resourceType={subscriptionLimitData?.plan_type === 'free' && pendingBotCreation?.type === 'ai_generated' ? 'ai_bots' : 'manual_bots'}
+        onUpgrade={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          // TODO: Open subscription management or navigate to settings
+          console.log('Navigate to subscription upgrade');
+        }}
+        onManageExisting={() => {
+          setIsSubscriptionLimitModalOpen(false);
+          // Stay in current view to allow user to delete existing bots
+          console.log('User can delete existing bots to free up space');
+        }}
+      />
     </div>
   );
 };
