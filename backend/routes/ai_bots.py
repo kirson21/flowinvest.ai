@@ -11,6 +11,11 @@ router = APIRouter()
 # Initialize Grok service only (no OpenAI to avoid Rust dependencies)
 grok_creator = GrokBotCreator()
 
+# Import subscription limit checking
+class LimitCheckRequest(BaseModel):
+    resource_type: str  # 'ai_bots', 'manual_bots', 'marketplace_products'
+    current_count: Optional[int] = 0
+
 # Pydantic models
 class BotCreationRequest(BaseModel):
     prompt: str
