@@ -107,25 +107,17 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                         if existing_response.data:
                             current_count = 0
                             for bot in existing_response.data:
-                                # Determine if existing bot is AI-generated or manual
-                                # AI bots typically have strategy field or AI-related keywords in description/name
+                                # Use actual database columns: strategy field
                                 bot_strategy = (bot.get('strategy') or '').lower()
-                                bot_description = (bot.get('description') or '').lower()
-                                bot_name = (bot.get('name') or '').lower()
                                 
-                                # Check if this is an AI bot based on strategy or AI keywords
-                                existing_is_ai = (
-                                    bot_strategy in ['momentum', 'steady_growth', 'scalping', 'swing', 'ai_generated'] or
-                                    'ai' in bot_description or 'grok' in bot_description or 
-                                    'generated' in bot_description or 'algorithm' in bot_description
-                                )
-                                
-                                print(f"Bot: {bot_name}, strategy: {bot_strategy}, is_ai: {existing_is_ai}")
-                                
-                                if resource_type == 'ai_bots' and existing_is_ai:
-                                    current_count += 1
-                                elif resource_type == 'manual_bots' and not existing_is_ai:
-                                    current_count += 1
+                                # AI bots: mean_reversion, momentum, scalping, swing (from AI Creator)
+                                # Manual bots: simple, advanced, manual (from Advanced Settings)
+                                if resource_type == 'ai_bots':
+                                    if bot_strategy in ['mean_reversion', 'momentum', 'scalping', 'swing']:
+                                        current_count += 1
+                                else:  # manual_bots
+                                    if bot_strategy in ['simple', 'advanced', 'manual']:
+                                        current_count += 1
                         else:
                             current_count = 0
                         
