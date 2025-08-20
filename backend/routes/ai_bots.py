@@ -144,20 +144,35 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                         
                         if sub_response.data and len(sub_response.data) > 0:
                             subscription = sub_response.data[0]
-                            if subscription.get('plan_type') == 'super_admin':
-                                # Super admin has no limits
+                            plan_type = subscription.get('plan_type', 'free')
+                            
+                            if plan_type == 'super_admin':
+                                # Super admin has no limits - skip limit checking
                                 pass  # Continue with bot creation
-                            else:
-                                # Get limits from subscription or use defaults
-                                sub_limits = subscription.get('limits', limits)
-                                limits.update(sub_limits)
+                            elif plan_type == 'premium':
+                                # Premium plan limits
+                                limits = {
+                                    "ai_bots": 10,
+                                    "manual_bots": 20,
+                                    "marketplace_products": 10
+                                }
+                            # else: use free plan limits (already set above)
                         
-                        # Check if user has reached the limit
-                        limit = limits.get(resource_type.replace('_bots', '_bots'), 1)
-                        
-                        if current_count >= limit:
-                            error_msg = f"Subscription limit reached. Free plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
-                            raise HTTPException(status_code=403, detail=error_msg)
+                        # Check if user has reached the limit (skip for super admin)
+                        if sub_response.data and len(sub_response.data) > 0:
+                            subscription = sub_response.data[0]
+                            if subscription.get('plan_type') != 'super_admin':
+                                limit = limits.get(resource_type, 1)
+                                
+                                if current_count >= limit:
+                                    error_msg = f"Subscription limit reached. {subscription.get('plan_type', 'Free').title()} plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
+                                    raise HTTPException(status_code=403, detail=error_msg)
+                        else:
+                            # No subscription found - apply free limits
+                            limit = limits.get(resource_type, 1)
+                            if current_count >= limit:
+                                error_msg = f"Subscription limit reached. Free plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
+                                raise HTTPException(status_code=403, detail=error_msg)
                         
             except HTTPException:
                 raise  # Re-raise HTTP exceptions
