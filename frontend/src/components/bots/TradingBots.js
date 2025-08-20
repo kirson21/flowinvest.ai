@@ -1198,7 +1198,7 @@ const TradingBots = () => {
           setSubscriptionLimitData(null);
         }}
         limitData={subscriptionLimitData}
-        resourceType={subscriptionLimitData?.plan_type === 'free' && pendingBotCreation?.type === 'ai_generated' ? 'ai_bots' : 'manual_bots'}
+        resourceType={pendingBotCreation?.type === 'ai_generated' ? 'ai_bots' : 'manual_bots'}
         onUpgrade={() => {
           setIsSubscriptionLimitModalOpen(false);
           // TODO: Open subscription management or navigate to settings
