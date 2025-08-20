@@ -60,13 +60,24 @@ const TradingBots = () => {
 
   // Check subscription limits before bot creation
   const checkBotCreationLimits = async (botType) => {
-    if (!user?.id || isSuperAdmin()) {
+    console.log('🔒 checkBotCreationLimits called with botType:', botType);
+    console.log('🔒 User ID:', user?.id);
+    console.log('🔒 Is Super Admin:', isSuperAdmin());
+    
+    if (!user?.id) {
+      console.log('🔒 No user ID, blocking creation');
+      return { canCreate: false, limitData: { message: 'User not authenticated' } };
+    }
+    
+    if (isSuperAdmin()) {
+      console.log('🔒 Super Admin detected, allowing unlimited creation');
       return { canCreate: true }; // Super admin has no limits
     }
 
     try {
       // Determine resource type based on bot type
       const resourceType = botType === 'ai_generated' ? 'ai_bots' : 'manual_bots';
+      console.log('🔒 Resource type:', resourceType);
       
       // Count current bots of the specific type
       const currentUserBots = userBots.filter(bot => {
@@ -80,6 +91,9 @@ const TradingBots = () => {
         }
       }).length;
       
+      console.log('🔒 Current user bots:', currentUserBots);
+      console.log('🔒 All user bots:', userBots.map(b => ({ name: b.name, type: b.type })));
+      
       // Check subscription limit
       const limitCheck = await supabaseDataService.checkSubscriptionLimit(
         user.id, 
@@ -87,8 +101,11 @@ const TradingBots = () => {
         currentUserBots
       );
       
+      console.log('🔒 Backend limit check response:', limitCheck);
+      
       if (limitCheck.success && !limitCheck.can_create) {
         // User has reached their limit
+        console.log('🔒 LIMIT REACHED - blocking creation');
         return {
           canCreate: false,
           limitData: {
@@ -98,9 +115,10 @@ const TradingBots = () => {
         };
       }
       
+      console.log('🔒 LIMIT OK - allowing creation');
       return { canCreate: true };
     } catch (error) {
-      console.error('Error checking bot creation limits:', error);
+      console.error('🔒 Error checking bot creation limits:', error);
       return { canCreate: true }; // Allow creation if error (graceful fallback)
     }
   };
