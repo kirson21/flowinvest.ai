@@ -165,23 +165,23 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                 print(f"Warning: Could not check subscription limits: {e}")
                 # Continue with bot creation if limit checking fails (graceful fallback)
         
-        # Prepare bot data for Supabase storage
+        # Prepare bot data for Supabase storage (match actual schema)
         supabase_data = {
             "name": bot_data['bot_name'],
             "description": bot_data['description'],
             "strategy": "ai_generated" if bot_data['ai_model'] != 'manual' else "manual",
-            "bot_config": bot_data['bot_config'],
-            "is_predefined_strategy": bot_data.get('is_predefined_strategy', False),
+            "config": bot_data['bot_config'],  # Use 'config' instead of 'bot_config'
             "trading_mode": bot_data.get('trading_mode', 'paper'),
             "status": "inactive",
             "is_prebuilt": False,
             "user_id": bot_data.get('user_id'),
-            "daily_pnl": 0,
-            "weekly_pnl": 0,
-            "monthly_pnl": 0,
-            "win_rate": 0,
+            "daily_pnl": 0.0,
+            "weekly_pnl": 0.0,
+            "monthly_pnl": 0.0,
+            "win_rate": 0.0,
             "total_trades": 0,
             "successful_trades": 0,
+            "is_active": False,
             "created_at": datetime.utcnow().isoformat()
         }
         
