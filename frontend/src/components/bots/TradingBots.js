@@ -1006,21 +1006,6 @@ const TradingBots = () => {
           setEditingBot(null); // Clear editing state
         }}
         onSave={async (botData) => {
-          // Skip limit checking if editing existing bot
-          if (!editingBot) {
-            const limitCheck = await checkBotCreationLimits('ai_generated');
-            if (!limitCheck.canCreate) {
-              setSubscriptionLimitData(limitCheck.limitData);
-              setPendingBotCreation({
-                type: 'ai_generated',
-                data: botData,
-                source: 'ai_creator'
-              });
-              setIsSubscriptionLimitModalOpen(true);
-              return;
-            }
-          }
-
           const success = await saveBot({
             name: botData.name || 'AI Generated Bot',
             description: botData.description || 'AI-powered trading bot',
