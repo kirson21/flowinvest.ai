@@ -83,102 +83,106 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
         # CRITICAL: Check subscription limits before creating bot
         user_id = bot_data.get('user_id')
         if user_id:
-            # Determine bot type - AI bots vs manual bots
-            ai_model = bot_data.get('ai_model', '').lower()
-            is_ai_bot = bool(ai_model and ai_model != 'manual')
-            resource_type = 'ai_bots' if is_ai_bot else 'manual_bots'
-            
-            # Count current user bots of this type
-            try:
-                if supabase:
-                    existing_response = supabase.table('user_bots')\
-                        .select('strategy,description,name')\
-                        .eq('user_id', user_id)\
-                        .execute()
-                    
-                    if existing_response.data:
-                        current_count = 0
-                        for bot in existing_response.data:
-                            # Determine if existing bot is AI-generated or manual
-                            # AI bots typically have strategy field or AI-related keywords in description/name
-                            bot_strategy = (bot.get('strategy') or '').lower()
-                            bot_description = (bot.get('description') or '').lower()
-                            bot_name = (bot.get('name') or '').lower()
-                            
-                            # Check if this is an AI bot based on strategy or AI keywords
-                            existing_is_ai = (
-                                bot_strategy in ['momentum', 'steady_growth', 'scalping', 'swing'] or
-                                'ai' in bot_description or 'grok' in bot_description or 
-                                'generated' in bot_description or 'algorithm' in bot_description
-                            )
-                            
-                            if resource_type == 'ai_bots' and existing_is_ai:
-                                current_count += 1
-                            elif resource_type == 'manual_bots' and not existing_is_ai:
-                                current_count += 1
-                    else:
-                        current_count = 0
-                    
-                    # Call subscription limit checking
-                    # Import here to avoid circular imports
-                    import sys
-                    import os
-                    sys.path.append(os.path.dirname(__file__))
-                    
-                    # Use the supabase admin directly for subscription checking
-                    from supabase_client import supabase_admin
-                    
-                    if supabase_admin:
-                        # Check user's subscription
-                        sub_response = supabase_admin.table('subscriptions')\
-                            .select('*')\
+            # Special case: Super Admin UUID bypasses all limits
+            if user_id == "cd0e9717-f85d-4726-81e9-f260394ead58":
+                print(f"Super Admin detected - bypassing subscription limits for user {user_id}")
+            else:
+                # Determine bot type - AI bots vs manual bots
+                ai_model = bot_data.get('ai_model', '').lower()
+                is_ai_bot = bool(ai_model and ai_model != 'manual')
+                resource_type = 'ai_bots' if is_ai_bot else 'manual_bots'
+                
+                # Count current user bots of this type
+                try:
+                    if supabase:
+                        existing_response = supabase.table('user_bots')\
+                            .select('strategy,description,name')\
                             .eq('user_id', user_id)\
                             .execute()
                         
-                        # Default to free plan limits
-                        limits = {
-                            "ai_bots": 1,
-                            "manual_bots": 2,
-                            "marketplace_products": 1
-                        }
-                        
-                        if sub_response.data and len(sub_response.data) > 0:
-                            subscription = sub_response.data[0]
-                            plan_type = subscription.get('plan_type', 'free')
-                            
-                            if plan_type == 'super_admin':
-                                # Super admin has no limits - skip limit checking
-                                pass  # Continue with bot creation
-                            elif plan_type == 'premium':
-                                # Premium plan limits
-                                limits = {
-                                    "ai_bots": 10,
-                                    "manual_bots": 20,
-                                    "marketplace_products": 10
-                                }
-                            # else: use free plan limits (already set above)
-                        
-                        # Check if user has reached the limit (skip for super admin)
-                        if sub_response.data and len(sub_response.data) > 0:
-                            subscription = sub_response.data[0]
-                            if subscription.get('plan_type') != 'super_admin':
-                                limit = limits.get(resource_type, 1)
+                        if existing_response.data:
+                            current_count = 0
+                            for bot in existing_response.data:
+                                # Determine if existing bot is AI-generated or manual
+                                # AI bots typically have strategy field or AI-related keywords in description/name
+                                bot_strategy = (bot.get('strategy') or '').lower()
+                                bot_description = (bot.get('description') or '').lower()
+                                bot_name = (bot.get('name') or '').lower()
                                 
-                                if current_count >= limit:
-                                    error_msg = f"Subscription limit reached. {subscription.get('plan_type', 'Free').title()} plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
-                                    raise HTTPException(status_code=403, detail=error_msg)
+                                # Check if this is an AI bot based on strategy or AI keywords
+                                existing_is_ai = (
+                                    bot_strategy in ['momentum', 'steady_growth', 'scalping', 'swing', 'ai_generated'] or
+                                    'ai' in bot_description or 'grok' in bot_description or 
+                                    'generated' in bot_description or 'algorithm' in bot_description
+                                )
+                                
+                                if resource_type == 'ai_bots' and existing_is_ai:
+                                    current_count += 1
+                                elif resource_type == 'manual_bots' and not existing_is_ai:
+                                    current_count += 1
                         else:
-                            # No subscription found - apply free limits
-                            limit = limits.get(resource_type, 1)
-                            if current_count >= limit:
-                                error_msg = f"Subscription limit reached. Free plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
-                                raise HTTPException(status_code=403, detail=error_msg)
+                            current_count = 0
                         
-            except HTTPException:
-                raise  # Re-raise HTTP exceptions
-            except Exception as e:
-                print(f"Warning: Could not check subscription limits: {e}")
-                # Continue with bot creation if limit checking fails (graceful fallback)
+                        # Call subscription limit checking
+                        # Import here to avoid circular imports
+                        import sys
+                        import os
+                        sys.path.append(os.path.dirname(__file__))
+                        
+                        # Use the supabase admin directly for subscription checking
+                        from supabase_client import supabase_admin
+                        
+                        if supabase_admin:
+                            # Check user's subscription
+                            sub_response = supabase_admin.table('subscriptions')\
+                                .select('*')\
+                                .eq('user_id', user_id)\
+                                .execute()
+                            
+                            # Default to free plan limits
+                            limits = {
+                                "ai_bots": 1,
+                                "manual_bots": 2,
+                                "marketplace_products": 1
+                            }
+                            
+                            if sub_response.data and len(sub_response.data) > 0:
+                                subscription = sub_response.data[0]
+                                plan_type = subscription.get('plan_type', 'free')
+                                
+                                if plan_type == 'super_admin':
+                                    # Super admin has no limits - skip limit checking
+                                    pass  # Continue with bot creation
+                                elif plan_type == 'premium':
+                                    # Premium plan limits
+                                    limits = {
+                                        "ai_bots": 10,
+                                        "manual_bots": 20,
+                                        "marketplace_products": 10
+                                    }
+                                # else: use free plan limits (already set above)
+                            
+                            # Check if user has reached the limit (skip for super admin)
+                            if sub_response.data and len(sub_response.data) > 0:
+                                subscription = sub_response.data[0]
+                                if subscription.get('plan_type') != 'super_admin':
+                                    limit = limits.get(resource_type, 1)
+                                    
+                                    if current_count >= limit:
+                                        error_msg = f"Subscription limit reached. {subscription.get('plan_type', 'Free').title()} plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
+                                        raise HTTPException(status_code=403, detail=error_msg)
+                            else:
+                                # No subscription found - apply free limits
+                                limit = limits.get(resource_type, 1)
+                                if current_count >= limit:
+                                    error_msg = f"Subscription limit reached. Free plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
+                                    raise HTTPException(status_code=403, detail=error_msg)
+                            
+                except HTTPException:
+                    raise  # Re-raise HTTP exceptions
+                except Exception as e:
+                    print(f"Warning: Could not check subscription limits: {e}")
+                    # Continue with bot creation if limit checking fails (graceful fallback)
         
         # Prepare bot data for Supabase storage (match actual schema)
         supabase_data = {
