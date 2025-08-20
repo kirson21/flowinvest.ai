@@ -95,10 +95,14 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                 # Count current user bots of this type
                 try:
                     if supabase:
+                        print(f"Checking existing bots for user {user_id}, resource_type: {resource_type}")
                         existing_response = supabase.table('user_bots')\
                             .select('strategy,description,name')\
                             .eq('user_id', user_id)\
                             .execute()
+                        
+                        print(f"Existing bots query status: {existing_response.status_code}")
+                        print(f"Existing bots data: {existing_response.data}")
                         
                         if existing_response.data:
                             current_count = 0
@@ -116,12 +120,16 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                                     'generated' in bot_description or 'algorithm' in bot_description
                                 )
                                 
+                                print(f"Bot: {bot_name}, strategy: {bot_strategy}, is_ai: {existing_is_ai}")
+                                
                                 if resource_type == 'ai_bots' and existing_is_ai:
                                     current_count += 1
                                 elif resource_type == 'manual_bots' and not existing_is_ai:
                                     current_count += 1
                         else:
                             current_count = 0
+                        
+                        print(f"Current {resource_type} count for user {user_id}: {current_count}")
                         
                         # Call subscription limit checking
                         # Import here to avoid circular imports
@@ -133,11 +141,15 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                         from supabase_client import supabase_admin
                         
                         if supabase_admin:
+                            print(f"Checking subscription for user {user_id}")
                             # Check user's subscription
                             sub_response = supabase_admin.table('subscriptions')\
                                 .select('*')\
                                 .eq('user_id', user_id)\
                                 .execute()
+                            
+                            print(f"Subscription query status: {sub_response.status_code}")
+                            print(f"Subscription data: {sub_response.data}")
                             
                             # Default to free plan limits
                             limits = {
@@ -149,9 +161,11 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                             if sub_response.data and len(sub_response.data) > 0:
                                 subscription = sub_response.data[0]
                                 plan_type = subscription.get('plan_type', 'free')
+                                print(f"User has subscription with plan_type: {plan_type}")
                                 
                                 if plan_type == 'super_admin':
                                     # Super admin has no limits - skip limit checking
+                                    print("Super admin plan detected - skipping limits")
                                     pass  # Continue with bot creation
                                 elif plan_type == 'premium':
                                     # Premium plan limits
@@ -160,28 +174,41 @@ async def create_trading_bot(bot_data: Dict[str, Any]):
                                         "manual_bots": 20,
                                         "marketplace_products": 10
                                     }
+                                    print(f"Premium plan limits applied: {limits}")
                                 # else: use free plan limits (already set above)
+                            else:
+                                print("No subscription found - using free plan limits")
                             
                             # Check if user has reached the limit (skip for super admin)
                             if sub_response.data and len(sub_response.data) > 0:
                                 subscription = sub_response.data[0]
                                 if subscription.get('plan_type') != 'super_admin':
                                     limit = limits.get(resource_type, 1)
+                                    print(f"Checking limit: current_count={current_count}, limit={limit}")
                                     
                                     if current_count >= limit:
                                         error_msg = f"Subscription limit reached. {subscription.get('plan_type', 'Free').title()} plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
+                                        print(f"LIMIT EXCEEDED: {error_msg}")
                                         raise HTTPException(status_code=403, detail=error_msg)
+                                    else:
+                                        print(f"Limit check passed: {current_count} < {limit}")
                             else:
                                 # No subscription found - apply free limits
                                 limit = limits.get(resource_type, 1)
+                                print(f"No subscription - checking free limit: current_count={current_count}, limit={limit}")
                                 if current_count >= limit:
                                     error_msg = f"Subscription limit reached. Free plan allows {limit} {resource_type.replace('_', ' ')}. Current: {current_count}"
+                                    print(f"FREE LIMIT EXCEEDED: {error_msg}")
                                     raise HTTPException(status_code=403, detail=error_msg)
+                                else:
+                                    print(f"Free limit check passed: {current_count} < {limit}")
                             
                 except HTTPException:
                     raise  # Re-raise HTTP exceptions
                 except Exception as e:
                     print(f"Warning: Could not check subscription limits: {e}")
+                    import traceback
+                    traceback.print_exc()
                     # Continue with bot creation if limit checking fails (graceful fallback)
         
         # Prepare bot data for Supabase storage (match actual schema)
