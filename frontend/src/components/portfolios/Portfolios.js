@@ -42,7 +42,7 @@ import { verificationService } from '../../services/verificationService';
 
 const Portfolios = () => {
   const { user } = useAuth();
-  const { t } = useApp();
+  const { t, setActiveTab } = useApp();
   const [portfolios, setPortfolios] = useState([]);
   const [filteredPortfolios, setFilteredPortfolios] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('Most Popular');
