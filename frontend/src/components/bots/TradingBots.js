@@ -905,6 +905,21 @@ const TradingBots = () => {
         }}
         onSave={async (botData) => {
           try {
+            // Skip limit checking if editing existing bot
+            if (!editingBot) {
+              const limitCheck = await checkBotCreationLimits('manual'); // Advanced bots are manual
+              if (!limitCheck.canCreate) {
+                setSubscriptionLimitData(limitCheck.limitData);
+                setPendingBotCreation({
+                  type: 'manual',
+                  data: botData,
+                  source: 'advanced_builder'
+                });
+                setIsSubscriptionLimitModalOpen(true);
+                return;
+              }
+            }
+
             const success = await saveBot({
               ...botData,
               name: botData.botName || 'Advanced Bot',
