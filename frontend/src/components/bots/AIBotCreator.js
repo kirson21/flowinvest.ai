@@ -241,11 +241,10 @@ const AIBotCreator = () => {
     return <Icon size={24} className="text-[#0097B2]" />;
   };
 
-  const renderCurrentStep = () => {
-    // Step 1: AI Model and Creation Mode Selection
-    if (step === 1) {
-      return (
-        <div className="max-w-4xl mx-auto space-y-6">
+  // Step 1: AI Model and Creation Mode Selection
+  if (step === 1) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-center space-x-2 flex-1">
