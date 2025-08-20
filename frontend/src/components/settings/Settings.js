@@ -177,6 +177,19 @@ const Settings = () => {
     }
   }, [user]);
 
+  // Listen for subscription management open event
+  useEffect(() => {
+    const handleOpenSubscriptionManagement = () => {
+      setShowSubscriptionModal(true);
+    };
+
+    window.addEventListener('openSubscriptionManagement', handleOpenSubscriptionManagement);
+    
+    return () => {
+      window.removeEventListener('openSubscriptionManagement', handleOpenSubscriptionManagement);
+    };
+  }, []);
+
   // Migrate localStorage data to Supabase
   const migrateUserDataIfNeeded = async () => {
     try {
