@@ -79,15 +79,16 @@ const TradingBots = () => {
       const resourceType = botType === 'ai_generated' ? 'ai_bots' : 'manual_bots';
       console.log('🔒 Resource type:', resourceType);
       
-      // Count current bots of the specific type
+      // Count current bots of the specific type using ACTUAL database columns
       const currentUserBots = userBots.filter(bot => {
         if (resourceType === 'ai_bots') {
-          // AI bots are created by AI Creator with type 'ai_generated'
-          return bot.type === 'ai_generated';
+          // AI bots have strategy like 'mean_reversion', 'momentum', etc. (from AI Creator)
+          const strategy = (bot.strategy || '').toLowerCase();
+          return strategy === 'mean_reversion' || strategy === 'momentum' || strategy === 'scalping' || strategy === 'swing';
         } else {
-          // Manual bots are created by Advanced Builder with type 'advanced' or other manual types
-          // Exclude AI-generated bots from manual count
-          return bot.type === 'advanced' || (bot.type && bot.type !== 'ai_generated');
+          // Manual bots have strategy 'Simple' or 'advanced' (from Advanced Settings)
+          const strategy = (bot.strategy || '').toLowerCase();
+          return strategy === 'simple' || strategy === 'advanced' || strategy === 'manual';
         }
       }).length;
       
