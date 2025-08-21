@@ -19,7 +19,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Import routes (using httpx-based supabase client - no Rust dependencies)
-from routes import auth, webhook, verification, ai_bots
+from routes import auth, webhook, verification, ai_bots, crypto_payments
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,8 +32,8 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "production")
 # Create FastAPI app
 app = FastAPI(
     title="f01i.ai API",
-    description="Future-Oriented Life & Investments AI Tools API",
-    version="1.0.0",
+    description="Future-Oriented Life & Investments AI Tools API with Crypto Payment Integration",
+    version="1.1.0",
     docs_url="/docs" if ENVIRONMENT == "development" else None,
     redoc_url="/redoc" if ENVIRONMENT == "development" else None
 )
@@ -91,29 +91,32 @@ api_router = APIRouter()
 async def root():
     return {
         "message": "f01i.ai API - Future-Oriented Life & Investments AI Tools",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "environment": ENVIRONMENT,
-        "status": "healthy"
+        "status": "healthy",
+        "features": ["balance_system", "subscriptions", "crypto_payments"]
     }
 
 @app.get("/api/")
 async def api_root():
     return {
         "message": "f01i.ai API - Future-Oriented Life & Investments AI Tools",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "environment": ENVIRONMENT,
-        "status": "healthy"
+        "status": "healthy",
+        "features": ["balance_system", "subscriptions", "crypto_payments"]
     }
 
 @app.get("/api/health")
 async def health_check():
     return {
         "status": "healthy",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "environment": ENVIRONMENT,
         "services": {
             "api": "running",
-            "supabase": "connected" if os.getenv("SUPABASE_URL") else "not_configured"
+            "supabase": "connected" if os.getenv("SUPABASE_URL") else "not_configured",
+            "crypto_payments": "available" if os.getenv("CAPITALIST_USERNAME") else "not_configured"
         }
     }
 
@@ -162,6 +165,15 @@ try:
 except Exception as e:
     print(f"❌ AI bots routes failed to load: {e}")
     logger.warning(f"AI bots routes failed to load: {e}")
+
+try:
+    print("=== LOADING CRYPTO PAYMENTS ROUTES ===")
+    api_router.include_router(crypto_payments.router)
+    print(f"✅ Crypto payments routes loaded successfully")
+    logger.info("Crypto payments routes loaded successfully")
+except Exception as e:
+    print(f"❌ Crypto payments routes failed to load: {e}")
+    logger.warning(f"Crypto payments routes failed to load: {e}")
 
 print("=== ROUTE LOADING COMPLETE ===")
 print(f"Total API routes loaded: {len(api_router.routes)}")
