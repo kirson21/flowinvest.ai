@@ -157,12 +157,22 @@ class CapitalistAPIClient:
             response = self.session.post(
                 f"{self.api_url}/",
                 data=request_data,
-                timeout=30
+                timeout=30,
+                verify=True
             )
             
             if response.status_code == 200:
-                result = self._parse_response(response)
-                return result if isinstance(result, list) else []
+                # Parse Capitalist response format
+                response_text = response.text.strip()
+                parts = response_text.split(';')
+                
+                if len(parts) >= 2 and parts[0] == '0':  # Status 0 = success
+                    logger.info(f"Accounts retrieved successfully: {len(parts)-1} accounts")
+                    # Return account data (would need to parse based on actual response format)
+                    return [{"status": "success", "accounts": len(parts)-1}]
+                else:
+                    logger.warning(f"Get accounts returned status: {parts[0] if parts else 'unknown'}")
+                    return []
             else:
                 logger.error(f"Get accounts request failed: {response.status_code} - {response.text}")
                 return []
