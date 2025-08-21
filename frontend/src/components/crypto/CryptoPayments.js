@@ -181,7 +181,7 @@ const CryptoPayments = () => {
         return;
       }
 
-      const response = await fetch(`${backendUrl}/api/crypto/withdrawal`, {
+      const response = await fetch(`${backendUrl}/api/crypto/withdrawal?user_id=${user.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,8 +191,7 @@ const CryptoPayments = () => {
           amount: amount,
           currency: withdrawCurrency,
           network: withdrawNetwork,
-          memo: withdrawMemo || null,
-          user_id: user.id
+          memo: withdrawMemo || null
         })
       });
 
