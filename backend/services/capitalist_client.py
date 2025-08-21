@@ -105,7 +105,7 @@ class CapitalistAPIClient:
         try:
             logger.info(f"Authenticating with Capitalist API as user: {self.username}")
             
-            # Use plain password authentication as mentioned in docs
+            # Use plain password authentication as per API docs
             auth_data = {
                 'login': self.username,
                 'operation': 'get_token',
@@ -115,20 +115,23 @@ class CapitalistAPIClient:
             response = self.session.post(
                 f"{self.api_url}/",
                 data=auth_data,
-                timeout=30
+                timeout=30,
+                verify=True  # Use standard SSL verification
             )
             
             logger.info(f"Authentication response status: {response.status_code}")
             
             if response.status_code == 200:
-                result = self._parse_response(response)
+                # Parse Capitalist API response format: "status;token;additional_data"
+                response_text = response.text.strip()
+                parts = response_text.split(';')
                 
-                if isinstance(result, dict) and 'token' in result:
-                    self.token = result['token']
+                if len(parts) >= 2 and parts[0] == '0':  # Status 0 = success
+                    self.token = parts[1]
                     logger.info("Successfully authenticated with Capitalist API")
                     return True
                 else:
-                    logger.error(f"Authentication failed: {result}")
+                    logger.error(f"Authentication failed: status={parts[0] if parts else 'unknown'}")
                     return False
             else:
                 logger.error(f"Authentication request failed: {response.status_code} - {response.text}")
