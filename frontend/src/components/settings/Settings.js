@@ -1098,75 +1098,45 @@ const Settings = () => {
               <SubscriptionProfileBadge user={user} />
             </div>
 
-            {/* Account Balance Section */}
-            <div className="bg-gradient-to-r from-[#0097B2]/5 to-[#0097B2]/10 p-4 rounded-lg border border-[#0097B2]/20">
-              <div className="flex items-center justify-between">
+            {/* Account Balance & Crypto Payments Section */}
+            <div className="border-2 border-[#0097B2] bg-gradient-to-r from-[#0097B2]/5 to-[#0097B2]/10 p-6 rounded-lg">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h3 className="text-lg font-medium text-[#0097B2] mb-2">
                     Account Balance
                   </h3>
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="w-5 h-5 text-[#0097B2]" />
-                    <span className="text-2xl font-bold text-[#0097B2]">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <DollarSign className="w-6 h-6 text-[#0097B2]" />
+                    <span className="text-3xl font-bold text-[#0097B2]">
                       {accountBalance.toFixed(2)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Available for transactions and purchases
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    Only crypto payments are available now
                   </p>
-                </div>
-                <div className="flex flex-col space-y-2">
-                  <Button
-                    onClick={() => setShowTopUpModal(true)}
-                    className="bg-[#0097B2] hover:bg-[#0097B2]/90 text-white"
-                    size="sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Top Up
-                  </Button>
-                  <Button
-                    onClick={() => setShowWithdrawModal(true)}
-                    variant="outline"
-                    className="border-[#0097B2]/30 text-[#0097B2] hover:bg-[#0097B2]/5"
-                    size="sm"
-                  >
-                    <Minus className="w-4 h-4 mr-2" />
-                    Withdraw
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Crypto Payments Section */}
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-green-600" />
-                    Crypto Payments
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
                     Deposit and withdraw using USDT & USDC cryptocurrencies
                   </p>
-                  <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-[#0097B2] rounded-full"></div>
                       <span className="text-xs text-gray-600 dark:text-gray-400">USDT (ERC20/TRC20)</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-[#0097B2] rounded-full"></div>
                       <span className="text-xs text-gray-600 dark:text-gray-400">USDC (ERC20)</span>
                     </div>
                   </div>
                 </div>
-                <Button
-                  onClick={() => setShowCryptoPayments(true)}
-                  className="bg-[#0097B2] hover:bg-[#007A93] text-white"
-                  size="sm"
-                >
-                  <Wallet className="w-4 h-4 mr-2" />
-                  Manage Crypto
-                </Button>
+                <div>
+                  <Button
+                    onClick={() => setShowCryptoPayments(true)}
+                    className="bg-[#0097B2] hover:bg-[#007A93] text-white px-6 py-3"
+                  >
+                    <Wallet className="w-5 h-5 mr-2" />
+                    Manage Crypto
+                  </Button>
+                </div>
               </div>
             </div>
 
