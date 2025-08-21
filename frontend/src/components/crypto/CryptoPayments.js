@@ -437,33 +437,64 @@ const CryptoPayments = () => {
               </Button>
 
               {depositAddress && (
-                <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Deposit Address</Label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCopyReference}
-                      className="h-6 p-1"
-                    >
-                      {addressCopied ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-                    </Button>
+                <div className="mt-6 space-y-4">
+                  {/* CRITICAL: Payment Reference Section */}
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-sm font-bold text-red-800 dark:text-red-200">🔥 PAYMENT REFERENCE (REQUIRED)</Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCopyReference}
+                        className="h-6 p-1"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="font-mono text-lg font-bold bg-white dark:bg-gray-600 text-red-900 dark:text-red-100 p-3 rounded border-2 border-red-300 dark:border-red-700 text-center">
+                      {depositReference}
+                    </p>
+                    <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 rounded">
+                      <p className="text-xs font-bold text-red-900 dark:text-red-100">
+                        ⚠️ YOU MUST INCLUDE THIS REFERENCE IN YOUR DEPOSIT OR WE CANNOT CREDIT YOUR ACCOUNT!
+                      </p>
+                    </div>
                   </div>
-                  <p className="font-mono text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-white p-2 rounded border break-all">
-                    {depositAddress}
-                  </p>
+
+                  {/* Deposit Address Section */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Deposit Address</Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCopyAddress}
+                        className="h-6 p-1"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="font-mono text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-white p-2 rounded border break-all">
+                      {depositAddress}
+                    </p>
+                  </div>
                   
-                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  {/* Instructions Section */}
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="flex items-start gap-2">
                       <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                       <div className="text-xs text-blue-800 dark:text-blue-200">
-                        <p className="font-medium mb-1">Important Instructions:</p>
-                        <ul className="space-y-1">
-                          <li>• Only send {depositCurrency} on {depositNetwork} network</li>
-                          <li>• Minimum deposit: $10 USD equivalent</li>
-                          <li>• Funds will be credited after network confirmation</li>
-                          <li>• Do not send other tokens to this address</li>
-                        </ul>
+                        <p className="font-medium mb-2">📋 Deposit Instructions:</p>
+                        <ol className="space-y-1 list-decimal list-inside">
+                          <li>Send {depositCurrency} to the address above using {depositNetwork} network</li>
+                          <li><strong>Include reference "{depositReference}" in transaction description</strong></li>
+                          <li>Alternative: Contact support with reference {depositReference}</li>
+                          <li>Your account will be credited after confirmation (5-30 minutes)</li>
+                          <li>Minimum deposit: $10 USD equivalent</li>
+                        </ol>
+                        <p className="mt-2 font-bold text-red-600 dark:text-red-400">
+                          ⚠️ Without the reference, automatic crediting is not possible!
+                        </p>
                       </div>
                     </div>
                   </div>
