@@ -135,6 +135,7 @@ const Settings = () => {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showCryptoPayments, setShowCryptoPayments] = useState(false);
 
   // Voting state
   const [userVotes, setUserVotes] = useState({});
