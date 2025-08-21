@@ -104,7 +104,57 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Add notification delete functionality: Create 'Delete All' button next to 'View All' button in Messages & Notifications section, add individual trash icons to each notification for deletion, ensure deletions are processed in both Supabase and backend with proper API endpoints."
+user_problem_statement: "Implement unique transaction references for user deposits and add notification system for crypto payments."
+
+backend:
+  - task: "Implement Unique Deposit Tracking System Backend"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/crypto_simple.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "CRYPTO PAYMENT REFERENCE SYSTEM IMPLEMENTED: ✅ Updated deposit address generation to create unique payment references for each user deposit request, ✅ Integrated with Supabase database to store crypto transactions with payment references in crypto_transactions table, ✅ Created webhook endpoint /api/crypto/webhook/capitalist to receive Capitalist API callbacks with payment reference matching, ✅ Implemented manual confirmation endpoint /api/crypto/deposit/manual-confirm for admin testing with payment reference validation, ✅ Updated all user deposit endpoints to work with database instead of in-memory storage, ✅ Added comprehensive transaction processing with balance updates, notifications creation, and proper error handling. Backend now properly tracks user deposits using unique payment reference numbers instead of shared deposit addresses, following Capitalist API documentation for payment identification."
+
+  - task: "Implement Crypto Notifications System Backend"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/crypto_simple.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "CRYPTO NOTIFICATIONS SYSTEM IMPLEMENTED: ✅ Added automatic notification creation for successful crypto deposits with detailed transaction information, ✅ Implemented withdrawal notification system that notifies users when withdrawal requests are submitted for processing, ✅ Enhanced webhook processing to create user notifications when deposits are confirmed via Capitalist API callbacks, ✅ Updated manual confirmation endpoint to create success notifications with deposit details, ✅ Integrated with existing user_notifications table for consistent notification delivery across the platform. Users now receive real-time notifications for all crypto transaction events including deposit confirmations and withdrawal submissions."
+
+  - task: "Update Crypto Transaction Management Backend"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/crypto_simple.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "CRYPTO TRANSACTION MANAGEMENT UPDATED: ✅ Replaced in-memory PENDING_DEPOSITS storage with proper Supabase database integration, ✅ Updated all transaction endpoints (/crypto/transactions, /crypto/status/{id}, /crypto/deposits/user/{id}) to work with database, ✅ Enhanced withdrawal processing with balance validation, fee calculation, and proper database record creation, ✅ Added comprehensive error handling for insufficient balance, invalid amounts, and database failures, ✅ Implemented proper transaction linking between crypto_transactions and balance transactions tables, ✅ Added real-time balance updates using Supabase RPC functions. Backend now provides complete crypto transaction management with proper database persistence and user balance integration."
+
+frontend:
+  - task: "Update Frontend Payment Reference Display"
+    implemented: true
+    working: "testing"
+    file: "/app/frontend/src/components/crypto/CryptoPayments.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "CRYPTO PAYMENT REFERENCE UI ENHANCED: ✅ Updated deposit address generation to display unique payment references prominently with critical warning styling, ✅ Redesigned deposit UI to prominently feature payment reference in red warning box with copy functionality, ✅ Added comprehensive step-by-step instructions explaining how users must include the payment reference in their deposits, ✅ Updated deposit instructions to emphasize that without the reference, automatic crediting is impossible, ✅ Added separate copy buttons for both payment reference and deposit address, ✅ Enhanced visual hierarchy to make payment reference the most prominent element in the deposit flow. Frontend now clearly communicates to users the critical importance of including payment references in their crypto deposits."
 
 backend:
   - task: "Fix Critical Bypass Endpoint - Trading Bots Creation"
