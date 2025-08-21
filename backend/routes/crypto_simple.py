@@ -635,24 +635,42 @@ async def get_withdrawal_fees():
 
 @router.get("/crypto/status/{transaction_id}")
 async def get_transaction_status(transaction_id: str, user_id: str = "demo_user"):
-    """Get crypto transaction status"""
+    """Get crypto transaction status from database"""
     try:
-        # Return mock status
-        mock_transaction = {
-            "id": transaction_id,
-            "transaction_type": "withdrawal",
-            "currency": "USDT",
-            "network": "ERC20",
-            "amount": 100.0,
-            "status": "processing",
-            "transaction_hash": None,
-            "confirmations": 0,
-            "created_at": "2024-01-15T10:30:00Z"
-        }
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
+        # Get transaction from database
+        transaction_result = supabase.table('crypto_transactions')\
+            .select('*')\
+            .eq('id', transaction_id)\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        if not transaction_result.data:
+            return {"success": False, "detail": "Transaction not found"}
+        
+        tx = transaction_result.data[0]
         
         return {
             "success": True,
-            "transaction": mock_transaction
+            "transaction": {
+                "id": tx['id'],
+                "transaction_type": tx['transaction_type'],
+                "currency": tx['currency'],
+                "network": tx['network'],
+                "amount": tx['amount'] or 0.0,
+                "status": tx['status'],
+                "transaction_hash": tx['transaction_hash'],
+                "confirmations": tx['confirmations'] or 0,
+                "created_at": tx['created_at'],
+                "updated_at": tx['updated_at'],
+                "reference": tx['reference'],
+                "deposit_address": tx['deposit_address'],
+                "recipient_address": tx['recipient_address']
+            }
         }
         
     except Exception as e:
