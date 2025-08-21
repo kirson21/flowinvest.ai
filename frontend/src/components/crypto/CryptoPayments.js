@@ -133,7 +133,8 @@ const CryptoPayments = () => {
 
       if (result.success) {
         setDepositAddress(result.address);
-        setDepositMemo(result.memo || '');
+        setDepositReference(result.deposit_reference || '');
+        setTransactionId(result.transaction_id || '');
         setMessage('Deposit address retrieved successfully');
         setTimeout(() => setMessage(''), 5000);
       } else {
