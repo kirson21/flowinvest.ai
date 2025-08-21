@@ -33,6 +33,9 @@ class CryptoTransaction(BaseModel):
     status: str
     created_at: str
 
+import uuid
+import hashlib
+
 # Real Capitalist addresses provided by user
 REAL_CAPITALIST_ADDRESSES = {
     'USDT_ERC20': '0xfd5fdd6856ee16e2e908bcea1c015fe7e04cee7b',
@@ -44,6 +47,15 @@ def get_real_deposit_address(currency: str, network: str) -> Optional[str]:
     """Get real Capitalist deposit address for currency/network combination"""
     key = f"{currency}_{network}"
     return REAL_CAPITALIST_ADDRESSES.get(key)
+
+def generate_unique_deposit_reference(user_id: str, currency: str, network: str) -> str:
+    """Generate unique reference for tracking deposits"""
+    # Create unique deposit ID using user_id + timestamp + currency
+    unique_data = f"{user_id}_{currency}_{network}_{int(time.time())}"
+    return hashlib.md5(unique_data.encode()).hexdigest()[:16].upper()
+
+# In-memory storage for pending deposits (in production, use Redis or database)
+PENDING_DEPOSITS = {}
 
 @router.get("/crypto/health")
 async def crypto_health_check():
