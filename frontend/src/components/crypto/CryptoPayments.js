@@ -117,15 +117,14 @@ const CryptoPayments = () => {
       setLoading(true);
       setError('');
       
-      const response = await fetch(`${backendUrl}/api/crypto/deposit/address`, {
+      const response = await fetch(`${backendUrl}/api/crypto/deposit/address?user_id=${user.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           currency: depositCurrency,
-          network: depositNetwork,
-          user_id: user.id
+          network: depositNetwork
         })
       });
 
