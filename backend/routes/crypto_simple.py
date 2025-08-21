@@ -134,7 +134,7 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
             'deposit_address': address,
             'reference': deposit_reference,
             'status': 'pending',
-            'amount': 0.0  # Amount not known until deposit is made
+            'amount': 0.01  # Small positive amount for pending deposits (will be updated when confirmed)
         }
         
         # Insert into database
