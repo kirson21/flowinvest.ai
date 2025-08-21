@@ -367,7 +367,7 @@ async def manual_confirm_deposit(
 
 @router.get("/crypto/deposits/pending")
 async def get_pending_deposits(admin_key: str = "admin123"):
-    """Get all pending deposits (for admin monitoring)"""
+    """Get all pending deposits (for admin monitoring) from database"""
     try:
         if admin_key != "admin123":
             return {"success": False, "detail": "Unauthorized"}
@@ -393,6 +393,7 @@ async def get_pending_deposits(admin_key: str = "admin123"):
             age_minutes = (datetime.now().timestamp() - created_at.timestamp()) / 60
             
             pending.append({
+                "id": deposit['id'],
                 "reference": deposit['reference'],
                 "user_id": deposit['user_id'],
                 "currency": deposit['currency'],
