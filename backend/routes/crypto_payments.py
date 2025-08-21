@@ -39,7 +39,7 @@ def get_capitalist_client():
                 api_url=os.getenv('CAPITALIST_API_URL', 'https://api.capitalist.net/'),
                 username=os.getenv('CAPITALIST_USERNAME'),
                 password=os.getenv('CAPITALIST_PASSWORD'),
-                cert_path=os.getenv('CAPITALIST_CERT_PATH', '/app/certificates/baad707566.pem'),
+                cert_path=os.getenv('CAPITALIST_CERT_PATH', '/app/certificates/238935d642.pem'),
                 cert_password=os.getenv('CAPITALIST_CERT_PASSWORD')
             )
             return client
