@@ -139,8 +139,8 @@ const CryptoPayments = () => {
         setError(result.detail || 'Failed to get deposit address');
       }
     } catch (error) {
-      console.error('Error generating deposit address:', error);
-      setError('Failed to generate deposit address. Please try again.');
+      console.error('Error getting deposit address:', error);
+      setError('Failed to get deposit address. Please try again.');
     } finally {
       setLoading(false);
     }
