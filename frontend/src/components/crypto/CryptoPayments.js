@@ -133,10 +133,10 @@ const CryptoPayments = () => {
       if (result.success) {
         setDepositAddress(result.address);
         setDepositMemo(result.memo || '');
-        setMessage(`${result.is_new ? 'Generated new' : 'Retrieved existing'} deposit address successfully`);
+        setMessage('Deposit address retrieved successfully');
         setTimeout(() => setMessage(''), 5000);
       } else {
-        setError(result.detail || 'Failed to generate deposit address');
+        setError(result.detail || 'Failed to get deposit address');
       }
     } catch (error) {
       console.error('Error generating deposit address:', error);
