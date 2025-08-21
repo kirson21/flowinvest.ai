@@ -106,19 +106,22 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
         # Get real Capitalist deposit address
         address = get_real_deposit_address(request.currency.upper(), request.network.upper())
         
+        if not address:
+            return {"success": False, "detail": f"No deposit address available for {request.currency.upper()} on {request.network.upper()} network"}
+        
         return {
             "success": True,
             "address": address,
             "currency": request.currency.upper(),
             "network": request.network.upper(),
             "memo": None,
-            "is_new": True,
-            "message": "Mock deposit address generated for development",
+            "is_new": False,
+            "message": "Real Capitalist deposit address provided",
             "instructions": {
-                "step1": f"Send {request.currency} to the address above using {request.network} network",
+                "step1": f"Send {request.currency.upper()} to the address above using {request.network.upper()} network",
                 "step2": "Your account will be credited automatically after confirmation",
                 "step3": "Minimum deposit: $10 USD equivalent",
-                "warning": "⚠️ This is a development mock address. Do not send real funds!"
+                "warning": "⚠️ This is a real Capitalist address. Only send the specified cryptocurrency!"
             }
         }
         
