@@ -1134,6 +1134,39 @@ const Settings = () => {
               </div>
             </div>
 
+            {/* Crypto Payments Section */}
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-green-600" />
+                    Crypto Payments
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Deposit and withdraw using USDT & USDC cryptocurrencies
+                  </p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">USDT (ERC20/TRC20)</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">USDC (ERC20)</span>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setShowCryptoPayments(true)}
+                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                  size="sm"
+                >
+                  <Wallet className="w-4 h-4 mr-2" />
+                  Manage Crypto
+                </Button>
+              </div>
+            </div>
+
             {/* Profile Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
