@@ -425,7 +425,7 @@ const CryptoPayments = () => {
               {depositAddress && (
                 <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-sm font-medium">Deposit Address</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Deposit Address</Label>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -435,13 +435,13 @@ const CryptoPayments = () => {
                       {addressCopied ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                     </Button>
                   </div>
-                  <p className="font-mono text-sm bg-white dark:bg-gray-600 p-2 rounded border break-all">
+                  <p className="font-mono text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-white p-2 rounded border break-all">
                     {depositAddress}
                   </p>
                   
                   <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="flex items-start gap-2">
-                      <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                       <div className="text-xs text-blue-800 dark:text-blue-200">
                         <p className="font-medium mb-1">Important Instructions:</p>
                         <ul className="space-y-1">
