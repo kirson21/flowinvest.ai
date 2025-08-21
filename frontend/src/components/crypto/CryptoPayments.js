@@ -432,7 +432,7 @@ const CryptoPayments = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={handleCopyAddress}
+                      onClick={handleCopyReference}
                       className="h-6 p-1"
                     >
                       {addressCopied ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
