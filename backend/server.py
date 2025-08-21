@@ -168,9 +168,10 @@ except Exception as e:
 
 try:
     print("=== LOADING CRYPTO PAYMENTS ROUTES ===")
-    api_router.include_router(crypto_payments.router)
-    print(f"✅ Crypto payments routes loaded successfully")
-    logger.info("Crypto payments routes loaded successfully")
+    # Temporarily disabled due to dependency conflicts
+    # api_router.include_router(crypto_payments.router)
+    print("ℹ️  Crypto payments routes temporarily disabled (dependency conflicts)")
+    logger.info("Crypto payments routes temporarily disabled")
 except Exception as e:
     print(f"❌ Crypto payments routes failed to load: {e}")
     logger.warning(f"Crypto payments routes failed to load: {e}")
