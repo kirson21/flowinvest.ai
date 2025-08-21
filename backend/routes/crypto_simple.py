@@ -375,18 +375,35 @@ async def get_pending_deposits(admin_key: str = "admin123"):
         if admin_key != "admin123":
             return {"success": False, "detail": "Unauthorized"}
             
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
+        # Get pending deposits from database
+        pending_result = supabase.table('crypto_transactions')\
+            .select('*')\
+            .eq('transaction_type', 'deposit')\
+            .eq('status', 'pending')\
+            .order('created_at', desc=True)\
+            .execute()
+        
         pending = []
-        for ref, info in PENDING_DEPOSITS.items():
-            if info['status'] == 'pending':
-                pending.append({
-                    "reference": ref,
-                    "user_id": info['user_id'],
-                    "currency": info['currency'],
-                    "network": info['network'],
-                    "address": info['address'],
-                    "created_at": info['created_at'],
-                    "age_minutes": (time.time() - info['created_at']) / 60
-                })
+        for deposit in pending_result.data:
+            # Calculate age in minutes
+            from datetime import datetime
+            created_at = datetime.fromisoformat(deposit['created_at'].replace('Z', '+00:00'))
+            age_minutes = (datetime.now().timestamp() - created_at.timestamp()) / 60
+            
+            pending.append({
+                "reference": deposit['reference'],
+                "user_id": deposit['user_id'],
+                "currency": deposit['currency'],
+                "network": deposit['network'],
+                "address": deposit['deposit_address'],
+                "created_at": deposit['created_at'],
+                "age_minutes": age_minutes
+            })
                 
         return {
             "success": True,
