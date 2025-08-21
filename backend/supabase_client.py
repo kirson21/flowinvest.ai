@@ -135,12 +135,65 @@ class SupabaseResponse:
 # Initialize clients
 if SUPABASE_URL and SUPABASE_ANON_KEY:
     supabase = SupabaseHTTPClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    print(f"✅ Supabase client initialized with URL: {SUPABASE_URL}")
 else:
     supabase = None
     print("Warning: Supabase credentials not found")
+    print(f"SUPABASE_URL: {SUPABASE_URL}")
+    print(f"SUPABASE_ANON_KEY: {'Present' if SUPABASE_ANON_KEY else 'Missing'}")
 
 if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY:
     supabase_admin = SupabaseHTTPClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    print(f"✅ Supabase admin client initialized")
 else:
     supabase_admin = None
     print("Warning: Supabase admin credentials not found")
+    print(f"SUPABASE_SERVICE_ROLE_KEY: {'Present' if SUPABASE_SERVICE_ROLE_KEY else 'Missing'}")
+
+# Add RPC support
+class SupabaseRPC:
+    def __init__(self, client: SupabaseHTTPClient):
+        self.client = client
+    
+    def rpc(self, function_name: str, params: dict = None):
+        return SupabaseRPCQuery(self.client, function_name, params)
+
+class SupabaseRPCQuery:
+    def __init__(self, client: SupabaseHTTPClient, function_name: str, params: dict = None):
+        self.client = client
+        self.function_name = function_name
+        self.params = params or {}
+    
+    def execute(self):
+        try:
+            url = f"{self.client.url}/rest/v1/rpc/{self.function_name}"
+            
+            with httpx.Client() as client:
+                response = client.post(url, headers=self.client.headers, json=self.params)
+                
+                result = SupabaseResponse()
+                result.status_code = response.status_code
+                
+                if response.status_code >= 200 and response.status_code < 300:
+                    try:
+                        result.data = response.json()
+                    except:
+                        result.data = []
+                else:
+                    result.data = []
+                    print(f"Supabase RPC error: {response.status_code} - {response.text}")
+                
+                return result
+                
+        except Exception as e:
+            print(f"Supabase RPC request failed: {e}")
+            result = SupabaseResponse()
+            result.status_code = 500
+            result.data = []
+            return result
+
+# Add RPC method to main clients
+if supabase:
+    supabase.rpc = lambda function_name, params=None: SupabaseRPCQuery(supabase, function_name, params)
+if supabase_admin:
+    supabase_admin.rpc = lambda function_name, params=None: SupabaseRPCQuery(supabase_admin, function_name, params)
