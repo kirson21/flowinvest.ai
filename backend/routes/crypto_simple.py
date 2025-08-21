@@ -561,39 +561,45 @@ async def submit_withdrawal(request: WithdrawalRequest, user_id: str = "demo_use
 
 @router.get("/crypto/transactions")
 async def get_crypto_transactions(user_id: str = "demo_user", limit: int = 50):
-    """Get user's crypto transaction history"""
+    """Get user's crypto transaction history from database"""
     try:
-        # Return mock transaction data
-        mock_transactions = [
-            {
-                "id": str(uuid.uuid4()),
-                "transaction_type": "deposit",
-                "currency": "USDT",
-                "network": "ERC20",
-                "amount": 100.0,
-                "status": "confirmed",
-                "transaction_hash": "0x" + "a" * 64,
-                "confirmations": 12,
-                "created_at": "2024-01-15T10:30:00Z"
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "transaction_type": "withdrawal", 
-                "currency": "USDC",
-                "network": "ERC20",
-                "amount": 50.0,
-                "status": "processing",
-                "transaction_hash": None,
-                "confirmations": 0,
-                "created_at": "2024-01-14T15:45:00Z"
-            }
-        ]
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
+        # Get user's crypto transactions
+        transactions_result = supabase.table('crypto_transactions')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .order('created_at', desc=True)\
+            .limit(limit)\
+            .execute()
+        
+        transactions = []
+        for tx in transactions_result.data:
+            transactions.append({
+                "id": tx['id'],
+                "transaction_type": tx['transaction_type'],
+                "currency": tx['currency'],
+                "network": tx['network'],
+                "amount": tx['amount'] or 0.0,
+                "status": tx['status'],
+                "transaction_hash": tx['transaction_hash'],
+                "confirmations": tx['confirmations'] or 0,
+                "created_at": tx['created_at'],
+                "reference": tx['reference'],
+                "deposit_address": tx['deposit_address'],
+                "recipient_address": tx['recipient_address'],
+                "platform_fee": tx['platform_fee'] or 0.0,
+                "total_fee": tx['total_fee'] or 0.0
+            })
         
         return {
             "success": True,
-            "transactions": mock_transactions[:limit],
-            "count": len(mock_transactions),
-            "message": "Mock transaction data (development mode)"
+            "transactions": transactions,
+            "count": len(transactions),
+            "message": "Real transaction data from database"
         }
         
     except Exception as e:
