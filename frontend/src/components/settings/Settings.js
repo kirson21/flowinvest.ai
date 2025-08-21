@@ -1161,7 +1161,7 @@ const Settings = () => {
                 </div>
                 <Button
                   onClick={() => setShowCryptoPayments(true)}
-                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                  className="bg-[#0097B2] hover:bg-[#007A93] text-white"
                   size="sm"
                 >
                   <Wallet className="w-4 h-4 mr-2" />
