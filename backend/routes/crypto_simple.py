@@ -438,9 +438,15 @@ async def get_user_deposits(user_id: str):
         
     except Exception as e:
         return {"success": False, "detail": f"Failed to get user deposits: {str(e)}"}
+@router.post("/crypto/withdrawal")
 async def submit_withdrawal(request: WithdrawalRequest, user_id: str = "demo_user"):
-    """Submit crypto withdrawal request"""
+    """Submit crypto withdrawal request with database integration"""
     try:
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
         # Validate inputs
         if request.currency.upper() not in ['USDT', 'USDC']:
             return {"success": False, "detail": "Unsupported currency"}
@@ -454,13 +460,86 @@ async def submit_withdrawal(request: WithdrawalRequest, user_id: str = "demo_use
         if len(request.recipient_address) < 20:
             return {"success": False, "detail": "Invalid recipient address"}
         
-        # Calculate mock fees
+        # Check user balance
+        balance_result = supabase.table('user_accounts')\
+            .select('balance')\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        if not balance_result.data or balance_result.data[0]['balance'] < request.amount:
+            return {"success": False, "detail": "Insufficient balance"}
+        
+        # Calculate withdrawal fees
         withdrawal_fee = max(5.0, request.amount * 0.02)
         total_needed = request.amount + withdrawal_fee
         
-        # Generate mock transaction ID
-        transaction_id = str(uuid.uuid4())
-        batch_id = f"mock_batch_{int(time.time())}"
+        if balance_result.data[0]['balance'] < total_needed:
+            return {"success": False, "detail": f"Insufficient balance. Need ${total_needed:.2f} (including ${withdrawal_fee:.2f} fee)"}
+        
+        # Generate unique batch ID for tracking
+        batch_id = f"batch_{int(time.time())}_{user_id[-8:]}"
+        
+        # Create crypto withdrawal transaction
+        crypto_transaction = {
+            'user_id': user_id,
+            'transaction_type': 'withdrawal',
+            'currency': request.currency.upper(),
+            'network': request.network.upper(),
+            'amount': request.amount,
+            'recipient_address': request.recipient_address,
+            'memo': request.memo,
+            'capitalist_batch_id': batch_id,
+            'status': 'processing',
+            'network_fee': 0.0,  # Will be updated by Capitalist
+            'platform_fee': withdrawal_fee,
+            'total_fee': withdrawal_fee
+        }
+        
+        crypto_result = supabase.table('crypto_transactions').insert(crypto_transaction).execute()
+        
+        if not crypto_result.data:
+            return {"success": False, "detail": "Failed to create withdrawal request"}
+            
+        transaction_id = crypto_result.data[0]['id']
+        
+        # Create balance transaction (debit user account)
+        balance_transaction = {
+            'user_id': user_id,
+            'transaction_type': 'withdrawal',
+            'amount': -total_needed,  # Negative for withdrawal
+            'platform_fee': withdrawal_fee,
+            'net_amount': -request.amount,
+            'status': 'completed',
+            'description': f"Crypto withdrawal: ${request.amount} {request.currency} to {request.recipient_address[:10]}...{request.recipient_address[-10:]}"
+        }
+        
+        balance_result = supabase.table('transactions').insert(balance_transaction).execute()
+        
+        if balance_result.data:
+            balance_tx_id = balance_result.data[0]['id']
+            
+            # Link crypto transaction to balance transaction
+            supabase.table('crypto_transactions')\
+                .update({'balance_transaction_id': balance_tx_id})\
+                .eq('id', transaction_id)\
+                .execute()
+        
+        # Update user balance
+        supabase.rpc('update_user_balance', {
+            'user_uuid': user_id,
+            'amount_change': -total_needed
+        }).execute()
+        
+        # Create notification for withdrawal initiation
+        notification = {
+            'user_id': user_id,
+            'title': 'Withdrawal Request Submitted 📤',
+            'message': f'Your withdrawal of ${request.amount:.2f} {request.currency} has been submitted for processing. Estimated completion: 1-24 hours.',
+            'type': 'info',
+            'is_read': False
+        }
+        
+        supabase.table('user_notifications').insert(notification).execute()
         
         return {
             "success": True,
@@ -471,7 +550,7 @@ async def submit_withdrawal(request: WithdrawalRequest, user_id: str = "demo_use
             "total_deducted": total_needed,
             "status": "processing",
             "estimated_completion": "1-24 hours",
-            "message": "Mock withdrawal request submitted (development mode)"
+            "message": "Withdrawal request submitted successfully"
         }
         
     except Exception as e:
