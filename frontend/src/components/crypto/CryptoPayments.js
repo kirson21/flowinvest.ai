@@ -373,7 +373,7 @@ const CryptoPayments = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Deposit Cryptocurrency</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Deposit Cryptocurrency</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowDepositModal(false)}>
                 ×
               </Button>
@@ -381,7 +381,7 @@ const CryptoPayments = () => {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="depositCurrency">Currency</Label>
+                <Label htmlFor="depositCurrency" className="text-gray-700 dark:text-gray-300">Currency</Label>
                 <select
                   id="depositCurrency"
                   value={depositCurrency}
@@ -392,7 +392,7 @@ const CryptoPayments = () => {
                       setDepositNetwork('ERC20');
                     }
                   }}
-                  className="w-full mt-1 p-2 border rounded-md"
+                  className="w-full mt-1 p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                 >
                   <option value="USDT">USDT - Tether USD</option>
                   <option value="USDC">USDC - USD Coin</option>
@@ -400,12 +400,12 @@ const CryptoPayments = () => {
               </div>
 
               <div>
-                <Label htmlFor="depositNetwork">Network</Label>
+                <Label htmlFor="depositNetwork" className="text-gray-700 dark:text-gray-300">Network</Label>
                 <select
                   id="depositNetwork"
                   value={depositNetwork}
                   onChange={(e) => setDepositNetwork(e.target.value)}
-                  className="w-full mt-1 p-2 border rounded-md"
+                  className="w-full mt-1 p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                 >
                   <option value="ERC20">ERC20 (Ethereum)</option>
                   {depositCurrency === 'USDT' && (
