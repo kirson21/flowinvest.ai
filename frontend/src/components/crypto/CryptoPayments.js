@@ -38,7 +38,6 @@ const CryptoPayments = () => {
   const [depositAddress, setDepositAddress] = useState('');
   const [depositReference, setDepositReference] = useState('');
   const [transactionId, setTransactionId] = useState('');
-  const [addressCopied, setAddressCopied] = useState(false);
 
   // State for withdrawals
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
