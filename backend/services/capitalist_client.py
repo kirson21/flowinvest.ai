@@ -58,7 +58,7 @@ class CapitalistAPIClient:
     Capitalist API client for crypto payment processing
     """
     
-    def __init__(self, api_url: str, username: str, password: str, cert_path: str, cert_password: str = None):
+    def __init__(self, api_url: str, username: str, password: str, cert_path: str = None, cert_password: str = None):
         self.api_url = api_url.rstrip('/')
         self.username = username
         self.password = password
@@ -67,7 +67,7 @@ class CapitalistAPIClient:
         self.session = requests.Session()
         self.token = None
         
-        # Configure SSL certificate authentication
+        # Certificate is optional - API works with username/password authentication
         if cert_path and os.path.exists(cert_path):
             try:
                 if cert_password:
@@ -76,10 +76,9 @@ class CapitalistAPIClient:
                     self.session.cert = cert_path
                 logger.info("SSL certificate configured successfully")
             except Exception as e:
-                logger.error(f"Failed to configure SSL certificate: {e}")
-                raise
+                logger.warning(f"Failed to configure SSL certificate: {e} (continuing without certificate)")
         else:
-            logger.warning(f"Certificate file not found: {cert_path}")
+            logger.info("No certificate provided - using standard authentication")
         
         self.session.verify = True
         
