@@ -103,8 +103,13 @@ async def get_supported_currencies():
 
 @router.post("/crypto/deposit/address")
 async def create_deposit_address(request: DepositAddressRequest, user_id: str = "demo_user"):
-    """Generate deposit address with unique tracking reference"""
+    """Generate deposit address with unique tracking reference and store in database"""
     try:
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
         # Validate inputs
         if request.currency.upper() not in ['USDT', 'USDC']:
             return {"success": False, "detail": "Unsupported currency"}
@@ -123,15 +128,25 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
         # Generate unique deposit reference for this user
         deposit_reference = generate_unique_deposit_reference(user_id, request.currency, request.network)
         
-        # Store pending deposit info (in production, save to database)
-        PENDING_DEPOSITS[deposit_reference] = {
+        # Create crypto transaction record in database
+        crypto_transaction = {
             'user_id': user_id,
+            'transaction_type': 'deposit',
             'currency': request.currency.upper(),
-            'network': request.network.upper(), 
-            'address': address,
-            'created_at': time.time(),
-            'status': 'pending'
+            'network': request.network.upper(),
+            'deposit_address': address,
+            'reference': deposit_reference,
+            'status': 'pending',
+            'amount': 0.0  # Amount not known until deposit is made
         }
+        
+        # Insert into database
+        result = supabase.table('crypto_transactions').insert(crypto_transaction).execute()
+        
+        if not result.data:
+            return {"success": False, "detail": "Failed to create transaction record"}
+            
+        transaction_id = result.data[0]['id']
         
         return {
             "success": True,
@@ -139,22 +154,24 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
             "currency": request.currency.upper(),
             "network": request.network.upper(),
             "deposit_reference": deposit_reference,
+            "transaction_id": transaction_id,
             "memo": None,
-            "message": "Deposit address with unique tracking ID",
+            "message": "Deposit address with unique payment reference",
             "instructions": {
                 "step1": f"Send {request.currency.upper()} to the address above using {request.network.upper()} network",
-                "step2": f"IMPORTANT: Include this reference in transaction description: {deposit_reference}",
-                "step3": "Or contact support with reference: " + deposit_reference,
-                "step4": "Your account will be credited after confirmation",
+                "step2": f"🔥 CRITICAL: Include this reference in transaction description: {deposit_reference}",
+                "step3": f"Alternative: Contact support with reference: {deposit_reference}",
+                "step4": "Your account will be credited after confirmation (typically 5-30 minutes)",
                 "warning": "⚠️ This is a real Capitalist address. Only send the specified cryptocurrency!",
-                "tracking": f"Deposit Reference: {deposit_reference}"
+                "tracking": f"Payment Reference: {deposit_reference}",
+                "note": "Without the reference, we cannot automatically credit your account!"
             }
         }
         
     except Exception as e:
         return {
             "success": False,
-            "detail": f"Failed to get deposit address: {str(e)}"
+            "detail": f"Failed to create deposit request: {str(e)}"
         }
 
 @router.post("/crypto/deposit/confirm")
