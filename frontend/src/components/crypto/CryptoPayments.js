@@ -419,7 +419,7 @@ const CryptoPayments = () => {
                 disabled={loading}
                 className="w-full"
               >
-                {loading ? 'Generating...' : 'Generate Deposit Address'}
+                {loading ? 'Loading...' : 'Show Deposit Address'}
               </Button>
 
               {depositAddress && (
