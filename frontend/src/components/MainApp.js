@@ -30,7 +30,7 @@ const MainApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAECEC] to-white dark:from-[#474545] dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#DFDFDF] to-white dark:from-[#474545] dark:to-gray-900">
       <div className="relative">
         {/* Main content with proper bottom padding */}
         <div className="pb-20 sm:pb-16 md:pb-12 lg:pb-8 overflow-x-hidden">
