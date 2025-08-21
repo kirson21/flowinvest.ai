@@ -157,7 +157,111 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
             "detail": f"Failed to get deposit address: {str(e)}"
         }
 
-@router.post("/crypto/withdrawal")
+@router.post("/crypto/deposit/confirm")
+async def confirm_deposit_manually(
+    deposit_reference: str,
+    transaction_hash: str,
+    amount: float,
+    admin_key: str = "admin123"  # Simple admin protection
+):
+    """Manually confirm a deposit (for admin use)"""
+    try:
+        # Simple admin authentication
+        if admin_key != "admin123":
+            return {"success": False, "detail": "Unauthorized"}
+            
+        # Find pending deposit
+        if deposit_reference not in PENDING_DEPOSITS:
+            return {"success": False, "detail": "Deposit reference not found"}
+            
+        deposit_info = PENDING_DEPOSITS[deposit_reference]
+        
+        if deposit_info['status'] != 'pending':
+            return {"success": False, "detail": "Deposit already processed"}
+            
+        # Update deposit status
+        PENDING_DEPOSITS[deposit_reference]['status'] = 'confirmed'
+        PENDING_DEPOSITS[deposit_reference]['transaction_hash'] = transaction_hash
+        PENDING_DEPOSITS[deposit_reference]['amount'] = amount
+        PENDING_DEPOSITS[deposit_reference]['confirmed_at'] = time.time()
+        
+        user_id = deposit_info['user_id']
+        
+        # TODO: Update user balance in Supabase
+        # For now, just simulate the process
+        
+        # Create success notification
+        notification_message = f"Deposit Confirmed! ${amount:.2f} {deposit_info['currency']} has been added to your account."
+        
+        return {
+            "success": True,
+            "deposit_reference": deposit_reference,
+            "user_id": user_id,
+            "amount": amount,
+            "currency": deposit_info['currency'],
+            "transaction_hash": transaction_hash,
+            "message": "Deposit confirmed successfully",
+            "notification": notification_message
+        }
+        
+    except Exception as e:
+        return {"success": False, "detail": f"Failed to confirm deposit: {str(e)}"}
+
+@router.get("/crypto/deposits/pending")
+async def get_pending_deposits(admin_key: str = "admin123"):
+    """Get all pending deposits (for admin monitoring)"""
+    try:
+        if admin_key != "admin123":
+            return {"success": False, "detail": "Unauthorized"}
+            
+        pending = []
+        for ref, info in PENDING_DEPOSITS.items():
+            if info['status'] == 'pending':
+                pending.append({
+                    "reference": ref,
+                    "user_id": info['user_id'],
+                    "currency": info['currency'],
+                    "network": info['network'],
+                    "address": info['address'],
+                    "created_at": info['created_at'],
+                    "age_minutes": (time.time() - info['created_at']) / 60
+                })
+                
+        return {
+            "success": True,
+            "pending_deposits": pending,
+            "count": len(pending)
+        }
+        
+    except Exception as e:
+        return {"success": False, "detail": f"Failed to get pending deposits: {str(e)}"}
+
+@router.get("/crypto/deposits/user/{user_id}")
+async def get_user_deposits(user_id: str):
+    """Get user's deposit history and pending deposits"""
+    try:
+        user_deposits = []
+        for ref, info in PENDING_DEPOSITS.items():
+            if info['user_id'] == user_id:
+                user_deposits.append({
+                    "reference": ref,
+                    "currency": info['currency'],
+                    "network": info['network'],
+                    "status": info['status'],
+                    "created_at": info['created_at'],
+                    "amount": info.get('amount'),
+                    "transaction_hash": info.get('transaction_hash'),
+                    "confirmed_at": info.get('confirmed_at')
+                })
+                
+        return {
+            "success": True,
+            "deposits": user_deposits,
+            "count": len(user_deposits)
+        }
+        
+    except Exception as e:
+        return {"success": False, "detail": f"Failed to get user deposits: {str(e)}"}
 async def submit_withdrawal(request: WithdrawalRequest, user_id: str = "demo_user"):
     """Submit crypto withdrawal request"""
     try:
