@@ -465,7 +465,7 @@ const CryptoPayments = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Withdraw Cryptocurrency</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Withdraw Cryptocurrency</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowWithdrawModal(false)}>
                 ×
               </Button>
@@ -474,7 +474,7 @@ const CryptoPayments = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label htmlFor="withdrawCurrency">Currency</Label>
+                  <Label htmlFor="withdrawCurrency" className="text-gray-700 dark:text-gray-300">Currency</Label>
                   <select
                     id="withdrawCurrency"
                     value={withdrawCurrency}
@@ -484,7 +484,7 @@ const CryptoPayments = () => {
                         setWithdrawNetwork('ERC20');
                       }
                     }}
-                    className="w-full mt-1 p-2 border rounded-md"
+                    className="w-full mt-1 p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                   >
                     <option value="USDT">USDT</option>
                     <option value="USDC">USDC</option>
@@ -492,12 +492,12 @@ const CryptoPayments = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="withdrawNetwork">Network</Label>
+                  <Label htmlFor="withdrawNetwork" className="text-gray-700 dark:text-gray-300">Network</Label>
                   <select
                     id="withdrawNetwork"
                     value={withdrawNetwork}
                     onChange={(e) => setWithdrawNetwork(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md"
+                    className="w-full mt-1 p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                   >
                     <option value="ERC20">ERC20</option>
                     {withdrawCurrency === 'USDT' && (
@@ -508,7 +508,7 @@ const CryptoPayments = () => {
               </div>
 
               <div>
-                <Label htmlFor="withdrawAmount">Amount (USD)</Label>
+                <Label htmlFor="withdrawAmount" className="text-gray-700 dark:text-gray-300">Amount (USD)</Label>
                 <Input
                   id="withdrawAmount"
                   type="number"
@@ -518,37 +518,40 @@ const CryptoPayments = () => {
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
                   placeholder="Enter amount"
+                  className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                 />
                 {withdrawAmount && (
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                     Fee: ~${Math.max(fees.withdrawal?.minimum_fee || 5, parseFloat(withdrawAmount || 0) * (fees.withdrawal?.percentage_fee || 0.02)).toFixed(2)}
                   </p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="withdrawAddress">Recipient Address</Label>
+                <Label htmlFor="withdrawAddress" className="text-gray-700 dark:text-gray-300">Recipient Address</Label>
                 <Input
                   id="withdrawAddress"
                   value={withdrawAddress}
                   onChange={(e) => setWithdrawAddress(e.target.value)}
                   placeholder={withdrawNetwork === 'ERC20' ? '0x...' : 'T...'}
+                  className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                 />
               </div>
 
               <div>
-                <Label htmlFor="withdrawMemo">Memo (Optional)</Label>
+                <Label htmlFor="withdrawMemo" className="text-gray-700 dark:text-gray-300">Memo (Optional)</Label>
                 <Input
                   id="withdrawMemo"
                   value={withdrawMemo}
                   onChange={(e) => setWithdrawMemo(e.target.value)}
                   placeholder="Enter memo if required"
+                  className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                 />
               </div>
 
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
                   <div className="text-xs text-yellow-800 dark:text-yellow-200">
                     <p className="font-medium">Security Notice:</p>
                     <p>Double-check the recipient address and network. Transactions cannot be reversed.</p>
