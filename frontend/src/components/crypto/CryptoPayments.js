@@ -159,6 +159,17 @@ const CryptoPayments = () => {
     }
   };
 
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(depositAddress);
+      setMessage('Address copied to clipboard!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Failed to copy address:', error);
+      setError('Failed to copy address to clipboard');
+    }
+  };
+
   const handleWithdraw = async () => {
     try {
       setLoading(true);
