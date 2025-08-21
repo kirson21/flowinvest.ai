@@ -5,13 +5,26 @@ Handles deposits, withdrawals, and crypto transaction management
 
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel, validator
-from supabase_client import supabase_admin
-from services.capitalist_client import CapitalistAPIClient, CurrencyType, validate_crypto_address
 from typing import Optional, List
 import os
 import logging
 from datetime import datetime
 import uuid
+
+# Import with error handling
+try:
+    from supabase_client import supabase_admin
+except ImportError:
+    supabase_admin = None
+    logging.warning("Supabase client not available - some features will be limited")
+
+try:
+    from services.capitalist_client import CapitalistAPIClient, CurrencyType, validate_crypto_address
+except ImportError:
+    logging.warning("Capitalist client not available - using mock functionality")
+    CapitalistAPIClient = None
+    CurrencyType = None
+    validate_crypto_address = None
 
 logger = logging.getLogger(__name__)
 
