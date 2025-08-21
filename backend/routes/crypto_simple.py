@@ -54,9 +54,6 @@ def generate_unique_deposit_reference(user_id: str, currency: str, network: str)
     unique_data = f"{user_id}_{currency}_{network}_{int(time.time())}"
     return hashlib.md5(unique_data.encode()).hexdigest()[:16].upper()
 
-# In-memory storage for pending deposits (in production, use Redis or database)
-PENDING_DEPOSITS = {}
-
 @router.get("/crypto/health")
 async def crypto_health_check():
     """Health check for crypto payment service"""
