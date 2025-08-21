@@ -5,11 +5,22 @@
     min-height: 100vh;
 }
 
+/* Light theme background */
+body:not(.dark) {
+    background-color: #DFDFDF;
+}
+
+/* Dark theme background */
+body.dark {
+    background-color: #1a1a1a;
+}
+
 /* Custom FlowinvestAI branding colors */
 :root {
     --flow-dark-gray: #474545;
     --flow-cyan-blue: #0097B2;
     --flow-light-beige: #FAECEC;
+    --flow-light-bg: #DFDFDF;
 }
 
 /* Smooth scrolling */
