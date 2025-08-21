@@ -174,55 +174,199 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
             "detail": f"Failed to create deposit request: {str(e)}"
         }
 
-@router.post("/crypto/deposit/confirm")
-async def confirm_deposit_manually(
+@router.post("/crypto/webhook/capitalist")
+async def capitalist_webhook(request: dict):
+    """Webhook endpoint to receive Capitalist API callbacks for deposit confirmations"""
+    try:
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
+        # Extract payment data from Capitalist callback
+        # Format: Operation code;USDT address;Amount;Payment number from your system;Payment description
+        payment_reference = request.get('payment_reference') or request.get('reference')
+        amount = float(request.get('amount', 0))
+        transaction_hash = request.get('transaction_hash') or request.get('txn_hash')
+        status = request.get('status', 'confirmed')
+        
+        if not payment_reference or amount <= 0:
+            return {"success": False, "detail": "Invalid callback data"}
+        
+        # Find the crypto transaction by reference
+        transaction_result = supabase.table('crypto_transactions')\
+            .select('*')\
+            .eq('reference', payment_reference)\
+            .eq('transaction_type', 'deposit')\
+            .eq('status', 'pending')\
+            .execute()
+        
+        if not transaction_result.data:
+            return {"success": False, "detail": "Transaction not found or already processed"}
+        
+        crypto_tx = transaction_result.data[0]
+        user_id = crypto_tx['user_id']
+        transaction_id = crypto_tx['id']
+        
+        # Update crypto transaction with confirmation details
+        supabase.table('crypto_transactions')\
+            .update({
+                'amount': amount,
+                'transaction_hash': transaction_hash,
+                'status': 'confirmed',
+                'confirmations': 1,
+                'updated_at': 'now()'
+            })\
+            .eq('id', transaction_id)\
+            .execute()
+        
+        # Create balance transaction (credit user account)
+        balance_transaction = {
+            'user_id': user_id,
+            'transaction_type': 'topup',
+            'amount': amount,
+            'platform_fee': 0.0,  # No fee on deposits
+            'net_amount': amount,
+            'status': 'completed',
+            'description': f"Crypto deposit: ${amount} from {crypto_tx['currency']} ({crypto_tx['network']})"
+        }
+        
+        balance_result = supabase.table('transactions').insert(balance_transaction).execute()
+        
+        if balance_result.data:
+            balance_tx_id = balance_result.data[0]['id']
+            
+            # Link crypto transaction to balance transaction
+            supabase.table('crypto_transactions')\
+                .update({'balance_transaction_id': balance_tx_id})\
+                .eq('id', transaction_id)\
+                .execute()
+        
+        # Update user balance
+        supabase.rpc('update_user_balance', {
+            'user_uuid': user_id,
+            'amount_change': amount
+        }).execute()
+        
+        # Create success notification
+        notification = {
+            'user_id': user_id,
+            'title': 'Crypto Deposit Confirmed! 🎉',
+            'message': f'Your {crypto_tx["currency"]} deposit of ${amount:.2f} has been confirmed and added to your balance.',
+            'type': 'success',
+            'is_read': False
+        }
+        
+        supabase.table('user_notifications').insert(notification).execute()
+        
+        return {
+            "success": True,
+            "transaction_id": transaction_id,
+            "user_id": user_id,
+            "amount": amount,
+            "currency": crypto_tx['currency'],
+            "message": "Deposit processed successfully"
+        }
+        
+    except Exception as e:
+        return {"success": False, "detail": f"Webhook processing failed: {str(e)}"}
+
+@router.post("/crypto/deposit/manual-confirm")
+async def manual_confirm_deposit(
     deposit_reference: str,
     transaction_hash: str,
     amount: float,
-    admin_key: str = "admin123"  # Simple admin protection
+    admin_key: str = "admin123"
 ):
-    """Manually confirm a deposit (for admin use)"""
+    """Manually confirm a deposit (for admin/testing use)"""
     try:
         # Simple admin authentication
         if admin_key != "admin123":
             return {"success": False, "detail": "Unauthorized"}
             
-        # Find pending deposit
-        if deposit_reference not in PENDING_DEPOSITS:
-            return {"success": False, "detail": "Deposit reference not found"}
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
+        # Find the crypto transaction by reference
+        transaction_result = supabase.table('crypto_transactions')\
+            .select('*')\
+            .eq('reference', deposit_reference)\
+            .eq('transaction_type', 'deposit')\
+            .eq('status', 'pending')\
+            .execute()
+        
+        if not transaction_result.data:
+            return {"success": False, "detail": "Transaction not found or already processed"}
+        
+        crypto_tx = transaction_result.data[0]
+        user_id = crypto_tx['user_id']
+        transaction_id = crypto_tx['id']
+        
+        # Update crypto transaction with confirmation details
+        supabase.table('crypto_transactions')\
+            .update({
+                'amount': amount,
+                'transaction_hash': transaction_hash,
+                'status': 'confirmed',
+                'confirmations': 1,
+                'updated_at': 'now()'
+            })\
+            .eq('id', transaction_id)\
+            .execute()
+        
+        # Create balance transaction (credit user account)
+        balance_transaction = {
+            'user_id': user_id,
+            'transaction_type': 'topup',
+            'amount': amount,
+            'platform_fee': 0.0,
+            'net_amount': amount,
+            'status': 'completed',
+            'description': f"Crypto deposit: ${amount} from {crypto_tx['currency']} ({crypto_tx['network']})"
+        }
+        
+        balance_result = supabase.table('transactions').insert(balance_transaction).execute()
+        
+        if balance_result.data:
+            balance_tx_id = balance_result.data[0]['id']
             
-        deposit_info = PENDING_DEPOSITS[deposit_reference]
+            # Link crypto transaction to balance transaction
+            supabase.table('crypto_transactions')\
+                .update({'balance_transaction_id': balance_tx_id})\
+                .eq('id', transaction_id)\
+                .execute()
         
-        if deposit_info['status'] != 'pending':
-            return {"success": False, "detail": "Deposit already processed"}
-            
-        # Update deposit status
-        PENDING_DEPOSITS[deposit_reference]['status'] = 'confirmed'
-        PENDING_DEPOSITS[deposit_reference]['transaction_hash'] = transaction_hash
-        PENDING_DEPOSITS[deposit_reference]['amount'] = amount
-        PENDING_DEPOSITS[deposit_reference]['confirmed_at'] = time.time()
-        
-        user_id = deposit_info['user_id']
-        
-        # TODO: Update user balance in Supabase
-        # For now, just simulate the process
+        # Update user balance
+        supabase.rpc('update_user_balance', {
+            'user_uuid': user_id,
+            'amount_change': amount
+        }).execute()
         
         # Create success notification
-        notification_message = f"Deposit Confirmed! ${amount:.2f} {deposit_info['currency']} has been added to your account."
+        notification = {
+            'user_id': user_id,
+            'title': 'Crypto Deposit Confirmed! 🎉',
+            'message': f'Your {crypto_tx["currency"]} deposit of ${amount:.2f} has been confirmed and added to your balance.',
+            'type': 'success',
+            'is_read': False
+        }
+        
+        supabase.table('user_notifications').insert(notification).execute()
         
         return {
             "success": True,
-            "deposit_reference": deposit_reference,
+            "transaction_id": transaction_id,
             "user_id": user_id,
             "amount": amount,
-            "currency": deposit_info['currency'],
+            "currency": crypto_tx['currency'],
             "transaction_hash": transaction_hash,
-            "message": "Deposit confirmed successfully",
-            "notification": notification_message
+            "message": "Deposit confirmed successfully"
         }
         
     except Exception as e:
-        return {"success": False, "detail": f"Failed to confirm deposit: {str(e)}"}
+        return {"success": False, "detail": f"Manual confirmation failed: {str(e)}"}
 
 @router.get("/crypto/deposits/pending")
 async def get_pending_deposits(admin_key: str = "admin123"):
