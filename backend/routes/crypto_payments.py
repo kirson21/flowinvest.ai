@@ -46,60 +46,106 @@ def get_capitalist_client():
         logger.error(f"Failed to initialize Capitalist client: {e}")
         raise HTTPException(status_code=500, detail="Payment service unavailable")
 
-# Pydantic models
-class DepositAddressRequest(BaseModel):
-    currency: str
-    network: str
-    
-    @validator('currency')
-    def validate_currency(cls, v):
-        if v.upper() not in ['USDT', 'USDC']:
-            raise ValueError('Currency must be USDT or USDC')
-        return v.upper()
-    
-    @validator('network')
-    def validate_network(cls, v):
-        if v.upper() not in ['ERC20', 'TRC20']:
-            raise ValueError('Network must be ERC20 or TRC20')
-        return v.upper()
+# Pydantic models with v1/v2 compatibility
+try:
+    from pydantic import Field
+    # Try v2 syntax first
+    class DepositAddressRequest(BaseModel):
+        currency: str = Field(..., description="Currency code")
+        network: str = Field(..., description="Network type")
+        
+        def validate_currency(cls, v):
+            if v.upper() not in ['USDT', 'USDC']:
+                raise ValueError('Currency must be USDT or USDC')
+            return v.upper()
+        
+        def validate_network(cls, v):
+            if v.upper() not in ['ERC20', 'TRC20']:
+                raise ValueError('Network must be ERC20 or TRC20')
+            return v.upper()
 
-class WithdrawalRequest(BaseModel):
-    recipient_address: str
-    amount: float
-    currency: str
-    network: str
-    memo: Optional[str] = None
-    
-    @validator('currency')
-    def validate_currency(cls, v):
-        if v.upper() not in ['USDT', 'USDC']:
-            raise ValueError('Currency must be USDT or USDC')
-        return v.upper()
-    
-    @validator('network')
-    def validate_network(cls, v):
-        if v.upper() not in ['ERC20', 'TRC20']:
-            raise ValueError('Network must be ERC20 or TRC20')
-        return v.upper()
-    
-    @validator('amount')
-    def validate_amount(cls, v):
-        if v <= 0:
-            raise ValueError('Amount must be greater than 0')
-        if v > 1000000:  # Set reasonable upper limit
-            raise ValueError('Amount exceeds maximum limit of 1,000,000')
-        return round(v, 8)  # Limit to 8 decimal places for crypto
-    
-    @validator('recipient_address')
-    def validate_address_format(cls, v, values):
-        if len(v) < 20 or len(v) > 64:
-            raise ValueError('Invalid address format')
-        return v
+    class WithdrawalRequest(BaseModel):
+        recipient_address: str = Field(..., description="Recipient crypto address")
+        amount: float = Field(..., gt=0, le=1000000, description="Amount to withdraw")
+        currency: str = Field(..., description="Currency code")
+        network: str = Field(..., description="Network type")
+        memo: Optional[str] = Field(None, description="Optional memo")
+        
+        def validate_currency(cls, v):
+            if v.upper() not in ['USDT', 'USDC']:
+                raise ValueError('Currency must be USDT or USDC')
+            return v.upper()
+        
+        def validate_network(cls, v):
+            if v.upper() not in ['ERC20', 'TRC20']:
+                raise ValueError('Network must be ERC20 or TRC20')
+            return v.upper()
+        
+        def validate_address_format(cls, v, values):
+            if len(v) < 20 or len(v) > 64:
+                raise ValueError('Invalid address format')
+            return v
 
-class DepositConfirmationRequest(BaseModel):
-    crypto_transaction_id: str
-    transaction_hash: str
-    confirmations: int = 1
+    class DepositConfirmationRequest(BaseModel):
+        crypto_transaction_id: str = Field(..., description="Crypto transaction ID")
+        transaction_hash: str = Field(..., description="Blockchain transaction hash")
+        confirmations: int = Field(1, ge=1, description="Number of confirmations")
+
+except Exception as e:
+    # Fallback to v1 syntax
+    class DepositAddressRequest(BaseModel):
+        currency: str
+        network: str
+        
+        @validator('currency')
+        def validate_currency(cls, v):
+            if v.upper() not in ['USDT', 'USDC']:
+                raise ValueError('Currency must be USDT or USDC')
+            return v.upper()
+        
+        @validator('network')
+        def validate_network(cls, v):
+            if v.upper() not in ['ERC20', 'TRC20']:
+                raise ValueError('Network must be ERC20 or TRC20')
+            return v.upper()
+
+    class WithdrawalRequest(BaseModel):
+        recipient_address: str
+        amount: float
+        currency: str
+        network: str
+        memo: Optional[str] = None
+        
+        @validator('currency')
+        def validate_currency(cls, v):
+            if v.upper() not in ['USDT', 'USDC']:
+                raise ValueError('Currency must be USDT or USDC')
+            return v.upper()
+        
+        @validator('network')
+        def validate_network(cls, v):
+            if v.upper() not in ['ERC20', 'TRC20']:
+                raise ValueError('Network must be ERC20 or TRC20')
+            return v.upper()
+        
+        @validator('amount')
+        def validate_amount(cls, v):
+            if v <= 0:
+                raise ValueError('Amount must be greater than 0')
+            if v > 1000000:
+                raise ValueError('Amount exceeds maximum limit of 1,000,000')
+            return round(v, 8)
+        
+        @validator('recipient_address')
+        def validate_address_format(cls, v, values):
+            if len(v) < 20 or len(v) > 64:
+                raise ValueError('Invalid address format')
+            return v
+
+    class DepositConfirmationRequest(BaseModel):
+        crypto_transaction_id: str
+        transaction_hash: str
+        confirmations: int = 1
 
 # =====================================================
 # DEPOSIT ENDPOINTS
