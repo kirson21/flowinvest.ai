@@ -36,7 +36,7 @@ const CryptoPayments = () => {
   const [depositCurrency, setDepositCurrency] = useState('USDT');
   const [depositNetwork, setDepositNetwork] = useState('ERC20');
   const [depositAddress, setDepositAddress] = useState('');
-  const [depositMemo, setDepositMemo] = useState('');
+  const [depositReference, setDepositReference] = useState('');
   const [addressCopied, setAddressCopied] = useState(false);
 
   // State for withdrawals
