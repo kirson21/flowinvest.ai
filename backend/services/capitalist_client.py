@@ -123,14 +123,15 @@ class CapitalistAPIClient:
             if response.status_code == 200:
                 # Parse Capitalist API response format: "status;token;additional_data"
                 response_text = response.text.strip()
+                logger.info(f"Raw API response: {response_text[:100]}...")
                 parts = response_text.split(';')
                 
                 if len(parts) >= 2 and parts[0] == '0':  # Status 0 = success
                     self.token = parts[1]
-                    logger.info("Successfully authenticated with Capitalist API")
+                    logger.info(f"Successfully authenticated with Capitalist API, token: {self.token[:50]}...")
                     return True
                 else:
-                    logger.error(f"Authentication failed: status={parts[0] if parts else 'unknown'}")
+                    logger.error(f"Authentication failed: status={parts[0] if parts else 'unknown'}, parts count={len(parts)}")
                     return False
             else:
                 logger.error(f"Authentication request failed: {response.status_code} - {response.text}")
