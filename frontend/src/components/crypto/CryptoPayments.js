@@ -148,13 +148,14 @@ const CryptoPayments = () => {
     }
   };
 
-  const handleCopyAddress = async () => {
+  const handleCopyReference = async () => {
     try {
-      await navigator.clipboard.writeText(depositAddress);
-      setAddressCopied(true);
-      setTimeout(() => setAddressCopied(false), 2000);
+      await navigator.clipboard.writeText(depositReference);
+      setMessage('Payment reference copied to clipboard!');
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Failed to copy address:', error);
+      console.error('Failed to copy reference:', error);
+      setError('Failed to copy reference to clipboard');
     }
   };
 
