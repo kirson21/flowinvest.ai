@@ -121,18 +121,30 @@ class CapitalistAPIClient:
             logger.info(f"Authentication response status: {response.status_code}")
             
             if response.status_code == 200:
-                # Parse Capitalist API response format: "status;token;additional_data"
                 response_text = response.text.strip()
-                logger.info(f"Raw API response: {response_text[:100]}...")
-                parts = response_text.split(';')
+                logger.info(f"Raw API response: {response_text[:200]}...")
                 
-                if len(parts) >= 2 and parts[0] == '0':  # Status 0 = success
-                    self.token = parts[1]
-                    logger.info(f"Successfully authenticated with Capitalist API, token: {self.token[:50]}...")
-                    return True
-                else:
-                    logger.error(f"Authentication failed: status={parts[0] if parts else 'unknown'}, parts count={len(parts)}")
-                    return False
+                # Try to parse as JSON first
+                try:
+                    import json
+                    result = json.loads(response_text)
+                    if result.get('code') == 0 and 'data' in result and 'token' in result['data']:
+                        self.token = result['data']['token']
+                        logger.info(f"Successfully authenticated with Capitalist API (JSON), token: {self.token[:50]}...")
+                        return True
+                    else:
+                        logger.error(f"JSON authentication failed: {result}")
+                        return False
+                except json.JSONDecodeError:
+                    # Fallback to semicolon-separated format
+                    parts = response_text.split(';')
+                    if len(parts) >= 2 and parts[0] == '0':  # Status 0 = success
+                        self.token = parts[1]
+                        logger.info(f"Successfully authenticated with Capitalist API (CSV), token: {self.token[:50]}...")
+                        return True
+                    else:
+                        logger.error(f"CSV authentication failed: status={parts[0] if parts else 'unknown'}, parts count={len(parts)}")
+                        return False
             else:
                 logger.error(f"Authentication request failed: {response.status_code} - {response.text}")
                 return False
