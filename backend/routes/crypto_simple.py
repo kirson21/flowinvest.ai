@@ -399,26 +399,41 @@ async def get_pending_deposits(admin_key: str = "admin123"):
 
 @router.get("/crypto/deposits/user/{user_id}")
 async def get_user_deposits(user_id: str):
-    """Get user's deposit history and pending deposits"""
+    """Get user's deposit history and pending deposits from database"""
     try:
-        user_deposits = []
-        for ref, info in PENDING_DEPOSITS.items():
-            if info['user_id'] == user_id:
-                user_deposits.append({
-                    "reference": ref,
-                    "currency": info['currency'],
-                    "network": info['network'],
-                    "status": info['status'],
-                    "created_at": info['created_at'],
-                    "amount": info.get('amount'),
-                    "transaction_hash": info.get('transaction_hash'),
-                    "confirmed_at": info.get('confirmed_at')
-                })
+        # Import Supabase client
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase
+        
+        # Get user's crypto transactions (deposits only)
+        deposits_result = supabase.table('crypto_transactions')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .eq('transaction_type', 'deposit')\
+            .order('created_at', desc=True)\
+            .execute()
+        
+        deposits = []
+        for deposit in deposits_result.data:
+            deposits.append({
+                "id": deposit['id'],
+                "reference": deposit['reference'],
+                "currency": deposit['currency'],
+                "network": deposit['network'],
+                "address": deposit['deposit_address'],
+                "amount": deposit['amount'],
+                "status": deposit['status'],
+                "transaction_hash": deposit['transaction_hash'],
+                "confirmations": deposit['confirmations'],
+                "created_at": deposit['created_at'],
+                "updated_at": deposit['updated_at']
+            })
                 
         return {
             "success": True,
-            "deposits": user_deposits,
-            "count": len(user_deposits)
+            "deposits": deposits,
+            "count": len(deposits)
         }
         
     except Exception as e:
