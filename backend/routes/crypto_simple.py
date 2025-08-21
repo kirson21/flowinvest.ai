@@ -103,7 +103,7 @@ async def get_supported_currencies():
 
 @router.post("/crypto/deposit/address")
 async def create_deposit_address(request: DepositAddressRequest, user_id: str = "demo_user"):
-    """Generate or retrieve deposit address for user"""
+    """Generate deposit address with unique tracking reference"""
     try:
         # Validate inputs
         if request.currency.upper() not in ['USDT', 'USDC']:
@@ -115,32 +115,46 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
         if request.currency.upper() == 'USDC' and request.network.upper() != 'ERC20':
             return {"success": False, "detail": "USDC only supports ERC20 network"}
         
-        # Get real Capitalist deposit address
+        # Get the real Capitalist address
         address = get_real_deposit_address(request.currency.upper(), request.network.upper())
-        
         if not address:
-            return {"success": False, "detail": f"No deposit address available for {request.currency.upper()} on {request.network.upper()} network"}
+            return {"success": False, "detail": "Address not available for this currency/network"}
+        
+        # Generate unique deposit reference for this user
+        deposit_reference = generate_unique_deposit_reference(user_id, request.currency, request.network)
+        
+        # Store pending deposit info (in production, save to database)
+        PENDING_DEPOSITS[deposit_reference] = {
+            'user_id': user_id,
+            'currency': request.currency.upper(),
+            'network': request.network.upper(), 
+            'address': address,
+            'created_at': time.time(),
+            'status': 'pending'
+        }
         
         return {
             "success": True,
             "address": address,
             "currency": request.currency.upper(),
             "network": request.network.upper(),
+            "deposit_reference": deposit_reference,
             "memo": None,
-            "is_new": False,
-            "message": "Real Capitalist deposit address provided",
+            "message": "Deposit address with unique tracking ID",
             "instructions": {
                 "step1": f"Send {request.currency.upper()} to the address above using {request.network.upper()} network",
-                "step2": "Your account will be credited automatically after confirmation",
-                "step3": "Minimum deposit: $10 USD equivalent",
-                "warning": "⚠️ This is a real Capitalist address. Only send the specified cryptocurrency!"
+                "step2": f"IMPORTANT: Include this reference in transaction description: {deposit_reference}",
+                "step3": "Or contact support with reference: " + deposit_reference,
+                "step4": "Your account will be credited after confirmation",
+                "warning": "⚠️ This is a real Capitalist address. Only send the specified cryptocurrency!",
+                "tracking": f"Deposit Reference: {deposit_reference}"
             }
         }
         
     except Exception as e:
         return {
             "success": False,
-            "detail": f"Failed to generate deposit address: {str(e)}"
+            "detail": f"Failed to get deposit address: {str(e)}"
         }
 
 @router.post("/crypto/withdrawal")
