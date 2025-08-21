@@ -33,18 +33,17 @@ class CryptoTransaction(BaseModel):
     status: str
     created_at: str
 
-# Mock functions for development
-def generate_mock_address(currency: str, network: str, user_id: str) -> str:
-    """Generate a mock crypto address for development"""
-    data = f"{currency}_{network}_{user_id}_{time.time()}"
-    hash_value = hashlib.md5(data.encode()).hexdigest()
-    
-    if network == 'ERC20':
-        return f"0x{hash_value[:40]}"
-    elif network == 'TRC20':
-        return f"T{hash_value[:33].upper()}"
-    else:
-        return f"mock_{hash_value[:32]}"
+# Real Capitalist addresses provided by user
+REAL_CAPITALIST_ADDRESSES = {
+    'USDT_ERC20': '0xfd5fdd6856ee16e2e908bcea1c015fe7e04cee7b',
+    'USDT_TRC20': 'TAAJ2Tb1EW8QaGye61AzsWkueMN649P8fg',
+    'USDC_ERC20': '0xd5554bb054e3397cbb26321d4354ac935007d9b6'
+}
+
+def get_real_deposit_address(currency: str, network: str) -> Optional[str]:
+    """Get real Capitalist deposit address for currency/network combination"""
+    key = f"{currency}_{network}"
+    return REAL_CAPITALIST_ADDRESSES.get(key)
 
 @router.get("/crypto/health")
 async def crypto_health_check():
@@ -104,8 +103,8 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
         if request.currency.upper() == 'USDC' and request.network.upper() != 'ERC20':
             return {"success": False, "detail": "USDC only supports ERC20 network"}
         
-        # Generate mock address
-        address = generate_mock_address(request.currency, request.network, user_id)
+        # Get real Capitalist deposit address
+        address = get_real_deposit_address(request.currency.upper(), request.network.upper())
         
         return {
             "success": True,
