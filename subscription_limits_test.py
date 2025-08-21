@@ -20,7 +20,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://investai-hub.preview.emergentagent.com/api"
+BACKEND_URL = "https://botfolio-1.preview.emergentagent.com/api"
 
 class SubscriptionLimitsTest:
     def __init__(self):
