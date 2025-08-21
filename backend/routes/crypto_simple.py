@@ -102,10 +102,13 @@ async def get_supported_currencies():
 async def create_deposit_address(request: DepositAddressRequest, user_id: str = "demo_user"):
     """Generate deposit address with unique tracking reference and store in database"""
     try:
-        # Import Supabase client
+        # Import Supabase client with service role key for database operations
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Validate inputs
         if request.currency.upper() not in ['USDT', 'USDC']:
@@ -175,10 +178,13 @@ async def create_deposit_address(request: DepositAddressRequest, user_id: str = 
 async def capitalist_webhook(request: dict):
     """Webhook endpoint to receive Capitalist API callbacks for deposit confirmations"""
     try:
-        # Import Supabase client
+        # Import Supabase client with service role key
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Extract payment data from Capitalist callback
         # Format: Operation code;USDT address;Amount;Payment number from your system;Payment description
@@ -281,10 +287,13 @@ async def manual_confirm_deposit(
         if admin_key != "admin123":
             return {"success": False, "detail": "Unauthorized"}
             
-        # Import Supabase client
+        # Import Supabase client with service role key
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Find the crypto transaction by reference
         transaction_result = supabase.table('crypto_transactions')\
@@ -372,10 +381,13 @@ async def get_pending_deposits(admin_key: str = "admin123"):
         if admin_key != "admin123":
             return {"success": False, "detail": "Unauthorized"}
             
-        # Import Supabase client
+        # Import Supabase client with service role key
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Get pending deposits from database
         pending_result = supabase.table('crypto_transactions')\
@@ -416,10 +428,13 @@ async def get_pending_deposits(admin_key: str = "admin123"):
 async def get_user_deposits(user_id: str):
     """Get user's deposit history and pending deposits from database"""
     try:
-        # Import Supabase client
+        # Import Supabase client with service role key
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Get user's crypto transactions (deposits only)
         deposits_result = supabase.table('crypto_transactions')\
@@ -453,14 +468,18 @@ async def get_user_deposits(user_id: str):
         
     except Exception as e:
         return {"success": False, "detail": f"Failed to get user deposits: {str(e)}"}
+
 @router.post("/crypto/withdrawal")
 async def submit_withdrawal(request: WithdrawalRequest, user_id: str = "demo_user"):
     """Submit crypto withdrawal request with database integration"""
     try:
-        # Import Supabase client
+        # Import Supabase client with service role key
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Validate inputs
         if request.currency.upper() not in ['USDT', 'USDC']:
@@ -578,10 +597,13 @@ async def submit_withdrawal(request: WithdrawalRequest, user_id: str = "demo_use
 async def get_crypto_transactions(user_id: str = "demo_user", limit: int = 50):
     """Get user's crypto transaction history from database"""
     try:
-        # Import Supabase client
+        # Import Supabase client with service role key
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Get user's crypto transactions
         transactions_result = supabase.table('crypto_transactions')\
@@ -652,10 +674,13 @@ async def get_withdrawal_fees():
 async def get_transaction_status(transaction_id: str, user_id: str = "demo_user"):
     """Get crypto transaction status from database"""
     try:
-        # Import Supabase client
+        # Import Supabase client with service role key
         import sys
         sys.path.append('/app/backend')
-        from supabase_client import supabase
+        from supabase_client import supabase_admin as supabase
+        
+        if not supabase:
+            return {"success": False, "detail": "Database connection not available"}
         
         # Get transaction from database
         transaction_result = supabase.table('crypto_transactions')\
