@@ -449,7 +449,7 @@ const NowPayments = () => {
                 >
                   {(currencyNetworks[selectedCurrency] || []).map(network => (
                     <option key={network.code} value={network.code}>
-                      {network.icon} {network.name}
+                      {network.name}
                     </option>
                   ))}
                 </select>
