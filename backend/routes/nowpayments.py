@@ -547,6 +547,37 @@ async def get_user_payments(user_id: str, limit: int = 50):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get user payments: {str(e)}")
 
+@router.post("/nowpayments/admin/reset-balances")
+async def reset_all_balances(admin_key: str = "admin123"):
+    """Reset all user balances to 0 (admin only)"""
+    try:
+        if admin_key != "admin123":
+            raise HTTPException(status_code=403, detail="Unauthorized")
+            
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        # Reset all balances to 0
+        result = supabase.table('user_accounts')\
+            .update({'balance': 0.0, 'updated_at': 'now()'})\
+            .neq('user_id', 'dummy')\
+            .execute()
+        
+        # Count affected records
+        affected_count = len(result.data) if result.data else 0
+        
+        return {
+            "success": True,
+            "message": f"Successfully reset {affected_count} user balances to $0.00",
+            "affected_users": affected_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to reset balances: {str(e)}")
+
 # Estimated price endpoint for frontend
 @router.get("/nowpayments/estimate")
 async def get_estimated_price(amount: float, currency_from: str = "usd", currency_to: str = "usdttrc20"):
