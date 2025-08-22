@@ -189,7 +189,7 @@ async def create_invoice(request: InvoiceRequest, user_id: str = "demo_user"):
         # Create invoice with NowPayments
         response = await make_nowpayments_request("POST", "/invoice", invoice_data)
         
-        if response.status_code != 201:
+        if response.status_code not in [200, 201]:
             error_detail = response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
             raise HTTPException(status_code=400, detail=f"NowPayments invoice creation failed: {error_detail}")
         
