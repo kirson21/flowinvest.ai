@@ -647,7 +647,7 @@ const NowPayments = () => {
                 </Button>
               </div>
 
-              <div className="text-xs text-gray-500 space-y-1">
+              <div className="text-xs text-gray-500 space-y-1 pb-4">
                 <p>• Automated recurring crypto payments</p>
                 <p>• Payment reminders sent via email</p>
                 <p>• Cancel anytime from your dashboard</p>
