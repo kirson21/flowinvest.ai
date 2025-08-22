@@ -124,15 +124,18 @@ backend:
 
   - task: "Implement NowPayments Subscription System"
     implemented: true
-    working: "testing"
+    working: false
     file: "/app/backend/routes/nowpayments.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "testing"
           agent: "main"
           comment: "NOWPAYMENTS SUBSCRIPTION SYSTEM IMPLEMENTED: ✅ Created subscription plan management endpoints for creating custom subscription plans, ✅ Implemented email-based subscription system using /nowpayments/subscription endpoint, ✅ Added subscription tracking with nowpayments_subscriptions table in database, ✅ Integrated with NowPayments recurring payments API for automated billing, ✅ Added subscription status monitoring and user management capabilities, ✅ Implemented proper email validation and user attribution for subscriptions. Backend now supports complete subscription lifecycle management with email-based recurring crypto payments."
+        - working: false
+          agent: "testing"
+          comment: "❌ SUBSCRIPTION SYSTEM BLOCKED BY DATABASE AND API ISSUES: Testing reveals multiple critical issues preventing subscription functionality. ISSUES IDENTIFIED: ❌ Database Tables Missing - nowpayments_subscriptions and nowpayments_plans tables do not exist, preventing subscription storage, ❌ NowPayments API Authentication - Subscription endpoints require JWT Bearer token authentication which is not implemented (401 AUTH_REQUIRED errors), ❌ API Integration Issues - Subscription plan creation fails with authentication errors from NowPayments API. DEPENDENCIES: Subscription system depends on database schema creation and proper NowPayments API authentication setup. Cannot test subscription functionality until database tables exist and API authentication is resolved."
 
   - task: "Update Database Schema for NowPayments"
     implemented: true
