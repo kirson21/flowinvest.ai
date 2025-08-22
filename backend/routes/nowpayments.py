@@ -200,7 +200,7 @@ async def create_invoice(request: InvoiceRequest, user_id: str = "cd0e9717-f85d-
         
         # Store payment record in database
         payment_record = {
-            'user_id': user_id,
+            'user_id': actual_user_id,
             'order_id': order_id,
             'invoice_id': invoice_response['id'],
             'payment_status': 'waiting',
