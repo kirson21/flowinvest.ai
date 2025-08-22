@@ -1,75 +1,66 @@
 <analysis>
-The previous AI engineer was tasked with developing an MVP landing page for f01i.ai from scratch, following a detailed specification and reference style. This involved creating a new React application within a landing folder, implementing various UI sections with 3D elements, and configuring complex Vercel routing to integrate with an existing main application and a newly deployed FastAPI backend on Render. A significant portion of the work involved troubleshooting persistent deployment and routing issues across frontend (React), backend (FastAPI/Pydantic), and deployment platforms (Vercel, Render, Supabase). The AI engineer systematically addressed these by updating dependencies, modifying core application logic, and adjusting Vercel configurations. The latest work involves recreating a specific 3D robot and implementing hover animations, with the AI facing access issues to provided project files, leading to a focus on the hover animation.
+The project began with an AI engineer building , an AI-powered investment platform, from scratch. Key initial work included a React landing page, FastAPI backend, Supabase integration for authentication and subscriptions, and deployment fixes. A major pivot occurred from integrating Capitalist API for crypto payments, which faced issues like shared deposit addresses and complex authentication, to adopting NowPayments. This shift necessitated a complete re-architecture of the payment system, implementing NowPayments' invoice-based gateway and subscription features. The AI engineer meticulously tackled Pydantic conflicts, database schema migrations (fixing constraints), dependency issues (email-validator), backend 500 errors, JWT authentication for subscriptions, and extensive frontend UI/UX enhancements including dynamic minimum amounts, mobile layout fixes, and transaction history pagination. The current focus is refining mobile UI elements after successfully integrating NowPayments.
 </analysis>
 
 <product_requirements>
-The primary objective is to develop a high-conversion MVP landing page for f01i.ai, an AI-powered investment platform. The landing page, to be a separate React application, must visually communicate the platform's value and encourage sign-ups. Key design elements include a dark gray, cyan blue, and light beige palette, Comfortaa typography, a minimalist layout with smooth animations, and interactive 3D components like a robot mascot and charts. Specific content for hero, benefit, how-it-works, features, marketplace, and security sections was provided.
-
-The initial implementation involved creating the landing page, fixing mobile responsiveness, and setting up Vercel deployment. Subsequent requirements focused on integrating the landing page with the main Flow Invest application and a FastAPI backend using specific domain routing. This evolved into complex troubleshooting of redirects, domain mismatches, and backend deployment failures on Render, including issues with Rust-dependent Python packages and  typing errors. The goal is a seamless user experience across  (landing),  (main app), and  (backend API). The latest request is to replace the existing 3D orb with a specific 3D robot from a reference project and implement hover animations.
+The  platform is an AI-powered investment application. Initial requirements included a high-conversion React landing page, a FastAPI backend, Vercel/Render deployment, user profile updates, Google OAuth, and a Supabase-backed user balance system with notifications. A ChatGPT-style subscription UI with Free, Plus, and Pro plans needed to enforce bot and marketplace product creation limits. The first major update involved integrating Capitalist API for crypto deposits/withdrawals (USDT ERC20/TRC20, USDC ERC20), requiring unique deposit tracking (later clarified to payment references), company/user fund tracking, and a UI with Top up, Withdraw, and Refresh balance. This was superseded by a switch to NowPayments for crypto payments and subscriptions, requiring an invoice-based payment gateway, email-based subscription system, IPN webhooks for real-time updates, and support for USDT (TRX, BSC, SOL, TON) and USDC (ETH, BSC, SOL). The UI also needed updates for new currencies, redirection to the payment gateway, and a subscription management interface.
 </product_requirements>
 
 <key_technical_concepts>
-- **React**: Frontend framework for both landing page and main application.
-- **FastAPI**: Backend framework for the API, handling data and business logic.
-- **MongoDB**: Database for the main application (not directly modified for landing page).
-- **React Three Fiber / Three.js**: For implementing 3D graphics and animations.
-- **Tailwind CSS**: For styling and responsive design.
-- **Vercel**: Frontend deployment platform for both landing and main applications, heavily utilized for domain routing and rewrites/redirects.
-- **Render**: Backend deployment platform, encountered Rust-related build issues.
-- **Supabase**: Authentication and database service, integrated with the main app.
-- **Yarn / Pip**: Package managers for frontend and backend dependencies.
-- **Supervisor**: Process manager for running services locally.
+-   **React**: Frontend UI development.
+-   **FastAPI**: Python backend API.
+-   **Supabase**: BaaS (PostgreSQL, Auth, RLS).
+-   **PostgreSQL/SQL**: Database schema, RLS, triggers.
+-   **NowPayments API**: Third-party crypto payment gateway.
+-   **Pydantic**: Data validation.
+-   **JWT**: JSON Web Token for authentication.
+-   **CORS**: Cross-origin resource sharing.
 </key_technical_concepts>
 
 <code_architecture>
 
 
-- ****: The main FastAPI application entry point.
-    - **Changes**: Updated to handle environment variables, downgraded FastAPI and Uvicorn versions for Pydantic v1 compatibility, and simplified imports.
-- ****: Lists Python dependencies.
-    - **Changes**: Drastically modified to downgrade Pydantic (from v2 to v1.10.13) to avoid Rust compilation issues, and adjusted FastAPI, Uvicorn, and httpx versions for compatibility. Removed  and .
-- ****: Environment variables for the backend.
-    - **Changes**: Configured , , and Supabase URLs/keys.
-- **, , **: Deployment configuration files for Render.
-    - **Changes**: New files created to define build and start commands for the backend.
-- ****: API route definitions (e.g., , , , ).
-    - **Changes**: Modified to remove  imports, adapt to custom Supabase client, and adjust authentication logic to match the new  route. Pydantic models simplified for v1 compatibility.
-- ****: Main React application file for the Flow Invest app.
-    - **Changes**: Modified routing from  to , including redirects for backward compatibility.
-- ****: Handles authentication state and logic.
-    - **Changes**: Updated OAuth logic and redirects to use .
-- ****: Supabase client configuration.
-    - **Changes**: Fixed Google OAuth redirect hardcoded path to use .
-- ****: Environment variables for the main frontend.
-    - **Changes**: Updated  to point to the deployed Render backend URL ().
-- ****: Main frontend project configuration and dependencies.
-    - **Changes**: Updated  URL to  to resolve redirection issues.
-- ****: Vercel deployment configuration for the main frontend.
-    - **Changes**: New file created to route  requests from  to the Render backend.
-- ****: A newly created directory for the f01i.ai landing page.
-    - **Changes**: Contains a full React application with multiple components, styles, and assets.
-- ****: Individual React components for each section of the landing page.
-    - **Changes**: , , , ,  had their CTA button links updated multiple times (from  to , then back to  for path-based routing, and finally to direct links like ).  also received mobile padding adjustments and  fix.
-- ****: New component for the 3D robot mascot.
-    - **Changes**: New file created, implementing a custom 3D robot using React Three Fiber.
-- ****: Vercel deployment configuration for the landing page.
-    - **Changes**: Initially set up for path-based routing (proxying  and ). Later, completely removed when direct linking to  was adopted as the solution for button redirects.
+-   ****:
+    -   **Importance**: Main FastAPI entry point, orchestrates API routes.
+    -   **Changes**: Replaced the Capitalist-related  router with the new  router.
+-   ** (NEW)**:
+    -   **Importance**: Handles all backend logic for NowPayments, including API calls for health checks, currency listing, price estimation, invoice creation, subscription management (with JWT), and webhook processing. Interacts with Supabase tables.
+    -   **Changes**: New file, centralizing NowPayments API integration. Includes endpoints for , , , , , , , and .
+-   ****:
+    -   **Importance**: Stores environment variables, crucial for API keys.
+    -   **Changes**: Added , , , and  for NowPayments authentication.
+-   ****:
+    -   **Importance**: Manages Python dependencies.
+    -   **Changes**: Added  to fix Pydantic's  import error.
+-   ** (NEW)**:
+    -   **Importance**: Defines the database schema for NowPayments.
+    -   **Changes**: Created to include , , and  tables. Includes RLS policies,  and  functions, and triggers. The  check constraint for  was fixed to  to allow free plans.
+-   ****:
+    -   **Importance**: User settings and profile management.
+    -   **Changes**: Modified to integrate the new  modal for managing crypto, replacing the older Capitalist-specific  component. Responsive styling for the Manage Crypto button was initiated.
+-   ****:
+    -   **Importance**: Manages user subscription plans.
+    -   **Changes**: Refactored  to integrate with the NowPayments subscription flow, updating plan descriptions and features to reflect the real NowPayments Plus plan.
+-   ** (NEW)**:
+    -   **Importance**: Dedicated UI for NowPayments crypto deposits and subscriptions.
+    -   **Changes**: New file, implements UI for selecting cryptocurrency, network, entering amount, dynamic minimum amount display, price estimation, and initiating invoices or subscriptions. Includes extensive styling fixes for mobile responsiveness, removal of emojis from network names, and updated plan feature descriptions.
+-   ** (NEW)**:
+    -   **Importance**: Frontend service for interacting with the NowPayments backend API.
+    -   **Changes**: New file containing , , , , , and  functions.
+-   ****:
+    -   **Importance**: Global styles for the application.
+    -   **Changes**: Updated the light theme background to a light grey () from pink/beige.
 </code_architecture>
 
 <pending_tasks>
-- Full implementation of the Montek demo's 3D robot with its exact animations, as the previous attempt was a custom recreation due to file access issues.
-- Implementing the color-changing hover animation on blocks from the Montek demo, adapted to the f01i.ai color scheme.
-- Ensuring the backend has all desired features (AI bots, webhooks, auth) re-added incrementally and tested, as it's currently deployed in a minimal configuration.
+-   Complete the mobile UI layout fixes for the Manage Crypto button within the  component.
+-   Further refine mobile responsiveness for elements within the settings and crypto payment sections.
 </pending_tasks>
 
 <current_work>
-The immediate work being addressed is the implementation of visual enhancements for the  landing page. This includes two main parts:
-1.  **3D Robot Mascot**: The user requested to replace the existing 3D orb with the specific 3D robot from the Montek demo, aiming for the same robot with the same animation. The AI engineer made an initial attempt by creating a custom  component using React Three Fiber () and integrating it into  and . However, due to issues accessing the full Montek project files from the provided Google Drive link, the AI's implementation is a custom recreation based on the aesthetic, not a direct replication. Screenshots confirm this custom robot is functioning and aesthetically pleasing.
-2.  **Color-Changing Hover Animation**: The user also explicitly requested to implement the color-changing hover animation on blocks, similar to the Montek project's interactive elements, while adhering to the  color scheme. The previous AI engineer identified this as the next focus after failing to access the Montek project files for the robot. This task has just begun.
-
-The current state of the product is that the landing page () is deployed on Vercel, the main application () is also deployed on Vercel, and the backend () is deployed on Render. The routing and redirection issues between these domains have been largely addressed by directly linking from the landing page to  and by configuring  in the main app to proxy API calls to the Render backend. The backend itself has been simplified to resolve previous Rust compilation and typing errors, using a minimal FastAPI/Pydantic v1 setup.
+Immediately prior to this summary, the AI engineer was engaged in fixing mobile UI layout issues within the  application. The current task focuses on the  component, specifically addressing the positioning and responsiveness of the Manage Crypto button. The previous styling, which utilized , was identified as causing layout problems and potential content overflow on mobile devices. The AI engineer is in the process of implementing a responsive layout solution for this section to ensure the button displays correctly and is user-friendly on smaller screens. This work is a continuation of previous UI/UX enhancements, which included optimizing minimum amount displays, adjusting button and modal positioning, and refining padding across various components, particularly in  and , following the successful integration of the NowPayments API and its core functionalities.
 </current_work>
 
 <optional_next_step>
-I will now work on implementing the color-changing hover animations on the landing page's relevant sections.
+Continue fixing the mobile UI layout issues in  for the Manage Crypto button.
 </optional_next_step>
