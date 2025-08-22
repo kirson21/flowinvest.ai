@@ -338,6 +338,26 @@ const SubscriptionManagement = ({ user, onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* Crypto Subscriptions Modal */}
+      {showCryptoSubscriptions && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-xl font-semibold">Crypto Subscriptions</h2>
+              <button
+                onClick={() => setShowCryptoSubscriptions(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <NowPayments />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
