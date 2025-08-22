@@ -1244,13 +1244,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Update Database Schema for NowPayments"
-    - "Implement NowPayments Invoice Payment System"
-    - "Implement NowPayments Subscription System"
-  stuck_tasks:
-    - "Update Database Schema for NowPayments"
+    - "Fix Mobile UI Layout for Manage Crypto Button"
+    - "Add Subscription Expiry Date Display" 
+    - "Improve Mobile Subscriptions Section Spacing"
+    - "Verify Subscription Upgrade Functionality"
+    - "Test Frontend Subscription Features (API calls, plan badge updates, bot/marketplace limits)"
+  stuck_tasks: []
   test_all: false
-  test_priority: "critical_first"
+  test_priority: "high_first"
 
 agent_communication:
     - agent: "testing"
