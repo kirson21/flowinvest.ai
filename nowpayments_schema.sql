@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS public.nowpayments_plans (
     plan_id VARCHAR(255) NOT NULL UNIQUE,
     title VARCHAR(255) NOT NULL,
     interval_days INTEGER NOT NULL CHECK (interval_days > 0),
-    amount DECIMAL(20, 2) NOT NULL CHECK (amount > 0),
+    amount DECIMAL(20, 2) NOT NULL CHECK (amount >= 0), -- Allow 0 for free plans
     currency VARCHAR(10) DEFAULT 'usd',
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
