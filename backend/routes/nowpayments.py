@@ -70,12 +70,48 @@ SUPPORTED_CURRENCIES = {
     }
 }
 
-def get_nowpayments_headers():
-    """Get headers for NowPayments API requests"""
-    return {
+async def get_nowpayments_jwt_token():
+    """Get JWT token for NowPayments subscriptions API"""
+    try:
+        # For subscriptions, we might need to authenticate first
+        auth_data = {
+            "email": "kirillpopolitov@gmail.com",  # Your account email
+            "password": "Osiris@21"  # Your account password
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.nowpayments.io/v1/auth",
+                json=auth_data,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result.get("token")
+            else:
+                print(f"JWT auth failed: {response.status_code} - {response.text}")
+                return None
+                
+    except Exception as e:
+        print(f"JWT auth error: {str(e)}")
+        return None
+
+def get_nowpayments_headers_with_jwt(jwt_token=None):
+    """Get headers for NowPayments API requests with JWT"""
+    headers = {
         "x-api-key": NOWPAYMENTS_API_KEY,
         "Content-Type": "application/json"
     }
+    
+    if jwt_token:
+        headers["Authorization"] = f"Bearer {jwt_token}"
+    
+    return headers
+
+def get_nowpayments_headers():
+    """Get headers for NowPayments API requests (backward compatibility)"""
+    return get_nowpayments_headers_with_jwt()
 
 async def make_nowpayments_request(method: str, endpoint: str, data: Optional[Dict] = None):
     """Make HTTP request to NowPayments API"""
