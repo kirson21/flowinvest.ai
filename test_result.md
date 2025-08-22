@@ -109,15 +109,18 @@ user_problem_statement: "Replace Capitalist payment system with NowPayments inte
 backend:
   - task: "Implement NowPayments Invoice Payment System"
     implemented: true
-    working: "testing"
+    working: false
     file: "/app/backend/routes/nowpayments.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "testing"
           agent: "main"
           comment: "NOWPAYMENTS INVOICE SYSTEM IMPLEMENTED: ✅ Created comprehensive NowPayments backend integration with invoice-based payment gateway, ✅ Implemented /nowpayments/invoice endpoint for creating payment invoices with redirect URLs, ✅ Added webhook handler /nowpayments/webhook for processing payment confirmations, ✅ Integrated with Supabase database using nowpayments_invoices table for payment tracking, ✅ Added support for USDT (TRX, BSC, SOL, TON) and USDC (ETH, BSC, SOL) currencies as requested, ✅ Implemented automatic balance crediting and notification creation upon successful payments, ✅ Added proper error handling and user attribution for all payment operations. Backend now provides complete NowPayments gateway integration with invoice creation, webhook processing, and user balance management."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL DATABASE SCHEMA ISSUE IDENTIFIED: Comprehensive NowPayments backend testing reveals the core issue preventing functionality. TESTING RESULTS: ✅ NowPayments API Integration Working - Health check passes, API connectivity confirmed, supported currencies loaded (USDT: 5 networks, USDC: 2 networks), ✅ Invoice Creation API Calls Successful - NowPayments successfully creates invoices (confirmed by invoice IDs and URLs in responses), ✅ Price Estimation Working - USDT TRC20 and BSC price estimates working correctly, ❌ CRITICAL ISSUE: Database Tables Missing - nowpayments_invoices, nowpayments_subscriptions, and nowpayments_plans tables do not exist in Supabase database. ROOT CAUSE: The nowpayments_schema.sql file exists but has never been executed against the database. All invoice creation attempts fail at database storage step with 'Failed to store payment record' error. IMPACT: Complete NowPayments functionality blocked - no invoices can be stored, no payment tracking possible, no webhook processing can work. SOLUTION REQUIRED: Execute nowpayments_schema.sql against Supabase database to create required tables and functions."
 
   - task: "Implement NowPayments Subscription System"
     implemented: true
