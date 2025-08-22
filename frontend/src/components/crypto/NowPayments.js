@@ -536,7 +536,7 @@ const NowPayments = () => {
                 </Button>
               </div>
 
-              <div className="text-xs text-gray-500 space-y-1">
+              <div className="text-xs text-gray-500 space-y-1 pb-4">
                 <p>• You'll be redirected to NowPayments secure gateway</p>
                 <p>• Support for 300+ cryptocurrencies</p>
                 <p>• Funds credited automatically after confirmation</p>
