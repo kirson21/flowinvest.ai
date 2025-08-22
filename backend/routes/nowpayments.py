@@ -434,7 +434,7 @@ async def create_subscription_plan(request: SubscriptionPlanRequest):
 
 @router.post("/nowpayments/subscription")
 async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e9717-f85d-4726-81e9-f260394ead58"):
-    """Create an email-based subscription for a user"""
+    """Create an email-based subscription for a user using real NowPayments API"""
     try:
         import sys
         sys.path.append('/app/backend')
@@ -443,31 +443,56 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e
         # For demo purposes, use Super Admin UUID
         actual_user_id = user_id if user_id != "demo_user" else "cd0e9717-f85d-4726-81e9-f260394ead58"
         
-        # For now, we'll create a local subscription record and send instructions via email
-        # This bypasses the NowPayments JWT requirement for subscriptions
+        # Get JWT token for subscription API
+        jwt_token = await get_nowpayments_jwt_token()
+        if not jwt_token:
+            raise HTTPException(status_code=500, detail="Failed to authenticate with NowPayments for subscriptions")
         
-        # Store subscription record in database with pending status
+        # Use your real NowPayments subscription plan ID
+        nowpayments_plan_id = 1516280944  # Your Plan Plus ID from dashboard
+        
+        subscription_data = {
+            "subscription_plan_id": nowpayments_plan_id,
+            "email": request.user_email
+        }
+        
+        # Make authenticated request to NowPayments subscriptions API
+        headers = get_nowpayments_headers_with_jwt(jwt_token)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{NOWPAYMENTS_API_URL}/subscriptions",
+                json=subscription_data,
+                headers=headers
+            )
+        
+        if response.status_code not in [200, 201]:
+            error_detail = response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
+            raise HTTPException(status_code=400, detail=f"Failed to create NowPayments subscription: {error_detail}")
+        
+        subscription_result = response.json().get("result", response.json())
+        
+        # Store subscription record in database
         subscription_record = {
             'user_id': actual_user_id,
-            'subscription_id': f"local_{int(time.time())}_{actual_user_id[-8:]}",
-            'plan_id': request.plan_id,
+            'subscription_id': str(subscription_result.get('id', '')),
+            'plan_id': request.plan_id,  # Keep our plan ID for reference
             'user_email': request.user_email,
-            'status': 'WAITING_PAY',
-            'is_active': False,
-            'expire_date': None  # Will be set when payment is made
+            'status': subscription_result.get('status', 'WAITING_PAY'),
+            'is_active': subscription_result.get('is_active', False),
+            'expire_date': subscription_result.get('expire_date')
         }
         
         result = supabase.table('nowpayments_subscriptions').insert(subscription_record).execute()
         
         if not result.data:
-            raise HTTPException(status_code=500, detail="Failed to create subscription record")
+            raise HTTPException(status_code=500, detail="Failed to store subscription record")
         
-        # Create a notification for the user about subscription setup
+        # Create success notification
         notification = {
             'user_id': actual_user_id,
-            'title': 'Subscription Created 📧',
-            'message': f'Your Plus Plan subscription has been set up. Payment instructions have been sent to {request.user_email}. You can also make payments directly through the Top Up feature.',
-            'type': 'info',
+            'title': 'Subscription Created! 📧',
+            'message': f'Your Plus Plan subscription has been created with NowPayments. Payment instructions have been sent to {request.user_email}. Check your email for payment details.',
+            'type': 'success',
             'is_read': False
         }
         
@@ -475,13 +500,9 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e
         
         return {
             "success": True,
-            "subscription": {
-                "id": subscription_record['subscription_id'],
-                "status": "WAITING_PAY",
-                "is_active": False,
-                "email": request.user_email
-            },
-            "message": f"Subscription created successfully. To activate your Plus Plan, please make a payment of $9.99 using the Top Up feature. Instructions have been noted for {request.user_email}"
+            "subscription": subscription_result,
+            "nowpayments_plan_id": nowpayments_plan_id,
+            "message": f"Subscription created successfully with NowPayments! Payment instructions have been sent to {request.user_email}"
         }
         
     except HTTPException:
