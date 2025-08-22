@@ -485,22 +485,54 @@ async def nowpayments_webhook(request: Request):
                 plan_type = 'free'  # Default fallback
                 plan_price = 0.00
             
-            # Upgrade user subscription using the existing upgrade function
+            # Direct subscription upgrade (bypassing problematic RPC function)
             try:
-                upgrade_response = supabase.rpc('upgrade_subscription', {
-                    'p_user_id': user_id,
-                    'p_plan_type': plan_type,
-                    'p_price': plan_price
-                }).execute()
+                from datetime import datetime, timedelta
                 
-                print(f"📈 Subscription upgrade response: {upgrade_response.data}")
+                # Calculate subscription end date (31 days from now)
+                end_date = datetime.utcnow() + timedelta(days=31)
                 
-                if upgrade_response.data and upgrade_response.data.get('success'):
+                # Check if user already has a subscription record
+                existing_sub = supabase.table('user_subscriptions_v2').select('*').eq('user_id', user_id).execute()
+                
+                subscription_data = {
+                    'user_id': user_id,
+                    'plan_type': plan_type,
+                    'status': 'active',
+                    'is_active': True,
+                    'start_date': datetime.utcnow().isoformat(),
+                    'end_date': end_date.isoformat(),
+                    'expires_at': end_date.isoformat(),
+                    'renewal': True,
+                    'price_paid': plan_price,
+                    'currency': 'USD',
+                    'metadata': {'payment_method': 'crypto', 'nowpayments_id': str(payment_id)},
+                    'updated_at': datetime.utcnow().isoformat()
+                }
+                
+                if existing_sub.data:
+                    # Update existing subscription
+                    result = supabase.table('user_subscriptions_v2')\
+                        .update(subscription_data)\
+                        .eq('user_id', user_id)\
+                        .execute()
+                    print(f"📝 Updated existing subscription for user {user_id}")
+                else:
+                    # Create new subscription
+                    subscription_data['created_at'] = datetime.utcnow().isoformat()
+                    result = supabase.table('user_subscriptions_v2')\
+                        .insert(subscription_data)\
+                        .execute()
+                    print(f"➕ Created new subscription for user {user_id}")
+                
+                if result.data:
+                    print(f"✅ Direct subscription upgrade completed successfully for user {user_id}")
+                    
                     # Create subscription upgrade notification
                     notification = {
                         'user_id': user_id,
                         'title': f'🎉 Subscription Upgraded to {plan_type.title()}!',
-                        'message': f'Your crypto payment has been confirmed and your subscription has been upgraded to {plan_type.title()} Plan. Enjoy your new features including 3 AI bots, 5 manual bots, and up to 10 marketplace products!',
+                        'message': f'Your crypto payment has been confirmed and your subscription has been upgraded to {plan_type.title()} Plan. Enjoy your new features including 3 AI bots, 5 manual bots, and up to 10 marketplace products! Valid until {end_date.strftime("%B %d, %Y")}',
                         'type': 'success',
                         'is_read': False
                     }
@@ -509,10 +541,39 @@ async def nowpayments_webhook(request: Request):
                     
                     print(f"✅ Subscription upgrade completed successfully for user {user_id}")
                 else:
-                    print(f"❌ Subscription upgrade failed for user {user_id}: {upgrade_response.data}")
+                    print(f"❌ Direct subscription upgrade failed for user {user_id}")
                     
             except Exception as upgrade_error:
-                print(f"❌ Error upgrading subscription: {upgrade_error}")
+                print(f"❌ Error with direct subscription upgrade: {upgrade_error}")
+                
+                # Fallback: try the original RPC function
+                try:
+                    upgrade_response = supabase.rpc('upgrade_subscription', {
+                        'p_user_id': user_id,
+                        'p_plan_type': plan_type,
+                        'p_price': plan_price
+                    }).execute()
+                    
+                    print(f"📈 Fallback RPC response: {upgrade_response.data}")
+                    
+                    if upgrade_response.data and upgrade_response.data.get('success'):
+                        # Create subscription upgrade notification
+                        notification = {
+                            'user_id': user_id,
+                            'title': f'🎉 Subscription Upgraded to {plan_type.title()}!',
+                            'message': f'Your crypto payment has been confirmed and your subscription has been upgraded to {plan_type.title()} Plan. Enjoy your new features including 3 AI bots, 5 manual bots, and up to 10 marketplace products!',
+                            'type': 'success',
+                            'is_read': False
+                        }
+                        
+                        supabase.table('user_notifications').insert(notification).execute()
+                        
+                        print(f"✅ Fallback subscription upgrade completed successfully for user {user_id}")
+                    else:
+                        print(f"❌ Fallback subscription upgrade failed for user {user_id}: {upgrade_response.data}")
+                        
+                except Exception as fallback_error:
+                    print(f"❌ Fallback RPC upgrade also failed: {fallback_error}")
                 
                 # Still create a notification about payment received
                 notification = {
