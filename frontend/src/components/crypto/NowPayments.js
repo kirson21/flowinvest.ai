@@ -62,11 +62,13 @@ const NowPayments = () => {
       price: 10.00,  // Updated to match your NowPayments plan
       interval: 31,  // Updated to match your NowPayments plan (31 days)
       features: [
-        '2 AI Trading Bots',
-        'Advanced Market Analysis',
-        'Priority Customer Support',
-        'Real-time Alerts',
-        'Portfolio Analytics'
+        'Access to AI news feed + push notifications',
+        'Telegram notifications + filters',
+        'Create & manage 3 AI trading bots',
+        'Create & manage 5 manual bots',
+        'API access for copytrading integration',
+        'Connect to ready-made bots from f01i.ai',
+        'For marketplace sellers: up to 10 product slots'
       ] 
     }
   ];
