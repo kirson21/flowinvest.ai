@@ -408,11 +408,11 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "demo
         
         response = await make_nowpayments_request("POST", "/subscriptions", subscription_data)
         
-        if response.status_code != 200:
+        if response.status_code not in [200, 201]:
             error_detail = response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
             raise HTTPException(status_code=400, detail=f"Failed to create subscription: {error_detail}")
         
-        subscription_result = response.json()["result"]
+        subscription_result = response.json().get("result", response.json())
         
         # Store subscription record in database
         subscription_record = {
