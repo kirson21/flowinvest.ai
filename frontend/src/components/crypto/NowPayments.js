@@ -52,8 +52,9 @@ const NowPayments = () => {
   const [showTransactions, setShowTransactions] = useState(false);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
 
-  // Price estimate
+  // Price estimate and minimum amount
   const [priceEstimate, setPriceEstimate] = useState(null);
+  const [minimumAmount, setMinimumAmount] = useState(null);
 
   // Available subscription plans (matching real NowPayments plan)
   const subscriptionPlans = [
