@@ -104,7 +104,69 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement unique transaction references for user deposits and add notification system for crypto payments."
+user_problem_statement: "Replace Capitalist payment system with NowPayments integration - implement invoice-based payment gateway and subscription system for crypto payments."
+
+backend:
+  - task: "Implement NowPayments Invoice Payment System"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/nowpayments.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "NOWPAYMENTS INVOICE SYSTEM IMPLEMENTED: ✅ Created comprehensive NowPayments backend integration with invoice-based payment gateway, ✅ Implemented /nowpayments/invoice endpoint for creating payment invoices with redirect URLs, ✅ Added webhook handler /nowpayments/webhook for processing payment confirmations, ✅ Integrated with Supabase database using nowpayments_invoices table for payment tracking, ✅ Added support for USDT (TRX, BSC, SOL, TON) and USDC (ETH, BSC, SOL) currencies as requested, ✅ Implemented automatic balance crediting and notification creation upon successful payments, ✅ Added proper error handling and user attribution for all payment operations. Backend now provides complete NowPayments gateway integration with invoice creation, webhook processing, and user balance management."
+
+  - task: "Implement NowPayments Subscription System"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/nowpayments.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "NOWPAYMENTS SUBSCRIPTION SYSTEM IMPLEMENTED: ✅ Created subscription plan management endpoints for creating custom subscription plans, ✅ Implemented email-based subscription system using /nowpayments/subscription endpoint, ✅ Added subscription tracking with nowpayments_subscriptions table in database, ✅ Integrated with NowPayments recurring payments API for automated billing, ✅ Added subscription status monitoring and user management capabilities, ✅ Implemented proper email validation and user attribution for subscriptions. Backend now supports complete subscription lifecycle management with email-based recurring crypto payments."
+
+  - task: "Update Database Schema for NowPayments"
+    implemented: true
+    working: "testing"
+    file: "/app/nowpayments_schema.sql"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "NOWPAYMENTS DATABASE SCHEMA CREATED: ✅ Created comprehensive SQL schema with nowpayments_invoices, nowpayments_subscriptions, and nowpayments_plans tables, ✅ Added proper RLS policies for user data isolation and security, ✅ Implemented helper function process_nowpayments_webhook for webhook processing, ✅ Added automatic timestamp triggers and proper indexing for performance, ✅ Created webhook processing function with balance updates and notification creation, ✅ Added subscription plans with default Free, Plus, and Pro tiers. Database schema ready for complete NowPayments integration with proper security and performance optimizations."
+
+frontend:
+  - task: "Implement NowPayments Frontend Components"
+    implemented: true
+    working: "testing"
+    file: "/app/frontend/src/components/crypto/NowPayments.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "NOWPAYMENTS FRONTEND INTEGRATION COMPLETED: ✅ Created comprehensive NowPayments React component with modern UI/UX design, ✅ Implemented invoice creation flow with currency/network selection for USDT and USDC, ✅ Added subscription management interface with plan selection and email input, ✅ Created transaction history viewer with payment status tracking, ✅ Integrated price estimation and validation for payment amounts, ✅ Added proper loading states, error handling, and success notifications, ✅ Implemented gateway redirection flow that opens NowPayments in new tab, ✅ Updated Settings.js to use new NowPayments component instead of old CryptoPayments. Frontend now provides complete payment gateway integration with professional UI and proper user flow management."
+
+  - task: "Create NowPayments Frontend Service"
+    implemented: true
+    working: "testing"
+    file: "/app/frontend/src/services/nowPaymentsService.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "NOWPAYMENTS SERVICE CLASS IMPLEMENTED: ✅ Created comprehensive frontend service class for NowPayments API communication, ✅ Implemented all necessary API endpoints (health, currencies, invoices, payments, subscriptions), ✅ Added utility functions for amount validation, email validation, and status formatting, ✅ Created currency/network mapping functions with proper display names and icons, ✅ Implemented price estimation and formatting utilities, ✅ Added proper error handling and request/response processing. Service provides complete abstraction layer for NowPayments integration with proper validation and formatting utilities."
 
 backend:
   - task: "Implement Unique Deposit Tracking System Backend"
