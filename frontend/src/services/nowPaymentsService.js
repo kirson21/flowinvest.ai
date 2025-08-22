@@ -194,8 +194,8 @@ class NowPaymentsService {
       return { valid: false, error: 'Amount must be a positive number' };
     }
     
-    if (numAmount < 1) {
-      return { valid: false, error: 'Minimum amount is $1.00' };
+    if (numAmount < 5) {
+      return { valid: false, error: 'Minimum amount is $5.00' };
     }
     
     if (numAmount > 10000) {
