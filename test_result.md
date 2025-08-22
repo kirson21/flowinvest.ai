@@ -139,15 +139,18 @@ backend:
 
   - task: "Update Database Schema for NowPayments"
     implemented: true
-    working: "testing"
+    working: false
     file: "/app/nowpayments_schema.sql"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: false
     status_history:
         - working: "testing"
           agent: "main"
           comment: "NOWPAYMENTS DATABASE SCHEMA CREATED: ✅ Created comprehensive SQL schema with nowpayments_invoices, nowpayments_subscriptions, and nowpayments_plans tables, ✅ Added proper RLS policies for user data isolation and security, ✅ Implemented helper function process_nowpayments_webhook for webhook processing, ✅ Added automatic timestamp triggers and proper indexing for performance, ✅ Created webhook processing function with balance updates and notification creation, ✅ Added subscription plans with default Free, Plus, and Pro tiers. Database schema ready for complete NowPayments integration with proper security and performance optimizations."
+        - working: false
+          agent: "testing"
+          comment: "🚨 CRITICAL: DATABASE SCHEMA NOT APPLIED TO SUPABASE: Comprehensive database testing confirms that while the nowpayments_schema.sql file exists and contains proper schema definitions, the schema has NEVER been executed against the Supabase database. VERIFICATION RESULTS: ❌ nowpayments_invoices table does not exist (404 error: relation 'public.nowpayments_invoices' does not exist), ❌ nowpayments_subscriptions table does not exist, ❌ nowpayments_plans table does not exist, ❌ process_nowpayments_webhook function does not exist, ✅ Other database tables (user_profiles, transactions, user_accounts, user_notifications) exist and work correctly. IMPACT: This is the root cause blocking ALL NowPayments functionality. Without these tables, no invoices can be stored, no payments can be tracked, and no webhooks can be processed. URGENT ACTION REQUIRED: The schema must be executed against the Supabase database immediately to enable NowPayments functionality."
 
 frontend:
   - task: "Implement NowPayments Frontend Components"
