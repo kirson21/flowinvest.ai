@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import ProductEditModal from '../portfolios/ProductEditModal';
 import VerificationRequiredModal from '../verification/VerificationRequiredModal';
 import VerificationManagementModal from '../verification/VerificationManagementModal';
-import CryptoPayments from '../crypto/CryptoPayments';
+import CryptoPayments from '../crypto/NowPayments';
 import { verificationService } from '../../services/verificationService';
 import { dataSyncService } from '../../services/dataSyncService';
 import { supabaseDataService } from '../../services/supabaseDataService';
