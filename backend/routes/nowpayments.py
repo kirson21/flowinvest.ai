@@ -158,7 +158,7 @@ async def get_supported_currencies():
         raise HTTPException(status_code=500, detail=f"Failed to get supported currencies: {str(e)}")
 
 @router.post("/nowpayments/invoice")
-async def create_invoice(request: InvoiceRequest, user_id: str = "demo_user"):
+async def create_invoice(request: InvoiceRequest, user_id: str = "cd0e9717-f85d-4726-81e9-f260394ead58"):
     """Create payment invoice with NowPayments"""
     try:
         import sys
@@ -168,8 +168,11 @@ async def create_invoice(request: InvoiceRequest, user_id: str = "demo_user"):
         if not supabase:
             raise HTTPException(status_code=500, detail="Database connection not available")
         
+        # For demo purposes, use Super Admin UUID
+        actual_user_id = user_id if user_id != "demo_user" else "cd0e9717-f85d-4726-81e9-f260394ead58"
+        
         # Generate unique order ID
-        order_id = request.order_id or f"f01i_{user_id}_{int(time.time())}"
+        order_id = request.order_id or f"f01i_{actual_user_id[-8:]}_{int(time.time())}"
         
         # Prepare invoice data
         invoice_data = {
