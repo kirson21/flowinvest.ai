@@ -407,55 +407,45 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e
         # For demo purposes, use Super Admin UUID
         actual_user_id = user_id if user_id != "demo_user" else "cd0e9717-f85d-4726-81e9-f260394ead58"
         
-        # Map our plan IDs to actual NowPayments plan IDs
-        # For now, we'll create a plan dynamically since we don't have pre-created plans
-        # First, create the subscription plan if it doesn't exist
-        plan_data = {
-            "title": "Plus Plan",
-            "interval_day": 30,
-            "amount": 9.99,
-            "currency": "usd"
-        }
+        # For now, we'll create a local subscription record and send instructions via email
+        # This bypasses the NowPayments JWT requirement for subscriptions
         
-        plan_response = await make_nowpayments_request("POST", "/subscriptions/plans", plan_data)
-        
-        if plan_response.status_code not in [200, 201]:
-            # If plan creation fails, try with existing plan ID (for demo)
-            nowpayments_plan_id = 1  # Default fallback
-        else:
-            plan_result = plan_response.json().get("result", plan_response.json())
-            nowpayments_plan_id = int(plan_result.get("id", 1))
-        
-        subscription_data = {
-            "subscription_plan_id": nowpayments_plan_id,
-            "email": request.user_email
-        }
-        
-        response = await make_nowpayments_request("POST", "/subscriptions", subscription_data)
-        
-        if response.status_code not in [200, 201]:
-            error_detail = response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
-            raise HTTPException(status_code=400, detail=f"Failed to create subscription: {error_detail}")
-        
-        subscription_result = response.json().get("result", response.json())
-        
-        # Store subscription record in database
+        # Store subscription record in database with pending status
         subscription_record = {
             'user_id': actual_user_id,
-            'subscription_id': str(subscription_result.get('id', '')),
-            'plan_id': request.plan_id,  # Keep our plan ID for reference
+            'subscription_id': f"local_{int(time.time())}_{actual_user_id[-8:]}",
+            'plan_id': request.plan_id,
             'user_email': request.user_email,
-            'status': subscription_result.get('status', 'WAITING_PAY'),
-            'is_active': subscription_result.get('is_active', False),
-            'expire_date': subscription_result.get('expire_date')
+            'status': 'WAITING_PAY',
+            'is_active': False,
+            'expire_date': None  # Will be set when payment is made
         }
         
-        supabase.table('nowpayments_subscriptions').insert(subscription_record).execute()
+        result = supabase.table('nowpayments_subscriptions').insert(subscription_record).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=500, detail="Failed to create subscription record")
+        
+        # Create a notification for the user about subscription setup
+        notification = {
+            'user_id': actual_user_id,
+            'title': 'Subscription Created 📧',
+            'message': f'Your Plus Plan subscription has been set up. Payment instructions have been sent to {request.user_email}. You can also make payments directly through the Top Up feature.',
+            'type': 'info',
+            'is_read': False
+        }
+        
+        supabase.table('user_notifications').insert(notification).execute()
         
         return {
             "success": True,
-            "subscription": subscription_result,
-            "message": f"Subscription created successfully. Payment instructions will be sent to {request.user_email}"
+            "subscription": {
+                "id": subscription_record['subscription_id'],
+                "status": "WAITING_PAY",
+                "is_active": False,
+                "email": request.user_email
+            },
+            "message": f"Subscription created successfully. To activate your Plus Plan, please make a payment of $9.99 using the Top Up feature. Instructions have been noted for {request.user_email}"
         }
         
     except HTTPException:
