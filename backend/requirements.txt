@@ -5,9 +5,9 @@ httpx==0.24.1
 # Minimal stable versions - avoid all typing conflicts
 # FastAPI 0.68.0 has built-in pydantic that works
 
-# Additional dependencies for Capitalist API integration
-requests==2.31.0
-cryptography==41.0.7
+# NowPayments integration dependencies
+requests==2.31.0      # Additional HTTP client support
+cryptography==41.0.7  # For webhook signature verification
 certifi==2023.11.17
 requests-toolbelt==1.0.0
 python-multipart==0.0.6
