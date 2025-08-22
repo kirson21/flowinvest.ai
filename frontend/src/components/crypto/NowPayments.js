@@ -54,13 +54,13 @@ const NowPayments = () => {
   // Price estimate
   const [priceEstimate, setPriceEstimate] = useState(null);
 
-  // Available subscription plans (updated to match subscription management)
+  // Available subscription plans (matching real NowPayments plan)
   const subscriptionPlans = [
     { 
       id: 'plan_plus', 
       name: 'Plus Plan', 
-      price: 9.99, 
-      interval: 30, 
+      price: 10.00,  // Updated to match your NowPayments plan
+      interval: 31,  // Updated to match your NowPayments plan (31 days)
       features: [
         '2 AI Trading Bots',
         'Advanced Market Analysis',
