@@ -471,11 +471,15 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e
         
         # Parse the response - handle both formats
         response_data = response.json()
+        print(f"NowPayments subscription response: {response_data}")  # Debug log
+        
         if isinstance(response_data, dict):
             subscription_result = response_data.get("result", response_data)
         else:
             # If it's a list or other format, use the first item or the whole response
             subscription_result = response_data[0] if isinstance(response_data, list) else response_data
+        
+        print(f"Parsed subscription result: {subscription_result}")  # Debug log
         
         # Store subscription record in database
         subscription_record = {
