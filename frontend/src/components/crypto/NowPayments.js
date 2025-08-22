@@ -165,24 +165,6 @@ const NowPayments = () => {
     }
   };
 
-  const updatePriceEstimate = async () => {
-    try {
-      const amount = parseFloat(paymentAmount);
-      if (amount <= 0) return;
-
-      const network = currencyNetworks[selectedCurrency]?.find(n => n.code === selectedNetwork);
-      if (!network) return;
-
-      const estimate = await nowPaymentsService.getEstimate(amount, 'usd', network.nowpayments_code);
-      if (estimate.success) {
-        setPriceEstimate(estimate.estimate);
-      }
-    } catch (error) {
-      console.error('Failed to get price estimate:', error);
-      setPriceEstimate(null);
-    }
-  };
-
   const handleCreatePayment = async () => {
     try {
       setLoading(true);
