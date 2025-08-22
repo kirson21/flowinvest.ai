@@ -632,7 +632,7 @@ const NowPayments = () => {
                 </div>
               </div>
 
-              <div className="pt-4">
+              <div className="pt-4 pb-6">
                 <Button
                   onClick={handleCreateSubscription}
                   disabled={loading || !subscriptionEmail}
