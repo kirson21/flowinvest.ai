@@ -191,11 +191,9 @@ const NowPayments = () => {
       if (result.success) {
         setMessage('Payment invoice created successfully! Redirecting...');
         
-        // Redirect to NowPayments gateway
+        // Redirect directly in the same tab to avoid popup blocking
         setTimeout(() => {
-          window.open(result.invoice_url, '_blank', 'noopener,noreferrer');
-          setShowPaymentModal(false);
-          resetPaymentForm();
+          window.location.href = result.invoice_url;
         }, 1500);
       }
     } catch (error) {
