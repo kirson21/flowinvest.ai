@@ -530,17 +530,17 @@ backend:
           agent: "main"
           comment: "SUBSCRIPTION EXPIRY DATE FEATURE IMPLEMENTED: ✅ Enhanced SubscriptionProfileBadge to show subscription expiry dates for paid users, ✅ Added formatExpiryDate function with proper date formatting and expiry detection, ✅ Shows 'Until [date]' for active subscriptions and 'Expired [date]' for expired ones, ✅ Added proper responsive layout (flex-col on mobile, flex-row on desktop), ✅ Only displays expiry info for paid plans (not free users), ✅ Added proper styling with red colors for expired subscriptions and gray for active ones. Users can now see when their subscription expires next to their plan badge."
 
-  - task: "Improve Mobile Subscriptions Section Spacing"
+  - task: "Fix Subscription Upgrade Bug in Webhook Processing"
     implemented: true
-    working: "testing" 
-    file: "/app/frontend/src/components/settings/SubscriptionManagement.js"
+    working: "testing"
+    file: "/app/backend/routes/nowpayments.py"
     stuck_count: 0
-    priority: "high"
+    priority: "critical"
     needs_retesting: true
     status_history:
         - working: "testing"
           agent: "main"
-          comment: "MOBILE SUBSCRIPTIONS SPACING ENHANCED: ✅ Added extra bottom spacing for mobile devices (mb-20 on mobile, mb-16 on desktop), ✅ Enhanced footer padding (pb-12 on mobile, pb-8 on desktop) for better content separation, ✅ Improved plans grid bottom padding for mobile viewing, ✅ Added responsive padding adjustments throughout the modal. Mobile users now have proper bottom spacing preventing content cutoff and improving scroll experience."
+          comment: "CRITICAL BUG FIX IMPLEMENTED - SUBSCRIPTION UPGRADE WEBHOOK: ✅ Fixed critical issue where successful subscription payments were not upgrading user plans automatically, ✅ Enhanced webhook processing to detect subscription vs balance payments using nowpayments_subscriptions table lookup, ✅ Added automatic subscription upgrade logic calling existing upgrade_subscription RPC function, ✅ Implemented proper plan type mapping (plan_plus → plus plan type), ✅ Added subscription status updates (WAITING_PAY → PAID), ✅ Enhanced notifications for subscription upgrades vs balance top-ups, ✅ Added comprehensive logging for webhook debugging. Now when users complete subscription payments via NowPayments, their plan will automatically upgrade and they'll get proper notification with feature unlocking (3 AI bots, 5 manual bots, 10 marketplace products)."
     priority: "critical"
     needs_retesting: false
     status_history:
