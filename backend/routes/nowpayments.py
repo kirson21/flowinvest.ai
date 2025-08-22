@@ -493,16 +493,14 @@ async def nowpayments_webhook(request: Request):
                 end_date = datetime.utcnow() + timedelta(days=31)
                 
                 # Check if user already has a subscription record
-                existing_sub = supabase.table('user_subscriptions_v2').select('*').eq('user_id', user_id).execute()
+                existing_sub = supabase.table('subscriptions').select('*').eq('user_id', user_id).execute()
                 
                 subscription_data = {
                     'user_id': user_id,
                     'plan_type': plan_type,
                     'status': 'active',
-                    'is_active': True,
                     'start_date': datetime.utcnow().isoformat(),
                     'end_date': end_date.isoformat(),
-                    'expires_at': end_date.isoformat(),
                     'renewal': True,
                     'price_paid': plan_price,
                     'currency': 'USD',
@@ -512,7 +510,7 @@ async def nowpayments_webhook(request: Request):
                 
                 if existing_sub.data:
                     # Update existing subscription
-                    result = supabase.table('user_subscriptions_v2')\
+                    result = supabase.table('subscriptions')\
                         .update(subscription_data)\
                         .eq('user_id', user_id)\
                         .execute()
@@ -520,7 +518,7 @@ async def nowpayments_webhook(request: Request):
                 else:
                     # Create new subscription
                     subscription_data['created_at'] = datetime.utcnow().isoformat()
-                    result = supabase.table('user_subscriptions_v2')\
+                    result = supabase.table('subscriptions')\
                         .insert(subscription_data)\
                         .execute()
                     print(f"➕ Created new subscription for user {user_id}")
