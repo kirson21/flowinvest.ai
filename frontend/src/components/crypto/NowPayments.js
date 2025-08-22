@@ -273,7 +273,7 @@ const NowPayments = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       {/* Service Health Status */}
       {serviceHealth && (
         <Alert className={`border-l-4 ${serviceHealth.status === 'healthy' ? 'border-l-green-500' : 'border-l-yellow-500'}`}>
