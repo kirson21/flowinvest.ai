@@ -558,19 +558,25 @@ async def reset_all_balances(admin_key: str = "admin123"):
         sys.path.append('/app/backend')
         from supabase_client import supabase_admin as supabase
         
+        # First, get all user accounts to see how many exist
+        all_accounts = supabase.table('user_accounts').select('user_id, balance').execute()
+        
         # Reset all balances to 0
-        result = supabase.table('user_accounts')\
+        reset_result = supabase.table('user_accounts')\
             .update({'balance': 0.0, 'updated_at': 'now()'})\
-            .neq('user_id', 'dummy')\
-            .execute()
+            .gt('balance', -999999)\
+            .execute()  # Update all accounts regardless of current balance
         
         # Count affected records
-        affected_count = len(result.data) if result.data else 0
+        affected_count = len(reset_result.data) if reset_result.data else 0
+        total_accounts = len(all_accounts.data) if all_accounts.data else 0
         
         return {
             "success": True,
             "message": f"Successfully reset {affected_count} user balances to $0.00",
-            "affected_users": affected_count
+            "affected_users": affected_count,
+            "total_accounts": total_accounts,
+            "accounts_before": all_accounts.data[:5] if all_accounts.data else []  # Show first 5 as sample
         }
         
     except HTTPException:
