@@ -126,7 +126,7 @@ const SubscriptionManagement = ({ user, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto mb-16">
+      <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto mb-20 sm:mb-16">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
@@ -168,7 +168,7 @@ const SubscriptionManagement = ({ user, onClose }) => {
         </div>
 
         {/* Plans Grid */}
-        <div className="p-6 pb-12">
+        <div className="p-6 pb-12 sm:pb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
             {plans.map((plan) => (
               <div
@@ -251,7 +251,7 @@ const SubscriptionManagement = ({ user, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-8 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <div className="px-6 py-8 pb-12 sm:pb-8 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <div className="text-center text-sm text-gray-600 dark:text-gray-400 space-y-3">
             <p>
               💡 All subscription payments are deducted from your account balance.
