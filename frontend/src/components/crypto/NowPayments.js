@@ -489,13 +489,18 @@ const NowPayments = () => {
                 <Label>Amount (USD)</Label>
                 <Input
                   type="number"
-                  placeholder="5.00"
+                  placeholder="20.00"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   min="5"
                   max="10000"
                   step="0.01"
                 />
+                {minimumAmount && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                    Minimum for {selectedCurrency} ({selectedNetwork}): ${minimumAmount.toFixed(2)}
+                  </p>
+                )}
               </div>
 
               <div>
