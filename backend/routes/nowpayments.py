@@ -473,23 +473,26 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e
         response_data = response.json()
         print(f"NowPayments subscription response: {response_data}")  # Debug log
         
-        if isinstance(response_data, dict):
-            subscription_result = response_data.get("result", response_data)
+        # NowPayments returns result as array with subscription object
+        if isinstance(response_data, dict) and "result" in response_data:
+            if isinstance(response_data["result"], list) and len(response_data["result"]) > 0:
+                subscription_result = response_data["result"][0]  # Get first subscription from array
+            else:
+                subscription_result = response_data["result"]
         else:
-            # If it's a list or other format, use the first item or the whole response
-            subscription_result = response_data[0] if isinstance(response_data, list) else response_data
+            subscription_result = response_data
         
         print(f"Parsed subscription result: {subscription_result}")  # Debug log
         
-        # Store subscription record in database
+        # Store subscription record in database with proper data extraction
         subscription_record = {
             'user_id': actual_user_id,
-            'subscription_id': str(subscription_result.get('id', '') if isinstance(subscription_result, dict) else subscription_result),
+            'subscription_id': str(subscription_result.get('id', '')),  # This should be just the ID number
             'plan_id': request.plan_id,  # Keep our plan ID for reference
             'user_email': request.user_email,
-            'status': subscription_result.get('status', 'WAITING_PAY') if isinstance(subscription_result, dict) else 'WAITING_PAY',
-            'is_active': subscription_result.get('is_active', False) if isinstance(subscription_result, dict) else False,
-            'expire_date': subscription_result.get('expire_date') if isinstance(subscription_result, dict) else None
+            'status': subscription_result.get('status', 'WAITING_PAY'),
+            'is_active': subscription_result.get('is_active', False),
+            'expire_date': subscription_result.get('expire_date')
         }
         
         result = supabase.table('nowpayments_subscriptions').insert(subscription_record).execute()
