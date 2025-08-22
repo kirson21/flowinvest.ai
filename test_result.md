@@ -1205,11 +1205,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Bot Creation Subscription Limits Implementation"
+    - "Update Database Schema for NowPayments"
+    - "Implement NowPayments Invoice Payment System"
+    - "Implement NowPayments Subscription System"
   stuck_tasks:
-    []
+    - "Update Database Schema for NowPayments"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "critical_first"
 
 agent_communication:
     - agent: "testing"
