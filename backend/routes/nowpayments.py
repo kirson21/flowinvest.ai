@@ -226,8 +226,21 @@ async def create_invoice(request: InvoiceRequest, user_id: str = "cd0e9717-f85d-
         sys.path.append('/app/backend')
         from supabase_client import supabase_admin as supabase
         
-        if not supabase:
-            raise HTTPException(status_code=500, detail="Database connection not available")
+        # Validate inputs and check minimum amounts
+        if request.currency.upper() not in ['USD', 'EUR']:
+            return {"success": False, "detail": "Unsupported price currency"}
+        
+        if request.amount <= 0:
+            return {"success": False, "detail": "Amount must be positive"}
+        
+        # If pay_currency is specified, check minimum amount
+        if request.pay_currency:
+            min_check = await get_minimum_amount(request.currency.lower(), request.pay_currency.lower())
+            if min_check["success"] and request.amount < min_check["min_amount"]:
+                return {
+                    "success": False, 
+                    "detail": f"Amount ${request.amount} is below minimum ${min_check['min_amount']} for {request.pay_currency}"
+                }
         
         # For demo purposes, use Super Admin UUID
         actual_user_id = user_id if user_id != "demo_user" else "cd0e9717-f85d-4726-81e9-f260394ead58"
