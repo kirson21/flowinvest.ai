@@ -469,7 +469,13 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e
             error_detail = response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
             raise HTTPException(status_code=400, detail=f"Failed to create NowPayments subscription: {error_detail}")
         
-        subscription_result = response.json().get("result", response.json())
+        # Parse the response - handle both formats
+        response_data = response.json()
+        if isinstance(response_data, dict):
+            subscription_result = response_data.get("result", response_data)
+        else:
+            # If it's a list or other format, use the first item or the whole response
+            subscription_result = response_data[0] if isinstance(response_data, list) else response_data
         
         # Store subscription record in database
         subscription_record = {
