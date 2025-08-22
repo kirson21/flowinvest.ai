@@ -54,77 +54,7 @@ const SubscriptionManagement = ({ user, onClose }) => {
     setShowCryptoSubscriptions(true);
   };
 
-    if (plan.id === subscription?.plan_type) {
-      alert('You are already on this plan.');
-      return;
-    }
 
-    // Check if user has sufficient balance
-    if (accountBalance < plan.price) {
-      const shortfall = plan.price - accountBalance;
-      const shouldTopUp = window.confirm(
-        `💰 Insufficient Funds\n\n` +
-        `Plan price: $${plan.price.toFixed(2)}\n` +
-        `Your balance: $${accountBalance.toFixed(2)}\n` +
-        `You need: $${shortfall.toFixed(2)} more\n\n` +
-        `Would you like to go to the balance section to top up your account?`
-      );
-      
-      if (shouldTopUp) {
-        onClose(); // Close subscription modal
-        // The parent component should handle scrolling to balance section
-      }
-      return;
-    }
-
-    // Confirm upgrade
-    const confirmMessage = plan.id === 'free' 
-      ? `Downgrade to ${plan.name}?\n\nYou will lose access to premium features immediately.`
-      : `Upgrade to ${plan.name} for $${plan.price.toFixed(2)}?\n\nThis will be deducted from your account balance.\nYour new balance will be $${(accountBalance - plan.price).toFixed(2)}`;
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      setUpgrading(true);
-
-      const result = await supabaseDataService.upgradeSubscription(
-        user.id,
-        plan.id,
-        plan.price
-      );
-
-      if (result.success) {
-        // Update local state
-        setSubscription(result.subscription);
-        setAccountBalance(result.new_balance);
-
-        alert(
-          `✅ Subscription ${plan.id === 'free' ? 'Downgraded' : 'Upgraded'}!\n\n` +
-          `You are now on the ${plan.name}.\n` +
-          `${plan.price > 0 ? `Amount charged: $${result.amount_charged.toFixed(2)}\n` : ''}` +
-          `Your new balance: $${result.new_balance.toFixed(2)}`
-        );
-      } else {
-        if (result.error === 'insufficient_funds') {
-          alert(
-            '❌ Insufficient Funds\n\n' +
-            `Required: $${result.required_amount.toFixed(2)}\n` +
-            `Your balance: $${result.current_balance.toFixed(2)}\n\n` +
-            'Please top up your account and try again.'
-          );
-        } else {
-          alert('❌ Upgrade Failed\n\n' + (result.message || 'Unknown error occurred'));
-        }
-      }
-    } catch (error) {
-      console.error('Error upgrading subscription:', error);
-      alert('❌ Failed to upgrade subscription. Please try again.');
-    } finally {
-      setUpgrading(false);
-    }
-  };
 
   const getPlanIcon = (planId) => {
     switch (planId) {
