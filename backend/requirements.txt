@@ -11,6 +11,7 @@ cryptography==41.0.7  # For webhook signature verification
 certifi==2023.11.17
 requests-toolbelt==1.0.0
 python-multipart==0.0.6
+email-validator==2.1.0  # Email validation for Pydantic EmailStr
 
 # Supabase client with compatible httpx version
 supabase==2.1.0
