@@ -1100,8 +1100,8 @@ const Settings = () => {
 
             {/* Account Balance & Crypto Payments Section */}
             <div className="border-2 border-[#0097B2] bg-gradient-to-r from-[#0097B2]/5 to-[#0097B2]/10 p-6 rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-4 sm:space-y-0">
+                <div className="flex-1">
                   <h3 className="text-lg font-medium text-[#0097B2] mb-2">
                     Account Balance
                   </h3>
@@ -1128,10 +1128,10 @@ const Settings = () => {
                     </div>
                   </div>
                 </div>
-                <div>
+                <div className="flex-shrink-0 w-full sm:w-auto">
                   <Button
                     onClick={() => setShowCryptoPayments(true)}
-                    className="bg-[#0097B2] hover:bg-[#007A93] text-white px-6 py-3"
+                    className="bg-[#0097B2] hover:bg-[#007A93] text-white px-6 py-3 w-full sm:w-auto"
                   >
                     <Wallet className="w-5 h-5 mr-2" />
                     Manage Crypto
