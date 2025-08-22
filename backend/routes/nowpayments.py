@@ -397,15 +397,37 @@ async def create_subscription_plan(request: SubscriptionPlanRequest):
         raise HTTPException(status_code=500, detail=f"Failed to create subscription plan: {str(e)}")
 
 @router.post("/nowpayments/subscription")
-async def create_subscription(request: SubscriptionRequest, user_id: str = "demo_user"):
+async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e9717-f85d-4726-81e9-f260394ead58"):
     """Create an email-based subscription for a user"""
     try:
         import sys
         sys.path.append('/app/backend')
         from supabase_client import supabase_admin as supabase
         
+        # For demo purposes, use Super Admin UUID
+        actual_user_id = user_id if user_id != "demo_user" else "cd0e9717-f85d-4726-81e9-f260394ead58"
+        
+        # Map our plan IDs to actual NowPayments plan IDs
+        # For now, we'll create a plan dynamically since we don't have pre-created plans
+        # First, create the subscription plan if it doesn't exist
+        plan_data = {
+            "title": "Plus Plan",
+            "interval_day": 30,
+            "amount": 9.99,
+            "currency": "usd"
+        }
+        
+        plan_response = await make_nowpayments_request("POST", "/subscriptions/plans", plan_data)
+        
+        if plan_response.status_code not in [200, 201]:
+            # If plan creation fails, try with existing plan ID (for demo)
+            nowpayments_plan_id = 1  # Default fallback
+        else:
+            plan_result = plan_response.json().get("result", plan_response.json())
+            nowpayments_plan_id = int(plan_result.get("id", 1))
+        
         subscription_data = {
-            "subscription_plan_id": int(request.plan_id),
+            "subscription_plan_id": nowpayments_plan_id,
             "email": request.user_email
         }
         
