@@ -362,7 +362,8 @@ const NowPayments = () => {
               <p className="text-center text-gray-500 py-4">No transactions found</p>
             ) : (
               <div className="space-y-3">
-                {transactions.map((tx) => (
+                {/* Display limited or all transactions based on state */}
+                {(showAllTransactions ? transactions : transactions.slice(0, 5)).map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
@@ -383,6 +384,30 @@ const NowPayments = () => {
                     </div>
                   </div>
                 ))}
+                
+                {/* Show All / Show Less Button */}
+                {transactions.length > 5 && (
+                  <div className="flex justify-center pt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAllTransactions(!showAllTransactions)}
+                      className="text-cyan-600 hover:text-cyan-700 border-cyan-600 hover:border-cyan-700"
+                    >
+                      {showAllTransactions ? (
+                        <>
+                          <ArrowUpCircle className="h-4 w-4 mr-2" />
+                          Show Less
+                        </>
+                      ) : (
+                        <>
+                          <ArrowDownCircle className="h-4 w-4 mr-2" />
+                          Show All ({transactions.length})
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
