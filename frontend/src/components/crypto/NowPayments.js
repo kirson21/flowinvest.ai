@@ -99,14 +99,38 @@ const NowPayments = () => {
     }
   }, [user]);
 
-  // Update price estimate when amount or currency changes
+  // Update price estimate and minimum amount when currency changes
   useEffect(() => {
-    if (paymentAmount && parseFloat(paymentAmount) > 0) {
-      const timer = setTimeout(() => {
-        updatePriceEstimate();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
+    const updateEstimates = async () => {
+      const network = currencyNetworks[selectedCurrency]?.find(n => n.code === selectedNetwork);
+      if (!network) return;
+
+      try {
+        // Get minimum amount for the selected currency
+        const minResult = await nowPaymentsService.getMinimumAmount('usd', network.nowpayments_code);
+        if (minResult.success) {
+          setMinimumAmount(minResult.min_amount);
+        }
+      } catch (error) {
+        console.error('Failed to get minimum amount:', error);
+      }
+
+      // Get price estimate if amount is set
+      if (paymentAmount && parseFloat(paymentAmount) > 0) {
+        try {
+          const estimate = await nowPaymentsService.getEstimate(parseFloat(paymentAmount), 'usd', network.nowpayments_code);
+          if (estimate.success) {
+            setPriceEstimate(estimate.estimate);
+          }
+        } catch (error) {
+          console.error('Failed to get price estimate:', error);
+          setPriceEstimate(null);
+        }
+      }
+    };
+
+    const timer = setTimeout(updateEstimates, 300);
+    return () => clearTimeout(timer);
   }, [paymentAmount, selectedCurrency, selectedNetwork]);
 
   const checkServiceHealth = async () => {
