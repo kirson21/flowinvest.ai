@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.nowpayments_invoices (
         'waiting', 'confirming', 'confirmed', 'sending', 
         'partially_paid', 'finished', 'failed', 'expired'
     )),
-    amount DECIMAL(20, 2) NOT NULL CHECK (amount > 0),
+    amount DECIMAL(20, 2) NOT NULL CHECK (amount > 0), -- Invoices should have positive amounts
     currency VARCHAR(10) NOT NULL DEFAULT 'usd',
     pay_currency VARCHAR(50), -- Crypto currency used for payment
     actually_paid DECIMAL(20, 8) DEFAULT 0,
