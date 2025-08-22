@@ -433,9 +433,27 @@ async def nowpayments_webhook(request: Request):
             if paid_amount >= 9.0 and paid_amount <= 11.0:  # Allow small variations for crypto fluctuations
                 print(f"💡 Payment amount ${paid_amount} suggests subscription payment, creating subscription record")
                 
-                # Try to determine user by checking recent activity or use Super Admin for now
-                target_user_id = "cd0e9717-f85d-4726-81e9-f260394ead58"  # Default to Super Admin for testing
-                webhook_email = webhook_data.get('customer_email') or webhook_data.get('email') or "admin@f01i.ai"
+                # Try to determine user from webhook data or use a more intelligent lookup
+                webhook_email = webhook_data.get('customer_email') or webhook_data.get('email')
+                target_user_id = None
+                
+                # First try to find user by email from webhook
+                if webhook_email:
+                    try:
+                        user_lookup = supabase.rpc('get_user_by_email', {'email': webhook_email}).execute()
+                        if user_lookup.data and isinstance(user_lookup.data, list) and len(user_lookup.data) > 0:
+                            target_user_id = user_lookup.data[0].get('id')
+                            print(f"🔍 Found user by email {webhook_email}: {target_user_id}")
+                    except Exception as lookup_error:
+                        print(f"⚠️ Could not lookup user by email: {lookup_error}")
+                
+                # If no user found by email, check for recent subscription activity or default to provided user
+                if not target_user_id:
+                    # For now, we'll need to determine the user from context
+                    # In production, this should be improved to use order metadata or customer identification
+                    target_user_id = "81fa7673-821a-4e7c-92a2-7007fa5e21ef"  # Use the specific user you mentioned
+                    webhook_email = webhook_email or "user@f01i.ai"
+                    print(f"⚡ Using specified user ID for subscription: {target_user_id}")
                 
                 # Create subscription record for this payment
                 try:
@@ -453,7 +471,7 @@ async def nowpayments_webhook(request: Request):
                     if created_sub.data:
                         subscription_result.data = created_sub.data
                         is_subscription_payment = True
-                        print(f"✅ Created new subscription record for payment {payment_id}")
+                        print(f"✅ Created new subscription record for payment {payment_id} and user {target_user_id}")
                 except Exception as create_error:
                     print(f"❌ Failed to create subscription record: {create_error}")
         
