@@ -379,6 +379,8 @@ async def nowpayments_webhook(request: Request):
         if not payment_id:
             raise HTTPException(status_code=400, detail="Missing payment_id in webhook")
         
+        print(f"🔔 Processing webhook for payment_id: {payment_id}, status: {payment_status}, order_id: {order_id}")
+        
         # Update payment record in database
         update_data = {
             'payment_status': payment_status,
@@ -391,54 +393,136 @@ async def nowpayments_webhook(request: Request):
         if payment_status == 'finished':
             update_data['completed_at'] = 'now()'
         
-        # Update invoice record
-        result = supabase.table('nowpayments_invoices')\
-            .update(update_data)\
-            .eq('invoice_id', str(payment_id))\
+        # Check if this is a subscription payment by looking for a subscription record
+        subscription_result = supabase.table('nowpayments_subscriptions')\
+            .select('*')\
+            .eq('subscription_id', str(payment_id))\
             .execute()
         
-        if result.data:
-            invoice = result.data[0]
-            user_id = invoice['user_id']
-            amount = float(webhook_data.get('actually_paid', 0))
+        is_subscription_payment = bool(subscription_result.data)
+        
+        print(f"🔍 Is subscription payment: {is_subscription_payment}")
+        
+        if is_subscription_payment and payment_status == 'finished':
+            # Handle subscription payment completion
+            subscription_record = subscription_result.data[0]
+            user_id = subscription_record['user_id']
+            plan_id = subscription_record['plan_id']
             
-            # If payment is completed, credit user balance
-            if payment_status == 'finished' and amount > 0:
-                # Create balance transaction
-                balance_transaction = {
-                    'user_id': user_id,
-                    'transaction_type': 'topup',
-                    'amount': amount,
-                    'platform_fee': 0.0,
-                    'net_amount': amount,
-                    'status': 'completed',
-                    'description': f"Crypto payment: ${amount} via NowPayments (Order: {order_id})"
-                }
-                
-                balance_result = supabase.table('transactions').insert(balance_transaction).execute()
-                
-                # Update user balance
-                supabase.rpc('update_user_balance', {
-                    'user_uuid': user_id,
-                    'amount_change': amount
+            print(f"💳 Processing subscription upgrade for user {user_id} to plan {plan_id}")
+            
+            # Update subscription status to PAID
+            supabase.table('nowpayments_subscriptions')\
+                .update({
+                    'status': 'PAID',
+                    'is_active': True,
+                    'updated_at': 'now()'
+                })\
+                .eq('subscription_id', str(payment_id))\
+                .execute()
+            
+            # Determine plan type and price from plan_id
+            if plan_id == 'plan_plus':
+                plan_type = 'plus'
+                plan_price = 10.00  # Plus plan price
+            else:
+                plan_type = 'free'  # Default fallback
+                plan_price = 0.00
+            
+            # Upgrade user subscription using the existing upgrade function
+            try:
+                upgrade_response = supabase.rpc('upgrade_subscription', {
+                    'p_user_id': user_id,
+                    'p_plan_type': plan_type,
+                    'p_price': plan_price
                 }).execute()
                 
-                # Create success notification
+                print(f"📈 Subscription upgrade response: {upgrade_response.data}")
+                
+                if upgrade_response.data and upgrade_response.data.get('success'):
+                    # Create subscription upgrade notification
+                    notification = {
+                        'user_id': user_id,
+                        'title': f'🎉 Subscription Upgraded to {plan_type.title()}!',
+                        'message': f'Your crypto payment has been confirmed and your subscription has been upgraded to {plan_type.title()} Plan. Enjoy your new features including 3 AI bots, 5 manual bots, and up to 10 marketplace products!',
+                        'type': 'success',
+                        'is_read': False
+                    }
+                    
+                    supabase.table('user_notifications').insert(notification).execute()
+                    
+                    print(f"✅ Subscription upgrade completed successfully for user {user_id}")
+                else:
+                    print(f"❌ Subscription upgrade failed for user {user_id}: {upgrade_response.data}")
+                    
+            except Exception as upgrade_error:
+                print(f"❌ Error upgrading subscription: {upgrade_error}")
+                
+                # Still create a notification about payment received
                 notification = {
                     'user_id': user_id,
-                    'title': 'Payment Successful! 🎉',
-                    'message': f'Your payment of ${amount:.2f} has been confirmed and added to your balance.',
-                    'type': 'success',
+                    'title': 'Payment Received - Processing Upgrade',
+                    'message': f'Your crypto payment has been confirmed. We are processing your subscription upgrade. If you experience any issues, please contact support.',
+                    'type': 'info',
                     'is_read': False
                 }
                 
                 supabase.table('user_notifications').insert(notification).execute()
         
+        else:
+            # Handle regular invoice payment (balance top-up)
+            # Update invoice record
+            result = supabase.table('nowpayments_invoices')\
+                .update(update_data)\
+                .eq('invoice_id', str(payment_id))\
+                .execute()
+            
+            if result.data:
+                invoice = result.data[0]
+                user_id = invoice['user_id']
+                amount = float(webhook_data.get('actually_paid', 0))
+                
+                print(f"💰 Processing balance top-up for user {user_id}, amount: ${amount}")
+                
+                # If payment is completed, credit user balance
+                if payment_status == 'finished' and amount > 0:
+                    # Create balance transaction
+                    balance_transaction = {
+                        'user_id': user_id,
+                        'transaction_type': 'topup',
+                        'amount': amount,
+                        'platform_fee': 0.0,
+                        'net_amount': amount,
+                        'status': 'completed',
+                        'description': f"Crypto payment: ${amount} via NowPayments (Order: {order_id})"
+                    }
+                    
+                    balance_result = supabase.table('transactions').insert(balance_transaction).execute()
+                    
+                    # Update user balance
+                    supabase.rpc('update_user_balance', {
+                        'user_uuid': user_id,
+                        'amount_change': amount
+                    }).execute()
+                    
+                    # Create success notification
+                    notification = {
+                        'user_id': user_id,
+                        'title': 'Payment Successful! 🎉',
+                        'message': f'Your payment of ${amount:.2f} has been confirmed and added to your balance.',
+                        'type': 'success',
+                        'is_read': False
+                    }
+                    
+                    supabase.table('user_notifications').insert(notification).execute()
+                    
+                    print(f"✅ Balance top-up completed for user {user_id}")
+        
         return {"success": True, "message": "Webhook processed successfully"}
         
     except Exception as e:
         # Log error but return success to avoid webhook retries
-        print(f"Webhook processing error: {str(e)}")
+        print(f"❌ Webhook processing error: {str(e)}")
         return {"success": False, "error": str(e)}
 
 # Subscription Management Endpoints
