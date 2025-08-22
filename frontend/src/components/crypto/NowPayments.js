@@ -521,7 +521,7 @@ const NowPayments = () => {
                 />
               </div>
 
-              <div className="pt-4">
+              <div className="pt-4 pb-6">
                 <Button
                   onClick={handleCreatePayment}
                   disabled={loading || !paymentAmount}
