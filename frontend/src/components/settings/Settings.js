@@ -1120,11 +1120,11 @@ const Settings = () => {
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
                       <div className="w-2 h-2 bg-[#0097B2] rounded-full"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">USDT (ERC20/TRC20)</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Multiple Cryptocurrencies</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <div className="w-2 h-2 bg-[#0097B2] rounded-full"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">USDC (ERC20)</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Secure Gateway</span>
                     </div>
                   </div>
                 </div>
