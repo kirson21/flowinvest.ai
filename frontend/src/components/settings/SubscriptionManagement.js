@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Crown, Zap, X } from 'lucide-react';
 import { supabaseDataService } from '../../services/supabaseDataService';
+import NowPayments from '../crypto/NowPayments';
 
 const SubscriptionManagement = ({ user, onClose }) => {
   const [subscription, setSubscription] = useState(null);
@@ -8,6 +9,7 @@ const SubscriptionManagement = ({ user, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState(false);
   const [accountBalance, setAccountBalance] = useState(0);
+  const [showCryptoSubscriptions, setShowCryptoSubscriptions] = useState(false);
 
   useEffect(() => {
     loadSubscriptionData();
@@ -47,6 +49,10 @@ const SubscriptionManagement = ({ user, onClose }) => {
       alert('This plan is coming soon! Stay tuned for updates.');
       return;
     }
+
+    // Redirect to crypto subscriptions for upgrades
+    setShowCryptoSubscriptions(true);
+  };
 
     if (plan.id === subscription?.plan_type) {
       alert('You are already on this plan.');
