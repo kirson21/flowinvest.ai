@@ -1099,9 +1099,9 @@ const Settings = () => {
             </div>
 
             {/* Account Balance & Crypto Payments Section */}
-            <div className="border-2 border-[#0097B2] bg-gradient-to-r from-[#0097B2]/5 to-[#0097B2]/10 p-6 rounded-lg">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-4 sm:space-y-0">
-                <div className="flex-1">
+            <div className="border-2 border-[#0097B2] bg-gradient-to-r from-[#0097B2]/5 to-[#0097B2]/10 p-4 sm:p-6 rounded-lg">
+              <div className="space-y-4">
+                <div>
                   <h3 className="text-lg font-medium text-[#0097B2] mb-2">
                     Account Balance
                   </h3>
@@ -1117,7 +1117,7 @@ const Settings = () => {
                   <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
                     Deposit and withdraw using USDT & USDC cryptocurrencies
                   </p>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <div className="flex items-center gap-1">
                       <div className="w-2 h-2 bg-[#0097B2] rounded-full"></div>
                       <span className="text-xs text-gray-600 dark:text-gray-400">Multiple Cryptocurrencies</span>
@@ -1128,10 +1128,10 @@ const Settings = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex-shrink-0 w-full sm:w-auto">
+                <div className="w-full">
                   <Button
                     onClick={() => setShowCryptoPayments(true)}
-                    className="bg-[#0097B2] hover:bg-[#007A93] text-white px-6 py-3 w-full sm:w-auto"
+                    className="bg-[#0097B2] hover:bg-[#007A93] text-white px-6 py-3 w-full"
                   >
                     <Wallet className="w-5 h-5 mr-2" />
                     Manage Crypto
