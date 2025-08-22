@@ -23,7 +23,7 @@ NOWPAYMENTS_PUBLIC_KEY = os.getenv("NOWPAYMENTS_PUBLIC_KEY", "f56ecfa5-09db-45d0
 NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "")
 
 # Base URL for return URLs (will be configured in environment)
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://your-app.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://f01i-crypto.preview.emergentagent.com")
 
 # Pydantic models
 class InvoiceRequest(BaseModel):
