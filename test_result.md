@@ -491,11 +491,41 @@ backend:
           agent: "main"
           comment: "SYNCHRONIZATION BUG FIXED: Implemented prebuilt_bots_customized flag in localStorage to track super admin changes. Regular users and super admin now see the same pre-built bots. Added proper synchronization in bot movement functions (handleMoveToPreBuilt, handleMoveToMyBots) with localStorage persistence. All users now see consistent pre-built bots list managed by super admin."
 
-  - task: "Implement Super Admin Role System"
+  - task: "Fix Mobile UI Layout for Manage Crypto Button"
     implemented: true
-    working: true
-    file: "/app/frontend/src/components/bots/TradingBots.js, /app/frontend/src/components/portfolios/Portfolios.js, /app/frontend/src/contexts/AuthContext.js"
+    working: "testing"
+    file: "/app/frontend/src/components/settings/Settings.js"
     stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "MOBILE UI LAYOUT FIXES IMPLEMENTED: ✅ Fixed 'Manage Crypto' button layout issue on mobile by replacing problematic flex-row/justify-between with proper stacked layout, ✅ Changed from problematic responsive flexbox to simple vertical stack with proper spacing, ✅ Button now displays full width on mobile eliminating the 'out of grid' issue, ✅ Added proper responsive padding (p-4 sm:p-6) and spacing, ✅ Made feature bullets wrap properly with flex-wrap for better mobile display. Mobile layout now properly contains the button within the grid and provides better user experience."
+
+  - task: "Add Subscription Expiry Date Display"
+    implemented: true  
+    working: "testing"
+    file: "/app/frontend/src/components/common/SubscriptionProfileBadge.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "SUBSCRIPTION EXPIRY DATE FEATURE IMPLEMENTED: ✅ Enhanced SubscriptionProfileBadge to show subscription expiry dates for paid users, ✅ Added formatExpiryDate function with proper date formatting and expiry detection, ✅ Shows 'Until [date]' for active subscriptions and 'Expired [date]' for expired ones, ✅ Added proper responsive layout (flex-col on mobile, flex-row on desktop), ✅ Only displays expiry info for paid plans (not free users), ✅ Added proper styling with red colors for expired subscriptions and gray for active ones. Users can now see when their subscription expires next to their plan badge."
+
+  - task: "Improve Mobile Subscriptions Section Spacing"
+    implemented: true
+    working: "testing" 
+    file: "/app/frontend/src/components/settings/SubscriptionManagement.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "MOBILE SUBSCRIPTIONS SPACING ENHANCED: ✅ Added extra bottom spacing for mobile devices (mb-20 on mobile, mb-16 on desktop), ✅ Enhanced footer padding (pb-12 on mobile, pb-8 on desktop) for better content separation, ✅ Improved plans grid bottom padding for mobile viewing, ✅ Added responsive padding adjustments throughout the modal. Mobile users now have proper bottom spacing preventing content cutoff and improving scroll experience."
     priority: "critical"
     needs_retesting: false
     status_history:
