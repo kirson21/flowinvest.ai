@@ -471,10 +471,10 @@ const NowPayments = () => {
                 <Label>Amount (USD)</Label>
                 <Input
                   type="number"
-                  placeholder="20.00"
+                  placeholder="25.00"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
-                  min="5"
+                  min="20"
                   max="10000"
                   step="0.01"
                 />
