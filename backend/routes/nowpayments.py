@@ -18,8 +18,9 @@ router = APIRouter()
 
 # NowPayments API Configuration
 NOWPAYMENTS_API_URL = "https://api.nowpayments.io/v1"
-NOWPAYMENTS_API_KEY = "DHGG9K5-VAQ4QFP-NDHHDQ7-M4ZQCHM"
-NOWPAYMENTS_PUBLIC_KEY = "f56ecfa5-09db-45d0-95bd-599043c84a5c"
+NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY", "DHGG9K5-VAQ4QFP-NDHHDQ7-M4ZQCHM")
+NOWPAYMENTS_PUBLIC_KEY = os.getenv("NOWPAYMENTS_PUBLIC_KEY", "f56ecfa5-09db-45d0-95bd-599043c84a5c")
+NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "")
 
 # Base URL for return URLs (will be configured in environment)
 BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://your-app.com")
