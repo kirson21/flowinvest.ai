@@ -561,11 +561,11 @@ async def reset_all_balances(admin_key: str = "admin123"):
         # First, get all user accounts to see how many exist
         all_accounts = supabase.table('user_accounts').select('user_id, balance').execute()
         
-        # Reset all balances to 0
+        # Reset all balances to 0 - update all existing records
         reset_result = supabase.table('user_accounts')\
-            .update({'balance': 0.0, 'updated_at': 'now()'})\
-            .gt('balance', -999999)\
-            .execute()  # Update all accounts regardless of current balance
+            .update({'balance': 0.0})\
+            .neq('user_id', '')\
+            .execute()  # Update all accounts with non-empty user_id
         
         # Count affected records
         affected_count = len(reset_result.data) if reset_result.data else 0
