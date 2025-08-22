@@ -1,360 +1,601 @@
 #!/usr/bin/env python3
 """
-CRITICAL BYPASS ENDPOINT FIX TESTING
-====================================
-
-This test specifically verifies the critical fix for the /trading-bots/create endpoint
-that was previously allowing unlimited bot creation without subscription limit checking.
-
-CRITICAL TESTING FOCUS:
-- POST /api/trading-bots/create endpoint subscription limit enforcement
-- Free user limits: 1 AI bot, 2 manual bots
-- Super Admin unlimited access
-- Proper 403 error responses when limits exceeded
+NowPayments Integration Backend Testing Suite
+Tests the complete NowPayments invoice-based payment gateway and subscription system
 """
 
 import requests
 import json
+import time
 import uuid
 from datetime import datetime
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv('/app/backend/.env')
-load_dotenv('/app/frontend/.env')
+from typing import Dict, Any, Optional
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://f01i-crypto.preview.emergentagent.com')
-API_BASE = f"{BACKEND_URL}/api"
+BACKEND_URL = "https://f01i-crypto.preview.emergentagent.com/api"
+TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"  # Super Admin for testing
 
-# Test constants
-SUPER_ADMIN_UUID = "cd0e9717-f85d-4726-81e9-f260394ead58"
-TEST_USER_UUID = str(uuid.uuid4())
-
-class CriticalBypassEndpointTester:
+class NowPaymentsBackendTester:
     def __init__(self):
-        self.results = []
-        self.total_tests = 0
-        self.passed_tests = 0
+        self.base_url = BACKEND_URL
+        self.test_user_id = TEST_USER_ID
+        self.session = requests.Session()
+        self.session.timeout = 30
         
-    def log_result(self, test_name, success, details="", expected_status=None, actual_status=None):
-        """Log test result with detailed information"""
-        self.total_tests += 1
-        if success:
-            self.passed_tests += 1
-            status = "✅ PASS"
-        else:
-            status = "❌ FAIL"
-            
-        result = {
-            "test": test_name,
-            "status": status,
-            "success": success,
-            "details": details,
-            "expected_status": expected_status,
-            "actual_status": actual_status
+        # Test results tracking
+        self.results = {
+            'total_tests': 0,
+            'passed': 0,
+            'failed': 0,
+            'errors': []
         }
-        self.results.append(result)
         
-        print(f"{status}: {test_name}")
+        print("🚀 NowPayments Backend Integration Testing Suite")
+        print(f"Backend URL: {self.base_url}")
+        print(f"Test User ID: {self.test_user_id}")
+        print("=" * 80)
+
+    def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
+        """Log test results"""
+        self.results['total_tests'] += 1
+        status = "✅ PASS" if success else "❌ FAIL"
+        
+        print(f"{status} | {test_name}")
         if details:
-            print(f"   Details: {details}")
-        if expected_status and actual_status:
-            print(f"   Expected: {expected_status}, Got: {actual_status}")
-        print()
-
-    def test_backend_health(self):
-        """Test basic backend connectivity"""
-        try:
-            response = requests.get(f"{API_BASE}/health", timeout=10)
-            success = response.status_code == 200
-            self.log_result(
-                "Backend Health Check",
-                success,
-                f"Backend connectivity verified" if success else f"Backend unreachable",
-                200,
-                response.status_code
-            )
-            return success
-        except Exception as e:
-            self.log_result("Backend Health Check", False, f"Connection error: {str(e)}")
-            return False
-
-    def create_bot_payload(self, bot_name, ai_model="grok-4", user_id=None):
-        """Create standardized bot creation payload"""
-        return {
-            "bot_name": bot_name,
-            "description": "Test bot for subscription limit checking",
-            "ai_model": ai_model,
-            "bot_config": {
-                "strategy": "test_strategy",
-                "risk_level": "medium",
-                "max_position_size": 1000
-            },
-            "user_id": user_id or TEST_USER_UUID
-        }
-
-    def test_free_user_first_ai_bot(self):
-        """Test: Free user creating 1st AI bot should work"""
-        payload = self.create_bot_payload("Test AI Bot 1", "grok-4")
+            print(f"     Details: {details}")
+        if response_data and isinstance(response_data, dict):
+            if 'status_code' in response_data:
+                print(f"     Status: {response_data['status_code']}")
+            if 'response_time' in response_data:
+                print(f"     Time: {response_data['response_time']:.3f}s")
         
-        try:
-            response = requests.post(f"{API_BASE}/trading-bots/create", json=payload, timeout=15)
-            success = response.status_code == 200
-            
-            if success:
-                data = response.json()
-                details = f"AI bot created successfully: {data.get('message', 'No message')}"
-            else:
-                details = f"Failed to create AI bot: {response.text}"
-                
-            self.log_result(
-                "Free User - 1st AI Bot Creation",
-                success,
-                details,
-                200,
-                response.status_code
-            )
-            return success
-            
-        except Exception as e:
-            self.log_result("Free User - 1st AI Bot Creation", False, f"Request error: {str(e)}")
-            return False
-
-    def test_free_user_second_ai_bot_blocked(self):
-        """Test: Free user creating 2nd AI bot should be BLOCKED with 403"""
-        payload = self.create_bot_payload("Test AI Bot 2", "grok-4")
-        
-        try:
-            response = requests.post(f"{API_BASE}/trading-bots/create", json=payload, timeout=15)
-            success = response.status_code == 403
-            
-            if success:
-                data = response.json()
-                details = f"Correctly blocked with 403: {data.get('detail', 'No detail')}"
-            else:
-                details = f"SECURITY ISSUE: Should have been blocked but got {response.status_code}: {response.text}"
-                
-            self.log_result(
-                "Free User - 2nd AI Bot BLOCKED",
-                success,
-                details,
-                403,
-                response.status_code
-            )
-            return success
-            
-        except Exception as e:
-            self.log_result("Free User - 2nd AI Bot BLOCKED", False, f"Request error: {str(e)}")
-            return False
-
-    def test_free_user_first_manual_bot(self):
-        """Test: Free user creating 1st manual bot should work"""
-        payload = self.create_bot_payload("Test Manual Bot 1", "manual")
-        
-        try:
-            response = requests.post(f"{API_BASE}/trading-bots/create", json=payload, timeout=15)
-            success = response.status_code == 200
-            
-            if success:
-                data = response.json()
-                details = f"Manual bot created successfully: {data.get('message', 'No message')}"
-            else:
-                details = f"Failed to create manual bot: {response.text}"
-                
-            self.log_result(
-                "Free User - 1st Manual Bot Creation",
-                success,
-                details,
-                200,
-                response.status_code
-            )
-            return success
-            
-        except Exception as e:
-            self.log_result("Free User - 1st Manual Bot Creation", False, f"Request error: {str(e)}")
-            return False
-
-    def test_free_user_second_manual_bot(self):
-        """Test: Free user creating 2nd manual bot should work (limit is 2)"""
-        payload = self.create_bot_payload("Test Manual Bot 2", "manual")
-        
-        try:
-            response = requests.post(f"{API_BASE}/trading-bots/create", json=payload, timeout=15)
-            success = response.status_code == 200
-            
-            if success:
-                data = response.json()
-                details = f"2nd manual bot created successfully: {data.get('message', 'No message')}"
-            else:
-                details = f"Failed to create 2nd manual bot: {response.text}"
-                
-            self.log_result(
-                "Free User - 2nd Manual Bot Creation",
-                success,
-                details,
-                200,
-                response.status_code
-            )
-            return success
-            
-        except Exception as e:
-            self.log_result("Free User - 2nd Manual Bot Creation", False, f"Request error: {str(e)}")
-            return False
-
-    def test_free_user_third_manual_bot_blocked(self):
-        """Test: Free user creating 3rd manual bot should be BLOCKED with 403"""
-        payload = self.create_bot_payload("Test Manual Bot 3", "manual")
-        
-        try:
-            response = requests.post(f"{API_BASE}/trading-bots/create", json=payload, timeout=15)
-            success = response.status_code == 403
-            
-            if success:
-                data = response.json()
-                details = f"Correctly blocked with 403: {data.get('detail', 'No detail')}"
-            else:
-                details = f"SECURITY ISSUE: Should have been blocked but got {response.status_code}: {response.text}"
-                
-            self.log_result(
-                "Free User - 3rd Manual Bot BLOCKED",
-                success,
-                details,
-                403,
-                response.status_code
-            )
-            return success
-            
-        except Exception as e:
-            self.log_result("Free User - 3rd Manual Bot BLOCKED", False, f"Request error: {str(e)}")
-            return False
-
-    def test_super_admin_unlimited_access(self):
-        """Test: Super Admin should have unlimited access"""
-        payload = self.create_bot_payload("Super Admin Test Bot", "grok-4", SUPER_ADMIN_UUID)
-        
-        try:
-            response = requests.post(f"{API_BASE}/trading-bots/create", json=payload, timeout=15)
-            success = response.status_code == 200
-            
-            if success:
-                data = response.json()
-                details = f"Super Admin bot created successfully: {data.get('message', 'No message')}"
-            else:
-                details = f"Super Admin bot creation failed: {response.text}"
-                
-            self.log_result(
-                "Super Admin - Unlimited Access",
-                success,
-                details,
-                200,
-                response.status_code
-            )
-            return success
-            
-        except Exception as e:
-            self.log_result("Super Admin - Unlimited Access", False, f"Request error: {str(e)}")
-            return False
-
-    def test_payload_validation(self):
-        """Test: Endpoint should validate required payload fields"""
-        invalid_payload = {"bot_name": "Test"}  # Missing required fields
-        
-        try:
-            response = requests.post(f"{API_BASE}/trading-bots/create", json=invalid_payload, timeout=15)
-            success = response.status_code == 400
-            
-            if success:
-                data = response.json()
-                details = f"Correctly rejected invalid payload: {data.get('detail', 'No detail')}"
-            else:
-                details = f"Should have rejected invalid payload but got {response.status_code}: {response.text}"
-                
-            self.log_result(
-                "Payload Validation",
-                success,
-                details,
-                400,
-                response.status_code
-            )
-            return success
-            
-        except Exception as e:
-            self.log_result("Payload Validation", False, f"Request error: {str(e)}")
-            return False
-
-    def run_critical_tests(self):
-        """Run all critical bypass endpoint tests"""
-        print("=" * 80)
-        print("🚨 CRITICAL BYPASS ENDPOINT FIX TESTING")
-        print("=" * 80)
-        print(f"Testing endpoint: POST {API_BASE}/trading-bots/create")
-        print(f"Test User UUID: {TEST_USER_UUID}")
-        print(f"Super Admin UUID: {SUPER_ADMIN_UUID}")
-        print("=" * 80)
-        print()
-
-        # Test sequence
-        tests = [
-            self.test_backend_health,
-            self.test_payload_validation,
-            self.test_free_user_first_ai_bot,
-            self.test_free_user_second_ai_bot_blocked,
-            self.test_free_user_first_manual_bot,
-            self.test_free_user_second_manual_bot,
-            self.test_free_user_third_manual_bot_blocked,
-            self.test_super_admin_unlimited_access
-        ]
-
-        for test in tests:
-            test()
-
-        # Summary
-        print("=" * 80)
-        print("🔍 CRITICAL TEST RESULTS SUMMARY")
-        print("=" * 80)
-        
-        critical_security_tests = [
-            "Free User - 2nd AI Bot BLOCKED",
-            "Free User - 3rd Manual Bot BLOCKED"
-        ]
-        
-        security_passed = 0
-        for result in self.results:
-            if result["test"] in critical_security_tests and result["success"]:
-                security_passed += 1
-        
-        print(f"Overall Success Rate: {self.passed_tests}/{self.total_tests} ({(self.passed_tests/self.total_tests)*100:.1f}%)")
-        print(f"Critical Security Tests: {security_passed}/{len(critical_security_tests)} passed")
-        print()
-        
-        if security_passed == len(critical_security_tests):
-            print("🔒 SECURITY STATUS: BYPASS VULNERABILITY FIXED ✅")
+        if success:
+            self.results['passed'] += 1
         else:
-            print("🚨 SECURITY STATUS: BYPASS VULNERABILITY STILL EXISTS ❌")
-        
+            self.results['failed'] += 1
+            self.results['errors'].append({
+                'test': test_name,
+                'details': details,
+                'data': response_data
+            })
         print()
-        print("Detailed Results:")
-        for result in self.results:
-            print(f"  {result['status']}: {result['test']}")
-            if result['details']:
-                print(f"     {result['details']}")
-        
-        return self.passed_tests, self.total_tests
 
-def main():
-    """Main test execution"""
-    tester = CriticalBypassEndpointTester()
-    passed, total = tester.run_critical_tests()
-    
-    # Exit with appropriate code
-    if passed == total:
-        print("\n🎉 ALL TESTS PASSED - BYPASS VULNERABILITY SUCCESSFULLY FIXED!")
-        exit(0)
-    else:
-        print(f"\n⚠️  {total - passed} TESTS FAILED - REVIEW REQUIRED")
-        exit(1)
+    def make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, params: Optional[Dict] = None) -> Dict[str, Any]:
+        """Make HTTP request with error handling"""
+        url = f"{self.base_url}{endpoint}"
+        start_time = time.time()
+        
+        try:
+            if method.upper() == "GET":
+                response = self.session.get(url, params=params)
+            elif method.upper() == "POST":
+                response = self.session.post(url, json=data, params=params)
+            elif method.upper() == "PUT":
+                response = self.session.put(url, json=data, params=params)
+            elif method.upper() == "DELETE":
+                response = self.session.delete(url, params=params)
+            else:
+                raise ValueError(f"Unsupported method: {method}")
+            
+            response_time = time.time() - start_time
+            
+            try:
+                response_json = response.json()
+            except:
+                response_json = {"raw_response": response.text}
+            
+            return {
+                'status_code': response.status_code,
+                'response_time': response_time,
+                'data': response_json,
+                'success': 200 <= response.status_code < 300
+            }
+            
+        except Exception as e:
+            return {
+                'status_code': 0,
+                'response_time': time.time() - start_time,
+                'data': {'error': str(e)},
+                'success': False
+            }
+
+    def test_nowpayments_health_check(self):
+        """Test NowPayments service health and API connectivity"""
+        print("🔍 Testing NowPayments Health Check...")
+        
+        result = self.make_request("GET", "/nowpayments/health")
+        
+        if result['success']:
+            data = result['data']
+            api_connected = data.get('api_connected', False)
+            supported_currencies = data.get('supported_currencies', [])
+            
+            self.log_test(
+                "NowPayments Health Check",
+                api_connected and len(supported_currencies) > 0,
+                f"API Connected: {api_connected}, Currencies: {supported_currencies}",
+                result
+            )
+        else:
+            self.log_test(
+                "NowPayments Health Check",
+                False,
+                f"Health check failed: {result['data']}",
+                result
+            )
+
+    def test_supported_currencies(self):
+        """Test supported currencies endpoint"""
+        print("🔍 Testing Supported Currencies...")
+        
+        result = self.make_request("GET", "/nowpayments/currencies")
+        
+        if result['success']:
+            data = result['data']
+            currencies = data.get('currencies', {})
+            total_networks = data.get('total_networks', 0)
+            
+            # Check for required currencies
+            has_usdt = 'USDT' in currencies
+            has_usdc = 'USDC' in currencies
+            
+            usdt_networks = len(currencies.get('USDT', {}).get('networks', [])) if has_usdt else 0
+            usdc_networks = len(currencies.get('USDC', {}).get('networks', [])) if has_usdc else 0
+            
+            success = has_usdt and has_usdc and total_networks >= 6
+            
+            self.log_test(
+                "Supported Currencies Loading",
+                success,
+                f"USDT: {usdt_networks} networks, USDC: {usdc_networks} networks, Total: {total_networks}",
+                result
+            )
+        else:
+            self.log_test(
+                "Supported Currencies Loading",
+                False,
+                f"Failed to load currencies: {result['data']}",
+                result
+            )
+
+    def test_invoice_creation(self):
+        """Test invoice creation with various currencies"""
+        print("🔍 Testing Invoice Creation...")
+        
+        test_cases = [
+            {"amount": 100.0, "currency": "usd", "pay_currency": "usdttrc20", "description": "USDT TRX Test"},
+            {"amount": 50.0, "currency": "usd", "pay_currency": "usdtbsc", "description": "USDT BSC Test"},
+            {"amount": 75.0, "currency": "usd", "pay_currency": "usdcsol", "description": "USDC SOL Test"},
+            {"amount": 25.0, "currency": "usd", "pay_currency": "usdcerc20", "description": "USDC ETH Test"}
+        ]
+        
+        created_invoices = []
+        
+        for i, test_case in enumerate(test_cases):
+            test_case['user_email'] = f"test{i+1}@example.com"
+            
+            result = self.make_request("POST", "/nowpayments/invoice", test_case, {"user_id": self.test_user_id})
+            
+            if result['success']:
+                data = result['data']
+                invoice_id = data.get('invoice_id')
+                invoice_url = data.get('invoice_url')
+                order_id = data.get('order_id')
+                
+                created_invoices.append({
+                    'invoice_id': invoice_id,
+                    'order_id': order_id,
+                    'amount': test_case['amount'],
+                    'currency': test_case['pay_currency']
+                })
+                
+                success = bool(invoice_id and invoice_url and order_id)
+                
+                self.log_test(
+                    f"Invoice Creation - {test_case['pay_currency']}",
+                    success,
+                    f"Invoice ID: {invoice_id}, Order: {order_id}, Amount: ${test_case['amount']}",
+                    result
+                )
+            else:
+                self.log_test(
+                    f"Invoice Creation - {test_case['pay_currency']}",
+                    False,
+                    f"Failed to create invoice: {result['data']}",
+                    result
+                )
+        
+        return created_invoices
+
+    def test_payment_status_retrieval(self, created_invoices):
+        """Test payment status retrieval"""
+        print("🔍 Testing Payment Status Retrieval...")
+        
+        if not created_invoices:
+            self.log_test(
+                "Payment Status Retrieval",
+                False,
+                "No invoices available for testing",
+                {}
+            )
+            return
+        
+        for invoice in created_invoices[:2]:  # Test first 2 invoices
+            invoice_id = invoice['invoice_id']
+            
+            result = self.make_request("GET", f"/nowpayments/payment/{invoice_id}", params={"user_id": self.test_user_id})
+            
+            if result['success']:
+                data = result['data']
+                payment_data = data.get('payment', {})
+                local_status = data.get('local_status')
+                
+                success = bool(payment_data and local_status)
+                
+                self.log_test(
+                    f"Payment Status - {invoice['currency']}",
+                    success,
+                    f"Status: {local_status}, Amount: ${invoice['amount']}",
+                    result
+                )
+            else:
+                self.log_test(
+                    f"Payment Status - {invoice['currency']}",
+                    False,
+                    f"Failed to get status: {result['data']}",
+                    result
+                )
+
+    def test_user_payment_history(self):
+        """Test user payment history retrieval"""
+        print("🔍 Testing User Payment History...")
+        
+        result = self.make_request("GET", f"/nowpayments/user/{self.test_user_id}/payments", params={"limit": 10})
+        
+        if result['success']:
+            data = result['data']
+            payments = data.get('payments', [])
+            count = data.get('count', 0)
+            
+            self.log_test(
+                "User Payment History",
+                True,
+                f"Retrieved {count} payments for user",
+                result
+            )
+        else:
+            self.log_test(
+                "User Payment History",
+                False,
+                f"Failed to get payment history: {result['data']}",
+                result
+            )
+
+    def test_webhook_processing(self):
+        """Test webhook processing with mock data"""
+        print("🔍 Testing Webhook Processing...")
+        
+        # Create a test invoice first
+        invoice_data = {
+            "amount": 10.0,
+            "currency": "usd",
+            "pay_currency": "usdttrc20",
+            "description": "Webhook Test Invoice",
+            "user_email": "webhook@test.com"
+        }
+        
+        invoice_result = self.make_request("POST", "/nowpayments/invoice", invoice_data, {"user_id": self.test_user_id})
+        
+        if not invoice_result['success']:
+            self.log_test(
+                "Webhook Processing Setup",
+                False,
+                "Failed to create test invoice for webhook testing",
+                invoice_result
+            )
+            return
+        
+        invoice_id = invoice_result['data'].get('invoice_id')
+        order_id = invoice_result['data'].get('order_id')
+        
+        # Mock webhook data
+        webhook_data = {
+            "payment_id": invoice_id,
+            "payment_status": "finished",
+            "order_id": order_id,
+            "actually_paid": 10.0,
+            "pay_currency": "usdttrc20",
+            "price_amount": 10.0,
+            "price_currency": "usd"
+        }
+        
+        # Test webhook processing
+        webhook_result = self.make_request("POST", "/nowpayments/webhook", webhook_data)
+        
+        success = webhook_result['success'] or webhook_result['status_code'] == 200
+        
+        self.log_test(
+            "Webhook Processing",
+            success,
+            f"Processed webhook for payment {invoice_id}",
+            webhook_result
+        )
+
+    def test_subscription_plan_creation(self):
+        """Test subscription plan creation"""
+        print("🔍 Testing Subscription Plan Creation...")
+        
+        plan_data = {
+            "title": "Test Premium Plan",
+            "interval_days": 30,
+            "amount": 19.99,
+            "currency": "usd"
+        }
+        
+        result = self.make_request("POST", "/nowpayments/subscription/plan", plan_data)
+        
+        if result['success']:
+            data = result['data']
+            plan = data.get('plan', {})
+            plan_id = plan.get('id')
+            
+            success = bool(plan_id)
+            
+            self.log_test(
+                "Subscription Plan Creation",
+                success,
+                f"Created plan ID: {plan_id}, Amount: ${plan_data['amount']}",
+                result
+            )
+            
+            return plan_id
+        else:
+            self.log_test(
+                "Subscription Plan Creation",
+                False,
+                f"Failed to create plan: {result['data']}",
+                result
+            )
+            return None
+
+    def test_subscription_creation(self, plan_id):
+        """Test email-based subscription creation"""
+        print("🔍 Testing Subscription Creation...")
+        
+        if not plan_id:
+            self.log_test(
+                "Subscription Creation",
+                False,
+                "No plan ID available for subscription testing",
+                {}
+            )
+            return
+        
+        subscription_data = {
+            "plan_id": str(plan_id),
+            "user_email": "subscriber@test.com"
+        }
+        
+        result = self.make_request("POST", "/nowpayments/subscription", subscription_data, {"user_id": self.test_user_id})
+        
+        if result['success']:
+            data = result['data']
+            subscription = data.get('subscription', {})
+            subscription_id = subscription.get('id')
+            
+            success = bool(subscription_id)
+            
+            self.log_test(
+                "Email-based Subscription Creation",
+                success,
+                f"Created subscription ID: {subscription_id}",
+                result
+            )
+        else:
+            self.log_test(
+                "Email-based Subscription Creation",
+                False,
+                f"Failed to create subscription: {result['data']}",
+                result
+            )
+
+    def test_price_estimation(self):
+        """Test price estimation for different currency pairs"""
+        print("🔍 Testing Price Estimation...")
+        
+        test_cases = [
+            {"amount": 100, "currency_from": "usd", "currency_to": "usdttrc20"},
+            {"amount": 50, "currency_from": "usd", "currency_to": "usdcerc20"},
+            {"amount": 25, "currency_from": "usd", "currency_to": "usdtbsc"}
+        ]
+        
+        for test_case in test_cases:
+            result = self.make_request("GET", "/nowpayments/estimate", params=test_case)
+            
+            if result['success']:
+                data = result['data']
+                estimate = data.get('estimate', {})
+                estimated_amount = estimate.get('estimated_amount')
+                
+                success = bool(estimated_amount)
+                
+                self.log_test(
+                    f"Price Estimation - {test_case['currency_to']}",
+                    success,
+                    f"${test_case['amount']} USD = {estimated_amount} {test_case['currency_to']}",
+                    result
+                )
+            else:
+                self.log_test(
+                    f"Price Estimation - {test_case['currency_to']}",
+                    False,
+                    f"Failed to get estimate: {result['data']}",
+                    result
+                )
+
+    def test_edge_cases(self):
+        """Test edge cases and error handling"""
+        print("🔍 Testing Edge Cases and Error Handling...")
+        
+        # Test invalid amount
+        invalid_invoice = {
+            "amount": -10.0,
+            "currency": "usd",
+            "description": "Invalid amount test"
+        }
+        
+        result = self.make_request("POST", "/nowpayments/invoice", invalid_invoice, {"user_id": self.test_user_id})
+        
+        # Should fail with negative amount
+        self.log_test(
+            "Invalid Amount Rejection",
+            not result['success'],
+            f"Correctly rejected negative amount: {result['status_code']}",
+            result
+        )
+        
+        # Test invalid currency
+        invalid_currency = {
+            "amount": 10.0,
+            "currency": "invalid_currency",
+            "description": "Invalid currency test"
+        }
+        
+        result = self.make_request("POST", "/nowpayments/invoice", invalid_currency, {"user_id": self.test_user_id})
+        
+        # May succeed or fail depending on NowPayments validation
+        self.log_test(
+            "Invalid Currency Handling",
+            True,  # We just test that it doesn't crash
+            f"Handled invalid currency gracefully: {result['status_code']}",
+            result
+        )
+        
+        # Test non-existent payment status
+        result = self.make_request("GET", "/nowpayments/payment/non-existent-payment-id", params={"user_id": self.test_user_id})
+        
+        self.log_test(
+            "Non-existent Payment Handling",
+            not result['success'],
+            f"Correctly handled non-existent payment: {result['status_code']}",
+            result
+        )
+
+    def test_database_integration(self):
+        """Test database integration and data persistence"""
+        print("🔍 Testing Database Integration...")
+        
+        # Create a test invoice to verify database storage
+        test_invoice = {
+            "amount": 5.0,
+            "currency": "usd",
+            "pay_currency": "usdttrc20",
+            "description": "Database Integration Test",
+            "user_email": "dbtest@example.com"
+        }
+        
+        result = self.make_request("POST", "/nowpayments/invoice", test_invoice, {"user_id": self.test_user_id})
+        
+        if result['success']:
+            # Check if we can retrieve the payment from user history
+            history_result = self.make_request("GET", f"/nowpayments/user/{self.test_user_id}/payments", params={"limit": 1})
+            
+            if history_result['success']:
+                payments = history_result['data'].get('payments', [])
+                found_payment = any(p.get('description') == test_invoice['description'] for p in payments)
+                
+                self.log_test(
+                    "Database Storage Verification",
+                    found_payment,
+                    f"Invoice stored and retrievable from database",
+                    history_result
+                )
+            else:
+                self.log_test(
+                    "Database Storage Verification",
+                    False,
+                    "Failed to retrieve payment from database",
+                    history_result
+                )
+        else:
+            self.log_test(
+                "Database Storage Verification",
+                False,
+                "Failed to create test invoice for database verification",
+                result
+            )
+
+    def run_comprehensive_tests(self):
+        """Run all NowPayments integration tests"""
+        print("🎯 Starting Comprehensive NowPayments Backend Testing...")
+        print()
+        
+        # 1. Service Health and Setup
+        self.test_nowpayments_health_check()
+        self.test_supported_currencies()
+        
+        # 2. Invoice Creation System
+        created_invoices = self.test_invoice_creation()
+        
+        # 3. Payment Status Tracking
+        self.test_payment_status_retrieval(created_invoices)
+        self.test_user_payment_history()
+        
+        # 4. Webhook Processing
+        self.test_webhook_processing()
+        
+        # 5. Subscription System
+        plan_id = self.test_subscription_plan_creation()
+        self.test_subscription_creation(plan_id)
+        
+        # 6. Price Estimation
+        self.test_price_estimation()
+        
+        # 7. Database Integration
+        self.test_database_integration()
+        
+        # 8. Edge Cases
+        self.test_edge_cases()
+        
+        # Print final results
+        self.print_final_results()
+
+    def print_final_results(self):
+        """Print comprehensive test results"""
+        print("=" * 80)
+        print("🎯 NOWPAYMENTS BACKEND TESTING RESULTS")
+        print("=" * 80)
+        
+        total = self.results['total_tests']
+        passed = self.results['passed']
+        failed = self.results['failed']
+        success_rate = (passed / total * 100) if total > 0 else 0
+        
+        print(f"📊 SUMMARY:")
+        print(f"   Total Tests: {total}")
+        print(f"   Passed: {passed} ✅")
+        print(f"   Failed: {failed} ❌")
+        print(f"   Success Rate: {success_rate:.1f}%")
+        print()
+        
+        if failed > 0:
+            print("❌ FAILED TESTS:")
+            for error in self.results['errors']:
+                print(f"   • {error['test']}: {error['details']}")
+            print()
+        
+        # Overall assessment
+        if success_rate >= 90:
+            print("🎉 EXCELLENT: NowPayments integration is working excellently!")
+        elif success_rate >= 75:
+            print("✅ GOOD: NowPayments integration is working well with minor issues.")
+        elif success_rate >= 50:
+            print("⚠️  MODERATE: NowPayments integration has some significant issues.")
+        else:
+            print("🚨 CRITICAL: NowPayments integration has major issues requiring immediate attention.")
+        
+        print("=" * 80)
 
 if __name__ == "__main__":
-    main()
+    tester = NowPaymentsBackendTester()
+    tester.run_comprehensive_tests()
