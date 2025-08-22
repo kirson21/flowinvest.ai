@@ -69,6 +69,32 @@ const SubscriptionProfileBadge = ({ user }) => {
     }
   };
 
+  const formatExpiryDate = (expiryDate) => {
+    if (!expiryDate) return null;
+    
+    try {
+      const date = new Date(expiryDate);
+      const now = new Date();
+      
+      // Check if expired
+      const isExpired = date < now;
+      
+      // Format date
+      const formattedDate = date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+      
+      return {
+        text: isExpired ? `Expired ${formattedDate}` : `Until ${formattedDate}`,
+        isExpired
+      };
+    } catch (error) {
+      return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center">
@@ -79,6 +105,7 @@ const SubscriptionProfileBadge = ({ user }) => {
 
   const planType = subscription?.plan_type || 'free';
   const badgeConfig = getBadgeConfig(planType);
+  const expiryInfo = subscription?.expires_at ? formatExpiryDate(subscription.expires_at) : null;
   
   // Check if user is Super Admin by UUID (fallback method)
   const isSuperAdmin = user?.id === 'cd0e9717-f85d-4726-81e9-f260394ead58';
@@ -86,7 +113,7 @@ const SubscriptionProfileBadge = ({ user }) => {
     // Use Super Admin styling even if subscription isn't set properly
     const superAdminConfig = getBadgeConfig('super_admin');
     return (
-      <div className="flex items-center">
+      <div className="flex flex-col items-end sm:flex-row sm:items-center gap-2">
         <div className={`
           inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium
           border ${superAdminConfig.borderColor}
@@ -102,7 +129,7 @@ const SubscriptionProfileBadge = ({ user }) => {
   }
 
   return (
-    <div className="flex items-center">
+    <div className="flex flex-col items-end sm:flex-row sm:items-center gap-2">
       <div className={`
         inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium
         border ${badgeConfig.borderColor}
@@ -113,6 +140,17 @@ const SubscriptionProfileBadge = ({ user }) => {
         {badgeConfig.icon}
         <span className="ml-1.5">{badgeConfig.text}</span>
       </div>
+      {expiryInfo && planType !== 'free' && (
+        <div className={`
+          text-xs px-2 py-1 rounded-full border
+          ${expiryInfo.isExpired 
+            ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800' 
+            : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+          }
+        `}>
+          {expiryInfo.text}
+        </div>
+      )}
     </div>
   );
 };
