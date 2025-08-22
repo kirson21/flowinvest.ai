@@ -130,7 +130,7 @@ backend:
 
   - task: "Implement NowPayments Subscription System"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/routes/nowpayments.py"
     stuck_count: 1
     priority: "high"
@@ -145,6 +145,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "❌ SUBSCRIPTION SYSTEM AUTHENTICATION REQUIREMENTS CONFIRMED: Comprehensive testing confirms subscription endpoints require JWT Bearer token authentication which is expected behavior. TESTING RESULTS: ✅ Database Schema Applied - nowpayments_subscriptions and nowpayments_plans tables now exist and are accessible, ✅ Subscription Endpoints Operational - Both /nowpayments/subscription/plan and /nowpayments/subscription endpoints respond correctly, ❌ Authentication Required - NowPayments API returns 401 AUTH_REQUIRED errors: 'Authorization header is empty (Bearer JWTtoken is required)', ❌ JWT Token Missing - Backend does not implement JWT token generation for NowPayments subscription API calls. EXPECTED BEHAVIOR: Subscription functionality requires proper JWT authentication setup with NowPayments API. This is a configuration/authentication issue, not a system failure. RECOMMENDATION: Subscription system implementation is correct but requires JWT token configuration for NowPayments subscription API access. Invoice-based payments work without JWT authentication and are the primary payment method."
+        - working: true
+          agent: "testing"
+          comment: "✅ CRITICAL SUBSCRIPTION UPGRADE WEBHOOK FIX VERIFICATION COMPLETED: Comprehensive testing confirms the subscription system is now FULLY OPERATIONAL for the critical production bug fix. SUBSCRIPTION WEBHOOK PROCESSING VERIFIED: ✅ Subscription Creation Working - Successfully created subscription with ID 706827961 using JWT authentication, ✅ Webhook Processing Enhancement - /api/nowpayments/webhook correctly identifies subscription payments vs invoice payments, ✅ Subscription Detection Logic - Webhook queries nowpayments_subscriptions table and correctly identifies subscription payments ('🔍 Is subscription payment: True'), ✅ Subscription Upgrade Flow - When subscription payment marked as 'finished', webhook updates subscription status to 'PAID', calls upgrade_subscription RPC function, maps plan_plus to 'plus' plan type correctly, ✅ Database Integration - Webhook successfully queries nowpayments_subscriptions table and processes subscription upgrades. CRITICAL PRODUCTION BUG STATUS: ✅ FIXED - The webhook now correctly processes subscription payments and triggers automatic plan upgrades. Users who pay for subscriptions will get their plans upgraded automatically. Backend logs confirm successful subscription detection and upgrade processing. The critical production bug where users pay but don't get upgraded has been resolved."
 
   - task: "Update Database Schema for NowPayments"
     implemented: true
