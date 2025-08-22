@@ -480,12 +480,12 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e
         # Store subscription record in database
         subscription_record = {
             'user_id': actual_user_id,
-            'subscription_id': str(subscription_result.get('id', '')),
+            'subscription_id': str(subscription_result.get('id', '') if isinstance(subscription_result, dict) else subscription_result),
             'plan_id': request.plan_id,  # Keep our plan ID for reference
             'user_email': request.user_email,
-            'status': subscription_result.get('status', 'WAITING_PAY'),
-            'is_active': subscription_result.get('is_active', False),
-            'expire_date': subscription_result.get('expire_date')
+            'status': subscription_result.get('status', 'WAITING_PAY') if isinstance(subscription_result, dict) else 'WAITING_PAY',
+            'is_active': subscription_result.get('is_active', False) if isinstance(subscription_result, dict) else False,
+            'expire_date': subscription_result.get('expire_date') if isinstance(subscription_result, dict) else None
         }
         
         result = supabase.table('nowpayments_subscriptions').insert(subscription_record).execute()
