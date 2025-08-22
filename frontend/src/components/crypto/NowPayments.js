@@ -54,10 +54,9 @@ const NowPayments = () => {
   // Price estimate
   const [priceEstimate, setPriceEstimate] = useState(null);
 
-  // Available subscription plans
+  // Available subscription plans (removed Pro Plan)
   const subscriptionPlans = [
-    { id: 'plan_plus', name: 'Plus Plan', price: 9.99, interval: 30, features: ['Unlimited AI Bots', 'Advanced Analytics', 'Priority Support'] },
-    { id: 'plan_pro', name: 'Pro Plan', price: 29.99, interval: 30, features: ['Everything in Plus', 'Custom Integrations', 'White Label'] }
+    { id: 'plan_plus', name: 'Plus Plan', price: 9.99, interval: 30, features: ['Unlimited AI Bots', 'Advanced Analytics', 'Priority Support'] }
   ];
 
   // Currency and network mappings
