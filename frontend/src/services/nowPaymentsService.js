@@ -192,7 +192,7 @@ class NowPaymentsService {
   }
 
   /**
-   * Validate payment amount
+   * Validate payment amount (basic validation, real minimum checked separately)
    */
   validateAmount(amount) {
     const numAmount = parseFloat(amount);
