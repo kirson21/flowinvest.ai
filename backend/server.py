@@ -19,7 +19,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Import routes (using httpx-based supabase client - no Rust dependencies)
-from routes import auth, webhook, verification, ai_bots, crypto_simple
+from routes import auth, webhook, verification, ai_bots, nowpayments
 # Crypto payments temporarily disabled due to pydantic v2 conflicts
 # from routes import crypto_payments
 
@@ -169,13 +169,13 @@ except Exception as e:
     logger.warning(f"AI bots routes failed to load: {e}")
 
 try:
-    print("=== LOADING CRYPTO PAYMENTS ROUTES ===")
-    api_router.include_router(crypto_simple.router)
-    print(f"✅ Crypto payments routes loaded successfully")
-    logger.info("Crypto payments routes loaded successfully")
+    print("=== LOADING NOWPAYMENTS ROUTES ===")
+    api_router.include_router(nowpayments.router)
+    print(f"✅ NowPayments routes loaded successfully")
+    logger.info("NowPayments routes loaded successfully")
 except Exception as e:
-    print(f"❌ Crypto payments routes failed to load: {e}")
-    logger.warning(f"Crypto payments routes failed to load: {e}")
+    print(f"❌ NowPayments routes failed to load: {e}")
+    logger.warning(f"NowPayments routes failed to load: {e}")
 
 print("=== ROUTE LOADING COMPLETE ===")
 print(f"Total API routes loaded: {len(api_router.routes)}")
