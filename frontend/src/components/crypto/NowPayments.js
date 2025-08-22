@@ -179,6 +179,17 @@ const NowPayments = () => {
         return;
       }
 
+      // Check minimum amount for the selected crypto
+      try {
+        const minAmountResult = await nowPaymentsService.getMinimumAmount('usd', network.nowpayments_code);
+        if (minAmountResult.success && amount < minAmountResult.min_amount) {
+          setError(`Minimum amount for ${selectedCurrency} (${selectedNetwork}) is $${minAmountResult.min_amount.toFixed(2)}`);
+          return;
+        }
+      } catch (minError) {
+        console.warn('Could not check minimum amount, proceeding:', minError);
+      }
+
       const invoiceData = {
         amount: amount,
         currency: 'usd',
