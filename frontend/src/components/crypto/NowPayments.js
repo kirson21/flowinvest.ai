@@ -50,6 +50,7 @@ const NowPayments = () => {
   // Transaction history
   const [transactions, setTransactions] = useState([]);
   const [showTransactions, setShowTransactions] = useState(false);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   // Price estimate
   const [priceEstimate, setPriceEstimate] = useState(null);
