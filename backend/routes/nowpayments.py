@@ -193,6 +193,31 @@ async def get_supported_currencies():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get supported currencies: {str(e)}")
 
+@router.get("/nowpayments/min-amount")
+async def get_minimum_amount(currency_from: str = "usd", currency_to: str = "usdttrc20"):
+    """Get minimum payment amount for currency pair"""
+    try:
+        params = {
+            "currency_from": currency_from,
+            "currency_to": currency_to
+        }
+        
+        response = await make_nowpayments_request("GET", "/min-amount", params)
+        
+        if response.status_code != 200:
+            return {"success": False, "min_amount": 10.0}  # Default fallback
+        
+        result = response.json()
+        return {
+            "success": True,
+            "min_amount": result.get("min_amount", 10.0),
+            "currency_from": result.get("currency_from", currency_from),
+            "currency_to": result.get("currency_to", currency_to)
+        }
+        
+    except Exception as e:
+        return {"success": False, "min_amount": 10.0}  # Safe fallback
+
 @router.post("/nowpayments/invoice")
 async def create_invoice(request: InvoiceRequest, user_id: str = "cd0e9717-f85d-4726-81e9-f260394ead58"):
     """Create payment invoice with NowPayments"""
