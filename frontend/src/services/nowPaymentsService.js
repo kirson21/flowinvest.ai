@@ -55,6 +55,13 @@ class NowPaymentsService {
   }
 
   /**
+   * Get minimum payment amount for currency pair
+   */
+  async getMinimumAmount(currencyFrom = 'usd', currencyTo = 'usdttrc20') {
+    return this.makeRequest(`/min-amount?currency_from=${currencyFrom}&currency_to=${currencyTo}`);
+  }
+
+  /**
    * Get price estimate for crypto payment
    */
   async getEstimate(amount, currencyFrom = 'usd', currencyTo = 'usdttrc20') {
