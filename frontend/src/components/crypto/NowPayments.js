@@ -63,16 +63,16 @@ const NowPayments = () => {
   // Currency and network mappings
   const currencyNetworks = {
     'USDT': [
-      { code: 'TRX', name: 'Tron (TRC20)', icon: '⚡', nowpayments_code: 'usdttrc20' },
-      { code: 'BSC', name: 'Binance Smart Chain', icon: '🔶', nowpayments_code: 'usdtbsc' },
-      { code: 'SOL', name: 'Solana', icon: '☀️', nowpayments_code: 'usdtsol' },
-      { code: 'TON', name: 'TON', icon: '💎', nowpayments_code: 'usdtton' },
-      { code: 'ETH', name: 'Ethereum (ERC20)', icon: '⟠', nowpayments_code: 'usdterc20' }
+      { code: 'TRX', name: 'Tron (TRC20)', nowpayments_code: 'usdttrc20' },
+      { code: 'BSC', name: 'Binance Smart Chain', nowpayments_code: 'usdtbsc' },
+      { code: 'SOL', name: 'Solana', nowpayments_code: 'usdtsol' },
+      { code: 'TON', name: 'TON', nowpayments_code: 'usdtton' },
+      { code: 'ETH', name: 'Ethereum (ERC20)', nowpayments_code: 'usdterc20' }
     ],
     'USDC': [
-      { code: 'ETH', name: 'Ethereum (ERC20)', icon: '⟠', nowpayments_code: 'usdcerc20' },
-      { code: 'BSC', name: 'Binance Smart Chain', icon: '🔶', nowpayments_code: 'usdcbsc' },
-      { code: 'SOL', name: 'Solana', icon: '☀️', nowpayments_code: 'usdcsol' }
+      { code: 'ETH', name: 'Ethereum (ERC20)', nowpayments_code: 'usdcerc20' },
+      { code: 'BSC', name: 'Binance Smart Chain', nowpayments_code: 'usdcbsc' },
+      { code: 'SOL', name: 'Solana', nowpayments_code: 'usdcsol' }
     ]
   };
 
