@@ -2,7 +2,7 @@
 NowPayments Integration - Invoice-based Payment Gateway & Subscriptions
 """
 
-from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Request, BackgroundTasks, Query
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
 import os
