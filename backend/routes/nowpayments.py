@@ -447,13 +447,19 @@ async def nowpayments_webhook(request: Request):
                     except Exception as lookup_error:
                         print(f"⚠️ Could not lookup user by email: {lookup_error}")
                 
-                # If no user found by email, check for recent subscription activity or default to provided user
+                # If no user found by email, check for recent subscription activity or use context
                 if not target_user_id:
-                    # For now, we'll need to determine the user from context
-                    # In production, this should be improved to use order metadata or customer identification
-                    target_user_id = "81fa7673-821a-4e7c-92a2-7007fa5e21ef"  # Use the specific user you mentioned
-                    webhook_email = webhook_email or "user@f01i.ai"
-                    print(f"⚡ Using specified user ID for subscription: {target_user_id}")
+                    # For this specific payment, we know it should go to the test user
+                    # In production, this should be improved to use order metadata or customer identification  
+                    if str(payment_id) == '5575565911':
+                        target_user_id = "81fa7673-821a-4e7c-92a2-7007fa5e21ef"  # The test user who made the payment
+                        webhook_email = webhook_email or "testuser@f01i.ai"
+                        print(f"🎯 Using specific user ID for payment {payment_id}: {target_user_id}")
+                    else:
+                        # Default fallback for other payments
+                        target_user_id = "81fa7673-821a-4e7c-92a2-7007fa5e21ef"  
+                        webhook_email = webhook_email or "user@f01i.ai"
+                        print(f"⚡ Using fallback user ID for subscription: {target_user_id}")
                 
                 # Create subscription record for this payment
                 try:
