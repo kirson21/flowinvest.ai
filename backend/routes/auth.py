@@ -61,7 +61,7 @@ async def auth_health_check():
 
 @router.get("/auth/user/{user_id}")
 async def get_user_profile(user_id: str):
-    """Get user profile by ID"""
+    """Get user profile by ID - returns empty profile if none exists"""
     try:
         if not supabase:
             return {"success": False, "message": "Database not available"}
@@ -71,9 +71,20 @@ async def get_user_profile(user_id: str):
         if response.data and len(response.data) > 0:
             return {"success": True, "user": response.data[0]}
         else:
-            return {"success": False, "message": "User not found"}
-            
+            # User has no profile - return a default profile structure
+            # This is normal for users who haven't completed seller verification
+            default_profile = {
+                "user_id": user_id,
+                "display_name": None,
+                "email": None,
+                "avatar_url": None,
+                "seller_verification_status": "unverified",
+                "created_at": None,
+                "updated_at": None
+            }
+            return {"success": True, "user": default_profile, "is_default": True}
     except Exception as e:
+        print(f"Error getting user profile: {e}")
         return {"success": False, "message": f"Failed to get user profile: {str(e)}"}
 
 @router.put("/auth/user/{user_id}/profile")
