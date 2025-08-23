@@ -401,24 +401,43 @@ async def nowpayments_webhook(request: Request):
         is_subscription_payment = bool(subscription_result.data)
         
         # If no subscription record found but webhook data suggests it's a subscription payment,
-        # do NOT create arbitrary subscriptions - this was causing the bug
+        # try more intelligent matching approaches
         if not is_subscription_payment and order_id:
-            # Only check for orphaned payments with proper validation
             webhook_email = webhook_data.get('customer_email') or webhook_data.get('email')
             paid_amount = float(webhook_data.get('actually_paid', 0))
             
-            # Only proceed if this is clearly a subscription payment (amount ~$10)
+            # Only proceed if this is clearly a subscription payment (amount ~$10) and we have email
             if webhook_email and paid_amount >= 9.0 and paid_amount <= 11.0:
-                print(f"💡 Potential orphaned subscription payment: {payment_id}, amount: ${paid_amount}, email: {webhook_email}")
+                print(f"💡 Potential subscription payment: {payment_id}, amount: ${paid_amount}, email: {webhook_email}")
                 
-                # Instead of auto-creating, log this for manual review
-                print(f"⚠️  MANUAL REVIEW REQUIRED: Payment {payment_id} appears to be subscription but no matching record found")
-                print(f"   - Amount: ${paid_amount}")
-                print(f"   - Email: {webhook_email}")
-                print(f"   - Order: {order_id}")
+                # Try to find a matching subscription by email that's in WAITING_PAY status
+                email_subs = supabase.table('nowpayments_subscriptions')\
+                    .select('*')\
+                    .eq('user_email', webhook_email)\
+                    .eq('status', 'WAITING_PAY')\
+                    .execute()
                 
-                # Do NOT auto-create subscriptions - this caused the Super Admin association bug
-                # Instead, require manual intervention or proper user context
+                if email_subs.data:
+                    # Found a matching subscription - link the payment to it
+                    existing_sub = email_subs.data[0]  # Use the first/most recent one
+                    
+                    print(f"🔄 Found matching subscription {existing_sub.get('subscription_id')} for payment {payment_id}")
+                    
+                    # Update the subscription to link to this payment
+                    supabase.table('nowpayments_subscriptions')\
+                        .update({'subscription_id': str(payment_id)})\
+                        .eq('id', existing_sub['id'])\
+                        .execute()
+                    
+                    # Update our local data to proceed with subscription processing
+                    existing_sub['subscription_id'] = str(payment_id)
+                    subscription_result.data = [existing_sub]
+                    is_subscription_payment = True
+                    
+                    print(f"✅ Successfully linked payment {payment_id} to existing subscription")
+                else:
+                    print(f"⚠️ No matching WAITING_PAY subscription found for email {webhook_email}")
+                    print(f"   - Payment {payment_id} requires manual review")
         
         print(f"🔍 Is subscription payment: {is_subscription_payment}")
         
