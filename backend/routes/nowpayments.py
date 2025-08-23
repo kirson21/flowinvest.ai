@@ -642,15 +642,19 @@ async def create_subscription_plan(request: SubscriptionPlanRequest):
         raise HTTPException(status_code=500, detail=f"Failed to create subscription plan: {str(e)}")
 
 @router.post("/nowpayments/subscription")
-async def create_subscription(request: SubscriptionRequest, user_id: str = "cd0e9717-f85d-4726-81e9-f260394ead58"):
+async def create_subscription(request: SubscriptionRequest, user_id: str = Query(..., description="User ID for the subscription")):
     """Create an email-based subscription for a user using real NowPayments API"""
     try:
         import sys
         sys.path.append('/app/backend')
         from supabase_client import supabase_admin as supabase
         
-        # For demo purposes, use Super Admin UUID
-        actual_user_id = user_id if user_id != "demo_user" else "cd0e9717-f85d-4726-81e9-f260394ead58"
+        # Validate user_id is provided and not a default value
+        if not user_id or user_id == "demo_user":
+            raise HTTPException(status_code=400, detail="Valid user_id is required for subscription creation")
+        
+        # Use the provided user_id directly (no more defaults to Super Admin!)
+        actual_user_id = user_id
         
         # Get JWT token for subscription API
         jwt_token = await get_nowpayments_jwt_token()
