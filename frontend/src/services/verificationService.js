@@ -10,9 +10,21 @@ export const verificationService = {
           .from('user_profiles')
           .select('seller_verification_status')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single to handle 0 rows gracefully
 
-        if (error && error.code !== 'PGRST116') {
+        // If no error and we have data, return the status
+        if (!error && data) {
+          return data.seller_verification_status || 'unverified';
+        }
+        
+        // If user has no profile record, that's fine - they're just not a seller
+        if (error && error.code === 'PGRST116') {
+          console.log('User has no profile record - defaulting to unverified (not a seller)');
+          return 'unverified';
+        }
+        
+        // For other errors, fall back to localStorage
+        if (error) {
           console.warn('Supabase verification status check failed:', error);
           return this.getVerificationStatusFromLocalStorage(userId);
         }
