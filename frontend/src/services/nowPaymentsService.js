@@ -71,13 +71,15 @@ class NowPaymentsService {
   /**
    * Create payment invoice
    */
-  async createInvoice(invoiceData, userId = 'demo_user') {
-    return this.makeRequest('/invoice', {
+  async createInvoice(invoiceData, userId) {
+    // Validate userId is provided
+    if (!userId) {
+      throw new Error('User ID is required for invoice creation');
+    }
+    
+    return this.makeRequest(`/invoice?user_id=${userId}`, {
       method: 'POST',
-      body: JSON.stringify({
-        ...invoiceData,
-        user_id: userId
-      }),
+      body: JSON.stringify(invoiceData),
     });
   }
 
