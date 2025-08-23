@@ -300,15 +300,15 @@ const SubscriptionManagement = ({ user, onClose }) => {
         <div className="px-6 py-8 pb-12 sm:pb-8 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <div className="text-center text-sm text-gray-600 dark:text-gray-400 space-y-3">
             <p>
-              💡 All subscription payments are deducted from your account balance.
+              💡 All subscription payments are processed securely via NowPayments crypto gateway.
             </p>
             <p>
-              Need more funds?{' '}
+              Need help?{' '}
               <button
                 onClick={onClose}
                 className="text-[#0097B2] hover:underline font-medium"
               >
-                Top up your balance
+                Contact support
               </button>
             </p>
           </div>
