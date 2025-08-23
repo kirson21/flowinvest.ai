@@ -219,31 +219,26 @@ async def get_minimum_amount(currency_from: str = "usd", currency_to: str = "usd
         return {"success": False, "min_amount": 10.0}  # Safe fallback
 
 @router.post("/nowpayments/invoice")
-async def create_invoice(request: InvoiceRequest, user_id: str = "cd0e9717-f85d-4726-81e9-f260394ead58"):
+async def create_invoice(request: InvoiceRequest, user_id: str = Query(..., description="User ID for the invoice")):
     """Create payment invoice with NowPayments"""
     try:
         import sys
         sys.path.append('/app/backend')
         from supabase_client import supabase_admin as supabase
         
-        # Validate inputs and check minimum amounts
-        if request.currency.upper() not in ['USD', 'EUR']:
-            return {"success": False, "detail": "Unsupported price currency"}
+        # Validate required fields
+        if not request.amount or request.amount <= 0:
+            raise HTTPException(status_code=400, detail="Amount must be greater than 0")
         
-        if request.amount <= 0:
-            return {"success": False, "detail": "Amount must be positive"}
+        if not request.currency:
+            raise HTTPException(status_code=400, detail="Currency is required")
         
-        # If pay_currency is specified, check minimum amount
-        if request.pay_currency:
-            min_check = await get_minimum_amount(request.currency.lower(), request.pay_currency.lower())
-            if min_check["success"] and request.amount < min_check["min_amount"]:
-                return {
-                    "success": False, 
-                    "detail": f"Amount ${request.amount} is below minimum ${min_check['min_amount']} for {request.pay_currency}"
-                }
+        # Validate user_id is provided
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Valid user_id is required for invoice creation")
         
-        # For demo purposes, use Super Admin UUID
-        actual_user_id = user_id if user_id != "demo_user" else "cd0e9717-f85d-4726-81e9-f260394ead58"
+        # Use the provided user_id directly
+        actual_user_id = user_id
         
         # Generate unique order ID
         order_id = request.order_id or f"f01i_{actual_user_id[-8:]}_{int(time.time())}"
