@@ -304,12 +304,16 @@ async def create_invoice(request: InvoiceRequest, user_id: str = Query(..., desc
         raise HTTPException(status_code=500, detail=f"Failed to create invoice: {str(e)}")
 
 @router.get("/nowpayments/payment/{payment_id}")
-async def get_payment_status(payment_id: str, user_id: str = "demo_user"):
+async def get_payment_status(payment_id: str, user_id: str = Query(..., description="User ID for payment verification")):
     """Get payment status from NowPayments"""
     try:
         import sys
         sys.path.append('/app/backend')
         from supabase_client import supabase_admin as supabase
+        
+        # Validate user_id is provided
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Valid user_id is required for payment verification")
         
         # Get payment status from NowPayments
         response = await make_nowpayments_request("GET", f"/payment/{payment_id}")
