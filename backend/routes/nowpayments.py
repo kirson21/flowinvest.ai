@@ -510,6 +510,13 @@ async def nowpayments_webhook(request: Request):
                 # Calculate subscription end date (31 days from now)
                 end_date = datetime.utcnow() + timedelta(days=31)
                 
+                # Define proper Plus plan limits
+                plus_plan_limits = {
+                    'ai_bots': 3,
+                    'manual_bots': 5, 
+                    'marketplace_products': 10
+                }
+                
                 # Check if user already has a subscription record
                 existing_sub = supabase.table('subscriptions').select('*').eq('user_id', user_id).execute()
                 
@@ -522,6 +529,7 @@ async def nowpayments_webhook(request: Request):
                     'renewal': True,
                     'price_paid': plan_price,
                     'currency': 'USD',
+                    'limits': plus_plan_limits,  # Set proper Plus plan limits
                     'metadata': {'payment_method': 'crypto', 'nowpayments_id': str(payment_id)},
                     'updated_at': datetime.utcnow().isoformat()
                 }
