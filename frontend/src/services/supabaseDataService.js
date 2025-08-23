@@ -1312,5 +1312,42 @@ export const supabaseDataService = {
       console.error('Error in migrateUserDataFromLocalStorage:', error);
       return [];
     }
+  },
+
+  /**
+   * Cancel user subscription
+   */
+  async cancelUserSubscription(userId) {
+    try {
+      console.log('🔄 Cancelling user subscription...');
+      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${backendUrl}/api/auth/user/${userId}/subscription/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ Subscription cancelled successfully');
+      } else {
+        console.error('❌ Subscription cancellation failed:', result.message);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Error cancelling subscription:', error);
+      return {
+        success: false,
+        message: error.message
+      };
+    }
   }
 };
