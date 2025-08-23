@@ -234,6 +234,22 @@ const SubscriptionManagement = ({ user, onClose }) => {
                   {upgrading ? 'Processing...' : getButtonText(plan)}
                 </button>
 
+                {/* Cancel Subscription Button for Current Plan */}
+                {plan.id === subscription?.plan_type && subscription?.plan_type !== 'free' && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => handleCancelSubscription()}
+                      disabled={upgrading}
+                      className="w-full py-2 px-4 rounded-lg text-sm font-medium border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      Cancel Subscription
+                    </button>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                      Your plan will remain active until {subscription?.end_date ? new Date(subscription.end_date).toLocaleDateString() : 'the end date'}
+                    </p>
+                  </div>
+                )}
+
                 {/* Coming Soon Overlay */}
                 {plan.coming_soon && (
                   <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 rounded-lg flex items-center justify-center">
