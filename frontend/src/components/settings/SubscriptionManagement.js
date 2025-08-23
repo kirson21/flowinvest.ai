@@ -98,8 +98,8 @@ const SubscriptionManagement = ({ user, onClose }) => {
   const getCurrentPlanBadge = (planId) => {
     if (planId === subscription?.plan_type) {
       return (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <div className="bg-[#0097B2] text-white text-xs px-3 py-1 rounded-full font-medium">
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="bg-[#0097B2] text-white text-xs px-3 py-1 rounded-full font-medium shadow-md border-2 border-white dark:border-gray-800">
             Your current plan
           </div>
         </div>
@@ -109,10 +109,11 @@ const SubscriptionManagement = ({ user, onClose }) => {
   };
 
   const getPopularBadge = (plan) => {
-    if (plan.popular) {
+    // Don't show popular badge if it's the current plan (current plan badge takes priority)
+    if (plan.popular && plan.id !== subscription?.plan_type) {
       return (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
             Popular
           </div>
         </div>
