@@ -402,84 +402,24 @@ async def nowpayments_webhook(request: Request):
         is_subscription_payment = bool(subscription_result.data)
         
         # If no subscription record found but webhook data suggests it's a subscription payment,
-        # try to identify it by checking webhook data or order_id patterns
+        # do NOT create arbitrary subscriptions - this was causing the bug
         if not is_subscription_payment and order_id:
-            # Check if the order_id indicates this is a subscription (NowPayments subscription orders often have specific patterns)
-            # Also check for any subscription with this user's email in waiting status
+            # Only check for orphaned payments with proper validation
             webhook_email = webhook_data.get('customer_email') or webhook_data.get('email')
-            if webhook_email:
-                email_subs = supabase.table('nowpayments_subscriptions')\
-                    .select('*')\
-                    .eq('user_email', webhook_email)\
-                    .eq('status', 'WAITING_PAY')\
-                    .execute()
-                
-                if email_subs.data:
-                    # Update the subscription_id to match the payment_id
-                    supabase.table('nowpayments_subscriptions')\
-                        .update({'subscription_id': str(payment_id)})\
-                        .eq('id', email_subs.data[0]['id'])\
-                        .execute()
-                    
-                    subscription_result.data = email_subs.data
-                    is_subscription_payment = True
-                    print(f"🔄 Matched payment {payment_id} to existing subscription by email {webhook_email}")
-        
-        # If still no match, check if this could be a direct subscription payment from NowPayments
-        # that wasn't created through our API (common when users pay directly on NowPayments)
-        if not is_subscription_payment:
-            # Check if the amount matches typical subscription amounts ($10 for Plus plan)
             paid_amount = float(webhook_data.get('actually_paid', 0))
-            if paid_amount >= 9.0 and paid_amount <= 11.0:  # Allow small variations for crypto fluctuations
-                print(f"💡 Payment amount ${paid_amount} suggests subscription payment, creating subscription record")
+            
+            # Only proceed if this is clearly a subscription payment (amount ~$10)
+            if webhook_email and paid_amount >= 9.0 and paid_amount <= 11.0:
+                print(f"💡 Potential orphaned subscription payment: {payment_id}, amount: ${paid_amount}, email: {webhook_email}")
                 
-                # Try to determine user from webhook data or use a more intelligent lookup
-                webhook_email = webhook_data.get('customer_email') or webhook_data.get('email')
-                target_user_id = None
+                # Instead of auto-creating, log this for manual review
+                print(f"⚠️  MANUAL REVIEW REQUIRED: Payment {payment_id} appears to be subscription but no matching record found")
+                print(f"   - Amount: ${paid_amount}")
+                print(f"   - Email: {webhook_email}")
+                print(f"   - Order: {order_id}")
                 
-                # First try to find user by email from webhook
-                if webhook_email:
-                    try:
-                        user_lookup = supabase.rpc('get_user_by_email', {'email': webhook_email}).execute()
-                        if user_lookup.data and isinstance(user_lookup.data, list) and len(user_lookup.data) > 0:
-                            target_user_id = user_lookup.data[0].get('id')
-                            print(f"🔍 Found user by email {webhook_email}: {target_user_id}")
-                    except Exception as lookup_error:
-                        print(f"⚠️ Could not lookup user by email: {lookup_error}")
-                
-                # If no user found by email, check for recent subscription activity or use context
-                if not target_user_id:
-                    # For this specific payment, we know it should go to the test user
-                    # In production, this should be improved to use order metadata or customer identification  
-                    if str(payment_id) == '5575565911':
-                        target_user_id = "81fa7673-821a-4e7c-92a2-7007fa5e21ef"  # The test user who made the payment
-                        webhook_email = webhook_email or "testuser@f01i.ai"
-                        print(f"🎯 Using specific user ID for payment {payment_id}: {target_user_id}")
-                    else:
-                        # Default fallback for other payments
-                        target_user_id = "81fa7673-821a-4e7c-92a2-7007fa5e21ef"  
-                        webhook_email = webhook_email or "user@f01i.ai"
-                        print(f"⚡ Using fallback user ID for subscription: {target_user_id}")
-                
-                # Create subscription record for this payment
-                try:
-                    new_subscription = {
-                        'user_id': target_user_id,
-                        'subscription_id': str(payment_id),
-                        'plan_id': 'plan_plus',
-                        'user_email': webhook_email,
-                        'status': 'WAITING_PAY',  # Will be updated to PAID below
-                        'is_active': False,
-                        'expire_date': None
-                    }
-                    
-                    created_sub = supabase.table('nowpayments_subscriptions').insert(new_subscription).execute()
-                    if created_sub.data:
-                        subscription_result.data = created_sub.data
-                        is_subscription_payment = True
-                        print(f"✅ Created new subscription record for payment {payment_id} and user {target_user_id}")
-                except Exception as create_error:
-                    print(f"❌ Failed to create subscription record: {create_error}")
+                # Do NOT auto-create subscriptions - this caused the Super Admin association bug
+                # Instead, require manual intervention or proper user context
         
         print(f"🔍 Is subscription payment: {is_subscription_payment}")
         
