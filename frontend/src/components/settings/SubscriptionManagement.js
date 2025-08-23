@@ -54,6 +54,36 @@ const SubscriptionManagement = ({ user, onClose }) => {
     setShowCryptoSubscriptions(true);
   };
 
+  const handleCancelSubscription = async () => {
+    if (!user?.id) return;
+
+    const confirmCancel = window.confirm(
+      'Are you sure you want to cancel your subscription? Your plan will remain active until the end date, but it won\'t renew automatically.'
+    );
+
+    if (!confirmCancel) return;
+
+    try {
+      setUpgrading(true);
+      
+      const result = await supabaseDataService.cancelUserSubscription(user.id);
+      
+      if (result.success) {
+        alert('Subscription cancelled successfully. Your plan will remain active until the end date.');
+        
+        // Refresh subscription data
+        loadSubscriptionData();
+      } else {
+        alert('Failed to cancel subscription: ' + (result.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      alert('Failed to cancel subscription. Please try again.');
+    } finally {
+      setUpgrading(false);
+    }
+  };
+
 
 
   const getPlanIcon = (planId) => {
