@@ -108,13 +108,15 @@ class NowPaymentsService {
   /**
    * Create subscription for user
    */
-  async createSubscription(subscriptionData, userId = 'demo_user') {
-    return this.makeRequest('/subscription', {
+  async createSubscription(subscriptionData, userId) {
+    // Validate userId is provided
+    if (!userId) {
+      throw new Error('User ID is required for subscription creation');
+    }
+    
+    return this.makeRequest(`/subscription?user_id=${userId}`, {
       method: 'POST',
-      body: JSON.stringify({
-        ...subscriptionData,
-        user_id: userId
-      }),
+      body: JSON.stringify(subscriptionData),
     });
   }
 
