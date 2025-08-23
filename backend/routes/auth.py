@@ -582,27 +582,52 @@ async def upgrade_user_subscription(user_id: str, upgrade_request: SubscriptionU
 
 @router.post("/auth/user/{user_id}/subscription/cancel")
 async def cancel_user_subscription(user_id: str):
-    """Cancel user subscription (downgrade to free)"""
+    """Cancel user subscription (keep active until end date, but disable renewal)"""
     try:
         if not supabase_admin:
             return {"success": False, "message": "Database not available"}
         
         print(f"Cancelling subscription for user {user_id}")
         
-        # Update subscription to free plan
+        # Get current subscription first
+        current_response = supabase_admin.table('subscriptions')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        if not current_response.data:
+            return {"success": False, "message": "No active subscription found"}
+        
+        subscription = current_response.data[0]
+        current_plan = subscription.get('plan_type', 'free')
+        end_date = subscription.get('end_date')
+        
+        # Don't cancel if already free or cancelled
+        if current_plan == 'free' or subscription.get('status') == 'cancelled':
+            return {"success": False, "message": "No active paid subscription to cancel"}
+        
+        # Update subscription to cancelled status but keep plan_type until end_date
         response = supabase_admin.table('subscriptions').update({
-            'plan_type': 'free',
-            'status': 'cancelled',
-            'end_date': None,
-            'renewal': False
+            'status': 'cancelled',  # Mark as cancelled
+            'renewal': False,       # Disable auto-renewal
+            'updated_at': 'now()'
         }).eq('user_id', user_id).execute()
         
         # Create notification
         try:
+            from datetime import datetime
+            end_date_str = "the end of your billing period"
+            if end_date:
+                try:
+                    end_date_obj = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+                    end_date_str = end_date_obj.strftime('%B %d, %Y')
+                except:
+                    end_date_str = "the end of your billing period"
+            
             supabase_admin.table('user_notifications').insert({
                 'user_id': user_id,
                 'title': 'Subscription Cancelled',
-                'message': 'Your subscription has been cancelled and downgraded to the Free plan. You can upgrade again anytime.',
+                'message': f'Your {current_plan.title()} subscription has been cancelled. You will keep your current features until {end_date_str}, after which your plan will automatically downgrade to Free.',
                 'type': 'info',
                 'is_read': False
             }).execute()
@@ -611,8 +636,10 @@ async def cancel_user_subscription(user_id: str):
         
         return {
             "success": True,
-            "message": "Subscription cancelled successfully",
-            "subscription": response.data[0] if response.data else {}
+            "message": "Subscription cancelled successfully. Your plan will remain active until the end date.",
+            "subscription": response.data[0] if response.data else {},
+            "end_date": end_date,
+            "current_plan": current_plan
         }
         
     except Exception as e:
