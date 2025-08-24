@@ -352,7 +352,7 @@ async def get_payment_status(payment_id: str, user_id: str = Query(..., descript
 
 @router.post("/nowpayments/webhook")
 async def nowpayments_webhook(request: Request):
-    """Handle NowPayments IPN webhooks"""
+    """Handle NowPayments IPN webhooks with email validation"""
     try:
         import sys
         sys.path.append('/app/backend')
@@ -368,107 +368,47 @@ async def nowpayments_webhook(request: Request):
         # Parse JSON data
         webhook_data = json.loads(body.decode())
         
-        # Verify webhook signature (optional but recommended)
-        # For production, you should verify the HMAC signature
-        
         payment_id = webhook_data.get('payment_id')
         payment_status = webhook_data.get('payment_status')
         order_id = webhook_data.get('order_id')
+        customer_email = webhook_data.get('customer_email') or webhook_data.get('email')
+        actually_paid = float(webhook_data.get('actually_paid', 0))
         
         if not payment_id:
             raise HTTPException(status_code=400, detail="Missing payment_id in webhook")
         
-        print(f"🔔 Processing webhook for payment_id: {payment_id}, status: {payment_status}, order_id: {order_id}")
+        print(f"🔔 Processing webhook for payment_id: {payment_id}, status: {payment_status}, email: {customer_email}, amount: ${actually_paid}")
         
-        # Update payment record in database
-        update_data = {
-            'payment_status': payment_status,
-            'actually_paid': webhook_data.get('actually_paid', 0),
-            'pay_currency': webhook_data.get('pay_currency'),
-            'updated_at': 'now()',
-            'webhook_data': webhook_data
-        }
-        
-        if payment_status == 'finished':
-            update_data['completed_at'] = 'now()'
-        
-        # Check if this is a subscription payment by looking for a subscription record
-        subscription_result = supabase.table('nowpayments_subscriptions')\
-            .select('*')\
-            .eq('subscription_id', str(payment_id))\
-            .execute()
-        
-        is_subscription_payment = bool(subscription_result.data)
-        
-        # If no subscription record found but webhook data suggests it's a subscription payment,
-        # try more intelligent matching approaches
-        if not is_subscription_payment and order_id:
-            webhook_email = webhook_data.get('customer_email') or webhook_data.get('email')
-            paid_amount = float(webhook_data.get('actually_paid', 0))
+        # For subscription payments (amount around $10), use email validation approach
+        if customer_email and actually_paid >= 9.0 and actually_paid <= 11.0 and payment_status == 'finished':
+            print(f"💡 Processing subscription payment via email validation")
             
-            # Only proceed if this is clearly a subscription payment (amount ~$10) and we have email
-            if webhook_email and paid_amount >= 9.0 and paid_amount <= 11.0:
-                print(f"💡 Potential subscription payment: {payment_id}, amount: ${paid_amount}, email: {webhook_email}")
-                
-                # Try to find a matching subscription by email that's in WAITING_PAY status
-                email_subs = supabase.table('nowpayments_subscriptions')\
-                    .select('*')\
-                    .eq('user_email', webhook_email)\
-                    .eq('status', 'WAITING_PAY')\
-                    .execute()
-                
-                if email_subs.data:
-                    # Found a matching subscription - link the payment to it
-                    existing_sub = email_subs.data[0]  # Use the first/most recent one
-                    
-                    print(f"🔄 Found matching subscription {existing_sub.get('subscription_id')} for payment {payment_id}")
-                    
-                    # Update the subscription to link to this payment
-                    supabase.table('nowpayments_subscriptions')\
-                        .update({'subscription_id': str(payment_id)})\
-                        .eq('id', existing_sub['id'])\
-                        .execute()
-                    
-                    # Update our local data to proceed with subscription processing
-                    existing_sub['subscription_id'] = str(payment_id)
-                    subscription_result.data = [existing_sub]
-                    is_subscription_payment = True
-                    
-                    print(f"✅ Successfully linked payment {payment_id} to existing subscription")
-                else:
-                    print(f"⚠️ No matching WAITING_PAY subscription found for email {webhook_email}")
-                    print(f"   - Payment {payment_id} requires manual review")
-        
-        print(f"🔍 Is subscription payment: {is_subscription_payment}")
-        
-        if is_subscription_payment and payment_status == 'finished':
-            # Handle subscription payment completion
-            subscription_record = subscription_result.data[0]
-            user_id = subscription_record['user_id']
-            plan_id = subscription_record['plan_id']
-            
-            print(f"💳 Processing subscription upgrade for user {user_id} to plan {plan_id}")
-            
-            # Update subscription status to PAID
-            supabase.table('nowpayments_subscriptions')\
-                .update({
-                    'status': 'PAID',
-                    'is_active': True,
-                    'updated_at': 'now()'
-                })\
-                .eq('subscription_id', str(payment_id))\
+            # Find matching email validation record
+            validation_result = supabase.table('subscription_email_validation')\
+                .select('*')\
+                .eq('email', customer_email)\
+                .eq('status', 'pending')\
+                .order('created_at', desc=True)\
+                .limit(1)\
                 .execute()
             
-            # Determine plan type and price from plan_id
-            if plan_id == 'plan_plus':
-                plan_type = 'plus'
-                plan_price = 10.00  # Plus plan price
-            else:
-                plan_type = 'free'  # Default fallback
-                plan_price = 0.00
-            
-            # Direct subscription upgrade (bypassing problematic RPC function)
-            try:
+            if validation_result.data:
+                validation_record = validation_result.data[0]
+                user_id = validation_record['user_id']
+                plan_type = validation_record['plan_type']
+                
+                print(f"✅ Found email validation record for user {user_id}, plan: {plan_type}")
+                
+                # Update validation record to completed
+                supabase.table('subscription_email_validation')\
+                    .update({
+                        'status': 'completed',
+                        'updated_at': 'now()'
+                    })\
+                    .eq('id', validation_record['id'])\
+                    .execute()
+                
+                # Process subscription upgrade
                 from datetime import datetime, timedelta
                 
                 # Calculate subscription end date (31 days from now)
@@ -486,15 +426,15 @@ async def nowpayments_webhook(request: Request):
                 
                 subscription_data = {
                     'user_id': user_id,
-                    'plan_type': plan_type,
+                    'plan_type': 'plus',
                     'status': 'active',
                     'start_date': datetime.utcnow().isoformat(),
                     'end_date': end_date.isoformat(),
                     'renewal': True,
-                    'price_paid': plan_price,
+                    'price_paid': actually_paid,
                     'currency': 'USD',
-                    'limits': plus_plan_limits,  # Set proper Plus plan limits
-                    'metadata': {'payment_method': 'crypto', 'nowpayments_id': str(payment_id)},
+                    'limits': plus_plan_limits,
+                    'metadata': {'payment_method': 'crypto', 'nowpayments_id': str(payment_id), 'email_validated': True},
                     'updated_at': datetime.utcnow().isoformat()
                 }
                 
@@ -514,114 +454,93 @@ async def nowpayments_webhook(request: Request):
                     print(f"➕ Created new subscription for user {user_id}")
                 
                 if result.data:
-                    print(f"✅ Direct subscription upgrade completed successfully for user {user_id}")
+                    print(f"✅ Email-validated subscription upgrade completed for user {user_id}")
                     
-                    # Create subscription upgrade notification
-                    notification = {
-                        'user_id': user_id,
-                        'title': f'🎉 Subscription Upgraded to {plan_type.title()}!',
-                        'message': f'Your crypto payment has been confirmed and your subscription has been upgraded to {plan_type.title()} Plan. Enjoy your new features including 3 AI bots, 5 manual bots, and up to 10 marketplace products! Valid until {end_date.strftime("%B %d, %Y")}',
-                        'type': 'success',
-                        'is_read': False
-                    }
-                    
-                    supabase.table('user_notifications').insert(notification).execute()
-                    
-                    print(f"✅ Subscription upgrade completed successfully for user {user_id}")
-                else:
-                    print(f"❌ Direct subscription upgrade failed for user {user_id}")
-                    
-            except Exception as upgrade_error:
-                print(f"❌ Error with direct subscription upgrade: {upgrade_error}")
-                
-                # Fallback: try the original RPC function
-                try:
-                    upgrade_response = supabase.rpc('upgrade_subscription', {
-                        'p_user_id': user_id,
-                        'p_plan_type': plan_type,
-                        'p_price': plan_price
-                    }).execute()
-                    
-                    print(f"📈 Fallback RPC response: {upgrade_response.data}")
-                    
-                    if upgrade_response.data and upgrade_response.data.get('success'):
-                        # Create subscription upgrade notification
-                        notification = {
-                            'user_id': user_id,
-                            'title': f'🎉 Subscription Upgraded to {plan_type.title()}!',
-                            'message': f'Your crypto payment has been confirmed and your subscription has been upgraded to {plan_type.title()} Plan. Enjoy your new features including 3 AI bots, 5 manual bots, and up to 10 marketplace products!',
-                            'type': 'success',
-                            'is_read': False
-                        }
-                        
-                        supabase.table('user_notifications').insert(notification).execute()
-                        
-                        print(f"✅ Fallback subscription upgrade completed successfully for user {user_id}")
-                    else:
-                        print(f"❌ Fallback subscription upgrade failed for user {user_id}: {upgrade_response.data}")
-                        
-                except Exception as fallback_error:
-                    print(f"❌ Fallback RPC upgrade also failed: {fallback_error}")
-                
-                # Still create a notification about payment received
-                notification = {
-                    'user_id': user_id,
-                    'title': 'Payment Received - Processing Upgrade',
-                    'message': f'Your crypto payment has been confirmed. We are processing your subscription upgrade. If you experience any issues, please contact support.',
-                    'type': 'info',
-                    'is_read': False
-                }
-                
-                supabase.table('user_notifications').insert(notification).execute()
-        
-        else:
-            # Handle regular invoice payment (balance top-up)
-            # Update invoice record
-            result = supabase.table('nowpayments_invoices')\
-                .update(update_data)\
-                .eq('invoice_id', str(payment_id))\
-                .execute()
-            
-            if result.data:
-                invoice = result.data[0]
-                user_id = invoice['user_id']
-                amount = float(webhook_data.get('actually_paid', 0))
-                
-                print(f"💰 Processing balance top-up for user {user_id}, amount: ${amount}")
-                
-                # If payment is completed, credit user balance
-                if payment_status == 'finished' and amount > 0:
-                    # Create balance transaction
-                    balance_transaction = {
-                        'user_id': user_id,
-                        'transaction_type': 'topup',
-                        'amount': amount,
-                        'platform_fee': 0.0,
-                        'net_amount': amount,
-                        'status': 'completed',
-                        'description': f"Crypto payment: ${amount} via NowPayments (Order: {order_id})"
-                    }
-                    
-                    balance_result = supabase.table('transactions').insert(balance_transaction).execute()
-                    
-                    # Update user balance
-                    supabase.rpc('update_user_balance', {
-                        'user_uuid': user_id,
-                        'amount_change': amount
-                    }).execute()
+                    # Update NowPayments subscription record if exists
+                    supabase.table('nowpayments_subscriptions')\
+                        .update({
+                            'status': 'PAID',
+                            'is_active': True,
+                            'updated_at': 'now()'
+                        })\
+                        .eq('user_id', user_id)\
+                        .eq('user_email', customer_email)\
+                        .execute()
                     
                     # Create success notification
                     notification = {
                         'user_id': user_id,
-                        'title': 'Payment Successful! 🎉',
-                        'message': f'Your payment of ${amount:.2f} has been confirmed and added to your balance.',
+                        'title': '🎉 Subscription Upgraded to Plus!',
+                        'message': f'Your crypto payment of ${actually_paid:.2f} has been confirmed and your subscription has been upgraded to Plus Plan. Enjoy your new features including 3 AI bots, 5 manual bots, and up to 10 marketplace products! Valid until {end_date.strftime("%B %d, %Y")}',
                         'type': 'success',
                         'is_read': False
                     }
                     
                     supabase.table('user_notifications').insert(notification).execute()
                     
-                    print(f"✅ Balance top-up completed for user {user_id}")
+                    return {"success": True, "message": "Subscription webhook processed successfully via email validation"}
+                else:
+                    print(f"❌ Failed to upgrade subscription for user {user_id}")
+                    
+            else:
+                print(f"⚠️ No pending email validation record found for {customer_email}")
+                print(f"   - This might be a duplicate webhook or payment for a different service")
+        
+        # For regular invoice payments (balance top-ups) or non-subscription payments
+        else:
+            print(f"💰 Processing as invoice payment or balance top-up")
+            
+            # Update invoice record if exists
+            result = supabase.table('nowpayments_invoices')\
+                .update({
+                    'payment_status': payment_status,
+                    'actually_paid': actually_paid,
+                    'pay_currency': webhook_data.get('pay_currency'),
+                    'updated_at': 'now()',
+                    'webhook_data': webhook_data,
+                    'completed_at': 'now()' if payment_status == 'finished' else None
+                })\
+                .eq('invoice_id', str(payment_id))\
+                .execute()
+            
+            if result.data and payment_status == 'finished':
+                invoice = result.data[0]
+                user_id = invoice['user_id']
+                amount = float(actually_paid)
+                
+                print(f"💰 Processing balance top-up for user {user_id}, amount: ${amount}")
+                
+                # Create balance transaction
+                balance_transaction = {
+                    'user_id': user_id,
+                    'transaction_type': 'topup',
+                    'amount': amount,
+                    'platform_fee': 0.0,
+                    'net_amount': amount,
+                    'status': 'completed',
+                    'description': f"Crypto payment: ${amount} via NowPayments (Order: {order_id})"
+                }
+                
+                supabase.table('transactions').insert(balance_transaction).execute()
+                
+                # Update user balance
+                supabase.rpc('update_user_balance', {
+                    'user_uuid': user_id,
+                    'amount_change': amount
+                }).execute()
+                
+                # Create success notification
+                notification = {
+                    'user_id': user_id,
+                    'title': 'Payment Successful! 🎉',
+                    'message': f'Your payment of ${amount:.2f} has been confirmed and added to your balance.',
+                    'type': 'success',
+                    'is_read': False
+                }
+                
+                supabase.table('user_notifications').insert(notification).execute()
+                
+                print(f"✅ Balance top-up completed for user {user_id}")
         
         return {"success": True, "message": "Webhook processed successfully"}
         
