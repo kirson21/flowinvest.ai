@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from datetime import datetime, date
 from typing import Optional
 import sys
+import os
 sys.path.append('/app/backend')
 sys.path.append('/app/backend/services')
 from services.google_sheets_service import google_sheets_service
