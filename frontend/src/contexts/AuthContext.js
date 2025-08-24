@@ -29,6 +29,9 @@ export const AuthProvider = ({ children }) => {
         if (session?.user) {
           console.log('User found in session:', session.user);
           
+          // Auto-create user profile if it doesn't exist
+          await ensureUserProfile(session.user);
+          
           // Trigger data sync for authenticated user (non-blocking)
           console.log('User authenticated, starting background data sync...');
           dataSyncService.syncAllUserData(session.user.id).then(() => {
