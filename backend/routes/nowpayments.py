@@ -755,6 +755,68 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = Query
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create subscription: {str(e)}")
 
+@router.delete("/nowpayments/subscription/{subscription_id}")
+async def cancel_subscription(subscription_id: str, user_id: str = Query(..., description="User ID for subscription cancellation")):
+    """Cancel a NowPayments subscription"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        # Validate user_id is provided
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Valid user_id is required for subscription cancellation")
+        
+        # Get JWT token for subscription API
+        jwt_token = await get_nowpayments_jwt_token()
+        if not jwt_token:
+            raise HTTPException(status_code=500, detail="Failed to authenticate with NowPayments for subscription cancellation")
+        
+        # Make authenticated DELETE request to NowPayments subscriptions API
+        headers = get_nowpayments_headers_with_jwt(jwt_token)
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(
+                f"{NOWPAYMENTS_API_URL}/subscriptions/{subscription_id}",
+                headers=headers
+            )
+        
+        if response.status_code not in [200, 201]:
+            error_detail = response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
+            raise HTTPException(status_code=400, detail=f"Failed to cancel NowPayments subscription: {error_detail}")
+        
+        # Update local database to mark subscription as cancelled
+        result = supabase.table('nowpayments_subscriptions')\
+            .update({
+                'status': 'CANCELLED',
+                'is_active': False,
+                'updated_at': 'now()'
+            })\
+            .eq('subscription_id', subscription_id)\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        # Create cancellation notification
+        notification = {
+            'user_id': user_id,
+            'title': 'Subscription Cancelled ❌',
+            'message': f'Your subscription has been successfully cancelled. You can still use your current plan features until the expiry date.',
+            'type': 'info',
+            'is_read': False
+        }
+        
+        supabase.table('user_notifications').insert(notification).execute()
+        
+        return {
+            "success": True,
+            "message": "Subscription cancelled successfully",
+            "subscription_id": subscription_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to cancel subscription: {str(e)}")
+
 @router.get("/nowpayments/user/{user_id}/payments")
 async def get_user_payments(user_id: str, limit: int = 50):
     """Get user's payment history"""
