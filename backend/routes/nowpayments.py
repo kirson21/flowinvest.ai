@@ -505,6 +505,15 @@ async def nowpayments_webhook(request: Request):
                     except Exception as balance_error:
                         print(f"❌ Error updating company balance: {balance_error}")
                     
+                    # TRIGGER GOOGLE SHEETS SYNC
+                    try:
+                        import httpx
+                        async with httpx.AsyncClient() as client:
+                            await client.post(f"{BASE_URL}/api/google-sheets/trigger-sync")
+                        print(f"✅ Google Sheets sync triggered")
+                    except Exception as sync_error:
+                        print(f"⚠️ Google Sheets sync trigger failed: {sync_error}")
+                    
                     return {"success": True, "message": "Subscription webhook processed successfully via email validation"}
                 else:
                     print(f"❌ Failed to upgrade subscription for user {user_id}")
