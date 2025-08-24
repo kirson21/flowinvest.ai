@@ -684,8 +684,7 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = Query
         
         subscription_data = {
             "subscription_plan_id": nowpayments_plan_id,
-            "email": request.user_email,
-            "ipn_callback_url": f"{BASE_URL}/api/nowpayments/webhook"
+            "email": request.user_email
         }
         
         # Make authenticated request to NowPayments subscriptions API
