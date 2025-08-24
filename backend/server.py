@@ -177,6 +177,15 @@ except Exception as e:
     print(f"❌ NowPayments routes failed to load: {e}")
     logger.warning(f"NowPayments routes failed to load: {e}")
 
+try:
+    print("=== LOADING GOOGLE SHEETS ROUTES ===")
+    api_router.include_router(google_sheets.router)
+    print(f"✅ Google Sheets routes loaded successfully")
+    logger.info("Google Sheets routes loaded successfully")
+except Exception as e:
+    print(f"❌ Google Sheets routes failed to load: {e}")
+    logger.warning(f"Google Sheets routes failed to load: {e}")
+
 print("=== ROUTE LOADING COMPLETE ===")
 print(f"Total API routes loaded: {len(api_router.routes)}")
 
