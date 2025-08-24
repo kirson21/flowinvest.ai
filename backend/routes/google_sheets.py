@@ -95,7 +95,7 @@ async def get_sync_status():
             "users_sheet_id": google_sheets_service.users_sheet_id,
             "last_balance_update": last_balance_update,
             "monthly_reports_count": reports_count,
-            "service_account_email": "f01i-sheets-editor@flowinvestaiapp.iam.gserviceaccount.com"
+            "service_account_email": os.getenv("GOOGLE_CLIENT_EMAIL", "service_account_not_configured")
         }
         
     except Exception as e:
