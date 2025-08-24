@@ -478,6 +478,33 @@ async def nowpayments_webhook(request: Request):
                     
                     supabase.table('user_notifications').insert(notification).execute()
                     
+                    # UPDATE COMPANY BALANCE - Add subscription revenue
+                    print(f"💰 Adding ${actually_paid:.2f} subscription revenue to company balance")
+                    try:
+                        # Update company balance with subscription revenue
+                        company_update = supabase.rpc('update_company_balance_subscription', {
+                            'subscription_revenue': actually_paid
+                        }).execute()
+                        
+                        if company_update.data:
+                            print(f"✅ Company balance updated with subscription revenue: ${actually_paid:.2f}")
+                        else:
+                            print(f"⚠️ Company balance update failed, will try direct update")
+                            
+                            # Fallback: Direct update to company_balance table
+                            supabase.table('company_balance')\
+                                .update({
+                                    'company_funds': supabase.table('company_balance').select('company_funds').execute().data[0]['company_funds'] + actually_paid,
+                                    'last_updated': 'now()'
+                                })\
+                                .eq('id', '00000000-0000-0000-0000-000000000001')\
+                                .execute()
+                            
+                            print(f"✅ Company balance updated directly with subscription revenue: ${actually_paid:.2f}")
+                            
+                    except Exception as balance_error:
+                        print(f"❌ Error updating company balance: {balance_error}")
+                    
                     return {"success": True, "message": "Subscription webhook processed successfully via email validation"}
                 else:
                     print(f"❌ Failed to upgrade subscription for user {user_id}")
