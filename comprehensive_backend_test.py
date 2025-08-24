@@ -83,12 +83,28 @@ class ComprehensiveBackendTester:
                 response = requests.get(f"{self.backend_url.replace('/api', '')}{endpoint}", timeout=10)
                 
                 if response.status_code == 200:
-                    data = response.json()
-                    self.log_test(
-                        f"API Root Endpoint {endpoint}",
-                        True,
-                        f"Status: {data.get('status', 'N/A')}, Message: {data.get('message', 'N/A')[:50]}..."
-                    )
+                    try:
+                        data = response.json()
+                        self.log_test(
+                            f"API Root Endpoint {endpoint}",
+                            True,
+                            f"Status: {data.get('status', 'N/A')}, Message: {data.get('message', 'N/A')[:50]}..."
+                        )
+                    except:
+                        # Handle non-JSON responses (like HTML from root endpoint)
+                        if endpoint == "/":
+                            self.log_test(
+                                f"API Root Endpoint {endpoint}",
+                                True,
+                                f"Root endpoint accessible (non-JSON response is expected for web interface)"
+                            )
+                        else:
+                            self.log_test(
+                                f"API Root Endpoint {endpoint}",
+                                False,
+                                error="Expected JSON response but got non-JSON content"
+                            )
+                            all_passed = False
                 else:
                     self.log_test(
                         f"API Root Endpoint {endpoint}",
