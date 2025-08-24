@@ -69,7 +69,6 @@ allowed_origins = [
     "https://f01i.ai",
     "https://f01i.app",  # User's actual frontend domain
     "https://app.f01i.ai", 
-    "https://flowinvestaiapp-kirsons-projects.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001"
 ]
