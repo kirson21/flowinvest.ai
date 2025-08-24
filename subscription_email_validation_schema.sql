@@ -71,4 +71,3 @@ CREATE TRIGGER update_subscription_email_validation_updated_at
 
 -- Grant permissions
 GRANT ALL ON subscription_email_validation TO postgres, service_role;
-GRANT USAGE ON SEQUENCE subscription_email_validation_id_seq TO postgres, service_role;
