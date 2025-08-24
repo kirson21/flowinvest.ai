@@ -661,7 +661,7 @@ async def create_subscription_plan(request: SubscriptionPlanRequest):
 
 @router.post("/nowpayments/subscription")
 async def create_subscription(request: SubscriptionRequest, user_id: str = Query(..., description="User ID for the subscription")):
-    """Create an email-based subscription for a user using real NowPayments API"""
+    """Create subscription with NowPayments and store email validation record"""
     try:
         import sys
         sys.path.append('/app/backend')
@@ -682,6 +682,23 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = Query
         # Use your real NowPayments subscription plan ID
         nowpayments_plan_id = 1516280944  # Your Plan Plus ID from dashboard
         
+        # Create email validation record FIRST
+        validation_record = {
+            'user_id': actual_user_id,
+            'email': request.user_email,
+            'plan_type': request.plan_id,
+            'amount': 10.00,  # Plus plan amount
+            'status': 'pending'
+        }
+        
+        validation_result = supabase.table('subscription_email_validation').insert(validation_record).execute()
+        
+        if not validation_result.data:
+            raise HTTPException(status_code=500, detail="Failed to create subscription validation record")
+        
+        validation_id = validation_result.data[0]['id']
+        
+        # Now create subscription with NowPayments
         subscription_data = {
             "subscription_plan_id": nowpayments_plan_id,
             "email": request.user_email
@@ -697,6 +714,8 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = Query
             )
         
         if response.status_code not in [200, 201]:
+            # Clean up validation record if NowPayments call fails
+            supabase.table('subscription_email_validation').delete().eq('id', validation_id).execute()
             error_detail = response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
             raise HTTPException(status_code=400, detail=f"Failed to create NowPayments subscription: {error_detail}")
         
@@ -715,10 +734,18 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = Query
         
         print(f"Parsed subscription result: {subscription_result}")  # Debug log
         
+        nowpayments_subscription_id = subscription_result.get('id')
+        
+        # Update validation record with NowPayments subscription ID
+        supabase.table('subscription_email_validation')\
+            .update({'nowpayments_subscription_id': str(nowpayments_subscription_id)})\
+            .eq('id', validation_id)\
+            .execute()
+        
         # Store subscription record in database with proper data extraction
         subscription_record = {
             'user_id': actual_user_id,
-            'subscription_id': str(subscription_result.get('id', '')),  # This should be just the ID number
+            'subscription_id': str(nowpayments_subscription_id),  # This should be just the ID number
             'plan_id': request.plan_id,  # Keep our plan ID for reference
             'user_email': request.user_email,
             'status': subscription_result.get('status', 'WAITING_PAY'),
@@ -745,6 +772,7 @@ async def create_subscription(request: SubscriptionRequest, user_id: str = Query
         return {
             "success": True,
             "subscription": subscription_result,
+            "validation_id": validation_id,
             "nowpayments_plan_id": nowpayments_plan_id,
             "message": f"Subscription created successfully with NowPayments! Payment instructions have been sent to {request.user_email}"
         }
