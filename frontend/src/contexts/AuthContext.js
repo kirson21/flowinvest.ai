@@ -123,6 +123,10 @@ export const AuthProvider = ({ children }) => {
         // Trigger data sync when user logs in (non-blocking)
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('User signed in, starting background data sync...');
+          
+          // Auto-create user profile if it doesn't exist
+          await ensureUserProfile(session.user);
+          
           dataSyncService.syncAllUserData(session.user.id).then(() => {
             console.log('✅ Data sync completed on sign in');
           }).catch(error => {
