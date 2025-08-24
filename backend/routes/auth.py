@@ -630,6 +630,77 @@ async def cancel_user_subscription(user_id: str):
             'updated_at': 'now()'
         }).eq('user_id', user_id).execute()
         
+        # ALSO CANCEL IN NOWPAYMENTS - Get the NowPayments subscription ID
+        nowpayments_sub = supabase_admin.table('nowpayments_subscriptions')\
+            .select('subscription_id')\
+            .eq('user_id', user_id)\
+            .eq('is_active', True)\
+            .execute()
+        
+        if nowpayments_sub.data:
+            nowpayments_subscription_id = nowpayments_sub.data[0]['subscription_id']
+            print(f"🔄 Also cancelling NowPayments subscription: {nowpayments_subscription_id}")
+            
+            try:
+                import httpx
+                import json
+                import os
+                
+                # Get JWT token for NowPayments API
+                async def get_nowpayments_jwt():
+                    auth_data = {
+                        "email": os.getenv("NOWPAYMENTS_EMAIL", "kirson.blogger@gmail.com"),
+                        "password": os.getenv("NOWPAYMENTS_PASSWORD", "defaultpassword")
+                    }
+                    
+                    async with httpx.AsyncClient() as client:
+                        response = await client.post(
+                            "https://api.nowpayments.io/v1/auth",
+                            json=auth_data,
+                            headers={"x-api-key": os.getenv("NOWPAYMENTS_API_KEY")}
+                        )
+                        if response.status_code == 200:
+                            return response.json().get("token")
+                    return None
+                
+                jwt_token = await get_nowpayments_jwt()
+                
+                if jwt_token:
+                    # Cancel subscription in NowPayments
+                    headers = {
+                        "x-api-key": os.getenv("NOWPAYMENTS_API_KEY"),
+                        "Authorization": f"Bearer {jwt_token}",
+                        "Content-Type": "application/json"
+                    }
+                    
+                    async with httpx.AsyncClient() as client:
+                        cancel_response = await client.delete(
+                            f"https://api.nowpayments.io/v1/subscriptions/{nowpayments_subscription_id}",
+                            headers=headers
+                        )
+                    
+                    if cancel_response.status_code in [200, 201]:
+                        print(f"✅ Successfully cancelled NowPayments subscription: {nowpayments_subscription_id}")
+                        
+                        # Also update nowpayments_subscriptions table
+                        supabase_admin.table('nowpayments_subscriptions')\
+                            .update({
+                                'status': 'CANCELLED',
+                                'is_active': False,
+                                'updated_at': 'now()'
+                            })\
+                            .eq('subscription_id', nowpayments_subscription_id)\
+                            .execute()
+                    else:
+                        print(f"⚠️ Failed to cancel NowPayments subscription: {nowpayments_subscription_id}, status: {cancel_response.status_code}")
+                else:
+                    print("⚠️ Failed to get JWT token for NowPayments cancellation")
+                    
+            except Exception as nowpay_error:
+                print(f"❌ Error cancelling NowPayments subscription: {nowpay_error}")
+        else:
+            print("⚠️ No active NowPayments subscription found to cancel")
+        
         # Create notification
         try:
             from datetime import datetime
