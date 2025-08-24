@@ -1,86 +1,79 @@
 <analysis>
-The AI engineer's work on the  platform has been a comprehensive journey from initial UI fixes to resolving critical backend payment and user management bugs. The project began by addressing mobile UI/UX issues, such as button positioning and spacing, and enhancing subscription display. The core of the work then shifted to the NowPayments integration, which proved to be challenging. Initially, the webhook was not upgrading subscriptions, only crediting balances, and later failed to process payments due to not being called by NowPayments or misidentifying users.
+The AI engineer's trajectory chronicles an intricate journey from resolving critical payment and subscription system bugs to implementing a comprehensive data synchronization feature. Initially, efforts focused on stabilizing the NowPayments integration, which involved fixing the  for real-time updates and implementing subscription cancellation. A major challenge was a recurring issue with webhook URLs pointing to incorrect environments (preview vs. production), causing payment updates to fail. This led to the implementation of an email-based validation system for subscriptions.
 
-Significant effort was dedicated to fixing a critical bug where payments and subscriptions were incorrectly linked to the Super Admin account due to default user IDs in backend endpoints and email-based matching in the webhook. This necessitated a re-architecture of user identification and subscription update logic within the webhook. Further refinements included correcting subscription limits for paid plans, implementing robust subscription cancellation, and refining UI elements. The final major bug encountered, and currently being addressed, is the absence of  during NowPayments subscription creation, preventing real-time payment notifications. The AI has systematically debugged and stabilized a complex payment and subscription system.
+Subsequently, the focus shifted to financial tracking, adding subscription revenue to the company balance, and introducing a new  column. The final, extensive task was integrating Google Sheets for data synchronization, involving database schema enhancements (monthly reports, commissions table) and a dedicated Google Sheets backend service. A persistent security challenge emerged during this phase: repeatedly identifying and removing hardcoded Google service account credentials and other API keys from the codebase, ensuring all sensitive data is exclusively managed via environment variables for secure deployment.
 </analysis>
 
 <product_requirements>
-The  platform is an AI-powered investment application designed to offer a subscription-based service for AI bots and marketplace products. Initial requirements involved a high-conversion React landing page, a FastAPI backend, Supabase for authentication, user profiles, and a balance system. A ChatGPT-style subscription model (Free, Plus, Pro) with enforced limits on bot and marketplace product creation was crucial.
+The  platform is an AI-powered investment application providing subscription-based AI bots and marketplace products. It requires a React frontend, FastAPI backend, Supabase for authentication/database, and a subscription model (Free, Plus, Pro) with usage limits. The payment system transitioned from Capitalist API to NowPayments, necessitating invoice-based payments, IPN webhooks for real-time updates, support for various crypto (USDT, USDC on multiple chains), and robust subscription management (UI, cancellation).
 
-The payment system initially used Capitalist API for crypto deposits/withdrawals (USDT ERC20/TRC20, USDC ERC20), requiring unique transaction tracking and a Top up, Withdraw, Refresh balance UI. This was superseded by NowPayments integration, demanding an invoice-based gateway, email-based subscription system, IPN webhooks for real-time updates, and support for USDT (TRX, BSC, SOL, TON) and USDC (ETH, BSC, SOL). UI updates for new currencies, payment gateway redirection, and subscription management were also required. Subsequent requirements included fixing mobile UI layout issues, displaying subscription expiry dates, enabling subscription cancellation, ensuring strict user ID-based payment association, and implementing automatic user profile creation for Google OAuth users.
+Key functional requirements included fixing mobile UI/UX, displaying subscription expiry, ensuring strict user ID-based payment association (preventing Super Admin defaults), and automatic user profile creation for Google OAuth users. Later, the user explicitly requested enhanced data structure with monthly reports for , a new  table, and real-time (or scheduled) Google Sheets integration for  and aggregated  data (Name, Email, Country, Phone, Registration Date, Seller Status, Subscription Status, Total Commission Earned) using a Google Service Account.
 </product_requirements>
 
 <key_technical_concepts>
--   **React**: Frontend UI development for the main application and landing page.
--   **FastAPI**: Python backend API for business logic and integrations.
--   **Supabase**: Backend-as-a-Service, providing PostgreSQL database, authentication, and Row Level Security (RLS).
--   **PostgreSQL/SQL**: Database schema definition, RLS policies, and triggers for data integrity.
--   **NowPayments API**: Third-party crypto payment gateway for deposits and subscriptions.
--   **Pydantic**: Data validation and serialization within the FastAPI backend.
--   **JWT**: JSON Web Tokens for secure authentication and authorization.
--   **CORS**: Cross-Origin Resource Sharing for secure communication between frontend and backend.
+-   **React**: Frontend UI development.
+-   **FastAPI**: Python backend API.
+-   **Supabase**: BaaS (PostgreSQL, Auth, RLS).
+-   **PostgreSQL/SQL**: Database schema, RLS, triggers.
+-   **NowPayments API**: Crypto payment gateway.
+-   **Google Sheets API**: Data synchronization.
+-   **Pydantic**: Data validation.
+-   **JWT**: Authentication.
+-   **CORS**: Frontend/backend communication.
 </key_technical_concepts>
 
 <code_architecture>
 
+
 -   ****:
-    -   **Importance**: Main FastAPI entry point, orchestrates API routes.
-    -   **Changes**: Replaced Capitalist-related  router with the new  router.
--   ** (NEW/MODIFIED)**:
-    -   **Importance**: Handles all backend logic for NowPayments, including API calls, invoice/subscription creation, and webhook processing. Interacts with Supabase tables.
-    -   **Changes**: New file initially, then extensively modified. Added webhook logic to distinguish and process subscription payments (not just balance top-ups), directly update  table (bypassing problematic RPC), set correct subscription limits for plans, ensure user ID-based matching (removing Super Admin defaults), and is currently being updated to include  for subscription creation.
+    -   **Importance**: Main FastAPI entry point.
+    -   **Changes**:  router replaced .  router added.
 -   ****:
-    -   **Importance**: Stores environment variables, crucial for API keys.
+    -   **Importance**: Handles NowPayments API calls, invoice/subscription creation, and webhook processing.
+    -   **Changes**: Added  to subscription creation. Implemented  endpoint. Modified webhook to use  table for matching. Integrated  RPC call for revenue tracking. Removed hardcoded API keys and emails.
+-   ****:
+    -   **Importance**: Handles user authentication and subscription management.
+    -   **Changes**: Modified  endpoint to call  in addition to local Supabase update, ensuring external API sync.
+-   ** (NEW)**:
+    -   **Importance**: Dedicated service for Google Sheets API interactions.
+    -   **Changes**: Created to handle authentication with service account, read/write to Google Sheets, and manage data synchronization for company balance and user information. Uses environment variables for credentials.
+-   ** (NEW)**:
+    -   **Importance**: API endpoints for triggering Google Sheets synchronization and reports.
+    -   **Changes**: Created endpoints like , , , , .
+-   ****:
+    -   **Importance**: Stores environment variables for API keys and configurations.
+    -   **Changes**: Added , , , , , . Critically, , , , , ,  were added and repeatedly updated/removed to ensure no hardcoding. AI API keys (GROK, OPENAI) and Capitalist (deprecated) keys were also moved or confirmed to be in env vars.
+-   ****:
+    -   **Importance**: Python dependencies.
     -   **Changes**: Added , , , .
--   ****:
-    -   **Importance**: Manages Python dependencies.
-    -   **Changes**: Added  to fix Pydantic import error.
 -   ** (NEW)**:
-    -   **Importance**: Defines the database schema for NowPayments.
-    -   **Changes**: Created to include , , and  tables. Includes RLS policies, functions, and triggers.  check constraint for  fixed to .
--   ****:
-    -   **Importance**: User settings and profile management.
-    -   **Changes**: Modified to integrate the  modal, replacing , and initiated responsive styling for the Manage Crypto button.
--   ****:
-    -   **Importance**: Manages user subscription plans.
-    -   **Changes**: Refactored , added extra bottom spacing for mobile, removed irrelevant balance deduction text, enhanced Current Plan badge visibility, and added  logic.
+    -   **Importance**: Defines a new table for email-based subscription validation.
+    -   **Changes**: Created to store , , , , , , with RLS policies and a cleanup function. Fixes involved correcting sequence grants for UUID primary keys.
 -   ** (NEW)**:
-    -   **Importance**: Dedicated UI for NowPayments crypto deposits and subscriptions.
-    -   **Changes**: New file implementing UI for currency/network selection, amount input, dynamic minimums, price estimation, and invoice/subscription initiation. Includes styling fixes and updated plan features.
--   ** (NEW/MODIFIED)**:
-    -   **Importance**: Frontend service for interacting with the NowPayments backend API.
-    -   **Changes**: New file initially, then modified to include  as a query parameter for  and  functions to ensure correct user association.
+    -   **Importance**: SQL function to update company balance with subscription revenue.
+    -   **Changes**: Created  function to add revenue to , , and . Later modified to include  column for dedicated tracking. Fixes involved correcting syntax (unterminated quotes).
+-   ** (NEW)**:
+    -   **Importance**: Defines the enhanced database schema including monthly reports and commissions.
+    -   **Changes**: Created to add  column to , a new  table, and a new  table. Also includes functions for monthly report generation. Fixes involved adding  column for trigger compatibility.
 -   ****:
-    -   **Importance**: Global styles for the application.
-    -   **Changes**: Updated light theme background to .
--   ****:
-    -   **Importance**: Displays user's subscription status.
-    -   **Changes**: Modified to show the subscription expiry date for paid users.
--   ****:
-    -   **Importance**: Handles user authentication, profile, and subscription management endpoints.
-    -   **Changes**: Updated subscription cancellation logic to maintain plan until expiry. Modified user profile API to return default profile gracefully if no record exists.  and other endpoints were checked and had their default  values (e.g., Super Admin ID) removed.
+    -   **Importance**: Frontend service for NowPayments API.
+    -   **Changes**: Modified  to pass  and ensure correct user association.
 -   ****:
     -   **Importance**: Frontend service for Supabase data interactions.
-    -   **Changes**: Added  function.
--   ****:
-    -   **Importance**: Manages global authentication state.
-    -   **Changes**: Implemented  function and integrated it into the  listener to automatically create Supabase profile records for new Google OAuth users upon first login, extracting name and avatar.
--   ****:
-    -   **Importance**: Handles user verification status.
-    -   **Changes**: Modified  to use  instead of  when querying  for , to gracefully handle users without existing profiles.
+    -   **Changes**:  was identified as only updating local DB, leading to backend auth endpoint being updated.
 </code_architecture>
 
 <pending_tasks>
--   Add  to the subscription creation request when interacting with the NowPayments API to ensure real-time payment notifications.
--   Implement the  endpoint for NowPayments to support proper subscription cancellation through their API.
+-   Address remaining hardcoded Google credentials or secrets in the codebase that prevent saving to Git, specifically the strings  and .
+-   Verify full end-to-end functionality of Google Sheets integration after security fixes.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was engaged in resolving a critical production bug where users' paid subscriptions were not automatically upgrading their plans. Despite successful payments and notifications, the backend was not receiving real-time updates from NowPayments. Upon investigation, by reviewing NowPayments API documentation and system logs, the root cause was identified: the  was missing from the subscription creation requests sent to NowPayments. This meant NowPayments had no address to send payment success notifications back to the application's webhook.
+Immediately before this summary request, the AI engineer was deep into the implementation of the Google Sheets integration and simultaneously addressing critical security vulnerabilities related to credential management. The Google Sheets integration involved creating new database tables (, ) and modifying the  table to include  for better financial tracking. A new  was developed to handle API interactions and a  router was added for sync endpoints.
 
-This follows extensive work on ensuring accurate user-payment association, preventing payments from defaulting to the Super Admin account, refining webhook processing logic to handle both balance top-ups and subscription upgrades, implementing subscription cancellation, and automatically creating user profiles for Google OAuth registrations. The current state is that the NowPayments integration has been stabilized in many areas, but this fundamental  configuration is essential for the automatic, real-time subscription upgrade flow to function reliably. The AI engineer is now poised to implement the fix for this missing .
+A significant challenge arose with deployment failures due to missing Python dependencies (), which was fixed by updating . The most persistent and critical issue has been the presence of hardcoded Google Service Account credentials and other API keys within the codebase, preventing Git repository commits due to security alerts. The AI engineer has repeatedly attempted to move these secrets to environment variables and delete credential files. However, the latest interaction reveals that some Google-related strings (e.g., service account email, client ID) are still being detected, indicating remaining hardcoded values or references. The current work is focused on eradicating these last vestiges of hardcoded credentials to ensure secure deployment.
 </current_work>
 
 <optional_next_step>
-Fix #1: Add IPN Callback URL to Subscription Creation.
+Identify and remove the remaining hardcoded Google-related strings (, ) from  and the entire codebase.
 </optional_next_step>

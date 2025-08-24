@@ -12,7 +12,7 @@ from datetime import datetime
 import uuid
 
 # Get backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://crypto-payment-fix-2.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://fintracker-18.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class BackendTester:

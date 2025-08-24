@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://crypto-payment-fix-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://fintracker-18.preview.emergentagent.com/api"
 TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
 TEST_EMAIL = "kirillpopolitov@gmail.com"
 
