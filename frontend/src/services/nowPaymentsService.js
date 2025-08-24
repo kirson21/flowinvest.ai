@@ -123,6 +123,23 @@ class NowPaymentsService {
   }
 
   /**
+   * Cancel subscription for user
+   */
+  async cancelSubscription(subscriptionId, userId) {
+    // Validate parameters
+    if (!subscriptionId) {
+      throw new Error('Subscription ID is required for subscription cancellation');
+    }
+    if (!userId) {
+      throw new Error('User ID is required for subscription cancellation');
+    }
+    
+    return this.makeRequest(`/subscription/${subscriptionId}?user_id=${userId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
    * Process successful payment return
    */
   async handlePaymentReturn(orderId, status) {
