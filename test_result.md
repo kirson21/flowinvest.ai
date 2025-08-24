@@ -128,6 +128,30 @@ backend:
           agent: "testing"
           comment: "✅ CRITICAL SUBSCRIPTION UPGRADE WEBHOOK FIX VERIFICATION COMPLETED: Comprehensive testing confirms the production bug where users pay for subscriptions but don't get plan upgrades has been SUCCESSFULLY FIXED. WEBHOOK PROCESSING ENHANCEMENT VERIFIED: ✅ Webhook Detection Logic Working - /api/nowpayments/webhook endpoint correctly distinguishes between subscription payments (stored in nowpayments_subscriptions table) and regular balance payments (stored in nowpayments_invoices table), ✅ Subscription Upgrade Flow Operational - When subscription payment marked as 'finished', webhook updates subscription status to 'PAID', calls upgrade_subscription RPC function, maps plan_plus to 'plus' plan type correctly, ✅ Balance Top-up Flow Preserved - Regular invoice payments still work correctly for balance credits (tested with invoice ID 5766510408), ✅ Database Integration Confirmed - Webhook successfully queries nowpayments_subscriptions table and calls existing subscription upgrade APIs. TESTING EVIDENCE: Backend logs show successful subscription detection ('🔍 Is subscription payment: True'), subscription upgrade processing ('💳 Processing subscription upgrade for user cd0e9717-f85d-4726-81e9-f260394ead58 to plan plan_plus'), and proper database queries. CRITICAL PRODUCTION BUG STATUS: ✅ FIXED - Users who pay for subscriptions will now automatically get their plan upgrades. The webhook correctly processes subscription payments and triggers the upgrade_subscription function. Minor database constraint issue exists but doesn't affect core webhook functionality."
 
+  - task: "Fix Missing IPN Callback URL in Subscription Creation"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/nowpayments.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "CRITICAL SUBSCRIPTION WEBHOOK FIX IMPLEMENTED: ✅ Added missing 'ipn_callback_url' parameter to NowPayments subscription creation requests, ✅ Fixed subscription data to include webhook URL pointing to '/api/nowpayments/webhook', ✅ This ensures NowPayments will send real-time payment notifications when subscription payments are completed, ✅ Resolves critical production bug where users pay for subscriptions but don't get automatic plan upgrades. The subscription creation now includes the callback URL that was previously missing, enabling automatic webhook processing for subscription payments."
+
+  - task: "Implement Subscription Cancellation Endpoint"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/nowpayments.py, /app/frontend/src/services/nowPaymentsService.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "SUBSCRIPTION CANCELLATION SYSTEM IMPLEMENTED: ✅ Created DELETE /nowpayments/subscription/{subscription_id} endpoint for proper subscription cancellation, ✅ Integrated with NowPayments DELETE /v1/subscriptions/:sub_id API for real cancellation processing, ✅ Added JWT authentication for subscription cancellation requests, ✅ Updated local database to mark subscriptions as CANCELLED and inactive, ✅ Enhanced frontend nowPaymentsService with cancelSubscription() method, ✅ Added user notification system for subscription cancellation confirmation. Backend now provides complete subscription lifecycle management including proper cancellation through NowPayments API."
+
   - task: "Implement NowPayments Subscription System"
     implemented: true
     working: true
