@@ -11,7 +11,10 @@ cryptography==41.0.7  # For webhook signature verification
 certifi==2023.11.17
 requests-toolbelt==1.0.0
 python-multipart==0.0.6
-email-validator==2.1.1  # Email validation for Pydantic EmailStr
+google-auth==2.25.2
+google-auth-oauthlib==1.1.0
+google-auth-httplib2==0.1.1
+google-api-python-client==2.111.0  # Email validation for Pydantic EmailStr
 
 # Supabase client with compatible httpx version
 supabase==2.1.0
