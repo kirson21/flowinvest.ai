@@ -649,8 +649,8 @@ async def cancel_user_subscription(user_id: str):
                 # Get JWT token for NowPayments API
                 async def get_nowpayments_jwt():
                     auth_data = {
-                        "email": os.getenv("NOWPAYMENTS_EMAIL", "kirson.blogger@gmail.com"),
-                        "password": os.getenv("NOWPAYMENTS_PASSWORD", "defaultpassword")
+                        "email": os.getenv("NOWPAYMENTS_EMAIL"),
+                        "password": os.getenv("NOWPAYMENTS_PASSWORD")
                     }
                     
                     async with httpx.AsyncClient() as client:
