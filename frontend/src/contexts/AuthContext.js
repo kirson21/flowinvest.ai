@@ -4,6 +4,68 @@ import { dataSyncService } from '../services/dataSyncService';
 
 const AuthContext = createContext({});
 
+// Helper function to ensure user profile exists in Supabase
+const ensureUserProfile = async (user) => {
+  try {
+    if (!user?.id) return;
+    
+    console.log('🔍 Checking if user profile exists for:', user.id);
+    
+    // Check if profile already exists
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    const checkResponse = await fetch(`${backendUrl}/api/auth/user/${user.id}`);
+    
+    if (checkResponse.ok) {
+      const checkData = await checkResponse.json();
+      
+      // If it's a default profile (doesn't exist in DB), create it
+      if (checkData.success && checkData.user?.is_default) {
+        console.log('📝 Creating user profile from OAuth data...');
+        
+        // Extract data from OAuth user object
+        const profileData = {
+          display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          email: user.email,
+          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+          seller_verification_status: 'unverified',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        console.log('Profile data to create:', profileData);
+        
+        // Create the profile
+        const createResponse = await fetch(`${backendUrl}/api/auth/user/${user.id}/profile`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(profileData)
+        });
+        
+        if (createResponse.ok) {
+          const createData = await createResponse.json();
+          if (createData.success) {
+            console.log('✅ User profile created successfully:', createData.user);
+          } else {
+            console.warn('❌ Failed to create user profile:', createData.message);
+          }
+        } else {
+          console.warn('❌ Profile creation request failed:', createResponse.status);
+        }
+      } else if (checkData.success && !checkData.user?.is_default) {
+        console.log('✅ User profile already exists');
+      } else {
+        console.warn('❌ Failed to check user profile:', checkData.message);
+      }
+    } else {
+      console.warn('❌ Profile check request failed:', checkResponse.status);
+    }
+  } catch (error) {
+    console.error('❌ Error ensuring user profile:', error);
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
