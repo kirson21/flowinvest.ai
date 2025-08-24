@@ -25,11 +25,10 @@ const ensureUserProfile = async (user) => {
         // Extract data from OAuth user object
         const profileData = {
           display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-          email: user.email,
           avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
           seller_verification_status: 'unverified',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          bio: null,
+          phone: null
         };
         
         console.log('Profile data to create:', profileData);
