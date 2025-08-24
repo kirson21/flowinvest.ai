@@ -75,7 +75,7 @@ async def get_nowpayments_jwt_token():
     try:
         # For subscriptions, we might need to authenticate first
         auth_data = {
-            "email": "kirillpopolitov@gmail.com",  # Your account email
+            "email": os.getenv("NOWPAYMENTS_TEST_EMAIL", "test@example.com"),  # Test email for development
             "password": "Osiris@21"  # Your account password
         }
         
