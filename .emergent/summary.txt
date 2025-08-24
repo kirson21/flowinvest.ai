@@ -1,66 +1,86 @@
 <analysis>
-The project began with an AI engineer building , an AI-powered investment platform, from scratch. Key initial work included a React landing page, FastAPI backend, Supabase integration for authentication and subscriptions, and deployment fixes. A major pivot occurred from integrating Capitalist API for crypto payments, which faced issues like shared deposit addresses and complex authentication, to adopting NowPayments. This shift necessitated a complete re-architecture of the payment system, implementing NowPayments' invoice-based gateway and subscription features. The AI engineer meticulously tackled Pydantic conflicts, database schema migrations (fixing constraints), dependency issues (email-validator), backend 500 errors, JWT authentication for subscriptions, and extensive frontend UI/UX enhancements including dynamic minimum amounts, mobile layout fixes, and transaction history pagination. The current focus is refining mobile UI elements after successfully integrating NowPayments.
+The AI engineer's work on the  platform has been a comprehensive journey from initial UI fixes to resolving critical backend payment and user management bugs. The project began by addressing mobile UI/UX issues, such as button positioning and spacing, and enhancing subscription display. The core of the work then shifted to the NowPayments integration, which proved to be challenging. Initially, the webhook was not upgrading subscriptions, only crediting balances, and later failed to process payments due to not being called by NowPayments or misidentifying users.
+
+Significant effort was dedicated to fixing a critical bug where payments and subscriptions were incorrectly linked to the Super Admin account due to default user IDs in backend endpoints and email-based matching in the webhook. This necessitated a re-architecture of user identification and subscription update logic within the webhook. Further refinements included correcting subscription limits for paid plans, implementing robust subscription cancellation, and refining UI elements. The final major bug encountered, and currently being addressed, is the absence of  during NowPayments subscription creation, preventing real-time payment notifications. The AI has systematically debugged and stabilized a complex payment and subscription system.
 </analysis>
 
 <product_requirements>
-The  platform is an AI-powered investment application. Initial requirements included a high-conversion React landing page, a FastAPI backend, Vercel/Render deployment, user profile updates, Google OAuth, and a Supabase-backed user balance system with notifications. A ChatGPT-style subscription UI with Free, Plus, and Pro plans needed to enforce bot and marketplace product creation limits. The first major update involved integrating Capitalist API for crypto deposits/withdrawals (USDT ERC20/TRC20, USDC ERC20), requiring unique deposit tracking (later clarified to payment references), company/user fund tracking, and a UI with Top up, Withdraw, and Refresh balance. This was superseded by a switch to NowPayments for crypto payments and subscriptions, requiring an invoice-based payment gateway, email-based subscription system, IPN webhooks for real-time updates, and support for USDT (TRX, BSC, SOL, TON) and USDC (ETH, BSC, SOL). The UI also needed updates for new currencies, redirection to the payment gateway, and a subscription management interface.
+The  platform is an AI-powered investment application designed to offer a subscription-based service for AI bots and marketplace products. Initial requirements involved a high-conversion React landing page, a FastAPI backend, Supabase for authentication, user profiles, and a balance system. A ChatGPT-style subscription model (Free, Plus, Pro) with enforced limits on bot and marketplace product creation was crucial.
+
+The payment system initially used Capitalist API for crypto deposits/withdrawals (USDT ERC20/TRC20, USDC ERC20), requiring unique transaction tracking and a Top up, Withdraw, Refresh balance UI. This was superseded by NowPayments integration, demanding an invoice-based gateway, email-based subscription system, IPN webhooks for real-time updates, and support for USDT (TRX, BSC, SOL, TON) and USDC (ETH, BSC, SOL). UI updates for new currencies, payment gateway redirection, and subscription management were also required. Subsequent requirements included fixing mobile UI layout issues, displaying subscription expiry dates, enabling subscription cancellation, ensuring strict user ID-based payment association, and implementing automatic user profile creation for Google OAuth users.
 </product_requirements>
 
 <key_technical_concepts>
--   **React**: Frontend UI development.
--   **FastAPI**: Python backend API.
--   **Supabase**: BaaS (PostgreSQL, Auth, RLS).
--   **PostgreSQL/SQL**: Database schema, RLS, triggers.
--   **NowPayments API**: Third-party crypto payment gateway.
--   **Pydantic**: Data validation.
--   **JWT**: JSON Web Token for authentication.
--   **CORS**: Cross-origin resource sharing.
+-   **React**: Frontend UI development for the main application and landing page.
+-   **FastAPI**: Python backend API for business logic and integrations.
+-   **Supabase**: Backend-as-a-Service, providing PostgreSQL database, authentication, and Row Level Security (RLS).
+-   **PostgreSQL/SQL**: Database schema definition, RLS policies, and triggers for data integrity.
+-   **NowPayments API**: Third-party crypto payment gateway for deposits and subscriptions.
+-   **Pydantic**: Data validation and serialization within the FastAPI backend.
+-   **JWT**: JSON Web Tokens for secure authentication and authorization.
+-   **CORS**: Cross-Origin Resource Sharing for secure communication between frontend and backend.
 </key_technical_concepts>
 
 <code_architecture>
 
-
 -   ****:
     -   **Importance**: Main FastAPI entry point, orchestrates API routes.
-    -   **Changes**: Replaced the Capitalist-related  router with the new  router.
--   ** (NEW)**:
-    -   **Importance**: Handles all backend logic for NowPayments, including API calls for health checks, currency listing, price estimation, invoice creation, subscription management (with JWT), and webhook processing. Interacts with Supabase tables.
-    -   **Changes**: New file, centralizing NowPayments API integration. Includes endpoints for , , , , , , , and .
+    -   **Changes**: Replaced Capitalist-related  router with the new  router.
+-   ** (NEW/MODIFIED)**:
+    -   **Importance**: Handles all backend logic for NowPayments, including API calls, invoice/subscription creation, and webhook processing. Interacts with Supabase tables.
+    -   **Changes**: New file initially, then extensively modified. Added webhook logic to distinguish and process subscription payments (not just balance top-ups), directly update  table (bypassing problematic RPC), set correct subscription limits for plans, ensure user ID-based matching (removing Super Admin defaults), and is currently being updated to include  for subscription creation.
 -   ****:
     -   **Importance**: Stores environment variables, crucial for API keys.
-    -   **Changes**: Added , , , and  for NowPayments authentication.
+    -   **Changes**: Added , , , .
 -   ****:
     -   **Importance**: Manages Python dependencies.
-    -   **Changes**: Added  to fix Pydantic's  import error.
+    -   **Changes**: Added  to fix Pydantic import error.
 -   ** (NEW)**:
     -   **Importance**: Defines the database schema for NowPayments.
-    -   **Changes**: Created to include , , and  tables. Includes RLS policies,  and  functions, and triggers. The  check constraint for  was fixed to  to allow free plans.
+    -   **Changes**: Created to include , , and  tables. Includes RLS policies, functions, and triggers.  check constraint for  fixed to .
 -   ****:
     -   **Importance**: User settings and profile management.
-    -   **Changes**: Modified to integrate the new  modal for managing crypto, replacing the older Capitalist-specific  component. Responsive styling for the Manage Crypto button was initiated.
+    -   **Changes**: Modified to integrate the  modal, replacing , and initiated responsive styling for the Manage Crypto button.
 -   ****:
     -   **Importance**: Manages user subscription plans.
-    -   **Changes**: Refactored  to integrate with the NowPayments subscription flow, updating plan descriptions and features to reflect the real NowPayments Plus plan.
+    -   **Changes**: Refactored , added extra bottom spacing for mobile, removed irrelevant balance deduction text, enhanced Current Plan badge visibility, and added  logic.
 -   ** (NEW)**:
     -   **Importance**: Dedicated UI for NowPayments crypto deposits and subscriptions.
-    -   **Changes**: New file, implements UI for selecting cryptocurrency, network, entering amount, dynamic minimum amount display, price estimation, and initiating invoices or subscriptions. Includes extensive styling fixes for mobile responsiveness, removal of emojis from network names, and updated plan feature descriptions.
--   ** (NEW)**:
+    -   **Changes**: New file implementing UI for currency/network selection, amount input, dynamic minimums, price estimation, and invoice/subscription initiation. Includes styling fixes and updated plan features.
+-   ** (NEW/MODIFIED)**:
     -   **Importance**: Frontend service for interacting with the NowPayments backend API.
-    -   **Changes**: New file containing , , , , , and  functions.
+    -   **Changes**: New file initially, then modified to include  as a query parameter for  and  functions to ensure correct user association.
 -   ****:
     -   **Importance**: Global styles for the application.
-    -   **Changes**: Updated the light theme background to a light grey () from pink/beige.
+    -   **Changes**: Updated light theme background to .
+-   ****:
+    -   **Importance**: Displays user's subscription status.
+    -   **Changes**: Modified to show the subscription expiry date for paid users.
+-   ****:
+    -   **Importance**: Handles user authentication, profile, and subscription management endpoints.
+    -   **Changes**: Updated subscription cancellation logic to maintain plan until expiry. Modified user profile API to return default profile gracefully if no record exists.  and other endpoints were checked and had their default  values (e.g., Super Admin ID) removed.
+-   ****:
+    -   **Importance**: Frontend service for Supabase data interactions.
+    -   **Changes**: Added  function.
+-   ****:
+    -   **Importance**: Manages global authentication state.
+    -   **Changes**: Implemented  function and integrated it into the  listener to automatically create Supabase profile records for new Google OAuth users upon first login, extracting name and avatar.
+-   ****:
+    -   **Importance**: Handles user verification status.
+    -   **Changes**: Modified  to use  instead of  when querying  for , to gracefully handle users without existing profiles.
 </code_architecture>
 
 <pending_tasks>
--   Complete the mobile UI layout fixes for the Manage Crypto button within the  component.
--   Further refine mobile responsiveness for elements within the settings and crypto payment sections.
+-   Add  to the subscription creation request when interacting with the NowPayments API to ensure real-time payment notifications.
+-   Implement the  endpoint for NowPayments to support proper subscription cancellation through their API.
 </pending_tasks>
 
 <current_work>
-Immediately prior to this summary, the AI engineer was engaged in fixing mobile UI layout issues within the  application. The current task focuses on the  component, specifically addressing the positioning and responsiveness of the Manage Crypto button. The previous styling, which utilized , was identified as causing layout problems and potential content overflow on mobile devices. The AI engineer is in the process of implementing a responsive layout solution for this section to ensure the button displays correctly and is user-friendly on smaller screens. This work is a continuation of previous UI/UX enhancements, which included optimizing minimum amount displays, adjusting button and modal positioning, and refining padding across various components, particularly in  and , following the successful integration of the NowPayments API and its core functionalities.
+Immediately before this summary request, the AI engineer was engaged in resolving a critical production bug where users' paid subscriptions were not automatically upgrading their plans. Despite successful payments and notifications, the backend was not receiving real-time updates from NowPayments. Upon investigation, by reviewing NowPayments API documentation and system logs, the root cause was identified: the  was missing from the subscription creation requests sent to NowPayments. This meant NowPayments had no address to send payment success notifications back to the application's webhook.
+
+This follows extensive work on ensuring accurate user-payment association, preventing payments from defaulting to the Super Admin account, refining webhook processing logic to handle both balance top-ups and subscription upgrades, implementing subscription cancellation, and automatically creating user profiles for Google OAuth registrations. The current state is that the NowPayments integration has been stabilized in many areas, but this fundamental  configuration is essential for the automatic, real-time subscription upgrade flow to function reliably. The AI engineer is now poised to implement the fix for this missing .
 </current_work>
 
 <optional_next_step>
-Continue fixing the mobile UI layout issues in  for the Manage Crypto button.
+Fix #1: Add IPN Callback URL to Subscription Creation.
 </optional_next_step>
