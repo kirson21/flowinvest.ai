@@ -194,15 +194,17 @@ class RPCFunctionTester:
             
             if response.status_code == 200:
                 data = response.json()
-                plan_type = data.get('plan_type', '')
-                status = data.get('status', '')
+                success = data.get('success', False)
+                subscription = data.get('subscription', {})
+                plan_type = subscription.get('plan_type', '')
+                status = subscription.get('status', '')
                 
                 self.log_test(
                     "Subscriptions Data",
-                    bool(plan_type or status),
-                    f"Plan: {plan_type}, Status: {status}"
+                    success and bool(plan_type or status),
+                    f"Success: {success}, Plan: {plan_type}, Status: {status}"
                 )
-                return bool(plan_type or status)
+                return success and bool(plan_type or status)
             else:
                 self.log_test(
                     "Subscriptions Data",
