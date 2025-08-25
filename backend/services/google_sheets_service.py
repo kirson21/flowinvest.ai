@@ -206,27 +206,12 @@ OHA+JJ13uDfaltLNGG3PziK/
             # Try to get users from auth.users table first (contains emails)
             users_with_emails = []
             try:
-                # Use RPC to query auth.users since it's in a different schema
-                users_query = """
-                SELECT id, email, created_at 
-                FROM auth.users 
-                ORDER BY created_at DESC
-                """
-                
-                # Try direct query first
-                auth_users_result = supabase.rpc('exec_sql', {'query': users_query}).execute()
-                if auth_users_result.data:
-                    users_with_emails = auth_users_result.data
-                    print(f"📧 Found {len(users_with_emails)} users with emails from auth.users")
-                else:
-                    # Fallback: try different RPC name
-                    auth_users_result = supabase.rpc('execute_sql', {'sql_query': users_query}).execute()
-                    if auth_users_result.data:
-                        users_with_emails = auth_users_result.data
-                        print(f"📧 Found {len(users_with_emails)} users with emails from auth.users (fallback)")
+                print("⚠️ Auth.users table access not available via RPC, using fallback sources for emails")
             except Exception as e:
                 print(f"⚠️ Could not access auth.users table directly: {e}")
-                # We'll use profile data and try to get emails from other sources
+            
+            # For now, we'll rely on email_validation and subscription metadata for emails
+            # until we can properly access auth.users table
             
             # Get user profiles
             profiles_result = supabase.table('user_profiles').select('*').execute()
