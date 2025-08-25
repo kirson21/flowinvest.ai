@@ -40,11 +40,11 @@ BEGIN
         public.subscriptions s ON au.id = s.user_id
     LEFT JOIN (
         SELECT 
-            user_id, 
-            SUM(amount) as total_commissions
-        FROM public.commissions 
-        WHERE status = 'paid'
-        GROUP BY user_id
+            c.user_id, 
+            SUM(c.amount) as total_commissions
+        FROM public.commissions c
+        WHERE c.status = 'paid'
+        GROUP BY c.user_id
     ) comm ON au.id = comm.user_id
     ORDER BY au.created_at DESC;
 END;
