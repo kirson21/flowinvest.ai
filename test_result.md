@@ -406,11 +406,23 @@ frontend:
           agent: "testing"
           comment: "✅ BALANCE SYSTEM SERVICES BACKEND VERIFICATION COMPLETED: Comprehensive testing confirms all backend APIs supporting the balance system services are FULLY OPERATIONAL. BACKEND API VERIFICATION: ✅ Balance Retrieval API - GET /auth/user/{user_id}/balance working correctly, ✅ Balance Update API - POST /auth/user/{user_id}/update-balance successfully processes topups and withdrawals, ✅ Transaction History API - GET /auth/user/{user_id}/transactions retrieves complete transaction history, ✅ Balance Sync API - POST /auth/user/{user_id}/sync-balance synchronizes frontend/backend balances, ✅ Marketplace Transaction API - Backend supports marketplace purchase processing with balance validation, ✅ Error Handling - Proper insufficient funds protection and validation working. SERVICE LAYER BACKEND READY: All backend endpoints required by the balance system services are operational and provide complete balance management capabilities including topups, withdrawals, transaction history, and marketplace integration."
 
+  - task: "Implement NowPayments Withdrawal/Payout Functionality"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/nowpayments.py, /app/frontend/src/components/crypto/NowPayments.js, /app/frontend/src/services/nowPaymentsService.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "NOWPAYMENTS WITHDRAWAL/PAYOUT SYSTEM IMPLEMENTED: ✅ Added comprehensive withdrawal functionality with TOTP-based 2FA automation using NOWPAYMENTS_2FA_SECRET environment variable, ✅ Created nowpayments_withdrawals_schema.sql with withdrawal tracking table including 2FA verification, status management, and error handling, ✅ Implemented backend withdrawal endpoints: /withdrawal/min-amount/{currency}, /withdrawal/fee, /withdrawal/create, /withdrawal/verify, /user/{user_id}/withdrawals, /withdrawal/webhook, ✅ Added automatic 2FA code generation using pyotp library with environment variable secret, ✅ Enhanced frontend by replacing 'View History' button with 'Withdraw' functionality and showing payment history at bottom by default, ✅ Updated nowPaymentsService.js with withdrawal methods: getWithdrawalMinAmount, getWithdrawalFee, createWithdrawal, verifyWithdrawal, getUserWithdrawals, validateWithdrawalAddress, ✅ Frontend withdrawal modal includes amount validation, address validation, minimum amount checking, fee calculation, and automatic verification, ✅ Support for same cryptocurrencies as deposits: USDT (TRC20, BSC, SOL, TON, ERC20) and USDC (BSC, SOL, ERC20), ✅ Comprehensive transaction history showing both payments and withdrawals with proper status badges. Ready for backend testing of withdrawal functionality with 2FA automation."
+
   - task: "Complete Google Sheets Integration with All User Emails"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/services/google_sheets_service.py, /app/backend/routes/google_sheets.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
