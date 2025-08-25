@@ -1324,9 +1324,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Complete Google Sheets Integration with All User Emails"
-    - "Test Google Sheets Sync with Environment Variables"  
-    - "Verify User Data Synchronization to Google Sheets"
+    - "Implement NowPayments Withdrawal/Payout Functionality"
+    - "Test Withdrawal Creation with Balance Validation"
+    - "Test 2FA Verification and Payout Processing"
+    - "Test Withdrawal History and Status Updates"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
