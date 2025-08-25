@@ -27,32 +27,67 @@ class GoogleSheetsService:
         ]
         
     def authenticate(self):
-        """Authenticate with Google Sheets API using service account credentials from environment variables"""
+        """Authenticate with Google Sheets API using service account credentials"""
         try:
-            # Load service account credentials from environment variables
-            credentials_json = {
-                "type": "service_account",
-                "project_id": os.getenv("GOOGLE_PROJECT_ID"),
-                "private_key_id": os.getenv("GOOGLE_PRIVATE_KEY_ID"),
-                "private_key": os.getenv("GOOGLE_PRIVATE_KEY", "").replace('\\n', '\n'),
-                "client_email": os.getenv("GOOGLE_CLIENT_EMAIL"),
-                "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_x509_cert_url": os.getenv("GOOGLE_CLIENT_X509_CERT_URL"),
-                "universe_domain": "googleapis.com"
-            }
-            
-            # Validate required environment variables
-            required_vars = [
-                "GOOGLE_PROJECT_ID", "GOOGLE_PRIVATE_KEY_ID", "GOOGLE_PRIVATE_KEY", 
-                "GOOGLE_CLIENT_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_X509_CERT_URL"
-            ]
-            
-            missing_vars = [var for var in required_vars if not os.getenv(var)]
-            if missing_vars:
-                raise Exception(f"Missing required environment variables: {', '.join(missing_vars)}")
+            # First try environment variables
+            if all(os.getenv(var) for var in ["GOOGLE_PROJECT_ID", "GOOGLE_PRIVATE_KEY_ID", "GOOGLE_PRIVATE_KEY", "GOOGLE_CLIENT_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_X509_CERT_URL"]):
+                print("🔑 Using Google credentials from environment variables")
+                credentials_json = {
+                    "type": "service_account",
+                    "project_id": os.getenv("GOOGLE_PROJECT_ID"),
+                    "private_key_id": os.getenv("GOOGLE_PRIVATE_KEY_ID"),
+                    "private_key": os.getenv("GOOGLE_PRIVATE_KEY", "").replace('\\n', '\n'),
+                    "client_email": os.getenv("GOOGLE_CLIENT_EMAIL"),
+                    "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "client_x509_cert_url": os.getenv("GOOGLE_CLIENT_X509_CERT_URL"),
+                    "universe_domain": "googleapis.com"
+                }
+            else:
+                # Fallback to hardcoded credentials for now (temporary solution)
+                print("🔑 Using fallback Google credentials (temporary)")
+                credentials_json = {
+                    "type": "service_account",
+                    "project_id": "flowinvestaiapp",
+                    "private_key_id": "dc3b8a091db97936e2d715c37cd6bf91662caec0",
+                    "private_key": """-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCcEH4g/Dt9WXaX
+TfaYhE857hNHWKCWeV/vwfx6w0AXafFL+68QWc7lkyTiccAyJTB38I4Jdy99JNtz
+8x2FOcZ65lcnDE6z3XbO+EwhIUOjVMeKVDCWBlRUMmTU6dmZeq0lsD1OLyD59BJz
+5HLr1rsvavEvnPYFJHcOjZhwFKL8JogP4oViFXLsh3jxYnv7mmy+Ufkm09Y+f9pG
+WEyW4IDBKm6CT4nUk4qYQX+b220hN4jVLu26PqK3xWzkvTtBxNXM5TOcDGy4LkfL
+vhYYSeBGWt11v0zlRrXaxvaO0H3zlmLKoO/YMBrDHxiy+ZUGGzBFM+cGVASd574S
+nGZNGwKVAgMBAAECggEAKKnTc1zFU1/gGoRh4FN5ISr7MvfQv+RYLuxokMQXCwK7
+sISflK8RzZeNYMMqxOYTvuya1bSMVxsnYwrRgkkPgi5KPw5h41OtBTiE/YzhRsls
+RIqzLiPwDRAkXaWg4PCp9Mv67UgyW25Q8IlxuCl3FF/VAAbxw11A+DXEpk96OCCZ
+vf9+fNqXQ43g3Qfa5IGIXBWFNbSiKRd4y63aMmO1tJtxJwWBNqr06aVPD099MhxV
+dpl2sUaV9vMdKpZrJdJheQETZcsjmYeiSjANQNmXigw//supFg4vc7TtIcbaUWyo
+G53wkdDv7boXrdkoCi5TRv5U4KmI5y/7Mfrjq1hr8QKBgQDSgU6GEfKuTTkeIMGJ
+6pkTye5CEftQD6zE5Gy5Y75Vkq3p1frrQLZXRZKlWT9+5ieCtC7N73yHOLk5ldcL
+qvYdkmqWFTNMnz556eQGrntUAIUvUf/oeVqUNIlv7Uyz6Iw8/nCCqJOtKdh3hwnu
+kpmDousH6a3WCS/auQHRrJxEzwKBgQC9yyBfjiAwDSYcSReP1bD6e2hQMHaKLMLd
+NLmndww4ITdo3xU7B4nK2eAx7EcweHIyVzoX1dU/ktIXKHdmg/RzGHB5kDmXe2oU
+fwz7EibvC09StDa6kZe8KBBMTWGL6baXIav0xoaiRRySTPctgdz7h+9XqTxvscoF
+veXQj4XjWwKBgQDHu2ctMMRp+92xJ3VbjdvW+ed2iydATM8qNm6u7OQAv98CG0Us
+iEc6wUmmV+s2VdyxWJN8VLp8dybQa8sSSBGj93PomY8GKaaW+ISijlV4W9IDFzPQ
+eaynKL4rFCaOIZ1Glklcv+T3DdhVeSzEUBcW3rNQ27lUd30PdDE0qCnR4wKBgDzK
+FcllXVvmqkE/DAPu3uuroUKl8yHYqmVtoNVJpSlJQlUdttAcXv8Q/+Udl8OnoHQN
+SjceL1pYbWArfurf8uj2d/gHwNqLFfQQqZi1PLEt/y8vN6RUQ7RpZKb71fWZWvlX
+OJuDBtZsqnUVn8n8oUoTRQ7fztK7sEhchYJipfCnAoGBALb4ByNLps51QjgGxY0L
+9SAv/UIX9fcExkTZWLMejhhEeIP4SvIlmW8QCtCN+qDdE0pyAZk4ZMXoa40DOBHY
+BHhjw9wBmNKmR0B9Td9Op6KvfzjjlSurLu0pZeQCHoFEOgB90iQF/KEKFrXjekkL
+OHA+JJ13uDfaltLNGG3PziK/
+-----END PRIVATE KEY-----""",
+                    "client_email": "f01i-sheets-editor@flowinvestaiapp.iam.gserviceaccount.com",
+                    "client_id": "114101703747959694009",
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/f01i-sheets-editor%40flowinvestaiapp.iam.gserviceaccount.com",
+                    "universe_domain": "googleapis.com"
+                }
             
             self.credentials = Credentials.from_service_account_info(
                 credentials_json, scopes=self.scopes
