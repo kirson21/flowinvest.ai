@@ -407,6 +407,13 @@ const NowPayments = () => {
     }
   };
 
+  const resetSubscriptionForm = () => {
+    setSubscriptionEmail(user?.email || '');
+    setSelectedPlan('plan_plus');
+    setMessage('');
+    setError('');
+  };
+
   const resetWithdrawalForm = () => {
     setWithdrawalAmount('');
     setWithdrawalAddress('');
