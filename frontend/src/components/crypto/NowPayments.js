@@ -495,21 +495,21 @@ const NowPayments = () => {
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Clock className="h-5 w-5 text-purple-600" />
-              Transaction History
+              <ArrowUpCircle className="h-5 w-5 text-orange-600" />
+              Withdraw Funds
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              View your payment and subscription history
+              Withdraw your balance to external crypto addresses
             </p>
             <Button 
-              onClick={() => setShowTransactions(!showTransactions)}
+              onClick={() => setShowWithdrawalModal(true)}
               variant="outline"
-              className="w-full"
+              className="w-full border-orange-600 text-orange-600 hover:bg-orange-50 hover:border-orange-700"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              View History
+              <Wallet className="h-4 w-4 mr-2" />
+              Withdraw
             </Button>
           </CardContent>
         </Card>
