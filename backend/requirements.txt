@@ -16,6 +16,7 @@ google-auth==2.25.2
 google-auth-oauthlib==1.1.0
 google-auth-httplib2==0.1.1
 google-api-python-client==2.111.0  # Email validation for Pydantic EmailStr
+pyotp==2.9.0          # TOTP 2FA code generation for withdrawals
 
 # Supabase client with compatible httpx version
 supabase==2.1.0
