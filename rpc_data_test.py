@@ -239,7 +239,7 @@ class RPCFunctionTester:
             
             if profile_ok and subscription_ok:
                 profile_data = profile_response.json().get('user', {})
-                subscription_data = subscription_response.json()
+                subscription_data = subscription_response.json().get('subscription', {})
                 
                 # Check if we have the expected data structure
                 has_seller_status = 'seller_verification_status' in profile_data
