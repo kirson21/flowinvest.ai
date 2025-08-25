@@ -124,19 +124,21 @@ class RPCFunctionTester:
             # Since we can't directly query auth.users, let's test through user profiles
             # which should have user_id references to auth.users
             test_user_id = "cd0e9717-f85d-4726-81e9-f260394ead58"
-            response = requests.get(f"{self.backend_url}/auth/user/{test_user_id}/profile", timeout=15)
+            response = requests.get(f"{self.backend_url}/auth/user/{test_user_id}", timeout=15)
             
             if response.status_code == 200:
                 data = response.json()
-                user_id = data.get('user_id', '')
-                name = data.get('name', '')
+                success = data.get('success', False)
+                user_data = data.get('user', {})
+                user_id = user_data.get('user_id', '')
+                display_name = user_data.get('display_name', '')
                 
                 self.log_test(
                     "Auth Users Table Access (via Profile)",
-                    bool(user_id),
-                    f"User ID: {user_id}, Name: {name}"
+                    success and bool(user_id),
+                    f"Success: {success}, User ID: {user_id}, Name: {display_name}"
                 )
-                return bool(user_id)
+                return success and bool(user_id)
             else:
                 self.log_test(
                     "Auth Users Table Access (via Profile)",
