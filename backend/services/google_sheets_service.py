@@ -166,128 +166,94 @@ class GoogleSheetsService:
             return False
     
     def sync_users_data(self):
-        """Sync users data to Google Sheets with emails from auth.users table"""
+        """Sync users data to Google Sheets with emails from auth.users via RPC function"""
         try:
             if not self.service:
                 if not self.authenticate():
                     return False
             
-            # Get comprehensive users data from multiple sources
-            print("📊 Collecting user data from multiple tables...")
+            print("📊 Collecting user data using RPC function...")
             
-            # Try to get users from auth.users table first (contains emails)
-            users_with_emails = []
-            try:
-                print("⚠️ Auth.users table access not available via RPC, using fallback sources for emails")
-            except Exception as e:
-                print(f"⚠️ Could not access auth.users table directly: {e}")
-            
-            # For now, we'll rely on email_validation and subscription metadata for emails
-            # until we can properly access auth.users table
-            
-            # Get user profiles
-            profiles_result = supabase.table('user_profiles').select('*').execute()
-            profiles = profiles_result.data if profiles_result.data else []
-            print(f"👤 Found {len(profiles)} user profiles")
-            
-            # Get subscriptions
-            subscriptions_result = supabase.table('subscriptions').select('*').execute()
-            subscriptions = subscriptions_result.data if subscriptions_result.data else []
-            print(f"💳 Found {len(subscriptions)} subscriptions")
-            
-            # Get user accounts for additional info
-            try:
-                accounts_result = supabase.table('user_accounts').select('*').execute()
-                accounts = accounts_result.data if accounts_result.data else []
-                print(f"💰 Found {len(accounts)} user accounts")
-            except:
-                accounts = []
-            
-            # Get commissions
-            try:
-                commissions_result = supabase.table('commissions').select('user_id, amount, status').execute()
-                commissions = commissions_result.data if commissions_result.data else []
-                print(f"💵 Found {len(commissions)} commission records")
-            except:
-                commissions = []
-            
-            # Get email data from subscription_email_validation table as fallback
-            try:
-                email_validation_result = supabase.table('subscription_email_validation').select('user_id, email').execute()
-                email_validations = email_validation_result.data if email_validation_result.data else []
-                print(f"📩 Found {len(email_validations)} email validations as fallback")
-            except:
-                email_validations = []
-            
-            # Process and combine data
+            # Try to use the RPC function to get complete user data with emails
             users_data = []
             
-            # Create a master list of all users by combining sources
-            all_user_ids = set()
+            try:
+                print("🔍 Calling get_all_users_with_emails() RPC function...")
+                result = supabase.rpc('get_all_users_with_emails').execute()
+                
+                if result.data:
+                    print(f"✅ RPC function successful! Found {len(result.data)} users with complete data")
+                    
+                    for user in result.data:
+                        users_data.append({
+                            'user_id': user.get('user_id', ''),
+                            'name': user.get('name', ''),
+                            'email': user.get('email', ''),
+                            'country': user.get('country', ''),
+                            'phone': user.get('phone', ''),
+                            'registration_date': user.get('created_at', ''),
+                            'seller_verification_status': user.get('seller_verification_status', 'not_verified'),
+                            'plan_type': user.get('plan_type', 'free'),
+                            'subscription_status': user.get('subscription_status', 'inactive'),
+                            'subscription_end_date': user.get('subscription_end_date', ''),
+                            'total_commission_earned': float(user.get('total_commission_earned', 0))
+                        })
+                else:
+                    print("⚠️ RPC function returned no data, falling back to simple RPC")
+                    raise Exception("No data from complex RPC")
+                    
+            except Exception as rpc_error:
+                print(f"⚠️ Complex RPC failed: {rpc_error}")
+                print("🔄 Trying simple RPC function get_users_emails_simple()...")
+                
+                try:
+                    # Fallback to simple RPC + manual joins
+                    emails_result = supabase.rpc('get_users_emails_simple').execute()
+                    
+                    if emails_result.data:
+                        print(f"✅ Simple RPC successful! Found {len(emails_result.data)} users with emails")
+                        
+                        # Get additional data manually
+                        profiles = supabase.table('user_profiles').select('*').execute()
+                        subscriptions = supabase.table('subscriptions').select('*').execute()
+                        
+                        profiles_data = profiles.data if profiles.data else []
+                        subscriptions_data = subscriptions.data if subscriptions.data else []
+                        
+                        for user in emails_result.data:
+                            user_id = user.get('user_id', '')
+                            
+                            # Find matching profile and subscription
+                            profile = next((p for p in profiles_data if p.get('user_id') == user_id), {})
+                            subscription = next((s for s in subscriptions_data if s.get('user_id') == user_id), {})
+                            
+                            users_data.append({
+                                'user_id': user_id,
+                                'name': profile.get('name', ''),
+                                'email': user.get('email', ''),
+                                'country': profile.get('country', ''),
+                                'phone': profile.get('phone', ''),
+                                'registration_date': user.get('created_at', ''),
+                                'seller_verification_status': profile.get('seller_verification_status', 'not_verified'),
+                                'plan_type': subscription.get('plan_type', 'free'),
+                                'subscription_status': subscription.get('status', 'inactive'),
+                                'subscription_end_date': subscription.get('end_date', ''),
+                                'total_commission_earned': 0
+                            })
+                    else:
+                        print("❌ Simple RPC also returned no data")
+                        raise Exception("No data from simple RPC")
+                        
+                except Exception as simple_rpc_error:
+                    print(f"❌ Simple RPC also failed: {simple_rpc_error}")
+                    print("🔄 Falling back to manual data collection...")
+                    
+                    # Final fallback: use the original manual method
+                    users_data = self._fallback_manual_sync()
             
-            # Add users from auth.users (priority source)
-            for user in users_with_emails:
-                all_user_ids.add(user.get('id'))
-            
-            # Add users from profiles
-            for profile in profiles:
-                all_user_ids.add(profile.get('user_id'))
-            
-            # Add users from subscriptions
-            for subscription in subscriptions:
-                all_user_ids.add(subscription.get('user_id'))
-            
-            print(f"🔍 Processing {len(all_user_ids)} unique users")
-            
-            # Process each user
-            for user_id in all_user_ids:
-                if not user_id:
-                    continue
-                
-                # Find user email from auth.users
-                auth_user = next((u for u in users_with_emails if u.get('id') == user_id), {})
-                
-                # Find matching profile
-                user_profile = next((p for p in profiles if p.get('user_id') == user_id), {})
-                
-                # Find matching subscription
-                user_subscription = next((s for s in subscriptions if s.get('user_id') == user_id), {})
-                
-                # Find matching account
-                user_account = next((a for a in accounts if a.get('user_id') == user_id), {})
-                
-                # Find email from email validation table as fallback
-                email_validation = next((e for e in email_validations if e.get('user_id') == user_id), {})
-                
-                # Calculate total commissions
-                user_commissions = [c for c in commissions if c.get('user_id') == user_id and c.get('status') == 'paid']
-                total_commission = sum(float(c.get('amount', 0)) for c in user_commissions)
-                
-                # Determine best email source (priority: auth.users > email_validation > subscription metadata)
-                email = (auth_user.get('email', '') or 
-                        email_validation.get('email', '') or 
-                        user_subscription.get('metadata', {}).get('email', '') if isinstance(user_subscription.get('metadata'), dict) else '')
-                
-                # Determine registration date (priority: auth.users > profile > subscription)
-                registration_date = (auth_user.get('created_at', '') or 
-                                   user_profile.get('created_at', '') or 
-                                   user_subscription.get('created_at', ''))
-                
-                user_data = {
-                    'user_id': user_id,
-                    'name': user_profile.get('name', ''),
-                    'email': email,
-                    'country': user_profile.get('country', ''),
-                    'phone': user_profile.get('phone', ''),
-                    'registration_date': registration_date,
-                    'seller_verification_status': user_profile.get('seller_verification_status', 'not_verified'),
-                    'plan_type': user_subscription.get('plan_type', 'free'),
-                    'subscription_status': user_subscription.get('status', 'inactive'),
-                    'subscription_end_date': user_subscription.get('end_date', ''),
-                    'total_commission_earned': total_commission
-                }
-                
-                users_data.append(user_data)
+            if not users_data:
+                print("❌ No user data collected from any method")
+                return False
             
             # Sort by registration date (newest first)
             users_data.sort(key=lambda x: x.get('registration_date', ''), reverse=True)
@@ -332,13 +298,13 @@ class GoogleSheetsService:
             print(f"✅ Users data synced to Google Sheets successfully ({len(users_data)} users)")
             
             # Print detailed summary
-            active_subs = len([u for u in users_data if u.get('subscription_status') == 'active'])
-            plus_users = len([u for u in users_data if u.get('plan_type') == 'plus'])
-            verified_sellers = len([u for u in users_data if u.get('seller_verification_status') == 'verified'])
             users_with_email = len([u for u in users_data if u.get('email')])
             users_with_names = len([u for u in users_data if u.get('name')])
             users_with_phone = len([u for u in users_data if u.get('phone')])
             users_with_country = len([u for u in users_data if u.get('country')])
+            active_subs = len([u for u in users_data if u.get('subscription_status') == 'active'])
+            plus_users = len([u for u in users_data if u.get('plan_type') == 'plus'])
+            verified_sellers = len([u for u in users_data if u.get('seller_verification_status') == 'verified'])
             
             print(f"   📊 DETAILED SUMMARY:")
             print(f"   Total Users: {len(users_data)}")
@@ -360,6 +326,63 @@ class GoogleSheetsService:
             import traceback
             traceback.print_exc()
             return False
+
+    def _fallback_manual_sync(self):
+        """Fallback method for manual data collection when RPC functions fail"""
+        print("📊 Using fallback manual data collection...")
+        
+        try:
+            # Get data from individual tables
+            profiles = supabase.table('user_profiles').select('*').execute()
+            subscriptions = supabase.table('subscriptions').select('*').execute()
+            email_validations = supabase.table('subscription_email_validation').select('user_id, email').execute()
+            
+            profiles_data = profiles.data if profiles.data else []
+            subscriptions_data = subscriptions.data if subscriptions.data else []
+            email_validations_data = email_validations.data if email_validations.data else []
+            
+            # Collect all unique user IDs
+            all_user_ids = set()
+            for profile in profiles_data:
+                all_user_ids.add(profile.get('user_id'))
+            for subscription in subscriptions_data:
+                all_user_ids.add(subscription.get('user_id'))
+            for email_val in email_validations_data:
+                all_user_ids.add(email_val.get('user_id'))
+            
+            users_data = []
+            
+            for user_id in all_user_ids:
+                if not user_id:
+                    continue
+                
+                profile = next((p for p in profiles_data if p.get('user_id') == user_id), {})
+                subscription = next((s for s in subscriptions_data if s.get('user_id') == user_id), {})
+                email_validation = next((e for e in email_validations_data if e.get('user_id') == user_id), {})
+                
+                # Get best available email (from email validation table)
+                email = email_validation.get('email', '')
+                
+                users_data.append({
+                    'user_id': user_id,
+                    'name': profile.get('name', ''),
+                    'email': email,
+                    'country': profile.get('country', ''),
+                    'phone': profile.get('phone', ''),
+                    'registration_date': profile.get('created_at', '') or subscription.get('created_at', ''),
+                    'seller_verification_status': profile.get('seller_verification_status', 'not_verified'),
+                    'plan_type': subscription.get('plan_type', 'free'),
+                    'subscription_status': subscription.get('status', 'inactive'),
+                    'subscription_end_date': subscription.get('end_date', ''),
+                    'total_commission_earned': 0
+                })
+            
+            print(f"✅ Fallback method collected {len(users_data)} users")
+            return users_data
+            
+        except Exception as e:
+            print(f"❌ Fallback method also failed: {e}")
+            return []
     
     def sync_all_data(self):
         """Sync all data to Google Sheets"""
