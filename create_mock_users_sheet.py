@@ -35,12 +35,19 @@ try:
     try:
         accounts = supabase.table('user_accounts').select('*').execute()
     except:
-        accounts = None
+        accounts = type('obj', (object,), {'data': []})()
     
     try:
         commissions = supabase.table('commissions').select('user_id, amount, status').execute()
     except:
-        commissions = None
+        commissions = type('obj', (object,), {'data': []})()
+        
+    print(f"📊 Data loaded:")
+    print(f"   Email validations: {len(email_validations.data) if email_validations.data else 0}")
+    print(f"   Subscriptions: {len(subscriptions.data) if subscriptions.data else 0}")
+    print(f"   Profiles: {len(profiles.data) if profiles.data else 0}")
+    print(f"   Accounts: {len(accounts.data) if accounts.data else 0}")
+    print(f"   Commissions: {len(commissions.data) if commissions.data else 0}")
     
     # Get all unique user IDs
     all_user_ids = set()
