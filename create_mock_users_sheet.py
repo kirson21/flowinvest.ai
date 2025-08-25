@@ -75,11 +75,11 @@ try:
         email_validation = next((e for e in email_validations.data if e.get('user_id') == user_id), {}) if email_validations.data else {}
         user_profile = next((p for p in profiles.data if p.get('user_id') == user_id), {}) if profiles.data else {}
         user_subscription = next((s for s in subscriptions.data if s.get('user_id') == user_id), {}) if subscriptions.data else {}
-        user_account = next((a for a in accounts.data if a.get('user_id') == user_id), {}) if accounts and accounts.data else {}
+        user_account = next((a for a in accounts.data if a.get('user_id') == user_id), {}) if accounts.data else {}
         
         # Calculate commissions
         user_commissions = []
-        if commissions and commissions.data:
+        if commissions.data:
             user_commissions = [c for c in commissions.data if c.get('user_id') == user_id and c.get('status') == 'paid']
         total_commission = sum(float(c.get('amount', 0)) for c in user_commissions)
         
