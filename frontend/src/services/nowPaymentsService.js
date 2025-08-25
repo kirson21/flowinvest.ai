@@ -291,6 +291,103 @@ class NowPaymentsService {
     // Open in new tab for better UX
     window.open(invoiceUrl, '_blank', 'noopener,noreferrer');
   }
+
+  // =====================================================
+  // WITHDRAWAL/PAYOUT METHODS
+  // =====================================================
+
+  /**
+   * Get minimum withdrawal amount for a currency
+   */
+  async getWithdrawalMinAmount(currency) {
+    return this.makeRequest(`/withdrawal/min-amount/${currency}`);
+  }
+
+  /**
+   * Get withdrawal fee for a currency and amount
+   */
+  async getWithdrawalFee(currency, amount) {
+    return this.makeRequest(`/withdrawal/fee?currency=${currency}&amount=${amount}`);
+  }
+
+  /**
+   * Create a withdrawal request
+   */
+  async createWithdrawal(withdrawalData, userId) {
+    return this.makeRequest(`/withdrawal/create?user_id=${userId}`, {
+      method: 'POST',
+      body: JSON.stringify(withdrawalData),
+    });
+  }
+
+  /**
+   * Verify and process a withdrawal
+   */
+  async verifyWithdrawal(withdrawalId, userId, verificationCode = null) {
+    const data = {
+      withdrawal_id: withdrawalId,
+      verification_code: verificationCode
+    };
+
+    return this.makeRequest(`/withdrawal/verify?user_id=${userId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Get user's withdrawal history
+   */
+  async getUserWithdrawals(userId, limit = 50) {
+    return this.makeRequest(`/user/${userId}/withdrawals?limit=${limit}`);
+  }
+
+  /**
+   * Get withdrawal status badge
+   */
+  getWithdrawalStatusBadge(status) {
+    const statusInfo = {
+      'pending': { text: 'Pending', color: 'yellow', icon: '⏳' },
+      'created': { text: 'Created', color: 'blue', icon: '📝' },
+      'verifying': { text: 'Verifying', color: 'orange', icon: '🔐' },
+      'verified': { text: 'Verified', color: 'green', icon: '✅' },
+      'processing': { text: 'Processing', color: 'blue', icon: '🔄' },
+      'sent': { text: 'Sent', color: 'blue', icon: '🚀' },
+      'completed': { text: 'Completed', color: 'green', icon: '🎉' },
+      'failed': { text: 'Failed', color: 'red', icon: '❌' },
+      'cancelled': { text: 'Cancelled', color: 'gray', icon: '🚫' }
+    };
+    
+    return statusInfo[status] || { text: status, color: 'gray', icon: '❓' };
+  }
+
+  /**
+   * Validate withdrawal address (basic validation)
+   */
+  validateWithdrawalAddress(address, currency) {
+    if (!address || address.trim().length < 10) {
+      return { valid: false, error: 'Address is too short' };
+    }
+
+    // Basic validation for different networks
+    const addressValidation = {
+      'usdttrc20': /^T[A-Za-z1-9]{33}$/, // Tron address
+      'usdtbsc': /^0x[a-fA-F0-9]{40}$/, // BSC address
+      'usdtsol': /^[1-9A-HJ-NP-Za-km-z]{32,44}$/, // Solana address
+      'usdtton': /^[a-zA-Z0-9_-]{48}$/, // TON address (basic)
+      'usdterc20': /^0x[a-fA-F0-9]{40}$/, // Ethereum address
+      'usdcbsc': /^0x[a-fA-F0-9]{40}$/, // BSC address
+      'usdcsol': /^[1-9A-HJ-NP-Za-km-z]{32,44}$/, // Solana address
+      'usdcerc20': /^0x[a-fA-F0-9]{40}$/, // Ethereum address
+    };
+
+    const pattern = addressValidation[currency.toLowerCase()];
+    if (pattern && !pattern.test(address)) {
+      return { valid: false, error: `Invalid ${currency} address format` };
+    }
+
+    return { valid: true };
+  }
 }
 
 // Export singleton instance
