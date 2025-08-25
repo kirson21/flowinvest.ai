@@ -576,7 +576,7 @@ const NowPayments = () => {
                         }
                       </p>
                       {tx.type === 'withdrawal' ? 
-                        nowPaymentsService.getWithdrawalStatusBadge(tx.status) :
+                        formatWithdrawalStatus(tx.status) :
                         formatStatus(tx.payment_status)
                       }
                     </div>
