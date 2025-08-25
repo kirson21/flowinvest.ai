@@ -47,10 +47,21 @@ const NowPayments = () => {
   const [subscriptionEmail, setSubscriptionEmail] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('plan_plus');
 
-  // Transaction history
+  // Transaction history and withdrawals
   const [transactions, setTransactions] = useState([]);
-  const [showTransactions, setShowTransactions] = useState(false);
+  const [withdrawals, setWithdrawals] = useState([]);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
+
+  // Withdrawal state
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [withdrawalAddress, setWithdrawalAddress] = useState('');
+  const [withdrawalCurrency, setWithdrawalCurrency] = useState('USDT');
+  const [withdrawalNetwork, setWithdrawalNetwork] = useState('TRX');
+  const [withdrawalDescription, setWithdrawalDescription] = useState('');
+  const [withdrawalMinAmount, setWithdrawalMinAmount] = useState(null);
+  const [withdrawalFee, setWithdrawalFee] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Price estimate and minimum amount
   const [priceEstimate, setPriceEstimate] = useState(null);
