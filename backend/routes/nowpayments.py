@@ -12,6 +12,7 @@ import hashlib
 import hmac
 import json
 import httpx
+import pyotp  # For TOTP 2FA code generation
 from datetime import datetime, timedelta
 
 router = APIRouter()
