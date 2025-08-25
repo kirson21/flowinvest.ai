@@ -52,6 +52,16 @@ class PayoutRequest(BaseModel):
     currency: str
     description: Optional[str] = None
 
+class WithdrawalRequest(BaseModel):
+    recipient_address: str
+    amount: float
+    currency: str
+    description: Optional[str] = None
+
+class VerifyWithdrawalRequest(BaseModel):
+    withdrawal_id: str
+    verification_code: Optional[str] = None
+
 # NowPayments supported currencies configuration
 SUPPORTED_CURRENCIES = {
     'USDT': {
