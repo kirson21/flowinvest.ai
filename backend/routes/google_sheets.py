@@ -164,12 +164,86 @@ async def get_company_summary():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating summary: {str(e)}")
 
+@router.post("/google-sheets/sync-users-only")
+async def sync_users_only():
+    """Sync only users data to Google Sheets (bypassing balance sync issues)"""
+    try:
+        success = google_sheets_service.sync_users_data()
+        
+        if success:
+            return {
+                "success": True,
+                "message": "Successfully synced users data to Google Sheets",
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Users data sync failed")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Sync error: {str(e)}")
+
+@router.post("/google-sheets/auto-sync-webhook")
+async def auto_sync_webhook(background_tasks: BackgroundTasks):
+    """Webhook endpoint to automatically trigger users data sync"""
+    try:
+        print("🔄 Auto-sync webhook triggered")
+        
+        # Run sync in background
+        background_tasks.add_task(trigger_users_sync)
+        
+        return {
+            "success": True,
+            "message": "Auto-sync triggered in background",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Auto-sync trigger error: {str(e)}")
+
+async def trigger_users_sync():
+    """Background task to sync users data"""
+    try:
+        print("🔄 Running background users data sync...")
+        success = google_sheets_service.sync_users_data()
+        
+        if success:
+            print("✅ Background users sync completed successfully")
+        else:
+            print("⚠️ Background users sync had failures")
+            
+    except Exception as e:
+        print(f"❌ Background users sync error: {str(e)}")
+
+@router.get("/google-sheets/trigger-sync")
+async def trigger_manual_sync(sync_type: str = "users"):
+    """Manually trigger sync for testing"""
+    try:
+        if sync_type == "users":
+            success = google_sheets_service.sync_users_data()
+            message = "users data"
+        else:
+            raise HTTPException(status_code=400, detail="Only 'users' sync type supported for now")
+        
+        if success:
+            return {
+                "success": True,
+                "message": f"Successfully synced {message} to Google Sheets",
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            raise HTTPException(status_code=500, detail=f"{message.title()} sync failed")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Manual sync error: {str(e)}")
+
 # Background task for automatic syncing
 async def schedule_auto_sync():
     """Background task to automatically sync data every hour"""
     try:
         print("🔄 Running scheduled Google Sheets sync...")
-        success = google_sheets_service.sync_all_data()
+        success = google_sheets_service.sync_users_data()
         
         if success:
             print("✅ Scheduled sync completed successfully")
