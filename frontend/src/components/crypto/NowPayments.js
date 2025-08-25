@@ -329,9 +329,90 @@ const NowPayments = () => {
     setError('');
   };
 
-  const resetSubscriptionForm = () => {
-    setSubscriptionEmail(user?.email || '');
-    setSelectedPlan('plan_plus');
+  const handleCreateWithdrawal = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      setMessage('');
+
+      // Validation
+      const amount = parseFloat(withdrawalAmount);
+      if (!amount || amount <= 0) {
+        setError('Please enter a valid withdrawal amount');
+        return;
+      }
+
+      if (!withdrawalAddress.trim()) {
+        setError('Please enter a valid recipient address');
+        return;
+      }
+
+      // Get the current network
+      const network = currencyNetworks[withdrawalCurrency]?.find(n => n.code === withdrawalNetwork);
+      if (!network) {
+        setError('Invalid currency/network combination');
+        return;
+      }
+
+      // Validate address format
+      const addressValidation = nowPaymentsService.validateWithdrawalAddress(withdrawalAddress, network.nowpayments_code);
+      if (!addressValidation.valid) {
+        setError(addressValidation.error);
+        return;
+      }
+
+      // Check minimum amount
+      if (withdrawalMinAmount && amount < withdrawalMinAmount) {
+        setError(`Amount must be at least ${withdrawalMinAmount} ${withdrawalCurrency}`);
+        return;
+      }
+
+      const withdrawalData = {
+        recipient_address: withdrawalAddress.trim(),
+        amount: amount,
+        currency: network.nowpayments_code,
+        description: withdrawalDescription || `Withdrawal to ${withdrawalAddress.slice(0, 10)}...`
+      };
+
+      const result = await nowPaymentsService.createWithdrawal(withdrawalData, user?.id);
+      
+      if (result.success) {
+        setMessage('Withdrawal request created successfully! Verifying...');
+        
+        // Auto-verify the withdrawal
+        setTimeout(async () => {
+          try {
+            setIsVerifying(true);
+            const verifyResult = await nowPaymentsService.verifyWithdrawal(result.withdrawal_id, user?.id);
+            
+            if (verifyResult.success) {
+              setMessage('Withdrawal verified and processing! You will receive a notification when completed.');
+              setTimeout(() => {
+                setShowWithdrawalModal(false);
+                resetWithdrawalForm();
+                loadUserTransactions(); // Reload to show new withdrawal
+              }, 3000);
+            }
+          } catch (verifyError) {
+            setError(`Verification failed: ${verifyError.message}`);
+          } finally {
+            setIsVerifying(false);
+          }
+        }, 1500);
+      }
+    } catch (error) {
+      setError(`Failed to create withdrawal: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetWithdrawalForm = () => {
+    setWithdrawalAmount('');
+    setWithdrawalAddress('');
+    setWithdrawalDescription('');
+    setWithdrawalMinAmount(null);
+    setWithdrawalFee(null);
     setMessage('');
     setError('');
   };
