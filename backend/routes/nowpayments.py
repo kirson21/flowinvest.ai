@@ -22,6 +22,7 @@ NOWPAYMENTS_API_URL = "https://api.nowpayments.io/v1"
 NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY")
 NOWPAYMENTS_PUBLIC_KEY = os.getenv("NOWPAYMENTS_PUBLIC_KEY", "f56ecfa5-09db-45d0-95bd-599043c84a5c")
 NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "")
+NOWPAYMENTS_2FA_SECRET = os.getenv("NOWPAYMENTS_2FA_SECRET")  # For TOTP 2FA automation
 
 # Base URL for return URLs (will be configured in environment)
 BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://dataflow-crypto.preview.emergentagent.com")
