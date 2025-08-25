@@ -897,3 +897,530 @@ async def get_estimated_price(amount: float, currency_from: str = "usd", currenc
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get price estimate: {str(e)}")
+
+# =====================================================
+# WITHDRAWALS/PAYOUTS FUNCTIONALITY
+# =====================================================
+
+def generate_2fa_code():
+    """Generate 2FA code using TOTP and environment variable secret"""
+    try:
+        if not NOWPAYMENTS_2FA_SECRET:
+            raise Exception("NOWPAYMENTS_2FA_SECRET environment variable not set")
+        
+        totp = pyotp.TOTP(NOWPAYMENTS_2FA_SECRET)
+        code = totp.now()
+        print(f"🔐 Generated 2FA code: {code}")
+        return code
+    except Exception as e:
+        print(f"❌ Failed to generate 2FA code: {str(e)}")
+        return None
+
+@router.get("/nowpayments/withdrawal/min-amount/{currency}")
+async def get_withdrawal_min_amount(currency: str):
+    """Get minimum withdrawal amount for a specific currency"""
+    try:
+        response = await make_nowpayments_request("GET", f"/payout-withdrawal/min-amount/{currency}")
+        
+        if response.status_code != 200:
+            # Fallback minimum amounts for supported currencies
+            fallback_minimums = {
+                "usdttrc20": 1.0,
+                "usdtbsc": 1.0,
+                "usdtsol": 1.0,
+                "usdtton": 1.0,
+                "usdterc20": 10.0,
+                "usdcbsc": 1.0,
+                "usdcsol": 1.0,
+                "usdcerc20": 10.0
+            }
+            
+            min_amount = fallback_minimums.get(currency.lower(), 10.0)
+            
+            return {
+                "success": True,
+                "min_amount": min_amount,
+                "currency": currency,
+                "source": "fallback"
+            }
+        
+        result = response.json()
+        return {
+            "success": True,
+            "min_amount": result.get("min_amount", 10.0),
+            "currency": currency,
+            "source": "nowpayments_api"
+        }
+        
+    except Exception as e:
+        print(f"Error getting min amount for {currency}: {str(e)}")
+        return {
+            "success": False,
+            "min_amount": 10.0,  # Safe fallback
+            "currency": currency,
+            "error": str(e)
+        }
+
+@router.get("/nowpayments/withdrawal/fee")
+async def get_withdrawal_fee(currency: str, amount: float):
+    """Get withdrawal fee for a specific currency and amount"""
+    try:
+        params = {
+            "currency": currency,
+            "amount": amount
+        }
+        
+        response = await make_nowpayments_request("GET", "/payout/fee", params)
+        
+        if response.status_code != 200:
+            # Fallback network fees for supported currencies (approximate)
+            fallback_fees = {
+                "usdttrc20": 1.0,   # TRC20 usually ~$1
+                "usdtbsc": 0.5,     # BSC usually ~$0.5
+                "usdtsol": 0.01,    # Solana usually very low
+                "usdtton": 0.05,    # TON usually low
+                "usdterc20": 15.0,  # Ethereum usually higher
+                "usdcbsc": 0.5,     # BSC usually ~$0.5
+                "usdcsol": 0.01,    # Solana usually very low
+                "usdcerc20": 15.0   # Ethereum usually higher
+            }
+            
+            fee = fallback_fees.get(currency.lower(), 5.0)
+            
+            return {
+                "success": True,
+                "fee": fee,
+                "currency": currency,
+                "amount": amount,
+                "source": "fallback"
+            }
+        
+        result = response.json()
+        return {
+            "success": True,
+            "fee": result.get("fee", 5.0),
+            "currency": currency,
+            "amount": amount,
+            "source": "nowpayments_api"
+        }
+        
+    except Exception as e:
+        print(f"Error getting fee for {currency} amount {amount}: {str(e)}")
+        return {
+            "success": False,
+            "fee": 5.0,  # Safe fallback
+            "currency": currency,
+            "amount": amount,
+            "error": str(e)
+        }
+
+@router.post("/nowpayments/withdrawal/create")
+async def create_withdrawal_request(request: WithdrawalRequest, user_id: str = Query(..., description="User ID for withdrawal")):
+    """Create a withdrawal/payout request"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        # Validate input
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Valid user_id is required for withdrawal")
+        
+        if request.amount <= 0:
+            raise HTTPException(status_code=400, detail="Amount must be greater than 0")
+        
+        if not request.recipient_address:
+            raise HTTPException(status_code=400, detail="Recipient address is required")
+        
+        if not request.currency:
+            raise HTTPException(status_code=400, detail="Currency is required")
+        
+        # Validate currency is supported
+        supported_currencies = []
+        for curr_data in SUPPORTED_CURRENCIES.values():
+            supported_currencies.extend(curr_data["networks"].values())
+        
+        if request.currency not in supported_currencies:
+            raise HTTPException(status_code=400, detail=f"Currency {request.currency} is not supported")
+        
+        # Check minimum amount
+        min_amount_result = await get_withdrawal_min_amount(request.currency)
+        min_amount = min_amount_result.get("min_amount", 1.0)
+        
+        if request.amount < min_amount:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Amount {request.amount} is below minimum withdrawal amount {min_amount} for {request.currency}"
+            )
+        
+        # Check user balance
+        user_balance_result = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        
+        user_balance = 0.0
+        if user_balance_result.data:
+            user_balance = float(user_balance_result.data[0]['balance'])
+        
+        if user_balance < request.amount:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Insufficient balance. Available: ${user_balance:.2f}, Requested: ${request.amount:.2f}"
+            )
+        
+        # Create withdrawal record using database function
+        result = supabase.rpc('create_withdrawal_request', {
+            'p_user_id': user_id,
+            'p_recipient_address': request.recipient_address,
+            'p_currency': request.currency,
+            'p_amount': request.amount,
+            'p_description': request.description
+        }).execute()
+        
+        if not result.data or not result.data[0].get('success'):
+            error_msg = result.data[0].get('message', 'Unknown error') if result.data else 'Database function failed'
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        withdrawal_data = result.data[0]
+        withdrawal_id = withdrawal_data['withdrawal_id']
+        
+        # Create notification
+        notification = {
+            'user_id': user_id,
+            'title': '🔄 Withdrawal Request Created',
+            'message': f'Your withdrawal request for {request.amount} {request.currency} has been created. Please verify the withdrawal to process it.',
+            'type': 'info',
+            'is_read': False
+        }
+        
+        supabase.table('user_notifications').insert(notification).execute()
+        
+        return {
+            "success": True,
+            "withdrawal_id": withdrawal_id,
+            "amount": request.amount,
+            "currency": request.currency,
+            "recipient_address": request.recipient_address,
+            "status": "pending",
+            "min_amount": min_amount,
+            "message": "Withdrawal request created successfully. Please verify to process."
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error creating withdrawal: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create withdrawal: {str(e)}")
+
+@router.post("/nowpayments/withdrawal/verify")
+async def verify_and_process_withdrawal(request: VerifyWithdrawalRequest, user_id: str = Query(..., description="User ID for verification")):
+    """Verify withdrawal with 2FA and process the payout via NowPayments API"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        # Validate input
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Valid user_id is required for verification")
+        
+        # Get withdrawal record
+        withdrawal_result = supabase.table('nowpayments_withdrawals')\
+            .select('*')\
+            .eq('id', request.withdrawal_id)\
+            .eq('user_id', user_id)\
+            .execute()
+        
+        if not withdrawal_result.data:
+            raise HTTPException(status_code=404, detail="Withdrawal request not found")
+        
+        withdrawal = withdrawal_result.data[0]
+        
+        # Check if withdrawal is in correct state
+        if withdrawal['status'] != 'pending':
+            raise HTTPException(status_code=400, detail=f"Withdrawal is in {withdrawal['status']} state and cannot be verified")
+        
+        # Check expiration
+        if withdrawal['verification_expires_at']:
+            expires_at = datetime.fromisoformat(withdrawal['verification_expires_at'].replace('Z', '+00:00'))
+            if datetime.now(expires_at.tzinfo) > expires_at:
+                # Update status to expired
+                supabase.table('nowpayments_withdrawals')\
+                    .update({'status': 'failed', 'error_message': 'Verification expired'})\
+                    .eq('id', request.withdrawal_id)\
+                    .execute()
+                
+                raise HTTPException(status_code=400, detail="Verification has expired. Please create a new withdrawal request.")
+        
+        # Generate 2FA code automatically
+        verification_code = generate_2fa_code()
+        if not verification_code:
+            raise HTTPException(status_code=500, detail="Failed to generate 2FA code")
+        
+        # Get JWT token for payout API
+        jwt_token = await get_nowpayments_jwt_token()
+        if not jwt_token:
+            raise HTTPException(status_code=500, detail="Failed to authenticate with NowPayments")
+        
+        # Create payout request with NowPayments
+        payout_data = {
+            "withdrawals": [{
+                "address": withdrawal['recipient_address'],
+                "currency": withdrawal['currency'],
+                "amount": withdrawal['amount'],
+                "ipn_callback_url": f"{BASE_URL}/api/nowpayments/withdrawal/webhook"
+            }]
+        }
+        
+        headers = get_nowpayments_headers_with_jwt(jwt_token)
+        async with httpx.AsyncClient() as client:
+            payout_response = await client.post(
+                f"{NOWPAYMENTS_API_URL}/payout",
+                json=payout_data,
+                headers=headers
+            )
+        
+        if payout_response.status_code not in [200, 201]:
+            error_detail = payout_response.json() if payout_response.headers.get("content-type", "").startswith("application/json") else payout_response.text
+            
+            # Update withdrawal with error
+            supabase.table('nowpayments_withdrawals')\
+                .update({
+                    'status': 'failed',
+                    'error_message': f'NowPayments payout creation failed: {error_detail}',
+                    'api_response': error_detail
+                })\
+                .eq('id', request.withdrawal_id)\
+                .execute()
+            
+            raise HTTPException(status_code=400, detail=f"Failed to create payout with NowPayments: {error_detail}")
+        
+        payout_result = payout_response.json()
+        print(f"NowPayments payout response: {payout_result}")  # Debug log
+        
+        # Extract batch withdrawal ID for 2FA verification
+        batch_withdrawal_id = None
+        if isinstance(payout_result, dict):
+            if "result" in payout_result:
+                if isinstance(payout_result["result"], list) and len(payout_result["result"]) > 0:
+                    batch_withdrawal_id = payout_result["result"][0].get('id')
+                else:
+                    batch_withdrawal_id = payout_result["result"].get('id')
+            else:
+                batch_withdrawal_id = payout_result.get('id')
+        
+        if not batch_withdrawal_id:
+            raise HTTPException(status_code=500, detail="Failed to get batch withdrawal ID from NowPayments")
+        
+        # Verify the payout with 2FA code
+        verify_data = {
+            "verification_code": verification_code
+        }
+        
+        async with httpx.AsyncClient() as client:
+            verify_response = await client.post(
+                f"{NOWPAYMENTS_API_URL}/payout/{batch_withdrawal_id}/verify",
+                json=verify_data,
+                headers=headers
+            )
+        
+        if verify_response.status_code not in [200, 201]:
+            verify_error = verify_response.json() if verify_response.headers.get("content-type", "").startswith("application/json") else verify_response.text
+            
+            # Update withdrawal with verification error
+            supabase.table('nowpayments_withdrawals')\
+                .update({
+                    'status': 'verifying',
+                    'batch_withdrawal_id': str(batch_withdrawal_id),
+                    'verification_code': verification_code,
+                    'error_message': f'2FA verification failed: {verify_error}',
+                    'api_response': {'payout': payout_result, 'verify_error': verify_error}
+                })\
+                .eq('id', request.withdrawal_id)\
+                .execute()
+            
+            print(f"2FA verification failed: {verify_error}")
+            raise HTTPException(status_code=400, detail=f"2FA verification failed: {verify_error}")
+        
+        verify_result = verify_response.json()
+        print(f"2FA verification successful: {verify_result}")
+        
+        # Update withdrawal record with success
+        supabase.table('nowpayments_withdrawals')\
+            .update({
+                'status': 'verified',
+                'batch_withdrawal_id': str(batch_withdrawal_id),
+                'verification_code': verification_code,
+                'verified_at': 'now()',
+                'api_response': {'payout': payout_result, 'verify': verify_result}
+            })\
+            .eq('id', request.withdrawal_id)\
+            .execute()
+        
+        # Process the verified withdrawal (deduct balance)
+        process_result = supabase.rpc('process_verified_withdrawal', {
+            'p_withdrawal_id': request.withdrawal_id
+        }).execute()
+        
+        if not process_result.data or not process_result.data[0].get('success'):
+            print(f"Warning: Failed to process verified withdrawal: {process_result}")
+            # Don't fail the entire request, as NowPayments part was successful
+        
+        # Create success notification
+        notification = {
+            'user_id': user_id,
+            'title': '✅ Withdrawal Verified & Processing',
+            'message': f'Your withdrawal of {withdrawal["amount"]} {withdrawal["currency"]} has been verified and is now being processed by NowPayments. You will receive a notification when the transaction is completed.',
+            'type': 'success',
+            'is_read': False
+        }
+        
+        supabase.table('user_notifications').insert(notification).execute()
+        
+        return {
+            "success": True,
+            "withdrawal_id": request.withdrawal_id,
+            "batch_withdrawal_id": batch_withdrawal_id,
+            "status": "verified",
+            "amount": withdrawal['amount'],
+            "currency": withdrawal['currency'],
+            "recipient_address": withdrawal['recipient_address'],
+            "message": "Withdrawal verified successfully and is now being processed"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error verifying withdrawal: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to verify withdrawal: {str(e)}")
+
+@router.get("/nowpayments/user/{user_id}/withdrawals")
+async def get_user_withdrawals(user_id: str, limit: int = 50):
+    """Get user's withdrawal history"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        result = supabase.table('nowpayments_withdrawals')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .order('created_at', desc=True)\
+            .limit(limit)\
+            .execute()
+        
+        return {
+            "success": True,
+            "withdrawals": result.data,
+            "count": len(result.data)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get user withdrawals: {str(e)}")
+
+@router.post("/nowpayments/withdrawal/webhook")
+async def withdrawal_webhook(request: Request):
+    """Handle NowPayments withdrawal webhooks"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        # Get request body
+        body = await request.body()
+        webhook_data = json.loads(body.decode())
+        
+        print(f"🔔 Withdrawal webhook received: {webhook_data}")
+        
+        # Extract relevant data
+        withdrawal_id = webhook_data.get('withdrawal_id') or webhook_data.get('id')
+        status = webhook_data.get('status')
+        transaction_hash = webhook_data.get('transaction_hash')
+        actual_amount = webhook_data.get('actual_amount')
+        error_message = webhook_data.get('error_message')
+        
+        if not withdrawal_id:
+            print("❌ No withdrawal ID in webhook")
+            return {"success": False, "error": "Missing withdrawal ID"}
+        
+        # Find withdrawal record by batch_withdrawal_id
+        withdrawal_result = supabase.table('nowpayments_withdrawals')\
+            .select('*')\
+            .eq('batch_withdrawal_id', str(withdrawal_id))\
+            .execute()
+        
+        if not withdrawal_result.data:
+            print(f"⚠️ Withdrawal record not found for batch ID: {withdrawal_id}")
+            return {"success": False, "error": "Withdrawal record not found"}
+        
+        withdrawal = withdrawal_result.data[0]
+        user_id = withdrawal['user_id']
+        
+        # Update withdrawal record
+        update_data = {
+            'api_response': webhook_data,
+            'updated_at': 'now()'
+        }
+        
+        # Map NowPayments status to our status
+        if status == 'sent':
+            update_data['status'] = 'sent'
+            update_data['transaction_hash'] = transaction_hash
+            update_data['actual_amount_sent'] = actual_amount
+        elif status == 'completed':
+            update_data['status'] = 'completed'
+            update_data['completed_at'] = 'now()'
+            update_data['transaction_hash'] = transaction_hash
+            update_data['actual_amount_sent'] = actual_amount
+        elif status == 'failed':
+            update_data['status'] = 'failed'
+            update_data['error_message'] = error_message
+        else:
+            update_data['status'] = status
+        
+        # Update the withdrawal record
+        supabase.table('nowpayments_withdrawals')\
+            .update(update_data)\
+            .eq('id', withdrawal['id'])\
+            .execute()
+        
+        # Create notification for user
+        notification_title = ""
+        notification_message = ""
+        notification_type = "info"
+        
+        if status == 'sent':
+            notification_title = "🚀 Withdrawal Sent"
+            notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has been sent to the blockchain. Transaction hash: {transaction_hash}"
+            notification_type = "info"
+        elif status == 'completed':
+            notification_title = "✅ Withdrawal Completed"
+            notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has been completed successfully. Transaction hash: {transaction_hash}"
+            notification_type = "success"
+        elif status == 'failed':
+            notification_title = "❌ Withdrawal Failed"
+            notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has failed. Reason: {error_message}. Your balance has been restored."
+            notification_type = "error"
+            
+            # Restore user balance if withdrawal failed
+            supabase.rpc('update_user_balance', {
+                'user_uuid': user_id,
+                'amount_change': withdrawal['amount']
+            }).execute()
+        
+        if notification_title:
+            notification = {
+                'user_id': user_id,
+                'title': notification_title,
+                'message': notification_message,
+                'type': notification_type,
+                'is_read': False
+            }
+            
+            supabase.table('user_notifications').insert(notification).execute()
+        
+        print(f"✅ Withdrawal webhook processed for user {user_id}")
+        
+        return {"success": True, "message": "Withdrawal webhook processed"}
+        
+    except Exception as e:
+        print(f"❌ Withdrawal webhook error: {str(e)}")
+        return {"success": False, "error": str(e)}
