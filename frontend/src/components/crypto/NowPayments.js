@@ -434,6 +434,16 @@ const NowPayments = () => {
     );
   };
 
+  const formatWithdrawalStatus = (status) => {
+    const statusInfo = nowPaymentsService.getWithdrawalStatusBadge(status);
+    return (
+      <Badge variant={statusInfo.color === 'green' ? 'default' : 'secondary'} className="gap-1">
+        <span>{statusInfo.icon}</span>
+        {statusInfo.text}
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-6 pb-8">
       {/* Service Health Status */}
