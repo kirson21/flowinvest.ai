@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv('/app/backend/.env')
 
 # Configuration
-BACKEND_URL = "https://fintracker-18.preview.emergentagent.com/api"
+BACKEND_URL = "https://dataflow-crypto.preview.emergentagent.com/api"
 TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
 ADMIN_KEY = "admin123"
 
