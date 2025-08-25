@@ -1309,11 +1309,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix Mobile UI Layout for Manage Crypto Button"
-    - "Add Subscription Expiry Date Display" 
-    - "Improve Mobile Subscriptions Section Spacing"
-    - "Verify Subscription Upgrade Functionality"
-    - "Test Frontend Subscription Features (API calls, plan badge updates, bot/marketplace limits)"
+    - "Complete Google Sheets Integration with All User Emails"
+    - "Test Google Sheets Sync with Environment Variables"  
+    - "Verify User Data Synchronization to Google Sheets"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
