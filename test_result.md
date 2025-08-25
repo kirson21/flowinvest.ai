@@ -408,15 +408,18 @@ frontend:
 
   - task: "Complete Google Sheets Integration with All User Emails"
     implemented: true
-    working: "testing"
+    working: false
     file: "/app/backend/services/google_sheets_service.py, /app/backend/routes/google_sheets.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "testing"
           agent: "main"
           comment: "GOOGLE SHEETS INTEGRATION WITH COMPLETE USER EMAILS IMPLEMENTED: ✅ Successfully resolved RPC function syntax issues by creating a working get_users_emails_simple() function manually, ✅ Updated google_sheets_service.py to use the working simple RPC function that accesses auth.users table for complete email data, ✅ Verified data collection: found all 9 users with complete email addresses from auth.users table (sgpopolitova@gmail.com, kirson.blogger@gmail.com, signin_test_328d7dbe@flowinvest.ai, test_e0ba185a@flowinvest.ai, signin_test_77bd8e22@flowinvest.ai, test_a0a8ad8b@flowinvest.ai, seller_test_8755a5c0@flowinvest.ai, flowinvest.assets@gmail.com, kirillpropolitov@gmail.com), ✅ Comprehensive user data ready with 9 users having complete email coverage, 8 active subscriptions, 3 plus/pro users, 1 verified seller, ✅ Google Sheets service updated to manually join auth.users emails with user_profiles and subscriptions data. Ready for comprehensive sync to Google Sheets with all user emails from auth.users table."
+        - working: false
+          agent: "testing"
+          comment: "❌ GOOGLE SHEETS INTEGRATION BLOCKED BY MISSING ENVIRONMENT VARIABLES: Comprehensive testing reveals the Google Sheets integration is fully implemented but cannot function due to missing Google service account credentials. TESTING RESULTS: ✅ Backend Infrastructure Ready - All Google Sheets API endpoints operational (/api/google-sheets/status, /api/google-sheets/sync-users-only, /api/google-sheets/sync, /api/google-sheets/trigger-sync), ✅ Data Structure Verified - User data collection system working correctly with access to user profiles (user_id, display_name, seller_verification_status) and subscriptions (plan_type: super_admin, status: active), ✅ RPC Function Ready - get_users_emails_simple() RPC function accessible through sync endpoints, ✅ Service Structure Complete - Google Sheets service configured with correct sheet IDs (Balance: 1_q7zuZta8lIdGDmRFhh1rgYYdMUwGLXb7YCIShVB6Ps, Users: 1ZYabLq0ghpI2q1pI5frhZcTGe7rMJwzOL5clV1pV-iE), ❌ CRITICAL BLOCKER: Missing required environment variables (GOOGLE_PROJECT_ID, GOOGLE_PRIVATE_KEY_ID, GOOGLE_PRIVATE_KEY, GOOGLE_CLIENT_EMAIL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_X509_CERT_URL). All sync operations fail with authentication error: 'Missing required environment variables'. SOLUTION REQUIRED: Add Google service account credentials to environment variables to enable Google Sheets API authentication. The implementation is complete and ready to work once credentials are configured."
 
   - task: "Add Withdraw Funds Functionality to Settings"
     implemented: true
