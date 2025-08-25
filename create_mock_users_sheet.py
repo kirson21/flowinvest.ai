@@ -160,7 +160,9 @@ try:
     
     # Email sources breakdown
     print(f'\\n📧 EMAIL SOURCES:')
-    email_from_validation = len([u for u in users_data if u.get('email') and any(ev.get('user_id') == u.get('user_id') and ev.get('email') == u.get('email') for ev in email_validations.data) if email_validations.data])
+    email_from_validation = 0
+    if email_validations.data:
+        email_from_validation = len([u for u in users_data if u.get('email') and any(ev.get('user_id') == u.get('user_id') and ev.get('email') == u.get('email') for ev in email_validations.data)])
     print(f'   From email_validation table: {email_from_validation}')
     print(f'   From user_profiles table: 0 (no emails in profiles)')
     print(f'   From subscription metadata: 0 (no emails in metadata)')
