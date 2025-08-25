@@ -156,21 +156,23 @@ class RPCFunctionTester:
         try:
             # Test getting user profile data
             test_user_id = "cd0e9717-f85d-4726-81e9-f260394ead58"
-            response = requests.get(f"{self.backend_url}/auth/user/{test_user_id}/profile", timeout=15)
+            response = requests.get(f"{self.backend_url}/auth/user/{test_user_id}", timeout=15)
             
             if response.status_code == 200:
                 data = response.json()
+                success = data.get('success', False)
+                user_data = data.get('user', {})
                 
                 # Check expected fields
-                expected_fields = ['user_id', 'name', 'country', 'phone', 'seller_verification_status']
-                available_fields = [field for field in expected_fields if field in data and data[field]]
+                expected_fields = ['user_id', 'display_name', 'phone', 'seller_verification_status']
+                available_fields = [field for field in expected_fields if field in user_data and user_data[field]]
                 
                 self.log_test(
                     "User Profiles Data",
-                    len(available_fields) > 0,
-                    f"Available fields: {available_fields}"
+                    success and len(available_fields) > 0,
+                    f"Success: {success}, Available fields: {available_fields}"
                 )
-                return len(available_fields) > 0
+                return success and len(available_fields) > 0
             else:
                 self.log_test(
                     "User Profiles Data",
