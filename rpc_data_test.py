@@ -229,14 +229,14 @@ class RPCFunctionTester:
             test_user_id = "cd0e9717-f85d-4726-81e9-f260394ead58"
             
             # Test profile data
-            profile_response = requests.get(f"{self.backend_url}/auth/user/{test_user_id}/profile", timeout=15)
+            profile_response = requests.get(f"{self.backend_url}/auth/user/{test_user_id}", timeout=15)
             subscription_response = requests.get(f"{self.backend_url}/auth/user/{test_user_id}/subscription", timeout=15)
             
             profile_ok = profile_response.status_code == 200
             subscription_ok = subscription_response.status_code == 200
             
             if profile_ok and subscription_ok:
-                profile_data = profile_response.json()
+                profile_data = profile_response.json().get('user', {})
                 subscription_data = subscription_response.json()
                 
                 # Check if we have the expected data structure
