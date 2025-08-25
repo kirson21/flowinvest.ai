@@ -194,7 +194,7 @@ OHA+JJ13uDfaltLNGG3PziK/
             return False
     
     def sync_users_data(self):
-        """Sync users data to Google Sheets with enhanced data collection"""
+        """Sync users data to Google Sheets with emails from auth.users table"""
         try:
             if not self.service:
                 if not self.authenticate():
@@ -203,7 +203,32 @@ OHA+JJ13uDfaltLNGG3PziK/
             # Get comprehensive users data from multiple sources
             print("📊 Collecting user data from multiple tables...")
             
-            # Primary source: user_profiles table
+            # Try to get users from auth.users table first (contains emails)
+            users_with_emails = []
+            try:
+                # Use RPC to query auth.users since it's in a different schema
+                users_query = """
+                SELECT id, email, created_at 
+                FROM auth.users 
+                ORDER BY created_at DESC
+                """
+                
+                # Try direct query first
+                auth_users_result = supabase.rpc('exec_sql', {'query': users_query}).execute()
+                if auth_users_result.data:
+                    users_with_emails = auth_users_result.data
+                    print(f"📧 Found {len(users_with_emails)} users with emails from auth.users")
+                else:
+                    # Fallback: try different RPC name
+                    auth_users_result = supabase.rpc('execute_sql', {'sql_query': users_query}).execute()
+                    if auth_users_result.data:
+                        users_with_emails = auth_users_result.data
+                        print(f"📧 Found {len(users_with_emails)} users with emails from auth.users (fallback)")
+            except Exception as e:
+                print(f"⚠️ Could not access auth.users table directly: {e}")
+                # We'll use profile data and try to get emails from other sources
+            
+            # Get user profiles
             profiles_result = supabase.table('user_profiles').select('*').execute()
             profiles = profiles_result.data if profiles_result.data else []
             print(f"👤 Found {len(profiles)} user profiles")
@@ -229,90 +254,86 @@ OHA+JJ13uDfaltLNGG3PziK/
             except:
                 commissions = []
             
-            # Try to get email data from subscription_email_validation table if available
+            # Get email data from subscription_email_validation table as fallback
             try:
                 email_validation_result = supabase.table('subscription_email_validation').select('user_id, email').execute()
                 email_validations = email_validation_result.data if email_validation_result.data else []
-                print(f"📧 Found {len(email_validations)} email validations")
+                print(f"📩 Found {len(email_validations)} email validations as fallback")
             except:
                 email_validations = []
             
             # Process and combine data
             users_data = []
             
-            # If we have profiles, use them as the primary source
-            if profiles:
-                for profile in profiles:
-                    user_id = profile.get('user_id', '')
-                    
-                    # Find matching subscription
-                    user_subscription = next((s for s in subscriptions if s['user_id'] == user_id), {})
-                    
-                    # Find matching account
-                    user_account = next((a for a in accounts if a['user_id'] == user_id), {})
-                    
-                    # Find email from email validation table
-                    email_validation = next((e for e in email_validations if e['user_id'] == user_id), {})
-                    
-                    # Calculate total commissions
-                    user_commissions = [c for c in commissions if c.get('user_id') == user_id and c.get('status') == 'paid']
-                    total_commission = sum(float(c.get('amount', 0)) for c in user_commissions)
-                    
-                    # Determine best email source
-                    email = profile.get('email', '') or email_validation.get('email', '') or user_subscription.get('metadata', {}).get('email', '')
-                    
-                    user_data = {
-                        'user_id': user_id,
-                        'name': profile.get('name', ''),
-                        'email': email,
-                        'country': profile.get('country', ''),
-                        'phone': profile.get('phone', ''),
-                        'registration_date': profile.get('created_at', ''),
-                        'seller_verification_status': profile.get('seller_verification_status', 'not_verified'),
-                        'plan_type': user_subscription.get('plan_type', 'free'),
-                        'subscription_status': user_subscription.get('status', 'inactive'),
-                        'subscription_end_date': user_subscription.get('end_date', ''),
-                        'total_commission_earned': total_commission
-                    }
-                    
-                    users_data.append(user_data)
-            else:
-                # Fallback: use subscriptions as primary source if no profiles
-                processed_users = set()
-                for subscription in subscriptions:
-                    user_id = subscription.get('user_id', '')
-                    if user_id in processed_users:
-                        continue
-                    processed_users.add(user_id)
-                    
-                    # Find matching account
-                    user_account = next((a for a in accounts if a['user_id'] == user_id), {})
-                    
-                    # Find email from email validation table
-                    email_validation = next((e for e in email_validations if e['user_id'] == user_id), {})
-                    
-                    # Calculate total commissions
-                    user_commissions = [c for c in commissions if c.get('user_id') == user_id and c.get('status') == 'paid']
-                    total_commission = sum(float(c.get('amount', 0)) for c in user_commissions)
-                    
-                    # Get email from metadata or email validation
-                    email = email_validation.get('email', '') or subscription.get('metadata', {}).get('email', '')
-                    
-                    user_data = {
-                        'user_id': user_id,
-                        'name': '',
-                        'email': email,
-                        'country': '',
-                        'phone': '',
-                        'registration_date': subscription.get('created_at', ''),
-                        'seller_verification_status': 'not_verified',
-                        'plan_type': subscription.get('plan_type', 'free'),
-                        'subscription_status': subscription.get('status', 'inactive'),
-                        'subscription_end_date': subscription.get('end_date', ''),
-                        'total_commission_earned': total_commission
-                    }
-                    
-                    users_data.append(user_data)
+            # Create a master list of all users by combining sources
+            all_user_ids = set()
+            
+            # Add users from auth.users (priority source)
+            for user in users_with_emails:
+                all_user_ids.add(user.get('id'))
+            
+            # Add users from profiles
+            for profile in profiles:
+                all_user_ids.add(profile.get('user_id'))
+            
+            # Add users from subscriptions
+            for subscription in subscriptions:
+                all_user_ids.add(subscription.get('user_id'))
+            
+            print(f"🔍 Processing {len(all_user_ids)} unique users")
+            
+            # Process each user
+            for user_id in all_user_ids:
+                if not user_id:
+                    continue
+                
+                # Find user email from auth.users
+                auth_user = next((u for u in users_with_emails if u.get('id') == user_id), {})
+                
+                # Find matching profile
+                user_profile = next((p for p in profiles if p.get('user_id') == user_id), {})
+                
+                # Find matching subscription
+                user_subscription = next((s for s in subscriptions if s.get('user_id') == user_id), {})
+                
+                # Find matching account
+                user_account = next((a for a in accounts if a.get('user_id') == user_id), {})
+                
+                # Find email from email validation table as fallback
+                email_validation = next((e for e in email_validations if e.get('user_id') == user_id), {})
+                
+                # Calculate total commissions
+                user_commissions = [c for c in commissions if c.get('user_id') == user_id and c.get('status') == 'paid']
+                total_commission = sum(float(c.get('amount', 0)) for c in user_commissions)
+                
+                # Determine best email source (priority: auth.users > email_validation > subscription metadata)
+                email = (auth_user.get('email', '') or 
+                        email_validation.get('email', '') or 
+                        user_subscription.get('metadata', {}).get('email', '') if isinstance(user_subscription.get('metadata'), dict) else '')
+                
+                # Determine registration date (priority: auth.users > profile > subscription)
+                registration_date = (auth_user.get('created_at', '') or 
+                                   user_profile.get('created_at', '') or 
+                                   user_subscription.get('created_at', ''))
+                
+                user_data = {
+                    'user_id': user_id,
+                    'name': user_profile.get('name', ''),
+                    'email': email,
+                    'country': user_profile.get('country', ''),
+                    'phone': user_profile.get('phone', ''),
+                    'registration_date': registration_date,
+                    'seller_verification_status': user_profile.get('seller_verification_status', 'not_verified'),
+                    'plan_type': user_subscription.get('plan_type', 'free'),
+                    'subscription_status': user_subscription.get('status', 'inactive'),
+                    'subscription_end_date': user_subscription.get('end_date', ''),
+                    'total_commission_earned': total_commission
+                }
+                
+                users_data.append(user_data)
+            
+            # Sort by registration date (newest first)
+            users_data.sort(key=lambda x: x.get('registration_date', ''), reverse=True)
             
             # Prepare headers for Google Sheets
             headers = [
@@ -353,17 +374,24 @@ OHA+JJ13uDfaltLNGG3PziK/
             
             print(f"✅ Users data synced to Google Sheets successfully ({len(users_data)} users)")
             
-            # Print summary
+            # Print detailed summary
             active_subs = len([u for u in users_data if u.get('subscription_status') == 'active'])
             plus_users = len([u for u in users_data if u.get('plan_type') == 'plus'])
             verified_sellers = len([u for u in users_data if u.get('seller_verification_status') == 'verified'])
             users_with_email = len([u for u in users_data if u.get('email')])
+            users_with_names = len([u for u in users_data if u.get('name')])
+            users_with_phone = len([u for u in users_data if u.get('phone')])
+            users_with_country = len([u for u in users_data if u.get('country')])
             
+            print(f"   📊 DETAILED SUMMARY:")
             print(f"   Total Users: {len(users_data)}")
+            print(f"   Users with Email: {users_with_email}")
+            print(f"   Users with Name: {users_with_names}")
+            print(f"   Users with Phone: {users_with_phone}")
+            print(f"   Users with Country: {users_with_country}")
             print(f"   Active Subscriptions: {active_subs}")
             print(f"   Plus Plan Users: {plus_users}")
             print(f"   Verified Sellers: {verified_sellers}")
-            print(f"   Users with Email: {users_with_email}")
             
             return True
             
@@ -372,6 +400,8 @@ OHA+JJ13uDfaltLNGG3PziK/
             return False
         except Exception as e:
             print(f"❌ Error syncing users data: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def sync_all_data(self):
