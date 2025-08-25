@@ -167,14 +167,69 @@ const NowPayments = () => {
 
   const loadUserTransactions = async () => {
     try {
-      const result = await nowPaymentsService.getUserPayments(user?.id);
+      if (!user?.id) return;
+
+      const result = await nowPaymentsService.getUserPayments(user.id);
       if (result.success) {
-        setTransactions(result.payments);
+        setTransactions(result.payments || []);
+      }
+
+      // Also load withdrawals
+      const withdrawalsResult = await nowPaymentsService.getUserWithdrawals(user.id);
+      if (withdrawalsResult.success) {
+        setWithdrawals(withdrawalsResult.withdrawals || []);
       }
     } catch (error) {
       console.error('Failed to load transactions:', error);
     }
   };
+
+  const loadWithdrawalMinAmount = async (currency) => {
+    try {
+      const result = await nowPaymentsService.getWithdrawalMinAmount(currency);
+      if (result.success) {
+        setWithdrawalMinAmount(result.min_amount);
+      }
+    } catch (error) {
+      console.error('Failed to load min amount:', error);
+    }
+  };
+
+  const loadWithdrawalFee = async (currency, amount) => {
+    try {
+      if (!amount || amount <= 0) {
+        setWithdrawalFee(null);
+        return;
+      }
+
+      const result = await nowPaymentsService.getWithdrawalFee(currency, amount);
+      if (result.success) {
+        setWithdrawalFee(result.fee);
+      }
+    } catch (error) {
+      console.error('Failed to load withdrawal fee:', error);
+    }
+  };
+
+  // Update withdrawal fee when amount or currency changes
+  useEffect(() => {
+    if (withdrawalAmount && withdrawalCurrency && withdrawalNetwork) {
+      const network = currencyNetworks[withdrawalCurrency]?.find(n => n.code === withdrawalNetwork);
+      if (network) {
+        loadWithdrawalFee(network.nowpayments_code, parseFloat(withdrawalAmount));
+      }
+    }
+  }, [withdrawalAmount, withdrawalCurrency, withdrawalNetwork]);
+
+  // Update minimum amount when currency/network changes
+  useEffect(() => {
+    if (withdrawalCurrency && withdrawalNetwork) {
+      const network = currencyNetworks[withdrawalCurrency]?.find(n => n.code === withdrawalNetwork);
+      if (network) {
+        loadWithdrawalMinAmount(network.nowpayments_code);
+      }
+    }
+  }, [withdrawalCurrency, withdrawalNetwork]);
 
   const handleCreatePayment = async () => {
     try {
