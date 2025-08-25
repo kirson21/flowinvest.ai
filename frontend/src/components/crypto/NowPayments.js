@@ -515,35 +515,44 @@ const NowPayments = () => {
         </Card>
       </div>
 
-      {/* Transaction History */}
-      {showTransactions && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Payment History</span>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setShowTransactions(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {transactions.length === 0 ? (
-              <p className="text-center text-gray-500 py-4">No transactions found</p>
-            ) : (
-              <div className="space-y-3">
-                {/* Display limited or all transactions based on state */}
-                {(showAllTransactions ? transactions : transactions.slice(0, 5)).map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-3 border rounded-lg">
+      {/* Payment History - Always Visible */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-purple-600" />
+            Payment History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {transactions.length === 0 && withdrawals.length === 0 ? (
+            <p className="text-center text-gray-500 py-4">No transactions found</p>
+          ) : (
+            <div className="space-y-3">
+              {/* Combine and sort transactions and withdrawals */}
+              {(() => {
+                const allTransactions = [
+                  ...transactions.map(tx => ({ ...tx, type: 'payment' })),
+                  ...withdrawals.map(wd => ({ ...wd, type: 'withdrawal' }))
+                ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                const displayTransactions = showAllTransactions ? allTransactions : allTransactions.slice(0, 5);
+
+                return displayTransactions.map((tx) => (
+                  <div key={`${tx.type}-${tx.id}`} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
-                        <DollarSign className="h-4 w-4" />
+                      <div className={`p-2 rounded-full ${tx.type === 'withdrawal' ? 'bg-orange-100 dark:bg-orange-900/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                        {tx.type === 'withdrawal' ? 
+                          <ArrowUpCircle className="h-4 w-4 text-orange-600" /> : 
+                          <DollarSign className="h-4 w-4" />
+                        }
                       </div>
                       <div>
-                        <p className="font-medium">{tx.description || 'Payment'}</p>
+                        <p className="font-medium">
+                          {tx.type === 'withdrawal' ? 
+                            `Withdrawal to ${tx.recipient_address?.slice(0, 10)}...` : 
+                            (tx.description || 'Payment')
+                          }
+                        </p>
                         <p className="text-sm text-gray-500">
                           {new Date(tx.created_at).toLocaleDateString()}
                         </p>
@@ -551,41 +560,47 @@ const NowPayments = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">
-                        {nowPaymentsService.formatAmount(tx.amount)}
+                        {tx.type === 'withdrawal' ? 
+                          `${tx.amount} ${tx.currency?.toUpperCase()}` :
+                          nowPaymentsService.formatAmount(tx.amount)
+                        }
                       </p>
-                      {formatStatus(tx.payment_status)}
+                      {tx.type === 'withdrawal' ? 
+                        nowPaymentsService.getWithdrawalStatusBadge(tx.status) :
+                        formatStatus(tx.payment_status)
+                      }
                     </div>
                   </div>
-                ))}
-                
-                {/* Show All / Show Less Button */}
-                {transactions.length > 5 && (
-                  <div className="flex justify-center pt-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowAllTransactions(!showAllTransactions)}
-                      className="text-cyan-600 hover:text-cyan-700 border-cyan-600 hover:border-cyan-700"
-                    >
-                      {showAllTransactions ? (
-                        <>
-                          <ArrowUpCircle className="h-4 w-4 mr-2" />
-                          Show Less
-                        </>
-                      ) : (
-                        <>
-                          <ArrowDownCircle className="h-4 w-4 mr-2" />
-                          Show All ({transactions.length})
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+                ));
+              })()}
+              
+              {/* Show All / Show Less Button */}
+              {(transactions.length + withdrawals.length) > 5 && (
+                <div className="flex justify-center pt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAllTransactions(!showAllTransactions)}
+                    className="text-cyan-600 hover:text-cyan-700 border-cyan-600 hover:border-cyan-700"
+                  >
+                    {showAllTransactions ? (
+                      <>
+                        <ArrowUpCircle className="h-4 w-4 mr-2" />
+                        Show Less
+                      </>
+                    ) : (
+                      <>
+                        <ArrowDownCircle className="h-4 w-4 mr-2" />
+                        Show All ({transactions.length + withdrawals.length})
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Payment Modal */}
       {showPaymentModal && (
