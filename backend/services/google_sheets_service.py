@@ -178,29 +178,44 @@ class GoogleSheetsService:
             users_data = []
             
             try:
-                print("🔍 Calling get_all_users_with_emails() RPC function...")
-                result = supabase.rpc('get_all_users_with_emails').execute()
+                print("🔍 Using working get_users_emails_simple() RPC function...")
+                emails_result = supabase.rpc('get_users_emails_simple').execute()
                 
-                if result.data:
-                    print(f"✅ RPC function successful! Found {len(result.data)} users with complete data")
+                if emails_result.data:
+                    print(f"✅ Simple RPC successful! Found {len(emails_result.data)} users with emails")
                     
-                    for user in result.data:
+                    # Get additional data manually
+                    profiles = supabase.table('user_profiles').select('*').execute()
+                    subscriptions = supabase.table('subscriptions').select('*').execute()
+                    
+                    profiles_data = profiles.data if profiles.data else []
+                    subscriptions_data = subscriptions.data if subscriptions.data else []
+                    
+                    print(f"📊 Combining {len(emails_result.data)} emails with {len(profiles_data)} profiles and {len(subscriptions_data)} subscriptions")
+                    
+                    for email_user in emails_result.data:
+                        user_id = email_user.get('user_id', '')
+                        
+                        # Find matching profile and subscription
+                        profile = next((p for p in profiles_data if p.get('user_id') == user_id), {})
+                        subscription = next((s for s in subscriptions_data if s.get('user_id') == user_id), {})
+                        
                         users_data.append({
-                            'user_id': user.get('user_id', ''),
-                            'name': user.get('name', ''),
-                            'email': user.get('email', ''),
-                            'country': user.get('country', ''),
-                            'phone': user.get('phone', ''),
-                            'registration_date': user.get('created_at', ''),
-                            'seller_verification_status': user.get('seller_verification_status', 'not_verified'),
-                            'plan_type': user.get('plan_type', 'free'),
-                            'subscription_status': user.get('subscription_status', 'inactive'),
-                            'subscription_end_date': user.get('subscription_end_date', ''),
-                            'total_commission_earned': float(user.get('total_commission_earned', 0))
+                            'user_id': user_id,
+                            'name': profile.get('name', ''),
+                            'email': email_user.get('email', ''),  # Email from auth.users!
+                            'country': profile.get('country', ''),
+                            'phone': profile.get('phone', ''),
+                            'registration_date': email_user.get('created_at', ''),
+                            'seller_verification_status': profile.get('seller_verification_status', 'not_verified'),
+                            'plan_type': subscription.get('plan_type', 'free'),
+                            'subscription_status': subscription.get('status', 'inactive'),
+                            'subscription_end_date': subscription.get('end_date', ''),
+                            'total_commission_earned': 0
                         })
                 else:
-                    print("⚠️ RPC function returned no data, falling back to simple RPC")
-                    raise Exception("No data from complex RPC")
+                    print("⚠️ Simple RPC returned no data, falling back to manual method")
+                    raise Exception("No data from simple RPC")
                     
             except Exception as rpc_error:
                 print(f"⚠️ Complex RPC failed: {rpc_error}")
