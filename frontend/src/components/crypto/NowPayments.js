@@ -838,6 +838,142 @@ const NowPayments = () => {
           </Card>
         </div>
       )}
+
+      {/* Withdrawal Modal */}
+      {showWithdrawalModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Withdraw Funds</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowWithdrawalModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {error && (
+                <Alert className="border-red-200 bg-red-50 dark:bg-red-900/20">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800 dark:text-red-200">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {message && (
+                <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800 dark:text-green-200">
+                    {message}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div>
+                <Label>Withdrawal Amount</Label>
+                <Input
+                  type="number"
+                  placeholder="10.00"
+                  value={withdrawalAmount}
+                  onChange={(e) => setWithdrawalAmount(e.target.value)}
+                  min="0.01"
+                  max="10000"
+                  step="0.01"
+                />
+                {withdrawalMinAmount && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                    Minimum: {withdrawalMinAmount} {withdrawalCurrency}
+                  </p>
+                )}
+                {withdrawalFee && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                    Network fee: ~{withdrawalFee} {withdrawalCurrency}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label>Cryptocurrency</Label>
+                <select
+                  value={withdrawalCurrency}
+                  onChange={(e) => {
+                    setWithdrawalCurrency(e.target.value);
+                    setWithdrawalNetwork(currencyNetworks[e.target.value]?.[0]?.code || '');
+                  }}
+                  className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                >
+                  {Object.keys(currencyNetworks).map(currency => (
+                    <option key={currency} value={currency}>{currency}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <Label>Network</Label>
+                <select
+                  value={withdrawalNetwork}
+                  onChange={(e) => setWithdrawalNetwork(e.target.value)}
+                  className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                >
+                  {(currencyNetworks[withdrawalCurrency] || []).map(network => (
+                    <option key={network.code} value={network.code}>
+                      {network.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <Label>Recipient Address</Label>
+                <Input
+                  placeholder="Enter your wallet address"
+                  value={withdrawalAddress}
+                  onChange={(e) => setWithdrawalAddress(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Make sure the address matches the selected network
+                </p>
+              </div>
+
+              <div>
+                <Label>Description (Optional)</Label>
+                <Input
+                  placeholder="Personal wallet"
+                  value={withdrawalDescription}
+                  onChange={(e) => setWithdrawalDescription(e.target.value)}
+                />
+              </div>
+
+              <div className="pt-4 pb-6">
+                <Button
+                  onClick={handleCreateWithdrawal}
+                  disabled={loading || isVerifying || !withdrawalAmount || !withdrawalAddress}
+                  className="w-full bg-orange-600 hover:bg-orange-700"
+                >
+                  {loading || isVerifying ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Wallet className="h-4 w-4 mr-2" />
+                  )}
+                  {isVerifying ? 'Verifying...' : (loading ? 'Creating...' : 'Create Withdrawal')}
+                </Button>
+              </div>
+
+              <div className="text-xs text-gray-500 space-y-1 pb-4">
+                <p>• Automatic 2FA verification with your account</p>
+                <p>• Withdrawal processed immediately after verification</p>
+                <p>• Network fees are deducted from withdrawal amount</p>
+                <p>• Processing time: 10-30 minutes depending on network</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
