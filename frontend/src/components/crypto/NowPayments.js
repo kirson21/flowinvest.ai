@@ -50,6 +50,7 @@ const NowPayments = () => {
   // Transaction history and withdrawals
   const [transactions, setTransactions] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [showTransactions, setShowTransactions] = useState(false);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   // Withdrawal state
