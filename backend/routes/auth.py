@@ -103,6 +103,16 @@ async def update_user_profile(user_id: str, profile_data: dict):
         response = supabase.table('user_profiles').update(profile_data).eq('user_id', user_id).execute()
         
         if response.data:
+            # Trigger Google Sheets sync after profile update
+            try:
+                import httpx
+                base_url = os.getenv("REACT_APP_BACKEND_URL", "http://127.0.0.1:8001")
+                async with httpx.AsyncClient() as client:
+                    await client.post(f"{base_url}/api/google-sheets/auto-sync-webhook")
+                print(f"✅ Google Sheets sync triggered after profile update")
+            except Exception as sync_error:
+                print(f"⚠️ Google Sheets sync trigger failed: {sync_error}")
+            
             return {"success": True, "message": "Profile updated successfully", "user": response.data[0]}
         else:
             return {"success": False, "message": "Failed to update profile"}
@@ -121,6 +131,16 @@ async def create_user_profile(user_id: str, profile_data: dict):
         response = supabase.table('user_profiles').insert(profile_data).execute()
         
         if response.data:
+            # Trigger Google Sheets sync after profile creation
+            try:
+                import httpx
+                base_url = os.getenv("REACT_APP_BACKEND_URL", "http://127.0.0.1:8001")
+                async with httpx.AsyncClient() as client:
+                    await client.post(f"{base_url}/api/google-sheets/auto-sync-webhook")
+                print(f"✅ Google Sheets sync triggered after profile creation")
+            except Exception as sync_error:
+                print(f"⚠️ Google Sheets sync trigger failed: {sync_error}")
+            
             return {"success": True, "message": "Profile created successfully", "user": response.data[0]}
         else:
             return {"success": False, "message": "Failed to create profile"}
