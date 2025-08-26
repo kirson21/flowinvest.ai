@@ -242,7 +242,135 @@ async def create_oauth_user_profile(user_id: str, oauth_data: dict):
             
     except Exception as e:
         print(f"❌ OAuth profile creation error for user {user_id}: {str(e)}")
-        return {"success": False, "message": f"OAuth profile creation failed: {str(e)}"}
+@router.delete("/auth/user/{user_id}/account")
+async def delete_user_account(user_id: str):
+    """Completely delete user account and all associated data"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"🗑️ Starting complete account deletion for user {user_id}")
+        
+        # List of all tables that contain user data (in deletion order to avoid foreign key issues)
+        tables_to_clean = [
+            'user_notifications',      # Delete notifications first
+            'transactions',            # Delete transactions
+            'user_bots',              # Delete user bots
+            'user_votes',             # Delete votes
+            'seller_reviews',         # Delete reviews
+            'user_purchases',         # Delete purchases
+            'portfolios',             # Delete portfolios
+            'seller_verification_applications',  # Delete verification applications
+            'crypto_transactions',    # Delete crypto transactions
+            'nowpayments_invoices',   # Delete payment invoices
+            'nowpayments_subscriptions',  # Delete subscriptions
+            'nowpayments_withdrawals',    # Delete withdrawal requests
+            'subscription_email_validation',  # Delete email validations
+            'subscriptions',          # Delete subscription records
+            'user_accounts',          # Delete user account (balance)
+            'user_profiles',          # Delete user profile
+            'commissions'             # Delete commission records
+        ]
+        
+        deletion_summary = {}
+        
+        # Delete data from each table
+        for table in tables_to_clean:
+            try:
+                print(f"🧹 Deleting from table: {table}")
+                
+                # Get count before deletion for summary
+                count_result = supabase_admin.table(table).select('id').eq('user_id', user_id).execute()
+                before_count = len(count_result.data) if count_result.data else 0
+                
+                if before_count > 0:
+                    # Delete all records for this user
+                    delete_result = supabase_admin.table(table).delete().eq('user_id', user_id).execute()
+                    after_count = len(delete_result.data) if delete_result.data else 0
+                    
+                    deletion_summary[table] = {
+                        "before": before_count,
+                        "deleted": after_count,
+                        "success": True
+                    }
+                    print(f"✅ Deleted {after_count} records from {table}")
+                else:
+                    deletion_summary[table] = {
+                        "before": 0,
+                        "deleted": 0,
+                        "success": True
+                    }
+                    print(f"ℹ️ No records found in {table}")
+                    
+            except Exception as table_error:
+                print(f"❌ Error deleting from {table}: {table_error}")
+                deletion_summary[table] = {
+                    "before": "unknown",
+                    "deleted": 0,
+                    "success": False,
+                    "error": str(table_error)
+                }
+        
+        # Finally, delete the user from auth.users (this is the critical part)
+        print(f"🔥 Deleting user from auth.users table...")
+        try:
+            # Delete from auth.users using admin API
+            auth_delete_result = supabase_admin.auth.admin.delete_user(user_id)
+            
+            if auth_delete_result:
+                print(f"✅ User {user_id} deleted from auth.users successfully")
+                deletion_summary["auth.users"] = {
+                    "success": True,
+                    "deleted": 1
+                }
+            else:
+                print(f"⚠️ User deletion from auth.users may have failed")
+                deletion_summary["auth.users"] = {
+                    "success": False,
+                    "error": "No response from auth.admin.delete_user"
+                }
+                
+        except Exception as auth_error:
+            print(f"❌ Failed to delete user from auth.users: {auth_error}")
+            deletion_summary["auth.users"] = {
+                "success": False,
+                "error": str(auth_error)
+            }
+        
+        # Count total deletions
+        total_deleted = sum(
+            item["deleted"] for item in deletion_summary.values() 
+            if isinstance(item.get("deleted"), int)
+        )
+        
+        # Trigger Google Sheets sync after account deletion
+        try:
+            import httpx
+            base_url = os.getenv("REACT_APP_BACKEND_URL", "http://127.0.0.1:8001")
+            async with httpx.AsyncClient() as client:
+                await client.post(f"{base_url}/api/google-sheets/auto-sync-webhook")
+            print(f"✅ Google Sheets sync triggered after account deletion")
+        except Exception as sync_error:
+            print(f"⚠️ Google Sheets sync trigger failed: {sync_error}")
+        
+        print(f"🎉 Account deletion completed! Total records deleted: {total_deleted}")
+        
+        return {
+            "success": True,
+            "message": f"Account completely deleted. Total records removed: {total_deleted}",
+            "user_id": user_id,
+            "deletion_summary": deletion_summary,
+            "total_records_deleted": total_deleted,
+            "auth_user_deleted": deletion_summary.get("auth.users", {}).get("success", False)
+        }
+        
+    except Exception as e:
+        print(f"❌ Account deletion error for user {user_id}: {str(e)}")
+        return {
+            "success": False, 
+            "message": f"Account deletion failed: {str(e)}",
+            "user_id": user_id
+        }
 
 # ========================================
 # BALANCE SYSTEM ENDPOINTS
