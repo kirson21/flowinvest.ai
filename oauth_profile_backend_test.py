@@ -371,22 +371,19 @@ class OAuthProfileTester:
             return False
     
     def test_regular_profile_creation_field_filtering(self):
-        """Test regular profile creation with field filtering"""
+        """Test regular profile creation with field filtering for existing user"""
         try:
-            # Create a unique test user ID for this test
-            test_user_id = f"test-regular-{int(time.time())}"
-            
             profile_data = {
-                "display_name": "Regular User Test",
-                "bio": "Test bio",
+                "display_name": "Regular User Test Updated",
+                "bio": "Test bio for field filtering",
                 "email": "should_be_filtered@example.com",  # Should be filtered out
                 "invalid_field": "should_be_removed",  # Should be filtered out
-                "avatar_url": "https://example.com/avatar.jpg",
+                "avatar_url": "https://example.com/filtered-avatar.jpg",
                 "seller_verification_status": "unverified"
             }
             
             response = requests.post(
-                f"{self.backend_url}/auth/user/{test_user_id}/profile",
+                f"{self.backend_url}/auth/user/{EXISTING_USER_ID}/profile",
                 json=profile_data,
                 timeout=15
             )
@@ -401,7 +398,7 @@ class OAuthProfileTester:
                     # Check that disallowed fields were filtered out
                     has_email = 'email' in user_data
                     has_invalid_field = 'invalid_field' in user_data
-                    has_display_name = user_data.get('display_name') == "Regular User Test"
+                    has_display_name = user_data.get('display_name') == "Regular User Test Updated"
                     
                     if not has_email and not has_invalid_field and has_display_name:
                         self.log_test(
