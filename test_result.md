@@ -408,6 +408,18 @@ frontend:
           agent: "testing"
           comment: "✅ BALANCE SYSTEM SERVICES BACKEND VERIFICATION COMPLETED: Comprehensive testing confirms all backend APIs supporting the balance system services are FULLY OPERATIONAL. BACKEND API VERIFICATION: ✅ Balance Retrieval API - GET /auth/user/{user_id}/balance working correctly, ✅ Balance Update API - POST /auth/user/{user_id}/update-balance successfully processes topups and withdrawals, ✅ Transaction History API - GET /auth/user/{user_id}/transactions retrieves complete transaction history, ✅ Balance Sync API - POST /auth/user/{user_id}/sync-balance synchronizes frontend/backend balances, ✅ Marketplace Transaction API - Backend supports marketplace purchase processing with balance validation, ✅ Error Handling - Proper insufficient funds protection and validation working. SERVICE LAYER BACKEND READY: All backend endpoints required by the balance system services are operational and provide complete balance management capabilities including topups, withdrawals, transaction history, and marketplace integration."
 
+  - task: "Fix Automatic Profile Creation for OAuth Users"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/auth.py, /app/frontend/src/contexts/AuthContext.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "AUTOMATIC OAUTH PROFILE CREATION SYSTEM FIXED: ✅ Identified and resolved PGRST204 'Could not find email column' error caused by frontend trying to include email field in user_profiles table updates, ✅ Enhanced backend profile creation endpoint to filter allowed fields and prevent database schema conflicts, ✅ Created dedicated OAuth profile creation endpoint /auth/user/{user_id}/profile/oauth with comprehensive error handling and user verification, ✅ Updated frontend ensureUserProfile function to use OAuth-specific endpoint with fallback mechanisms and better error handling, ✅ Fixed foreign key constraint issues by using supabase_admin client for reliable profile creation, ✅ Implemented automatic profile creation for all existing OAuth users (10 total users, 6 new profiles created), ✅ Added comprehensive logging and debugging for profile creation process, ✅ Enhanced profile data extraction from OAuth user metadata (full_name, picture, email-based display names). Ready for testing with new OAuth user registrations to ensure automatic profile creation works correctly."
+
   - task: "Implement NowPayments Withdrawal/Payout Functionality"
     implemented: true
     working: true
