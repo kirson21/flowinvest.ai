@@ -192,6 +192,39 @@ class SupabaseRPCQuery:
             result.data = []
             return result
 
+# Add Admin Auth functionality
+class SupabaseAdminAuth:
+    def __init__(self, client: SupabaseHTTPClient):
+        self.client = client
+    
+    def delete_user(self, user_id: str):
+        """Delete user from auth.users using admin API"""
+        try:
+            url = f"{self.client.url}/auth/v1/admin/users/{user_id}"
+            
+            with httpx.Client() as http_client:
+                response = http_client.delete(url, headers=self.client.headers)
+                
+                if response.status_code in [200, 204]:
+                    print(f"✅ User {user_id} deleted from auth.users successfully")
+                    return True
+                else:
+                    print(f"❌ Failed to delete user from auth.users: HTTP {response.status_code} - {response.text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ Error deleting user from auth.users: {e}")
+            return False
+
+class SupabaseAuth:
+    def __init__(self, client: SupabaseHTTPClient):
+        self.client = client
+        self.admin = SupabaseAdminAuth(client)
+
+# Add auth to admin client
+if supabase_admin:
+    supabase_admin.auth = SupabaseAuth(supabase_admin)
+
 # Add RPC method to main clients
 if supabase:
     supabase.rpc = lambda function_name, params=None: SupabaseRPCQuery(supabase, function_name, params)
