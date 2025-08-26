@@ -85,11 +85,22 @@ SUPPORTED_CURRENCIES = {
 async def get_nowpayments_jwt_token():
     """Get JWT token for NowPayments subscriptions API"""
     try:
-        # For subscriptions, we might need to authenticate first
+        # Get credentials from environment variables
+        nowpayments_email = os.getenv("NOWPAYMENTS_EMAIL")
+        nowpayments_password = os.getenv("NOWPAYMENTS_PASSWORD")
+        
+        if not nowpayments_email or not nowpayments_password:
+            print(f"❌ NowPayments credentials missing:")
+            print(f"   NOWPAYMENTS_EMAIL: {'Present' if nowpayments_email else 'Missing'}")
+            print(f"   NOWPAYMENTS_PASSWORD: {'Present' if nowpayments_password else 'Missing'}")
+            return None
+        
         auth_data = {
-            "email": os.getenv("NOWPAYMENTS_TEST_EMAIL", "test@example.com"),  # Test email for development
-            "password": "Osiris@21"  # Your account password
+            "email": nowpayments_email,
+            "password": nowpayments_password
         }
+        
+        print(f"🔐 Authenticating with NowPayments using email: {nowpayments_email}")
         
         async with httpx.AsyncClient() as client:
             response = await client.post(
