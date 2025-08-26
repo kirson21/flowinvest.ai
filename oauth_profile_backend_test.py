@@ -16,6 +16,12 @@ TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"  # Super Admin for testing
 EXISTING_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"  # Known existing user
 INVALID_USER_ID = "invalid-user-id-12345"
 
+# Known existing users from the system (from previous test results)
+KNOWN_USERS = [
+    "cd0e9717-f85d-4726-81e9-f260394ead58",  # Super admin
+    # We'll discover more during testing
+]
+
 class OAuthProfileTester:
     def __init__(self):
         self.backend_url = BACKEND_URL
