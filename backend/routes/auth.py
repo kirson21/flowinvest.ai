@@ -5,6 +5,7 @@ from supabase_client import supabase, supabase_admin
 from typing import Optional
 import os
 import sys
+import sys
 
 router = APIRouter()
 security = HTTPBearer()
