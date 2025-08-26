@@ -423,6 +423,18 @@ frontend:
           agent: "testing"
           comment: "✅ OAUTH PROFILE CREATION SYSTEM COMPREHENSIVE TESTING COMPLETED: Extensive testing confirms the automatic OAuth profile creation system is FULLY OPERATIONAL with 100% success rate (7/7 critical tests passed). CRITICAL VERIFICATION RESULTS: ✅ OAuth Profile Creation Endpoint Working - POST /api/auth/user/{user_id}/profile/oauth correctly processes OAuth metadata with rich data (full_name, picture), minimal data (name only), and empty metadata, ✅ Duplicate Prevention Operational - Multiple profile creation attempts for existing users correctly return 'Profile already exists' without creating duplicates, ✅ User Verification Logic Working - Invalid user IDs properly rejected with 'User not found in auth.users' error, ✅ Profile Retrieval Functional - GET /api/auth/user/{user_id} returns existing profiles correctly and default profile structure for users without profiles, ✅ Email Field Conflicts ELIMINATED - No PGRST204 'Could not find email column' errors detected, email fields properly filtered from user_profiles table, ✅ Foreign Key Relationships Correct - Profiles maintain proper user_id foreign key relationships with auth.users table, ✅ RLS Policies Operational - Row Level Security policies allow proper access using supabase_admin client, ✅ Data Sanitization Working - OAuth metadata with potentially problematic data (XSS attempts, extra fields) processed safely, ✅ System Reliability Confirmed - 100% success rate under load testing (5/5 rapid requests succeeded). CRITICAL PRODUCTION BUG STATUS: ✅ FIXED - The PGRST204 email column error that prevented OAuth profile creation has been completely resolved. OAuth users can now automatically get profiles created without any database schema conflicts or foreign key constraint violations."
 
+  - task: "Fix Complete Account Deletion System"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/auth.py, /app/frontend/src/components/settings/Settings.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "COMPLETE ACCOUNT DELETION SYSTEM IMPLEMENTED: ✅ Fixed incomplete account deletion that was only logging users out instead of removing data, ✅ Created comprehensive backend DELETE /auth/user/{user_id}/account endpoint that removes all user data from 17 database tables in proper order to avoid foreign key conflicts, ✅ Implemented cascading deletion covering all user data tables: user_notifications, transactions, user_bots, user_votes, seller_reviews, user_purchases, portfolios, verification_applications, crypto_transactions, nowpayments_invoices, nowpayments_subscriptions, nowpayments_withdrawals, subscription_email_validation, subscriptions, user_accounts, user_profiles, commissions, ✅ Added critical auth.users deletion using supabase_admin.auth.admin.delete_user() to completely remove user from Supabase authentication system, ✅ Enhanced frontend handleDeleteAccount to use new backend endpoint with deletion summary tracking and user feedback, ✅ Added local storage clearing, proper confirmation flow, and Google Sheets sync trigger after deletion, ✅ Removed all phone column references from frontend and backend code after database schema update. System now ensures complete data removal allowing fresh registration if users return later."
+
   - task: "Implement NowPayments Withdrawal/Payout Functionality"
     implemented: true
     working: true
