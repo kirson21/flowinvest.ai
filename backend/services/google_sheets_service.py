@@ -313,7 +313,6 @@ class GoogleSheetsService:
             # Print detailed summary
             users_with_email = len([u for u in users_data if u.get('email')])
             users_with_names = len([u for u in users_data if u.get('name')])
-            users_with_phone = len([u for u in users_data if u.get('phone')])
             users_with_country = len([u for u in users_data if u.get('country')])
             active_subs = len([u for u in users_data if u.get('subscription_status') == 'active'])
             plus_users = len([u for u in users_data if u.get('plan_type') == 'plus'])
@@ -323,7 +322,6 @@ class GoogleSheetsService:
             print(f"   Total Users: {len(users_data)}")
             print(f"   Users with Email: {users_with_email}")
             print(f"   Users with Name: {users_with_names}")
-            print(f"   Users with Phone: {users_with_phone}")
             print(f"   Users with Country: {users_with_country}")
             print(f"   Active Subscriptions: {active_subs}")
             print(f"   Plus Plan Users: {plus_users}")
