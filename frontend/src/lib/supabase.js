@@ -187,7 +187,7 @@ export const database = {
         .insert({
           user_id: userId,
           display_name: profileData.display_name,
-          phone: profileData.phone,
+          email: profileData.email,
           bio: profileData.bio,
           avatar_url: profileData.avatar_url,
           created_at: new Date().toISOString(),
