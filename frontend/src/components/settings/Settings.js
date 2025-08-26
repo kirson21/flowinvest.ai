@@ -73,7 +73,6 @@ const Settings = () => {
   const [profileData, setProfileData] = useState({
     display_name: '',
     email: '',
-    phone: '',
     bio: '',
     avatar_url: ''
   });
