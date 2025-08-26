@@ -899,35 +899,51 @@ const Settings = () => {
       setLoading(true);
       setError('');
 
-      // First, delete all user data (bots, settings, etc.)
-      const userBots = await dataSyncService.syncUserBots(user.id);
-      for (const bot of userBots) {
-        try {
-          // Delete from Supabase
-          const { error } = await supabase
-            .from('user_bots')
-            .delete()
-            .eq('id', bot.id)
-            .eq('user_id', user.id);
-          
-          if (error) {
-            console.warn('Failed to delete bot from Supabase:', error);
-          }
-        } catch (error) {
-          console.warn('Error deleting bot:', error);
+      console.log('🗑️ Starting complete account deletion...');
+
+      // Call the backend comprehensive deletion endpoint
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const deleteResponse = await fetch(`${backendUrl}/api/auth/user/${user.id}/account`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
         }
+      });
+
+      if (deleteResponse.ok) {
+        const deleteResult = await deleteResponse.json();
+        
+        if (deleteResult.success) {
+          console.log('✅ Account deletion successful:', deleteResult);
+          
+          setMessage(`Account completely deleted! Removed ${deleteResult.total_records_deleted} records from database.`);
+          
+          // Wait a moment to show the message
+          setTimeout(async () => {
+            // Sign out the user (this will redirect to login)
+            await auth.signOut();
+            
+            // Clear all local storage data
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            console.log('✅ User signed out and local data cleared');
+            
+          }, 2000);
+          
+        } else {
+          console.error('❌ Backend deletion failed:', deleteResult.message);
+          setError(`Account deletion failed: ${deleteResult.message}`);
+        }
+      } else {
+        const errorText = await deleteResponse.text();
+        console.error('❌ Delete request failed:', deleteResponse.status, errorText);
+        setError(`Account deletion request failed: ${deleteResponse.status}`);
       }
-
-      // Delete user profile
-      await database.updateUserProfile(user.id, { deleted_at: new Date().toISOString() });
-
-      // Sign out the user
-      await auth.signOut();
       
-      setMessage('Account deleted successfully');
     } catch (error) {
-      console.error('Error deleting account:', error);
-      setError('Failed to delete account');
+      console.error('❌ Account deletion error:', error);
+      setError(`Failed to delete account: ${error.message}`);
     } finally {
       setLoading(false);
     }
