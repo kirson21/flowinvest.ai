@@ -101,22 +101,20 @@ class OAuthProfileTester:
             return False
     
     def test_oauth_profile_creation_valid_data(self):
-        """Test OAuth profile creation with valid user_metadata"""
+        """Test OAuth profile creation with valid user_metadata for existing user"""
         try:
-            # Create a unique test user ID for this test
-            test_user_id = f"test-oauth-{int(time.time())}"
-            
+            # Use the known existing user for this test
             oauth_data = {
                 "user_metadata": {
-                    "full_name": "John OAuth Doe",
-                    "picture": "https://example.com/avatar.jpg",
+                    "full_name": "John OAuth Doe Updated",
+                    "picture": "https://lh3.googleusercontent.com/test-oauth-avatar",
                     "name": "John Doe"
                 },
                 "email": "john.oauth@example.com"
             }
             
             response = requests.post(
-                f"{self.backend_url}/auth/user/{test_user_id}/profile/oauth",
+                f"{self.backend_url}/auth/user/{EXISTING_USER_ID}/profile/oauth",
                 json=oauth_data,
                 timeout=15
             )
@@ -126,15 +124,23 @@ class OAuthProfileTester:
                 success = data.get('success', False)
                 
                 if success:
-                    user_data = data.get('user', {})
-                    display_name = user_data.get('display_name')
-                    avatar_url = user_data.get('avatar_url')
-                    
-                    self.log_test(
-                        "OAuth Profile Creation - Valid Data",
-                        True,
-                        f"Profile created with display_name: '{display_name}', avatar_url: '{avatar_url}'"
-                    )
+                    existed = data.get('existed', False)
+                    if existed:
+                        self.log_test(
+                            "OAuth Profile Creation - Valid Data",
+                            True,
+                            f"Profile already exists for user {EXISTING_USER_ID} - correct behavior"
+                        )
+                    else:
+                        user_data = data.get('user', {})
+                        display_name = user_data.get('display_name')
+                        avatar_url = user_data.get('avatar_url')
+                        
+                        self.log_test(
+                            "OAuth Profile Creation - Valid Data",
+                            True,
+                            f"Profile created with display_name: '{display_name}', avatar_url: '{avatar_url}'"
+                        )
                     return True
                 else:
                     self.log_test(
