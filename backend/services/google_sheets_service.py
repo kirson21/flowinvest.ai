@@ -275,7 +275,7 @@ class GoogleSheetsService:
             
             # Prepare headers for Google Sheets
             headers = [
-                'User ID', 'Name', 'Email', 'Country', 'Phone', 
+                'User ID', 'Name', 'Email', 'Country', 
                 'Registration Date', 'Seller Status', 'Subscription Status',
                 'Plan Type', 'Subscription End Date', 'Total Commission Earned'
             ]
