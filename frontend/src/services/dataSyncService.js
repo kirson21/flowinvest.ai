@@ -391,7 +391,7 @@ export const dataSyncService = {
       const { database } = await import('../lib/supabase');
       const data = await database.updateUserProfile(userId, {
         display_name: profileUpdates.display_name,
-        phone: profileUpdates.phone,
+        email: profileUpdates.email,
         bio: profileUpdates.bio,
         avatar_url: profileUpdates.avatar_url,
         social_links: profileUpdates.social_links || {},
