@@ -315,20 +315,20 @@ async def delete_user_account(user_id: str):
         # Finally, delete the user from auth.users (this is the critical part)
         print(f"🔥 Deleting user from auth.users table...")
         try:
-            # Delete from auth.users using admin API
-            auth_delete_result = supabase_admin.auth.admin.delete_user(user_id)
+            # Delete from auth.users using enhanced admin client
+            auth_delete_success = supabase_admin.auth.admin.delete_user(user_id)
             
-            if auth_delete_result:
+            if auth_delete_success:
                 print(f"✅ User {user_id} deleted from auth.users successfully")
                 deletion_summary["auth.users"] = {
                     "success": True,
                     "deleted": 1
                 }
             else:
-                print(f"⚠️ User deletion from auth.users may have failed")
+                print(f"❌ User deletion from auth.users failed")
                 deletion_summary["auth.users"] = {
                     "success": False,
-                    "error": "No response from auth.admin.delete_user"
+                    "error": "delete_user method returned False"
                 }
                 
         except Exception as auth_error:
@@ -336,6 +336,38 @@ async def delete_user_account(user_id: str):
             deletion_summary["auth.users"] = {
                 "success": False,
                 "error": str(auth_error)
+            }
+        
+        # Delete user from Google Sheets
+        print(f"📊 Deleting user from Google Sheets...")
+        try:
+            # Import Google Sheets service
+            sys.path.append('/app/backend/services')
+            from google_sheets_service import google_sheets_service
+            
+            # Try to get user email for better identification
+            user_email = None
+            if deletion_summary.get("user_profiles", {}).get("success"):
+                # Try to get email from the deleted profile data (if we captured it)
+                pass  # We'll use user_id for identification
+            
+            sheets_delete_success = google_sheets_service.delete_user_from_sheets(user_id, user_email)
+            
+            deletion_summary["google_sheets"] = {
+                "success": sheets_delete_success,
+                "deleted": 1 if sheets_delete_success else 0
+            }
+            
+            if sheets_delete_success:
+                print(f"✅ User deleted from Google Sheets successfully")
+            else:
+                print(f"⚠️ User deletion from Google Sheets failed (may not have been in sheets)")
+                
+        except Exception as sheets_error:
+            print(f"❌ Google Sheets deletion error: {sheets_error}")
+            deletion_summary["google_sheets"] = {
+                "success": False,
+                "error": str(sheets_error)
             }
         
         # Count total deletions
