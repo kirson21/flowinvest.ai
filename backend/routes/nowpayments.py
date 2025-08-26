@@ -678,6 +678,153 @@ async def nowpayments_webhook(request: Request):
         print(f"❌ Webhook processing error: {str(e)}")
         return {"success": False, "error": str(e)}
 
+@router.get("/nowpayments/webhook/test")
+async def test_webhook_connectivity():
+    """Test endpoint to verify webhook URL is reachable"""
+    try:
+        return {
+            "success": True,
+            "message": "Webhook endpoint is reachable",
+            "url": f"{BASE_URL}/api/nowpayments/webhook",
+            "timestamp": datetime.now().isoformat(),
+            "server_info": {
+                "base_url": BASE_URL,
+                "ipn_secret_configured": bool(NOWPAYMENTS_IPN_SECRET),
+                "api_key_configured": bool(NOWPAYMENTS_API_KEY)
+            }
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@router.post("/nowpayments/webhook/simulate")
+async def simulate_webhook_payment(test_data: dict):
+    """Simulate a webhook call for testing purposes"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        payment_id = test_data.get('payment_id', '5737988853')
+        customer_email = test_data.get('email', 'footballinphuket@gmail.com') 
+        amount = test_data.get('amount', '10.07')
+        
+        # Create a simulated webhook request
+        from fastapi import Request
+        import io
+        
+        # Simulate the webhook data
+        simulated_webhook_data = {
+            "payment_id": payment_id,
+            "payment_status": "finished",
+            "customer_email": customer_email,
+            "email": customer_email,
+            "actually_paid": amount,
+            "order_id": f"subscription_{customer_email}_{payment_id}",
+            "pay_currency": "usdttrc20",
+            "price_amount": amount,
+            "price_currency": "USD"
+        }
+        
+        print(f"🧪 Simulating webhook call with data: {simulated_webhook_data}")
+        
+        # Process this data through our webhook logic manually
+        webhook_body = json.dumps(simulated_webhook_data).encode()
+        
+        # Find matching email validation record
+        validation_result = supabase.table('subscription_email_validation')\
+            .select('*')\
+            .eq('email', customer_email)\
+            .order('created_at', desc=True)\
+            .limit(1)\
+            .execute()
+        
+        if validation_result.data:
+            validation_record = validation_result.data[0]
+            user_id = validation_record['user_id']
+            
+            print(f"✅ Found validation record for user {user_id}")
+            
+            # Update validation record to completed with webhook data
+            supabase.table('subscription_email_validation')\
+                .update({
+                    'status': 'completed',
+                    'nowpayments_payment_id': str(payment_id),
+                    'actual_amount_paid': float(amount),
+                    'updated_at': 'now()'
+                })\
+                .eq('id', validation_record['id'])\
+                .execute()
+            
+            print(f"✅ Validation record updated with payment ID {payment_id}")
+            
+            # Process subscription upgrade
+            from datetime import datetime, timedelta
+            end_date = datetime.utcnow() + timedelta(days=31)
+            
+            plus_plan_limits = {
+                'ai_bots': 3,
+                'manual_bots': 5, 
+                'marketplace_products': 10
+            }
+            
+            subscription_data = {
+                'user_id': user_id,
+                'plan_type': 'plus',
+                'status': 'active',
+                'start_date': datetime.utcnow().isoformat(),
+                'end_date': end_date.isoformat(),
+                'renewal': True,
+                'price_paid': float(amount),
+                'currency': 'USD',
+                'limits': plus_plan_limits,
+                'metadata': {
+                    'payment_method': 'crypto', 
+                    'nowpayments_payment_id': str(payment_id), 
+                    'email_validated': True,
+                    'simulated_webhook': True
+                },
+                'updated_at': datetime.utcnow().isoformat()
+            }
+            
+            # Update or create subscription
+            existing_sub = supabase.table('subscriptions').select('*').eq('user_id', user_id).execute()
+            
+            if existing_sub.data:
+                result = supabase.table('subscriptions')\
+                    .update(subscription_data)\
+                    .eq('user_id', user_id)\
+                    .execute()
+                print(f"📝 Updated existing subscription for user {user_id}")
+            else:
+                subscription_data['created_at'] = datetime.utcnow().isoformat()
+                result = supabase.table('subscriptions')\
+                    .insert(subscription_data)\
+                    .execute()
+                print(f"➕ Created new subscription for user {user_id}")
+            
+            # Update company balance
+            if result.data:
+                company_update = supabase.rpc('update_company_balance_subscription', {
+                    'subscription_revenue': float(amount)
+                }).execute()
+                
+                if company_update.data:
+                    print(f"✅ Company balance updated with ${amount}")
+            
+            return {
+                "success": True,
+                "message": f"Simulated webhook processed successfully for {customer_email}",
+                "user_id": user_id,
+                "payment_id": payment_id,
+                "amount": amount
+            }
+        else:
+            return {"success": False, "message": f"No validation record found for {customer_email}"}
+            
+    except Exception as e:
+        print(f"❌ Simulation error: {str(e)}")
+        return {"success": False, "error": str(e)}
+
 @router.post("/nowpayments/webhook/debug")
 async def debug_webhook_data(request: Request):
     """Debug endpoint to see what webhook data we're receiving"""
