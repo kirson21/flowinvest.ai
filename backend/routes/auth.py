@@ -165,6 +165,85 @@ async def create_user_profile(user_id: str, profile_data: dict):
         print(f"❌ Profile creation error for user {user_id}: {str(e)}")
         return {"success": False, "message": f"Failed to create profile: {str(e)}"}
 
+@router.post("/auth/user/{user_id}/profile/oauth")
+async def create_oauth_user_profile(user_id: str, oauth_data: dict):
+    """Create user profile specifically for OAuth users with enhanced error handling"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"🔍 Creating OAuth profile for user {user_id}")
+        print(f"OAuth data received: {oauth_data}")
+        
+        # First, verify the user exists in auth.users
+        try:
+            user_check = supabase_admin.rpc('get_users_emails_simple').execute()
+            user_exists = False
+            if user_check.data:
+                user_exists = any(u['user_id'] == user_id for u in user_check.data)
+            
+            if not user_exists:
+                return {"success": False, "message": f"User {user_id} not found in auth.users"}
+        
+        except Exception as check_error:
+            print(f"⚠️ Could not verify user existence: {check_error}")
+            # Continue anyway
+        
+        # Extract and clean OAuth data for profile creation
+        profile_data = {
+            'user_id': user_id,
+            'display_name': (
+                oauth_data.get('user_metadata', {}).get('full_name') or 
+                oauth_data.get('user_metadata', {}).get('name') or 
+                oauth_data.get('email', '').split('@')[0] or 
+                'User'
+            ),
+            'avatar_url': (
+                oauth_data.get('user_metadata', {}).get('avatar_url') or 
+                oauth_data.get('user_metadata', {}).get('picture')
+            ),
+            'seller_verification_status': 'unverified',
+            'bio': None,
+            'phone': None,
+            'social_links': {},
+            'specialties': [],
+            'seller_data': {},
+            'seller_mode': False
+        }
+        
+        print(f"✨ Processed profile data: {profile_data}")
+        
+        # Check if profile already exists
+        existing_check = supabase_admin.table('user_profiles').select('user_id').eq('user_id', user_id).execute()
+        if existing_check.data:
+            print(f"✅ Profile already exists for user {user_id}")
+            return {"success": True, "message": "Profile already exists", "existed": True}
+        
+        # Create the profile using admin client
+        response = supabase_admin.table('user_profiles').insert(profile_data).execute()
+        
+        if response.data:
+            print(f"✅ OAuth profile created successfully for user {user_id}")
+            
+            # Trigger Google Sheets sync
+            try:
+                import httpx
+                base_url = os.getenv("REACT_APP_BACKEND_URL", "http://127.0.0.1:8001")
+                async with httpx.AsyncClient() as client:
+                    await client.post(f"{base_url}/api/google-sheets/auto-sync-webhook")
+                print(f"✅ Google Sheets sync triggered")
+            except Exception as sync_error:
+                print(f"⚠️ Google Sheets sync failed: {sync_error}")
+            
+            return {"success": True, "message": "OAuth profile created successfully", "user": response.data[0]}
+        else:
+            print(f"❌ OAuth profile creation returned no data")
+            return {"success": False, "message": "Profile creation returned no data"}
+            
+    except Exception as e:
+        print(f"❌ OAuth profile creation error for user {user_id}: {str(e)}")
+        return {"success": False, "message": f"OAuth profile creation failed: {str(e)}"}
+
 # ========================================
 # BALANCE SYSTEM ENDPOINTS
 # ========================================
