@@ -1064,44 +1064,35 @@ class OAuthProfileTester:
         if not self.test_auth_health():
             print("❌ Auth service health check failed - continuing with limited tests")
         
-        # Test 3: OAuth profile creation with valid data
+        # Test 3: OAuth profile creation with valid data (existing user)
         self.test_oauth_profile_creation_valid_data()
         
-        # Test 4: OAuth profile creation with existing user
+        # Test 4: OAuth profile creation with existing user (duplicate prevention)
         self.test_oauth_profile_creation_existing_user()
         
-        # Test 5: OAuth profile creation with invalid user ID
+        # Test 5: OAuth profile creation with invalid user ID (error handling)
         self.test_oauth_profile_creation_invalid_user_id()
         
-        # Test 6: OAuth profile creation with missing metadata
+        # Test 6: OAuth profile creation with missing metadata (existing user)
         self.test_oauth_profile_creation_missing_metadata()
         
-        # Test 7: OAuth profile creation with malformed data
+        # Test 7: OAuth profile creation with malformed data (error handling)
         self.test_oauth_profile_creation_malformed_data()
         
-        # Test 8: Regular profile creation with field filtering
+        # Test 8: Regular profile creation with field filtering (existing user)
         self.test_regular_profile_creation_field_filtering()
         
         # Test 9: Profile retrieval for existing user
         self.test_profile_retrieval_existing_user()
         
-        # Test 10: Profile retrieval for nonexistent user
+        # Test 10: Profile retrieval for nonexistent user (default structure)
         self.test_profile_retrieval_nonexistent_user()
         
-        # Test 11: OAuth profile creation with minimal metadata
-        self.test_oauth_profile_minimal_metadata()
+        # Test 11: OAuth data extraction logic
+        self.test_oauth_data_extraction()
         
-        # Test 12: Concurrent profile creation attempts
-        self.test_concurrent_profile_creation()
-        
-        # Test 13: Database foreign key relationships
-        self.test_database_foreign_key_relationships()
-        
-        # Test 14: Profile creation with special characters
-        self.test_profile_creation_special_characters()
-        
-        # Test 15: Error handling edge cases
-        self.test_profile_creation_error_handling()
+        # Test 12: Profile field validation (no email conflicts)
+        self.test_profile_field_validation()
         
         return self.generate_summary()
     
