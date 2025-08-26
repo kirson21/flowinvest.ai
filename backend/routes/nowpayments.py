@@ -390,11 +390,18 @@ async def nowpayments_webhook(request: Request):
         # Parse JSON data first
         webhook_data = json.loads(body.decode())
         
+        # Handle both "All-Strings" and "Classic way" webhook formats
         payment_id = webhook_data.get('payment_id')
         payment_status = webhook_data.get('payment_status')
         order_id = webhook_data.get('order_id')
         customer_email = webhook_data.get('customer_email') or webhook_data.get('email')
-        actually_paid = float(webhook_data.get('actually_paid', 0))
+        
+        # Handle amount as string (All-Strings format) or number (Classic format)
+        actually_paid_raw = webhook_data.get('actually_paid', 0)
+        if isinstance(actually_paid_raw, str):
+            actually_paid = float(actually_paid_raw) if actually_paid_raw else 0
+        else:
+            actually_paid = float(actually_paid_raw) if actually_paid_raw else 0
         
         print(f"📊 Webhook data: payment_id={payment_id}, status={payment_status}, email={customer_email}, amount=${actually_paid}")
         
