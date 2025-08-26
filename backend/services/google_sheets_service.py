@@ -413,6 +413,93 @@ class GoogleSheetsService:
             print(f"❌ Error in sync_all_data: {str(e)}")
             return False
 
+    def delete_user_from_sheets(self, user_id: str, user_email: str = None):
+        """Delete a specific user from Google Sheets"""
+        try:
+            if not self.service:
+                if not self.authenticate():
+                    return False
+            
+            print(f"🗑️ Deleting user {user_id} from Google Sheets...")
+            
+            # Get current sheet data
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.users_sheet_id,
+                range='A:Z'
+            ).execute()
+            
+            values = result.get('values', [])
+            
+            if not values:
+                print("⚠️ No data found in Google Sheets")
+                return False
+            
+            # Find the row with the user to delete
+            headers = values[0] if values else []
+            user_id_col = None
+            email_col = None
+            
+            # Find User ID and Email column indexes
+            for i, header in enumerate(headers):
+                if header.lower() in ['user id', 'user_id']:
+                    user_id_col = i
+                elif header.lower() == 'email':
+                    email_col = i
+            
+            if user_id_col is None:
+                print("❌ Could not find User ID column in Google Sheets")
+                return False
+            
+            # Find rows to delete (by user_id or email)
+            rows_to_delete = []
+            for i, row in enumerate(values[1:], 1):  # Skip header row
+                if len(row) > user_id_col:
+                    # Check if this row matches the user to delete
+                    row_user_id = row[user_id_col] if user_id_col < len(row) else ''
+                    row_email = row[email_col] if email_col is not None and email_col < len(row) else ''
+                    
+                    if row_user_id == user_id or (user_email and row_email == user_email):
+                        rows_to_delete.append(i + 1)  # +1 for sheet row number (1-indexed)
+                        print(f"📍 Found user data at row {i + 1}: {row_user_id} / {row_email}")
+            
+            if not rows_to_delete:
+                print(f"⚠️ No rows found for user {user_id} in Google Sheets")
+                return True  # Not an error if user not in sheets
+            
+            # Delete rows (start from the end to avoid index shifting)
+            for row_num in sorted(rows_to_delete, reverse=True):
+                try:
+                    # Delete the row
+                    delete_request = {
+                        'requests': [{
+                            'deleteDimension': {
+                                'range': {
+                                    'sheetId': 0,  # Assuming first sheet
+                                    'dimension': 'ROWS',
+                                    'startIndex': row_num - 1,  # 0-indexed for API
+                                    'endIndex': row_num  # Exclusive end
+                                }
+                            }
+                        }]
+                    }
+                    
+                    self.service.spreadsheets().batchUpdate(
+                        spreadsheetId=self.users_sheet_id,
+                        body=delete_request
+                    ).execute()
+                    
+                    print(f"✅ Deleted row {row_num} from Google Sheets")
+                    
+                except Exception as row_error:
+                    print(f"❌ Failed to delete row {row_num}: {row_error}")
+            
+            print(f"✅ User {user_id} deleted from Google Sheets successfully")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error deleting user from Google Sheets: {str(e)}")
+            return False
+
 # Helper function for SQL execution (if not available as RPC)
 def create_sql_executor():
     """Create SQL executor function in Supabase if it doesn't exist"""
