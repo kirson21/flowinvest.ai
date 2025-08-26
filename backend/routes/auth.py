@@ -124,13 +124,28 @@ async def update_user_profile(user_id: str, profile_data: dict):
 async def create_user_profile(user_id: str, profile_data: dict):
     """Create user profile"""
     try:
-        if not supabase:
+        if not supabase_admin:  # Use admin client for reliable access
             return {"success": False, "message": "Database not available"}
-            
-        profile_data['user_id'] = user_id
-        response = supabase.table('user_profiles').insert(profile_data).execute()
+        
+        # Clean the profile data - remove any fields that don't belong in user_profiles
+        allowed_fields = [
+            'display_name', 'phone', 'bio', 'avatar_url', 
+            'seller_verification_status', 'social_links', 'specialties', 
+            'experience', 'seller_data', 'seller_mode'
+        ]
+        
+        # Filter out any disallowed fields (like 'email' which comes from auth.users)
+        cleaned_data = {k: v for k, v in profile_data.items() if k in allowed_fields}
+        cleaned_data['user_id'] = user_id
+        
+        print(f"Creating profile for user {user_id} with data: {cleaned_data}")
+        
+        # Use admin client to bypass RLS for profile creation
+        response = supabase_admin.table('user_profiles').insert(cleaned_data).execute()
         
         if response.data:
+            print(f"✅ Profile created successfully for user {user_id}")
+            
             # Trigger Google Sheets sync after profile creation
             try:
                 import httpx
@@ -143,9 +158,11 @@ async def create_user_profile(user_id: str, profile_data: dict):
             
             return {"success": True, "message": "Profile created successfully", "user": response.data[0]}
         else:
-            return {"success": False, "message": "Failed to create profile"}
+            print(f"❌ Profile creation returned no data for user {user_id}")
+            return {"success": False, "message": "Failed to create profile - no data returned"}
             
     except Exception as e:
+        print(f"❌ Profile creation error for user {user_id}: {str(e)}")
         return {"success": False, "message": f"Failed to create profile: {str(e)}"}
 
 # ========================================
