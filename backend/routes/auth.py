@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from supabase_client import supabase, supabase_admin
 from typing import Optional
 import os
+import sys
 
 router = APIRouter()
 security = HTTPBearer()
