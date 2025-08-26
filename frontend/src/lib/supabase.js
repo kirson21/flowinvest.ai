@@ -128,7 +128,7 @@ export const database = {
           .from('user_profiles')
           .update({
             display_name: updates.display_name,
-            phone: updates.phone,
+            email: updates.email,
             bio: updates.bio,
             avatar_url: updates.avatar_url,
             social_links: updates.social_links || {},
