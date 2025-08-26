@@ -64,6 +64,7 @@ const ensureUserProfile = async (user) => {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       const fallbackData = {
         display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        email: user.email || '',  // Include email now that we have the column
         avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
         seller_verification_status: 'unverified'
       };
