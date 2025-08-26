@@ -375,7 +375,7 @@ async def get_payment_status(payment_id: str, user_id: str = Query(..., descript
 
 @router.post("/nowpayments/webhook")
 async def nowpayments_webhook(request: Request):
-    """Handle NowPayments IPN webhooks with email validation"""
+    """Handle NowPayments IPN webhooks with proper signature verification"""
     try:
         import sys
         sys.path.append('/app/backend')
@@ -385,10 +385,9 @@ async def nowpayments_webhook(request: Request):
         body = await request.body()
         signature = request.headers.get("x-nowpayments-sig")
         
-        if not signature:
-            raise HTTPException(status_code=400, detail="Missing webhook signature")
+        print(f"🔔 Received webhook - Signature: {signature[:20]}..." if signature else "🔔 Received webhook - NO SIGNATURE")
         
-        # Parse JSON data
+        # Parse JSON data first
         webhook_data = json.loads(body.decode())
         
         payment_id = webhook_data.get('payment_id')
@@ -397,20 +396,40 @@ async def nowpayments_webhook(request: Request):
         customer_email = webhook_data.get('customer_email') or webhook_data.get('email')
         actually_paid = float(webhook_data.get('actually_paid', 0))
         
+        print(f"📊 Webhook data: payment_id={payment_id}, status={payment_status}, email={customer_email}, amount=${actually_paid}")
+        
+        # Verify IPN signature if secret is available
+        if NOWPAYMENTS_IPN_SECRET and signature:
+            expected_signature = hmac.new(
+                NOWPAYMENTS_IPN_SECRET.encode('utf-8'),
+                body,
+                hashlib.sha256
+            ).hexdigest()
+            
+            if signature != expected_signature:
+                print(f"❌ Invalid webhook signature. Expected: {expected_signature[:20]}..., Got: {signature[:20]}...")
+                raise HTTPException(status_code=401, detail="Invalid webhook signature")
+            else:
+                print(f"✅ Webhook signature verified successfully")
+        elif NOWPAYMENTS_IPN_SECRET:
+            print(f"⚠️ IPN secret is configured but no signature provided")
+        else:
+            print(f"⚠️ No IPN secret configured - skipping signature verification")
+        
         if not payment_id:
             raise HTTPException(status_code=400, detail="Missing payment_id in webhook")
         
         print(f"🔔 Processing webhook for payment_id: {payment_id}, status: {payment_status}, email: {customer_email}, amount: ${actually_paid}")
         
-        # For subscription payments (amount around $10), use email validation approach
-        if customer_email and actually_paid >= 9.0 and actually_paid <= 11.0 and payment_status == 'finished':
-            print(f"💡 Processing subscription payment via email validation")
+        # For subscription payments, use email validation approach
+        # Check if this is a subscription payment (amount around $10 and has customer email)
+        if customer_email and actually_paid >= 9.0 and actually_paid <= 15.0 and payment_status == 'finished':
+            print(f"💡 Processing as subscription payment via email validation")
             
-            # Find matching email validation record
+            # Find matching email validation record (ANY status to handle retries)
             validation_result = supabase.table('subscription_email_validation')\
                 .select('*')\
                 .eq('email', customer_email)\
-                .eq('status', 'pending')\
                 .order('created_at', desc=True)\
                 .limit(1)\
                 .execute()
@@ -419,17 +438,34 @@ async def nowpayments_webhook(request: Request):
                 validation_record = validation_result.data[0]
                 user_id = validation_record['user_id']
                 plan_type = validation_record['plan_type']
+                current_status = validation_record['status']
                 
-                print(f"✅ Found email validation record for user {user_id}, plan: {plan_type}")
+                print(f"✅ Found email validation record for user {user_id}, plan: {plan_type}, current_status: {current_status}")
                 
-                # Update validation record to completed
+                # Always update validation record with webhook payment data
                 supabase.table('subscription_email_validation')\
                     .update({
                         'status': 'completed',
+                        'nowpayments_payment_id': str(payment_id),
+                        'actual_amount_paid': actually_paid,
                         'updated_at': 'now()'
                     })\
                     .eq('id', validation_record['id'])\
                     .execute()
+                
+                print(f"✅ Validation record updated with payment ID {payment_id}")
+                
+                # Check if user already has an active subscription to avoid duplicates
+                existing_active_sub = supabase.table('subscriptions')\
+                    .select('*')\
+                    .eq('user_id', user_id)\
+                    .eq('status', 'active')\
+                    .eq('plan_type', 'plus')\
+                    .execute()
+                
+                if existing_active_sub.data:
+                    print(f"ℹ️ User {user_id} already has an active Plus subscription, skipping upgrade")
+                    return {"success": True, "message": "User already has active subscription"}
                 
                 # Process subscription upgrade
                 from datetime import datetime, timedelta
@@ -444,7 +480,7 @@ async def nowpayments_webhook(request: Request):
                     'marketplace_products': 10
                 }
                 
-                # Check if user already has a subscription record
+                # Check if user has ANY subscription record (active, cancelled, etc.)
                 existing_sub = supabase.table('subscriptions').select('*').eq('user_id', user_id).execute()
                 
                 subscription_data = {
@@ -457,7 +493,12 @@ async def nowpayments_webhook(request: Request):
                     'price_paid': actually_paid,
                     'currency': 'USD',
                     'limits': plus_plan_limits,
-                    'metadata': {'payment_method': 'crypto', 'nowpayments_id': str(payment_id), 'email_validated': True},
+                    'metadata': {
+                        'payment_method': 'crypto', 
+                        'nowpayments_payment_id': str(payment_id), 
+                        'email_validated': True,
+                        'webhook_processed': True
+                    },
                     'updated_at': datetime.utcnow().isoformat()
                 }
                 
@@ -515,15 +556,18 @@ async def nowpayments_webhook(request: Request):
                             print(f"⚠️ Company balance update failed, will try direct update")
                             
                             # Fallback: Direct update to company_balance table
-                            supabase.table('company_balance')\
-                                .update({
-                                    'company_funds': supabase.table('company_balance').select('company_funds').execute().data[0]['company_funds'] + actually_paid,
-                                    'last_updated': 'now()'
-                                })\
-                                .eq('id', '00000000-0000-0000-0000-000000000001')\
-                                .execute()
-                            
-                            print(f"✅ Company balance updated directly with subscription revenue: ${actually_paid:.2f}")
+                            current_balance = supabase.table('company_balance').select('company_funds').execute()
+                            if current_balance.data:
+                                current_funds = float(current_balance.data[0]['company_funds'])
+                                supabase.table('company_balance')\
+                                    .update({
+                                        'company_funds': current_funds + actually_paid,
+                                        'last_updated': 'now()'
+                                    })\
+                                    .eq('id', '00000000-0000-0000-0000-000000000001')\
+                                    .execute()
+                                
+                                print(f"✅ Company balance updated directly with subscription revenue: ${actually_paid:.2f}")
                             
                     except Exception as balance_error:
                         print(f"❌ Error updating company balance: {balance_error}")
@@ -542,8 +586,8 @@ async def nowpayments_webhook(request: Request):
                     print(f"❌ Failed to upgrade subscription for user {user_id}")
                     
             else:
-                print(f"⚠️ No pending email validation record found for {customer_email}")
-                print(f"   - This might be a duplicate webhook or payment for a different service")
+                print(f"⚠️ No email validation record found for {customer_email}")
+                print(f"   This might be a regular invoice payment, not a subscription")
         
         # For regular invoice payments (balance top-ups) or non-subscription payments
         else:
@@ -600,6 +644,8 @@ async def nowpayments_webhook(request: Request):
                 supabase.table('user_notifications').insert(notification).execute()
                 
                 print(f"✅ Balance top-up completed for user {user_id}")
+            else:
+                print(f"ℹ️ No matching invoice found for payment_id {payment_id} or payment not finished")
         
         return {"success": True, "message": "Webhook processed successfully"}
         
