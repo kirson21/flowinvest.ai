@@ -1,0 +1,10 @@
+UPDATE public.user_profiles SET email = 'footballinphuket@gmail.com' WHERE user_id = '72624bef-6e55-48a4-9370-4954eb4aa118';
+UPDATE public.user_profiles SET email = 'sgpopolitova@gmail.com' WHERE user_id = '73aced8d-e34a-4c94-83af-1bec71c2817e';
+UPDATE public.user_profiles SET email = 'kirson.blogger@gmail.com' WHERE user_id = 'a9e8449f-0b87-4b83-8754-8338cfacf423';
+UPDATE public.user_profiles SET email = 'signin_test_328d7dbe@flowinvest.ai' WHERE user_id = 'da58eaae-d971-446b-baf9-29f84e3c88dc';
+UPDATE public.user_profiles SET email = 'test_e0ba185a@flowinvest.ai' WHERE user_id = 'a378f5e4-9dab-4292-9d16-44cdf804dda2';
+UPDATE public.user_profiles SET email = 'signin_test_77bd8e22@flowinvest.ai' WHERE user_id = '94342dc3-a09a-42c9-a880-c7cc9c1294a6';
+UPDATE public.user_profiles SET email = 'test_a0a8ad8b@flowinvest.ai' WHERE user_id = 'bab88209-bd16-4241-80de-ab583a497ad6';
+UPDATE public.user_profiles SET email = 'seller_test_8755a5c0@flowinvest.ai' WHERE user_id = '3cd050b3-20c1-4aa8-a75c-c9253e3b923c';
+UPDATE public.user_profiles SET email = 'flowinvest.assets@gmail.com' WHERE user_id = '81fa7673-821a-4e7c-92a2-7007fa5e21ef';
+UPDATE public.user_profiles SET email = 'kirillpopolitov@gmail.com' WHERE user_id = 'cd0e9717-f85d-4726-81e9-f260394ead58';
