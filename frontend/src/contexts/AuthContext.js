@@ -21,36 +21,30 @@ const ensureUserProfile = async (user) => {
       // If it's a default profile (doesn't exist in DB), create it
       if (checkData.success && checkData.user?.is_default) {
         console.log('📝 Creating user profile from OAuth data...');
+        console.log('Full user object:', user);
         
-        // Extract data from OAuth user object
-        const profileData = {
-          display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-          seller_verification_status: 'unverified',
-          bio: null,
-          phone: null
-        };
-        
-        console.log('Profile data to create:', profileData);
-        
-        // Create the profile
-        const createResponse = await fetch(`${backendUrl}/api/auth/user/${user.id}/profile`, {
+        // Use the dedicated OAuth endpoint with the full user object
+        const createResponse = await fetch(`${backendUrl}/api/auth/user/${user.id}/profile/oauth`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(profileData)
+          body: JSON.stringify(user) // Send full user object
         });
         
         if (createResponse.ok) {
           const createData = await createResponse.json();
           if (createData.success) {
             console.log('✅ User profile created successfully:', createData.user);
+            if (createData.existed) {
+              console.log('ℹ️ Profile already existed');
+            }
           } else {
             console.warn('❌ Failed to create user profile:', createData.message);
           }
         } else {
-          console.warn('❌ Profile creation request failed:', createResponse.status);
+          const errorText = await createResponse.text();
+          console.warn('❌ Profile creation request failed:', createResponse.status, errorText);
         }
       } else if (checkData.success && !checkData.user?.is_default) {
         console.log('✅ User profile already exists');
@@ -58,10 +52,39 @@ const ensureUserProfile = async (user) => {
         console.warn('❌ Failed to check user profile:', checkData.message);
       }
     } else {
-      console.warn('❌ Profile check request failed:', checkResponse.status);
+      const errorText = await checkResponse.text();
+      console.warn('❌ Profile check request failed:', checkResponse.status, errorText);
     }
   } catch (error) {
     console.error('❌ Error ensuring user profile:', error);
+    
+    // Fallback: try the original endpoint
+    try {
+      console.log('🔄 Trying fallback profile creation...');
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const fallbackData = {
+        display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+        seller_verification_status: 'unverified'
+      };
+      
+      const fallbackResponse = await fetch(`${backendUrl}/api/auth/user/${user.id}/profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(fallbackData)
+      });
+      
+      if (fallbackResponse.ok) {
+        const fallbackResult = await fallbackResponse.json();
+        console.log('✅ Fallback profile creation succeeded:', fallbackResult);
+      } else {
+        console.error('❌ Fallback profile creation also failed:', fallbackResponse.status);
+      }
+    } catch (fallbackError) {
+      console.error('❌ Fallback profile creation error:', fallbackError);
+    }
   }
 };
 
