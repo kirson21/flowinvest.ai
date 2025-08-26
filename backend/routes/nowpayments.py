@@ -608,6 +608,158 @@ async def nowpayments_webhook(request: Request):
         print(f"❌ Webhook processing error: {str(e)}")
         return {"success": False, "error": str(e)}
 
+@router.post("/nowpayments/webhook/debug")
+async def debug_webhook_data(request: Request):
+    """Debug endpoint to see what webhook data we're receiving"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        # Get request body and headers
+        body = await request.body()
+        headers = dict(request.headers)
+        
+        print(f"🔍 DEBUG WEBHOOK DATA:")
+        print(f"Headers: {headers}")
+        print(f"Body: {body.decode()}")
+        
+        # Parse JSON data
+        webhook_data = json.loads(body.decode())
+        print(f"Parsed webhook data: {webhook_data}")
+        
+        # Store the webhook data for analysis
+        debug_record = {
+            'webhook_data': webhook_data,
+            'headers': headers,
+            'received_at': datetime.now().isoformat(),
+            'payment_id': webhook_data.get('payment_id'),
+            'payment_status': webhook_data.get('payment_status'),
+            'customer_email': webhook_data.get('customer_email') or webhook_data.get('email'),
+            'actually_paid': float(webhook_data.get('actually_paid', 0))
+        }
+        
+        print(f"🔍 Debug record: {debug_record}")
+        
+        return {
+            "success": True,
+            "message": "Webhook data captured for debugging",
+            "data": debug_record
+        }
+        
+    except Exception as e:
+        print(f"❌ Webhook debug error: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+@router.post("/nowpayments/subscription/manual-process")
+async def manual_process_subscription_payment(payment_data: dict):
+    """Manually process a subscription payment for debugging"""
+    try:
+        import sys
+        sys.path.append('/app/backend')
+        from supabase_client import supabase_admin as supabase
+        
+        payment_id = payment_data.get('payment_id')
+        customer_email = payment_data.get('customer_email') 
+        actually_paid = float(payment_data.get('actually_paid', 0))
+        
+        print(f"🔧 Manual processing: payment_id={payment_id}, email={customer_email}, amount=${actually_paid}")
+        
+        # Find matching email validation record
+        validation_result = supabase.table('subscription_email_validation')\
+            .select('*')\
+            .eq('email', customer_email)\
+            .order('created_at', desc=True)\
+            .limit(1)\
+            .execute()
+        
+        if validation_result.data:
+            validation_record = validation_result.data[0]
+            user_id = validation_record['user_id']
+            
+            print(f"✅ Found validation record for user {user_id}")
+            
+            # Update validation record with actual payment ID
+            supabase.table('subscription_email_validation')\
+                .update({
+                    'status': 'completed',
+                    'nowpayments_payment_id': str(payment_id),  # Store the actual payment ID
+                    'actual_amount_paid': actually_paid,
+                    'updated_at': 'now()'
+                })\
+                .eq('id', validation_record['id'])\
+                .execute()
+            
+            # Process subscription upgrade (same logic as webhook)
+            from datetime import datetime, timedelta
+            
+            end_date = datetime.utcnow() + timedelta(days=31)
+            
+            plus_plan_limits = {
+                'ai_bots': 3,
+                'manual_bots': 5, 
+                'marketplace_products': 10
+            }
+            
+            # Check if user already has a subscription record
+            existing_sub = supabase.table('subscriptions').select('*').eq('user_id', user_id).execute()
+            
+            subscription_data = {
+                'user_id': user_id,
+                'plan_type': 'plus',
+                'status': 'active',
+                'start_date': datetime.utcnow().isoformat(),
+                'end_date': end_date.isoformat(),
+                'renewal': True,
+                'price_paid': actually_paid,
+                'currency': 'USD',
+                'limits': plus_plan_limits,
+                'metadata': {'payment_method': 'crypto', 'nowpayments_payment_id': str(payment_id), 'email_validated': True},
+                'updated_at': datetime.utcnow().isoformat()
+            }
+            
+            if existing_sub.data:
+                # Update existing subscription
+                result = supabase.table('subscriptions')\
+                    .update(subscription_data)\
+                    .eq('user_id', user_id)\
+                    .execute()
+                print(f"📝 Updated existing subscription for user {user_id}")
+            else:
+                # Create new subscription
+                subscription_data['created_at'] = datetime.utcnow().isoformat()
+                result = supabase.table('subscriptions')\
+                    .insert(subscription_data)\
+                    .execute()
+                print(f"➕ Created new subscription for user {user_id}")
+            
+            if result.data:
+                print(f"✅ Subscription upgrade completed for user {user_id}")
+                
+                # Update company balance
+                company_update = supabase.rpc('update_company_balance_subscription', {
+                    'subscription_revenue': actually_paid
+                }).execute()
+                
+                if company_update.data:
+                    print(f"✅ Company balance updated with subscription revenue: ${actually_paid:.2f}")
+                
+                return {
+                    "success": True,
+                    "message": f"Subscription manually processed for {customer_email}",
+                    "user_id": user_id,
+                    "payment_id": payment_id,
+                    "amount": actually_paid
+                }
+            else:
+                return {"success": False, "message": "Failed to process subscription"}
+        else:
+            return {"success": False, "message": f"No validation record found for email {customer_email}"}
+            
+    except Exception as e:
+        print(f"❌ Manual processing error: {str(e)}")
+        return {"success": False, "message": f"Manual processing failed: {str(e)}"}
+
 # Subscription Management Endpoints
 
 @router.post("/nowpayments/subscription/plan")
