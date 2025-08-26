@@ -76,7 +76,7 @@ async def get_user_profile(user_id: str):
             default_profile = {
                 "user_id": user_id,
                 "display_name": None,
-                "phone": None,
+                "email": None,
                 "bio": None,
                 "avatar_url": None,
                 "seller_verification_status": "unverified",
