@@ -458,7 +458,7 @@ export const supabaseDataService = {
       const { database } = await import('../lib/supabase');
       return await database.updateUserProfile(userId, {
         display_name: profileData.display_name,
-        phone: profileData.phone,
+        email: profileData.email,
         bio: profileData.bio,
         avatar_url: profileData.avatar_url,
         social_links: profileData.social_links || {},
