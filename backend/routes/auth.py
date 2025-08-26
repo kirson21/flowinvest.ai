@@ -198,13 +198,13 @@ async def create_oauth_user_profile(user_id: str, oauth_data: dict):
                 oauth_data.get('email', '').split('@')[0] or 
                 'User'
             ),
+            'email': oauth_data.get('email', ''),  # Now we can include email!
             'avatar_url': (
                 oauth_data.get('user_metadata', {}).get('avatar_url') or 
                 oauth_data.get('user_metadata', {}).get('picture')
             ),
             'seller_verification_status': 'unverified',
             'bio': None,
-            'phone': None,
             'social_links': {},
             'specialties': [],
             'seller_data': {},
