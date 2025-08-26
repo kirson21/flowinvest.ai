@@ -288,7 +288,6 @@ class GoogleSheetsService:
                     user.get('name', ''),
                     user.get('email', ''),
                     user.get('country', ''),
-                    user.get('phone', ''),
                     user.get('registration_date', ''),
                     user.get('seller_verification_status', ''),
                     user.get('subscription_status', ''),
