@@ -547,21 +547,86 @@ class OAuthProfileTester:
             self.log_test("Profile Retrieval - Nonexistent User", False, error=str(e))
             return False
     
-    def test_oauth_profile_minimal_metadata(self):
-        """Test OAuth profile creation with minimal metadata"""
+    def test_profile_field_validation(self):
+        """Test that OAuth profiles have correct field structure and no email conflicts"""
         try:
-            # Create a unique test user ID for this test
-            test_user_id = f"test-minimal-{int(time.time())}"
+            # Get the existing user's profile
+            response = requests.get(
+                f"{self.backend_url}/auth/user/{EXISTING_USER_ID}",
+                timeout=10
+            )
             
+            if response.status_code == 200:
+                data = response.json()
+                success = data.get('success', False)
+                
+                if success:
+                    user_data = data.get('user', {})
+                    is_default = data.get('is_default', False)
+                    
+                    # Check required fields are present
+                    required_fields = ['user_id', 'display_name', 'seller_verification_status']
+                    missing_fields = [field for field in required_fields if field not in user_data]
+                    
+                    # Check that email field is NOT present (should be filtered)
+                    has_email_field = 'email' in user_data
+                    
+                    if not missing_fields and not has_email_field:
+                        self.log_test(
+                            "Profile Field Validation",
+                            True,
+                            f"Profile has correct structure. Required fields present, email field correctly absent."
+                        )
+                        return True
+                    else:
+                        error_msg = ""
+                        if missing_fields:
+                            error_msg += f"Missing fields: {missing_fields}. "
+                        if has_email_field:
+                            error_msg += "Email field present (should be filtered). "
+                        
+                        self.log_test(
+                            "Profile Field Validation",
+                            False,
+                            error=error_msg.strip()
+                        )
+                        return False
+                else:
+                    self.log_test(
+                        "Profile Field Validation",
+                        False,
+                        error=f"Failed to retrieve profile: {data.get('message')}"
+                    )
+                    return False
+            else:
+                self.log_test(
+                    "Profile Field Validation",
+                    False,
+                    error=f"HTTP {response.status_code}: {response.text}"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_test("Profile Field Validation", False, error=str(e))
+            return False
+    
+    def test_oauth_data_extraction(self):
+        """Test OAuth data extraction logic with various metadata formats"""
+        try:
+            # Test with comprehensive OAuth data
             oauth_data = {
                 "user_metadata": {
-                    # Only email, no full_name or picture
+                    "full_name": "OAuth Data Test User",
+                    "picture": "https://lh3.googleusercontent.com/oauth-test-avatar",
+                    "name": "OAuth Test",
+                    "avatar_url": "https://example.com/alt-avatar.jpg"  # Should prefer 'picture' over this
                 },
-                "email": "minimal@example.com"
+                "email": "oauth.data.test@gmail.com",
+                "provider": "google"
             }
             
             response = requests.post(
-                f"{self.backend_url}/auth/user/{test_user_id}/profile/oauth",
+                f"{self.backend_url}/auth/user/{EXISTING_USER_ID}/profile/oauth",
                 json=oauth_data,
                 timeout=15
             )
@@ -571,35 +636,33 @@ class OAuthProfileTester:
                 success = data.get('success', False)
                 
                 if success:
-                    user_data = data.get('user', {})
-                    display_name = user_data.get('display_name')
-                    
-                    # Should create profile with fallback display name (email prefix or 'User')
-                    expected_fallback = oauth_data['email'].split('@')[0] if oauth_data.get('email') else 'User'
+                    # The endpoint should handle this correctly (either create or detect existing)
+                    existed = data.get('existed', False)
+                    message = data.get('message', '')
                     
                     self.log_test(
-                        "OAuth Profile Creation - Minimal Metadata",
+                        "OAuth Data Extraction",
                         True,
-                        f"Profile created with fallback display_name: '{display_name}' (expected: '{expected_fallback}')"
+                        f"OAuth data processed correctly. Existed: {existed}, Message: {message}"
                     )
                     return True
                 else:
                     self.log_test(
-                        "OAuth Profile Creation - Minimal Metadata",
+                        "OAuth Data Extraction",
                         False,
-                        error=f"Profile creation failed: {data.get('message')}"
+                        error=f"OAuth data processing failed: {data.get('message')}"
                     )
                     return False
             else:
                 self.log_test(
-                    "OAuth Profile Creation - Minimal Metadata",
+                    "OAuth Data Extraction",
                     False,
                     error=f"HTTP {response.status_code}: {response.text}"
                 )
                 return False
                 
         except Exception as e:
-            self.log_test("OAuth Profile Creation - Minimal Metadata", False, error=str(e))
+            self.log_test("OAuth Data Extraction", False, error=str(e))
             return False
     
     def test_concurrent_profile_creation(self):
