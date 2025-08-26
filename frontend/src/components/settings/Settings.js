@@ -729,7 +729,7 @@ const Settings = () => {
       
       const updates = {
         display_name: profileData.display_name.trim(),
-        phone: profileData.phone.trim(),
+        email: profileData.email.trim(),
         bio: profileData.bio.trim(),
         avatar_url: profileData.avatar_url,
         social_links: profileData.social_links || {},
