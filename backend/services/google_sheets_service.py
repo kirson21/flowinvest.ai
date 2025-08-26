@@ -245,10 +245,9 @@ class GoogleSheetsService:
                             users_data.append({
                                 'user_id': user_id,
                                 'name': profile.get('name', ''),
-                                'email': user.get('email', ''),
+                                'email': email_user.get('email', ''),  # Email from auth.users!
                                 'country': profile.get('country', ''),
-                                'phone': profile.get('phone', ''),
-                                'registration_date': user.get('created_at', ''),
+                                'registration_date': email_user.get('created_at', ''),
                                 'seller_verification_status': profile.get('seller_verification_status', 'not_verified'),
                                 'plan_type': subscription.get('plan_type', 'free'),
                                 'subscription_status': subscription.get('status', 'inactive'),
