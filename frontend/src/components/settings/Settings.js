@@ -1158,16 +1158,6 @@ const Settings = () => {
                   disabled={!isEditing}
                 />
               </div>
-              <div>
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  value={profileData.phone}
-                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                  disabled={!isEditing}
-                  placeholder="Optional"
-                />
-              </div>
             </div>
 
             <div>
