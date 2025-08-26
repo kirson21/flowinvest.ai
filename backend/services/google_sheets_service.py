@@ -381,7 +381,6 @@ class GoogleSheetsService:
                     'name': profile.get('name', ''),
                     'email': email,
                     'country': profile.get('country', ''),
-                    'phone': profile.get('phone', ''),
                     'registration_date': profile.get('created_at', '') or subscription.get('created_at', ''),
                     'seller_verification_status': profile.get('seller_verification_status', 'not_verified'),
                     'plan_type': subscription.get('plan_type', 'free'),
