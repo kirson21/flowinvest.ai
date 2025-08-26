@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_user_profiles_email ON public.user_profiles(email);
