@@ -76,7 +76,6 @@ const AuthCallback = () => {
                 display_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
                 email: session.user.email,
                 avatar_url: session.user.user_metadata?.avatar_url || '',
-                phone: '',
                 bio: '',
                 social_links: {},
                 specialties: [],
