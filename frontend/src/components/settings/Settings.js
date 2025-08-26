@@ -657,7 +657,6 @@ const Settings = () => {
         setProfileData({
           display_name: profile.display_name || '',
           email: profile.email || user.email || '',
-          phone: profile.phone || '',
           bio: profile.bio || '',
           avatar_url: profile.avatar_url || ''
         });
@@ -666,7 +665,6 @@ const Settings = () => {
         const newProfile = {
           display_name: user.user_metadata?.full_name || user.user_metadata?.display_name || '',
           email: user.email || '',
-          phone: '',
           bio: '',
           avatar_url: user.user_metadata?.avatar_url || ''
         };
