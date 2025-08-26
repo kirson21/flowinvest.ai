@@ -129,7 +129,7 @@ async def create_user_profile(user_id: str, profile_data: dict):
         
         # Clean the profile data - remove any fields that don't belong in user_profiles
         allowed_fields = [
-            'display_name', 'phone', 'bio', 'avatar_url', 
+            'display_name', 'email', 'bio', 'avatar_url', 
             'seller_verification_status', 'social_links', 'specialties', 
             'experience', 'seller_data', 'seller_mode'
         ]
