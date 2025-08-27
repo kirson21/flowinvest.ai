@@ -1366,37 +1366,50 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
                 'buyer_new_balance': new_buyer_balance
             }
             
-        except Exception as e:
+            # Create notifications BEFORE returning the result
+            try:
+                # Create notification for buyer
+                supabase_admin.table('user_notifications').insert({
+                    'user_id': user_id,
+                    'title': 'Purchase Successful! 🛒',
+                    'message': f'You have successfully purchased "{transaction.description or "a product"}" for ${transaction.amount:.2f}. Your new balance is ${new_buyer_balance:.2f}.',
+                    'type': 'success',
+                    'is_read': False
+                }).execute()
+                
+                # Create notification for seller
+                supabase_admin.table('user_notifications').insert({
+                    'user_id': transaction.seller_id,
+                    'title': 'Sale Completed! 💰',
+                    'message': f'Your product was purchased for ${transaction.amount:.2f}. You received ${seller_amount:.2f} (after 10% platform fee).',
+                    'type': 'success',
+                    'is_read': False
+                }).execute()
+                
+                print(f"✅ Notifications created for buyer and seller")
+            except Exception as notification_error:
+                print(f"⚠️ Failed to create notifications: {notification_error}")
+            
+            # Trigger Google Sheets sync after successful purchase
+            try:
+                import httpx
+                base_url = os.getenv("REACT_APP_BACKEND_URL", "http://127.0.0.1:8001")
+                async with httpx.AsyncClient() as client:
+                    await client.post(f"{base_url}/api/google-sheets/auto-sync-webhook")
+                print(f"✅ Google Sheets sync triggered after purchase")
+            except Exception as sync_error:
+                print(f"⚠️ Google Sheets sync trigger failed: {sync_error}")
+            
+            return result
+            
+        except Exception as transaction_error:
             # Return error if transaction fails
+            print(f"❌ Transaction processing failed: {transaction_error}")
             return {
                 'success': False,
                 'error': 'transaction_failed',
-                'message': f'Failed to process purchase: {str(e)}'
+                'message': f'Failed to process purchase: {str(transaction_error)}'
             }
-            
-            # Create notification for buyer
-            if result.get('success'):
-                try:
-                    supabase.table('user_notifications').insert({
-                        'user_id': user_id,
-                        'title': 'Purchase Successful',
-                        'message': f'You have successfully purchased a product for ${transaction.amount:.2f}. Your new balance is ${result.get("buyer_new_balance", 0):.2f}.',
-                        'type': 'success',
-                        'is_read': False
-                    }).execute()
-                    
-                    # Create notification for seller
-                    supabase.table('user_notifications').insert({
-                        'user_id': transaction.seller_id,
-                        'title': 'Sale Completed',
-                        'message': f'Your product was purchased for ${transaction.amount:.2f}. You received ${result.get("seller_received", 0):.2f} (after 10% platform fee).',
-                        'type': 'success',
-                        'is_read': False
-                    }).execute()
-                except Exception as notification_error:
-                    print(f"Failed to create notifications: {notification_error}")
-            
-            return result
             
     except Exception as e:
         return {"success": False, "message": f"Failed to process transaction: {str(e)}"}
