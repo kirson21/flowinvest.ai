@@ -1435,6 +1435,50 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
     except Exception as e:
         return {"success": False, "message": f"Failed to process transaction: {str(e)}"}
 
+@router.post("/auth/user/{user_id}/purchase")
+async def save_user_purchase(user_id: str, purchase_data: dict):
+    """Save user purchase record to user_purchases table"""
+    try:
+        if not supabase_admin:
+            return {"success": False, "message": "Database not available"}
+        
+        print(f"💾 Saving purchase record for user {user_id}")
+        
+        # Prepare purchase record
+        purchase_record = {
+            'id': purchase_data.get('purchaseId') or f"purchase_{int(time.time())}_{user_id}",
+            'user_id': user_id,
+            'portfolio_id': purchase_data.get('portfolio_id') or purchase_data.get('id'),
+            'product_name': purchase_data.get('title') or purchase_data.get('name') or 'Unknown Product',
+            'product_description': purchase_data.get('description') or '',
+            'price': float(purchase_data.get('price', 0)),
+            'seller_id': purchase_data.get('seller_id'),
+            'seller_name': purchase_data.get('seller', {}).get('name') if isinstance(purchase_data.get('seller'), dict) else 'Unknown Seller',
+            'purchased_at': purchase_data.get('purchasedAt') or purchase_data.get('purchased_at') or datetime.now().isoformat(),
+            'status': 'completed'
+        }
+        
+        print(f"Purchase record to save: {purchase_record}")
+        
+        # Use admin client to save purchase (bypasses RLS)
+        result = supabase_admin.table('user_purchases').upsert([purchase_record]).execute()
+        
+        if result.data:
+            print(f"✅ Purchase saved successfully: {result.data[0]['id']}")
+            return {
+                "success": True,
+                "message": "Purchase saved successfully",
+                "purchase_id": result.data[0]['id'],
+                "purchase": result.data[0]
+            }
+        else:
+            print(f"❌ Purchase save returned no data")
+            return {"success": False, "message": "Purchase save returned no data"}
+            
+    except Exception as e:
+        print(f"❌ Error saving purchase: {str(e)}")
+        return {"success": False, "message": f"Failed to save purchase: {str(e)}"}
+
 @router.post("/auth/user/{user_id}/update-balance")
 async def update_balance(user_id: str, balance_update: BalanceUpdateRequest):
     """Update user balance (topup/withdrawal)"""
