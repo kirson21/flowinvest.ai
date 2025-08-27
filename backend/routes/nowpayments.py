@@ -531,7 +531,7 @@ async def nowpayments_webhook(request: Request):
                 'updated_at': datetime.utcnow().isoformat()
             }
             
-            # ALWAYS use UPDATE - this handles both existing subscriptions and creates if none exist
+            # ALWAYS use UPDATE with ADMIN CLIENT to bypass RLS - this handles both existing subscriptions and creates if none exist
             result = supabase.table('subscriptions')\
                 .update(subscription_data)\
                 .eq('user_id', user_id)\
