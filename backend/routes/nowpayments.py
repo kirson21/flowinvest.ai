@@ -445,9 +445,160 @@ async def nowpayments_webhook(request: Request):
         
         print(f"🔔 Processing webhook for payment_id: {payment_id}, status: {payment_status}, email: {customer_email}, amount: ${actually_paid}")
         
+        # For subscription payments, we need to handle the case where email is None
+        # Look for subscription payments by amount range and check if it's a subscription
+        is_subscription_payment = False
+        
+        # Method 1: Check by amount (subscription payments are usually $9-15)
+        if actually_paid >= 9.0 and actually_paid <= 15.0 and payment_status == 'finished':
+            print(f"💡 Detected potential subscription payment by amount: ${actually_paid}")
+            
+            # Method 2: Look for recent subscription validation records for this amount
+            validation_result = supabase.table('subscription_email_validation')\
+                .select('*')\
+                .eq('status', 'pending')\
+                .gte('amount', actually_paid - 1.0)\
+                .lte('amount', actually_paid + 1.0)\
+                .order('created_at', desc=True)\
+                .limit(5)\
+                .execute()
+            
+            if validation_result.data:
+                print(f"🎯 Found {len(validation_result.data)} potential matching subscription validation records")
+                
+                # Find the best match (closest amount and most recent)
+                best_match = None
+                min_amount_diff = float('inf')
+                
+                for validation_record in validation_result.data:
+                    amount_diff = abs(float(validation_record.get('amount', 0)) - actually_paid)
+                    if amount_diff < min_amount_diff:
+                        min_amount_diff = amount_diff
+                        best_match = validation_record
+                
+                if best_match:
+                    user_id = best_match['user_id']
+                    customer_email = best_match['email']  # Get email from validation record
+                    plan_type = best_match['plan_type']
+                    
+                    print(f"✅ Best match found: user {user_id}, email: {customer_email}, amount diff: ${min_amount_diff:.2f}")
+                    
+                    is_subscription_payment = True
+                    
+                    # Update validation record to completed
+                    supabase.table('subscription_email_validation')\
+                        .update({
+                            'status': 'completed',
+                            'nowpayments_payment_id': str(payment_id),
+                            'actual_amount_paid': actually_paid,
+                            'updated_at': 'now()'
+                        })\
+                        .eq('id', best_match['id'])\
+                        .execute()
+                    
+                    print(f"✅ Validation record updated with payment ID {payment_id}")
+        
+        # Process subscription upgrade if we identified this as a subscription payment
+        if is_subscription_payment and customer_email:
+            print(f"💡 Processing as subscription payment for {customer_email}")
+            
+            # Check if user already has an active subscription to avoid duplicates
+            existing_active_sub = supabase.table('subscriptions')\
+                .select('*')\
+                .eq('user_id', user_id)\
+                .eq('status', 'active')\
+                .eq('plan_type', 'plus')\
+                .execute()
+            
+            if existing_active_sub.data:
+                print(f"ℹ️ User {user_id} already has an active Plus subscription, updating payment info")
+                # Update existing subscription with new payment info
+                supabase.table('subscriptions')\
+                    .update({
+                        'price_paid': actually_paid,
+                        'metadata': {
+                            'payment_method': 'crypto', 
+                            'nowpayments_payment_id': str(payment_id), 
+                            'email_validated': True,
+                            'webhook_processed': True
+                        },
+                        'updated_at': datetime.utcnow().isoformat()
+                    })\
+                    .eq('user_id', user_id)\
+                    .execute()
+            else:
+                # Create new subscription
+                from datetime import datetime, timedelta
+                end_date = datetime.utcnow() + timedelta(days=31)
+                
+                plus_plan_limits = {
+                    'ai_bots': 3,
+                    'manual_bots': 5, 
+                    'marketplace_products': 10
+                }
+                
+                subscription_data = {
+                    'user_id': user_id,
+                    'plan_type': 'plus',
+                    'status': 'active',
+                    'start_date': datetime.utcnow().isoformat(),
+                    'end_date': end_date.isoformat(),
+                    'renewal': True,
+                    'price_paid': actually_paid,
+                    'currency': 'USD',
+                    'limits': plus_plan_limits,
+                    'metadata': {
+                        'payment_method': 'crypto', 
+                        'nowpayments_payment_id': str(payment_id), 
+                        'email_validated': True,
+                        'webhook_processed': True
+                    },
+                    'created_at': datetime.utcnow().isoformat(),
+                    'updated_at': datetime.utcnow().isoformat()
+                }
+                
+                result = supabase.table('subscriptions')\
+                    .insert(subscription_data)\
+                    .execute()
+                print(f"➕ Created new subscription for user {user_id}")
+            
+            # Create success notification
+            notification = {
+                'user_id': user_id,
+                'title': '🎉 Subscription Upgraded to Plus!',
+                'message': f'Your crypto payment of ${actually_paid:.2f} has been confirmed and your subscription has been upgraded to Plus Plan. Enjoy your new features!',
+                'type': 'success',
+                'is_read': False
+            }
+            
+            supabase.table('user_notifications').insert(notification).execute()
+            
+            # Update company balance
+            print(f"💰 Adding ${actually_paid:.2f} subscription revenue to company balance")
+            try:
+                company_update = supabase.rpc('update_company_balance_subscription', {
+                    'subscription_revenue': actually_paid
+                }).execute()
+                
+                if company_update.data:
+                    print(f"✅ Company balance updated with subscription revenue: ${actually_paid:.2f}")
+            except Exception as balance_error:
+                print(f"❌ Error updating company balance: {balance_error}")
+            
+            # Trigger Google Sheets sync
+            try:
+                import httpx
+                async with httpx.AsyncClient() as client:
+                    await client.post(f"{BASE_URL}/api/google-sheets/trigger-sync")
+                print(f"✅ Google Sheets sync triggered")
+            except Exception as sync_error:
+                print(f"⚠️ Google Sheets sync trigger failed: {sync_error}")
+            
+            return {"success": True, "message": "Subscription webhook processed successfully"}
+            
         # For subscription payments, use email validation approach
         # Check if this is a subscription payment (amount around $10 and has customer email)
-        if customer_email and actually_paid >= 9.0 and actually_paid <= 15.0 and payment_status == 'finished':
+        elif customer_email and actually_paid >= 9.0 and actually_paid <= 15.0 and payment_status == 'finished':
             print(f"💡 Processing as subscription payment via email validation")
             
             # Find matching email validation record (ANY status to handle retries)
