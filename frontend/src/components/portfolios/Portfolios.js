@@ -722,8 +722,30 @@ const Portfolios = () => {
           seller_id: sellerId
         };
 
-        // Save to user_purchases table for tracking
-        await dataSyncService.saveUserPurchase(purchaseData);
+        // Save to user_purchases table via backend API
+        try {
+          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+          const saveResponse = await fetch(`${backendUrl}/api/auth/user/${user.id}/purchase`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(purchaseData)
+          });
+          
+          const saveResult = await saveResponse.json();
+          if (saveResult.success) {
+            console.log('✅ Purchase saved to backend successfully');
+          } else {
+            console.warn('⚠️ Backend purchase save failed:', saveResult.message);
+            // Fallback to original method
+            await dataSyncService.saveUserPurchase(purchaseData);
+          }
+        } catch (saveError) {
+          console.warn('⚠️ Backend purchase save error:', saveError);
+          // Fallback to original method
+          await dataSyncService.saveUserPurchase(purchaseData);
+        }
         
         // Update local state
         const updatedPurchases = [...userPurchases, purchaseData];
