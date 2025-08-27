@@ -765,7 +765,16 @@ async def nowpayments_webhook(request: Request):
         else:
             print(f"💰 Processing as invoice payment or balance top-up")
             
-            # Update invoice record if exists
+            # Extract the correct invoice_id from webhook data
+            invoice_id = webhook_data.get('invoice_id')
+            
+            if not invoice_id:
+                print(f"⚠️ No invoice_id found in webhook data, trying payment_id as fallback")
+                invoice_id = payment_id
+            
+            print(f"🔍 Looking for invoice record with invoice_id: {invoice_id}")
+            
+            # Update invoice record if exists - use the correct invoice_id
             result = supabase.table('nowpayments_invoices')\
                 .update({
                     'payment_status': payment_status,
@@ -775,8 +784,10 @@ async def nowpayments_webhook(request: Request):
                     'webhook_data': webhook_data,
                     'completed_at': 'now()' if payment_status == 'finished' else None
                 })\
-                .eq('invoice_id', str(payment_id))\
+                .eq('invoice_id', str(invoice_id))\
                 .execute()
+            
+            print(f"📊 Invoice update result: {len(result.data) if result.data else 0} records updated")
             
             if result.data and payment_status == 'finished':
                 invoice = result.data[0]
