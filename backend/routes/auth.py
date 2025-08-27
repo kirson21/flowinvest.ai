@@ -1461,7 +1461,7 @@ async def save_user_purchase(user_id: str, purchase_data: dict):
         print(f"Purchase record to save: {purchase_record}")
         
         # Use admin client to save purchase (bypasses RLS)
-        result = supabase_admin.table('user_purchases').upsert([purchase_record]).execute()
+        result = supabase_admin.table('user_purchases').insert(purchase_record).execute()
         
         if result.data:
             print(f"✅ Purchase saved successfully: {result.data[0]['id']}")
