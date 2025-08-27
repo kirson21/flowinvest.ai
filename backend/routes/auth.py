@@ -1400,6 +1400,25 @@ async def process_transaction(user_id: str, transaction: TransactionRequest):
             except Exception as sync_error:
                 print(f"⚠️ Google Sheets sync trigger failed: {sync_error}")
             
+            # Update company balance with marketplace fees and user funds tracking
+            try:
+                print(f"💰 Updating company balance with platform fee: ${platform_fee:.2f}")
+                company_update = supabase_admin.rpc('update_company_balance_marketplace', {
+                    'platform_fee_amount': platform_fee
+                }).execute()
+                
+                if company_update.data:
+                    company_data = company_update.data[0] if isinstance(company_update.data, list) else company_update.data
+                    print(f"✅ Company balance updated:")
+                    print(f"   Platform fee added: ${company_data.get('platform_fee_added', 0):.2f}")
+                    print(f"   New fees earned: ${company_data.get('new_fees_earned', 0):.2f}")
+                    print(f"   New company funds: ${company_data.get('new_company_funds', 0):.2f}")
+                    print(f"   Current user funds: ${company_data.get('current_user_funds', 0):.2f}")
+                else:
+                    print(f"⚠️ Company balance update returned no data")
+            except Exception as balance_error:
+                print(f"⚠️ Company balance update failed: {balance_error}")
+            
             return result
             
         except Exception as transaction_error:
