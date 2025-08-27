@@ -502,104 +502,62 @@ async def nowpayments_webhook(request: Request):
         if is_subscription_payment and customer_email:
             print(f"💡 Processing as subscription payment for {customer_email}")
             
-            # Check if user already has an active subscription to avoid duplicates
-            existing_active_sub = supabase.table('subscriptions')\
-                .select('*')\
+            # ALWAYS update existing subscription - never try to insert
+            # This avoids the unique constraint error
+            from datetime import datetime, timedelta
+            end_date = datetime.utcnow() + timedelta(days=31)
+            
+            plus_plan_limits = {
+                'ai_bots': 3,
+                'manual_bots': 5, 
+                'marketplace_products': 10
+            }
+            
+            subscription_data = {
+                'plan_type': 'plus',
+                'status': 'active',
+                'start_date': datetime.utcnow().isoformat(),
+                'end_date': end_date.isoformat(),
+                'renewal': True,
+                'price_paid': actually_paid,
+                'currency': 'USD',
+                'limits': plus_plan_limits,
+                'metadata': {
+                    'payment_method': 'crypto', 
+                    'nowpayments_payment_id': str(payment_id), 
+                    'email_validated': True,
+                    'webhook_processed': True
+                },
+                'updated_at': datetime.utcnow().isoformat()
+            }
+            
+            # ALWAYS use UPDATE - this handles both existing subscriptions and creates if none exist
+            result = supabase.table('subscriptions')\
+                .update(subscription_data)\
                 .eq('user_id', user_id)\
-                .eq('status', 'active')\
-                .eq('plan_type', 'plus')\
                 .execute()
             
-            if existing_active_sub.data:
-                print(f"ℹ️ User {user_id} already has an active Plus subscription, updating payment info")
-                # Update existing subscription with new payment info
-                supabase.table('subscriptions')\
-                    .update({
-                        'price_paid': actually_paid,
-                        'metadata': {
-                            'payment_method': 'crypto', 
-                            'nowpayments_payment_id': str(payment_id), 
-                            'email_validated': True,
-                            'webhook_processed': True
-                        },
-                        'updated_at': datetime.utcnow().isoformat()
-                    })\
-                    .eq('user_id', user_id)\
-                    .execute()
+            if result.data:
+                print(f"✅ Updated subscription for user {user_id} to Plus plan")
             else:
-                # Check if user has ANY subscription record (active, inactive, free, etc.)
-                any_existing_sub = supabase.table('subscriptions').select('*').eq('user_id', user_id).execute()
+                print(f"⚠️ No existing subscription found, creating new one...")
+                # If update didn't work (no existing record), create new one
+                subscription_data['user_id'] = user_id
+                subscription_data['created_at'] = datetime.utcnow().isoformat()
                 
-                if any_existing_sub.data:
-                    print(f"📝 User {user_id} has existing subscription, upgrading to Plus")
-                    # Update ANY existing subscription to Plus
-                    from datetime import datetime, timedelta
-                    end_date = datetime.utcnow() + timedelta(days=31)
-                    
-                    plus_plan_limits = {
-                        'ai_bots': 3,
-                        'manual_bots': 5, 
-                        'marketplace_products': 10
-                    }
-                    
-                    subscription_data = {
-                        'plan_type': 'plus',
-                        'status': 'active',
-                        'start_date': datetime.utcnow().isoformat(),
-                        'end_date': end_date.isoformat(),
-                        'renewal': True,
-                        'price_paid': actually_paid,
-                        'currency': 'USD',
-                        'limits': plus_plan_limits,
-                        'metadata': {
-                            'payment_method': 'crypto', 
-                            'nowpayments_payment_id': str(payment_id), 
-                            'email_validated': True,
-                            'webhook_processed': True
-                        },
-                        'updated_at': datetime.utcnow().isoformat()
-                    }
-                    
-                    result = supabase.table('subscriptions')\
-                        .update(subscription_data)\
-                        .eq('user_id', user_id)\
-                        .execute()
-                    print(f"✅ Updated existing subscription for user {user_id} to Plus plan")
-                else:
-                    # Create new subscription only if user has no subscription record at all
-                    from datetime import datetime, timedelta
-                    end_date = datetime.utcnow() + timedelta(days=31)
-                    
-                    plus_plan_limits = {
-                        'ai_bots': 3,
-                        'manual_bots': 5, 
-                        'marketplace_products': 10
-                    }
-                    
-                    subscription_data = {
-                        'user_id': user_id,
-                        'plan_type': 'plus',
-                        'status': 'active',
-                        'start_date': datetime.utcnow().isoformat(),
-                        'end_date': end_date.isoformat(),
-                        'renewal': True,
-                        'price_paid': actually_paid,
-                        'currency': 'USD',
-                        'limits': plus_plan_limits,
-                        'metadata': {
-                            'payment_method': 'crypto', 
-                            'nowpayments_payment_id': str(payment_id), 
-                            'email_validated': True,
-                            'webhook_processed': True
-                        },
-                        'created_at': datetime.utcnow().isoformat(),
-                        'updated_at': datetime.utcnow().isoformat()
-                    }
-                    
+                try:
                     result = supabase.table('subscriptions')\
                         .insert(subscription_data)\
                         .execute()
                     print(f"➕ Created new subscription for user {user_id}")
+                except Exception as insert_error:
+                    print(f"❌ Failed to create subscription: {insert_error}")
+                    # Try one more update in case of race condition
+                    result = supabase.table('subscriptions')\
+                        .update(subscription_data)\
+                        .eq('user_id', user_id)\
+                        .execute()
+                    print(f"🔄 Retry update result: {len(result.data) if result.data else 0} records updated")
             
             # Create success notification
             notification = {
