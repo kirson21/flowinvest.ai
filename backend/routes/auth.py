@@ -1444,18 +1444,15 @@ async def save_user_purchase(user_id: str, purchase_data: dict):
         
         print(f"💾 Saving purchase record for user {user_id}")
         
-        # Prepare purchase record
+        # Prepare purchase record using the correct table structure
         purchase_record = {
             'id': purchase_data.get('purchaseId') or f"purchase_{int(time.time())}_{user_id}",
             'user_id': user_id,
             'portfolio_id': purchase_data.get('portfolio_id') or purchase_data.get('id'),
-            'product_name': purchase_data.get('title') or purchase_data.get('name') or 'Unknown Product',
-            'product_description': purchase_data.get('description') or '',
-            'price': float(purchase_data.get('price', 0)),
-            'seller_id': purchase_data.get('seller_id'),
-            'seller_name': purchase_data.get('seller', {}).get('name') if isinstance(purchase_data.get('seller'), dict) else 'Unknown Seller',
+            'purchase_id': purchase_data.get('purchaseId') or f"purchase_{int(time.time())}_{user_id}",
             'purchased_at': purchase_data.get('purchasedAt') or purchase_data.get('purchased_at') or datetime.now().isoformat(),
-            'status': 'completed'
+            'purchased_by': user_id,
+            'purchase_data': purchase_data  # Store the complete product data here
         }
         
         print(f"Purchase record to save: {purchase_record}")
