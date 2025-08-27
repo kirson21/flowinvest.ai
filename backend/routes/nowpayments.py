@@ -527,40 +527,79 @@ async def nowpayments_webhook(request: Request):
                     .eq('user_id', user_id)\
                     .execute()
             else:
-                # Create new subscription
-                from datetime import datetime, timedelta
-                end_date = datetime.utcnow() + timedelta(days=31)
+                # Check if user has ANY subscription record (active, inactive, free, etc.)
+                any_existing_sub = supabase.table('subscriptions').select('*').eq('user_id', user_id).execute()
                 
-                plus_plan_limits = {
-                    'ai_bots': 3,
-                    'manual_bots': 5, 
-                    'marketplace_products': 10
-                }
-                
-                subscription_data = {
-                    'user_id': user_id,
-                    'plan_type': 'plus',
-                    'status': 'active',
-                    'start_date': datetime.utcnow().isoformat(),
-                    'end_date': end_date.isoformat(),
-                    'renewal': True,
-                    'price_paid': actually_paid,
-                    'currency': 'USD',
-                    'limits': plus_plan_limits,
-                    'metadata': {
-                        'payment_method': 'crypto', 
-                        'nowpayments_payment_id': str(payment_id), 
-                        'email_validated': True,
-                        'webhook_processed': True
-                    },
-                    'created_at': datetime.utcnow().isoformat(),
-                    'updated_at': datetime.utcnow().isoformat()
-                }
-                
-                result = supabase.table('subscriptions')\
-                    .insert(subscription_data)\
-                    .execute()
-                print(f"➕ Created new subscription for user {user_id}")
+                if any_existing_sub.data:
+                    print(f"📝 User {user_id} has existing subscription, upgrading to Plus")
+                    # Update ANY existing subscription to Plus
+                    from datetime import datetime, timedelta
+                    end_date = datetime.utcnow() + timedelta(days=31)
+                    
+                    plus_plan_limits = {
+                        'ai_bots': 3,
+                        'manual_bots': 5, 
+                        'marketplace_products': 10
+                    }
+                    
+                    subscription_data = {
+                        'plan_type': 'plus',
+                        'status': 'active',
+                        'start_date': datetime.utcnow().isoformat(),
+                        'end_date': end_date.isoformat(),
+                        'renewal': True,
+                        'price_paid': actually_paid,
+                        'currency': 'USD',
+                        'limits': plus_plan_limits,
+                        'metadata': {
+                            'payment_method': 'crypto', 
+                            'nowpayments_payment_id': str(payment_id), 
+                            'email_validated': True,
+                            'webhook_processed': True
+                        },
+                        'updated_at': datetime.utcnow().isoformat()
+                    }
+                    
+                    result = supabase.table('subscriptions')\
+                        .update(subscription_data)\
+                        .eq('user_id', user_id)\
+                        .execute()
+                    print(f"✅ Updated existing subscription for user {user_id} to Plus plan")
+                else:
+                    # Create new subscription only if user has no subscription record at all
+                    from datetime import datetime, timedelta
+                    end_date = datetime.utcnow() + timedelta(days=31)
+                    
+                    plus_plan_limits = {
+                        'ai_bots': 3,
+                        'manual_bots': 5, 
+                        'marketplace_products': 10
+                    }
+                    
+                    subscription_data = {
+                        'user_id': user_id,
+                        'plan_type': 'plus',
+                        'status': 'active',
+                        'start_date': datetime.utcnow().isoformat(),
+                        'end_date': end_date.isoformat(),
+                        'renewal': True,
+                        'price_paid': actually_paid,
+                        'currency': 'USD',
+                        'limits': plus_plan_limits,
+                        'metadata': {
+                            'payment_method': 'crypto', 
+                            'nowpayments_payment_id': str(payment_id), 
+                            'email_validated': True,
+                            'webhook_processed': True
+                        },
+                        'created_at': datetime.utcnow().isoformat(),
+                        'updated_at': datetime.utcnow().isoformat()
+                    }
+                    
+                    result = supabase.table('subscriptions')\
+                        .insert(subscription_data)\
+                        .execute()
+                    print(f"➕ Created new subscription for user {user_id}")
             
             # Create success notification
             notification = {
