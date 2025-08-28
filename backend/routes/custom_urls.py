@@ -228,8 +228,8 @@ async def get_public_bot(slug: str):
             performance_metrics=performance_metrics
         )
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error fetching public bot: {e}")
         raise HTTPException(status_code=500, detail="Error fetching bot details")
