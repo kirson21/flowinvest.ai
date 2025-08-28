@@ -367,8 +367,8 @@ async def update_bot_slug(bot_id: str, new_slug: str = Query(...)):
         
         return {"success": True, "new_slug": new_slug, "bot_id": bot_id}
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error updating bot slug: {e}")
         raise HTTPException(status_code=500, detail="Error updating bot slug")
