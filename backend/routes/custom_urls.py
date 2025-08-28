@@ -181,15 +181,15 @@ async def get_public_user_profile(display_name: str):
         profile = result.data[0]
         print(f"✅ Found user profile: {profile.get('display_name')}")
         
-        return {
-            "display_name": profile['display_name'],
-            "bio": profile.get('bio'),
-            "avatar_url": profile.get('avatar_url'),
-            "social_links": profile.get('social_links', {}),
-            "specialties": profile.get('specialties', []),
-            "seller_mode": profile.get('seller_mode', False),
-            "created_at": profile['created_at']
-        }
+        return PublicUserProfile(
+            display_name=profile['display_name'],
+            bio=profile.get('bio'),
+            avatar_url=profile.get('avatar_url'),
+            social_links=profile.get('social_links', {}),
+            specialties=profile.get('specialties', []),
+            seller_mode=profile.get('seller_mode', False),
+            created_at=profile['created_at']
+        )
         
     except HTTPException as he:
         print(f"🔄 Re-raising HTTPException: {he.detail}")
