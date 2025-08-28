@@ -284,22 +284,22 @@ class ProductionCustomURLsTest:
         
         for slug, expected_valid in test_cases:
             try:
-                if slug:
-                    response = requests.get(f"{self.backend_url}/api/urls/validate-slug/{slug}", timeout=15)
-                else:
-                    response = requests.get(f"{self.backend_url}/api/urls/validate-slug/", timeout=15)
+                payload = {"slug": slug}
+                response = requests.post(f"{self.backend_url}/api/urls/validate-slug", json=payload, timeout=15)
                 
                 if response.status_code == 200:
                     data = response.json()
-                    is_valid = data.get('is_valid', False)
+                    is_valid = data.get('valid', False)
                     
                     if (is_valid and expected_valid) or (not is_valid and not expected_valid):
                         working_validations += 1
                         print(f"   ✅ '{slug}' - Expected: {expected_valid}, Got: {is_valid}")
                     else:
                         print(f"   ❌ '{slug}' - Expected: {expected_valid}, Got: {is_valid}")
+                        if not is_valid:
+                            print(f"      Error: {data.get('error', 'Unknown error')}")
                 else:
-                    print(f"   ❌ '{slug}' - HTTP {response.status_code}")
+                    print(f"   ❌ '{slug}' - HTTP {response.status_code}: {response.text[:100]}")
                     
             except Exception as e:
                 print(f"   ❌ '{slug}' - Error: {str(e)[:50]}")
