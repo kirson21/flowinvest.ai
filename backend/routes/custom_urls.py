@@ -158,13 +158,8 @@ async def get_reserved_words():
 async def get_public_user_profile(display_name: str):
     """Get public user profile by display name"""
     try:
-        print(f"🔍 Attempting to fetch user profile for: {display_name}")
-        
         if not supabase:
-            print("❌ Supabase client not available")
             raise HTTPException(status_code=500, detail="Database connection not available")
-        
-        print(f"✅ Supabase client available, querying user_profiles table...")
         
         # Fetch user profile by display_name
         result = supabase.table('user_profiles')\
@@ -172,14 +167,10 @@ async def get_public_user_profile(display_name: str):
             .eq('display_name', display_name)\
             .execute()
         
-        print(f"📊 Query result: status_code={result.status_code}, data_length={len(result.data) if result.data else 0}")
-        
         if not result.data:
-            print(f"❌ No user found with display_name: {display_name}")
             raise HTTPException(status_code=404, detail="User not found")
         
         profile = result.data[0]
-        print(f"✅ Found user profile: {profile.get('display_name')}")
         
         return PublicUserProfile(
             display_name=profile['display_name'],
@@ -192,13 +183,9 @@ async def get_public_user_profile(display_name: str):
         )
         
     except HTTPException as he:
-        print(f"🔄 Re-raising HTTPException: {he.detail}")
         raise he
     except Exception as e:
-        print(f"💥 Unexpected error fetching public user profile: {e}")
-        print(f"   Error type: {type(e)}")
-        import traceback
-        print(f"   Traceback: {traceback.format_exc()}")
+        print(f"Error fetching public user profile: {e}")
         raise HTTPException(status_code=500, detail="Error fetching user profile")
 
 @router.get("/public/bots/{slug}", response_model=PublicBotDetails)
