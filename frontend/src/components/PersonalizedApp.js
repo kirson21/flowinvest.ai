@@ -56,11 +56,7 @@ const PersonalizedApp = ({ section = 'feed' }) => {
     }
   }, [section, setActiveTab]);
 
-  // Handle navigation between sections
-  const handleTabChange = (newSection) => {
-    const newUrl = `/${encodeURIComponent(displayName)}/${newSection}`;
-    navigate(newUrl);
-  };
+
 
   if (loading) {
     return (
