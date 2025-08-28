@@ -338,6 +338,8 @@ async def generate_slug_endpoint(text: str = Query(..., description="Text to con
             "suggestions": generate_slug_suggestions(slug)
         }
         
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error generating slug: {e}")
         raise HTTPException(status_code=500, detail="Error generating slug")
