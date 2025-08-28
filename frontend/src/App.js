@@ -98,7 +98,7 @@ function App() {
             <Route path="/login/callback" element={<AuthCallback />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             
-            {/* Public URL routes - Direct section access */}
+            {/* Public URL routes - Direct section access for unauthenticated users */}
             <Route path="/marketplace" element={<Navigate to="/app?tab=portfolios" replace />} />
             <Route path="/bots" element={<Navigate to="/app?tab=bots" replace />} />
             <Route path="/feed" element={<Navigate to="/app?tab=feed" replace />} />
@@ -109,10 +109,32 @@ function App() {
             <Route path="/bots/:slug" element={<PublicBotDetails />} />
             <Route path="/feed/:slug" element={<PublicFeedPost />} />
             
-            {/* Protected routes */}
+            {/* Personalized authenticated user routes */}
+            <Route path="/:displayName/feed" element={
+              <ProtectedRoute>
+                <PersonalizedApp section="feed" />
+              </ProtectedRoute>
+            } />
+            <Route path="/:displayName/bots" element={
+              <ProtectedRoute>
+                <PersonalizedApp section="bots" />
+              </ProtectedRoute>
+            } />
+            <Route path="/:displayName/marketplace" element={
+              <ProtectedRoute>
+                <PersonalizedApp section="portfolios" />
+              </ProtectedRoute>
+            } />
+            <Route path="/:displayName/settings" element={
+              <ProtectedRoute>
+                <PersonalizedApp section="settings" />
+              </ProtectedRoute>
+            } />
+            
+            {/* Legacy protected routes - redirect to personalized URLs */}
             <Route path="/app" element={
               <ProtectedRoute>
-                <AppWithAuth />
+                <PersonalizedRedirect />
               </ProtectedRoute>
             } />
             
@@ -130,5 +152,52 @@ function App() {
     </AuthProvider>
   );
 }
+
+// Component to redirect /app to personalized URL
+const PersonalizedRedirect = () => {
+  const { user } = useAuth();
+  const [profile, setProfile] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadProfile = async () => {
+      if (user?.id) {
+        try {
+          // Get user profile to find display_name
+          const { data: profileData } = await import('./lib/supabase').then(module => 
+            module.supabase.from('user_profiles').select('display_name').eq('user_id', user.id).single()
+          );
+          setProfile(profileData);
+        } catch (error) {
+          console.error('Error loading profile for redirect:', error);
+        }
+      }
+      setLoading(false);
+    };
+
+    loadProfile();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#DFDFDF] to-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#0097B2]" />
+          <p className="text-[#474545]/70">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Get the tab parameter if any
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab') || 'feed';
+
+  // Redirect to personalized URL
+  const displayName = profile?.display_name || 'user';
+  const personalizedUrl = `/${encodeURIComponent(displayName)}/${tab}`;
+  
+  return <Navigate to={personalizedUrl} replace />;
+};
 
 export default App;
