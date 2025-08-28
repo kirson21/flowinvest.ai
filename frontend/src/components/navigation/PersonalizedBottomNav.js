@@ -76,7 +76,7 @@ const PersonalizedBottomNav = ({ displayName, activeSection }) => {
       <div className="flex items-center justify-around px-4 py-2">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeSection === item.id;
+          const isActive = activeItemId === item.id;
           
           return (
             <button
