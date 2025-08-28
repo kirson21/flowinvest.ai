@@ -182,8 +182,8 @@ async def get_public_user_profile(display_name: str):
             created_at=profile['created_at']
         )
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error fetching public user profile: {e}")
         raise HTTPException(status_code=500, detail="Error fetching user profile")
