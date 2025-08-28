@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import LoginScreen from './auth/LoginScreen';
 import BottomNav from './navigation/BottomNav';
 import AIFeed from './feed/AIFeed';
