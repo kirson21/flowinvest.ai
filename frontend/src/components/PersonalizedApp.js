@@ -129,42 +129,6 @@ const PersonalizedApp = ({ section = 'feed' }) => {
   );
 };
 
-// Custom Bottom Navigation that uses personalized URLs
-const PersonalizedBottomNav = ({ displayName, activeSection, onTabChange }) => {
-  const tabs = [
-    { id: 'feed', label: 'AI Feed', icon: '📊' },
-    { id: 'bots', label: 'Trading', icon: '🤖' }, 
-    { id: 'portfolios', label: 'Marketplace', icon: '💼' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' }
-  ];
 
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 z-50">
-      <div className="flex justify-around items-center max-w-md mx-auto">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`flex flex-col items-center p-2 rounded-lg transition-all duration-200 ${
-              activeSection === tab.id
-                ? 'text-[#0097B2] bg-[#0097B2]/10'
-                : 'text-gray-600 dark:text-gray-400 hover:text-[#0097B2] hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            <span className="text-lg mb-1">{tab.icon}</span>
-            <span className="text-xs font-medium">{tab.label}</span>
-          </button>
-        ))}
-      </div>
-      
-      {/* URL indicator for debugging */}
-      <div className="text-center mt-2">
-        <span className="text-xs text-gray-400">
-          f01i.app/{displayName}/{activeSection}
-        </span>
-      </div>
-    </nav>
-  );
-};
 
 export default PersonalizedApp;
