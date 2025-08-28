@@ -185,6 +185,15 @@ except Exception as e:
     print(f"❌ Google Sheets routes failed to load: {e}")
     logger.warning(f"Google Sheets routes failed to load: {e}")
 
+try:
+    print("=== LOADING CUSTOM URLS ROUTES ===")
+    api_router.include_router(custom_urls.router, prefix="/urls")
+    print(f"✅ Custom URLs routes loaded successfully")
+    logger.info("Custom URLs routes loaded successfully")
+except Exception as e:
+    print(f"❌ Custom URLs routes failed to load: {e}")
+    logger.warning(f"Custom URLs routes failed to load: {e}")
+
 print("=== ROUTE LOADING COMPLETE ===")
 print(f"Total API routes loaded: {len(api_router.routes)}")
 
