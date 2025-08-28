@@ -201,14 +201,22 @@ print(f"Total API routes loaded: {len(api_router.routes)}")
 app.include_router(api_router, prefix="/api")
 
 # Error handlers
+from fastapi.responses import JSONResponse
+
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
     logger.error(f"Internal error: {exc}")
-    return {"error": "Internal server error", "message": str(exc)}
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "message": str(exc)}
+    )
 
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
-    return {"error": "Not found", "message": "The requested resource was not found"}
+    return JSONResponse(
+        status_code=404,
+        content={"error": "Not found", "message": "The requested resource was not found"}
+    )
 
 # Main entry point
 if __name__ == "__main__":
