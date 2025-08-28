@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://dataflow-crypto.preview.emergentagent.com/api"
+BACKEND_URL = "https://payflow-ai.preview.emergentagent.com/api"
 
 class VerifySubscriptionFixTest:
     def __init__(self):

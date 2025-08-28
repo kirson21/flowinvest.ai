@@ -1,51 +1,71 @@
 <analysis>
-The AI engineer's work primarily revolved around three core areas: stabilizing the NowPayments integration, enhancing financial tracking within the application, and implementing a robust Google Sheets data synchronization feature. Initial efforts addressed critical bugs in the payment system, including fixing  issues and enabling subscription cancellations, alongside improving security by moving API keys to environment variables. A significant portion of the trajectory focused on the Google Sheets integration, which required database schema modifications, development of a dedicated backend service, and creation of API endpoints for data synchronization. A persistent challenge throughout this phase was the detection and removal of hardcoded Google Service Account credentials, repeatedly leading to security breaches and requiring a complete shift to environment variable management. The final stages focused on perfecting user data synchronization, specifically acquiring all user emails by proposing a Supabase RPC function.
+The AI engineer's trajectory involved a series of critical feature enhancements and bug fixes for the  application. Initially, efforts focused on resolving persistent SQL encoding issues, particularly with Supabase RPC functions, to enable comprehensive Google Sheets data synchronization, including all user emails. Subsequently, robust NowPayments withdrawal functionality with TOTP-based 2FA was implemented, along with a comprehensive account deletion system that ensures full data removal and Google Sheets cleanup. A significant portion addressed several payment-related bugs: fixing NowPayments JWT authentication, ensuring company balance accurately reflected subscription revenue, and resolving complex webhook processing issues (signature verification, missing email, and duplicate key errors) to enable automatic subscription upgrades and balance top-ups. Finally, the My Purchases section was fixed to correctly display user purchases, and company financial tracking for marketplace fees and user funds was enhanced, with the final SQL updates pending user execution.
 </analysis>
 
 <product_requirements>
-The  platform is an AI-powered investment application with a React frontend, FastAPI backend, and Supabase for auth/database. It features a subscription model (Free, Plus, Pro) with usage limits. The payment system transitioned from Capitalist API to NowPayments, requiring invoice-based payments, IPN webhooks for real-time updates, and robust crypto subscription management (USDT, USDC). Key initial requirements included fixing mobile UI/UX, displaying subscription expiry, ensuring user ID-based payment association, and automatic user profile creation for Google OAuth users. Later, the user explicitly requested an enhanced data structure with monthly reports for  and a new  table. A critical feature was real-time/scheduled Google Sheets integration for  and aggregated  data (Name, Email, Country, Phone, Registration Date, Seller Status, Subscription Status, Total Commission Earned) using a Google Service Account, with an emphasis on secure credential management via environment variables.
+The  platform is an AI-powered investment application with a React frontend, FastAPI backend, and Supabase for authentication and database management, featuring a Free, Plus, and Pro subscription model with usage limits. The payment system uses NowPayments for crypto-based invoices and IPN webhooks for real-time updates of USDT and USDC subscriptions. Initial requirements included mobile UI/UX fixes, displaying subscription expiry, user ID-based payment association, and automatic user profile creation for Google OAuth users. Subsequent requirements included an enhanced data structure for  with monthly reports and a new  table, real-time/scheduled Google Sheets integration for  and aggregated  data (Name, Email, Country, Phone, Registration Date, Seller Status, Subscription Status, Total Commission Earned) via a Google Service Account with secure environment variable management. Later, explicit requests involved implementing user withdrawals/payouts with 2FA, proper account deletion that removes all user data, and fixing various payment and data synchronization bugs.
 </product_requirements>
 
 <key_technical_concepts>
 -   **React**: Frontend UI development.
 -   **FastAPI**: Python backend API.
 -   **Supabase**: BaaS (PostgreSQL, Auth, RLS).
--   **PostgreSQL/SQL**: Database schema, RLS, triggers, RPC functions.
--   **NowPayments API**: Crypto payment gateway, webhooks.
+-   **PostgreSQL/SQL**: Database schema, RLS, RPC functions.
+-   **NowPayments API**: Crypto payment gateway, webhooks, withdrawals.
 -   **Google Sheets API**: Data synchronization with service accounts.
 -   **Pydantic**: Data validation.
--   **Environment Variables**: Secure credential management.
+-   **Environment Variables**: Secure credential management for API keys and secrets.
+-   **PyOTP**: Used for TOTP-based 2FA in NowPayments withdrawals.
 </key_technical_concepts>
 
 <code_architecture>
 
--   ****: Main FastAPI entry point. Updated to include  router and dynamically handle CORS origins.
--   ****: Handles NowPayments API, subscriptions, and webhooks. Modified for , , webhook email validation, company balance updates, and to include  on subscription events. Removed hardcoded API keys.
--   ****: User authentication and profile management. Modified  to sync with NowPayments. Enhanced profile update endpoints to trigger Google Sheets sync via .
--   ****: NEW dedicated service for Google Sheets API. Created to handle authentication, read/write, and data sync. Modified multiple times to remove hardcoded Google credentials, use environment variables exclusively, and handle private key formatting. Implements  for background operations.
--   ****: NEW API endpoints for Google Sheets sync. Created , , , , , and  for manual user data sync.
--   ****: Stores environment variables. Repeatedly modified to remove hardcoded Google credentials and ensure all API keys (, , etc.) are managed here.
--   ****: Python dependencies. Added , , , .
--   ****: NEW table for email-based subscription validation.
--   ****: NEW SQL function to update company balance with subscription revenue, later extended with .
--   ****: NEW SQL to expand schema with  and  tables.
--   ****: Frontend service for NowPayments. Modified  to pass .
--   ****: NEW SQL defining a Supabase RPC function to join , , , and  tables to retrieve comprehensive user data, including emails.
--   **Temporary Python Scripts (, , , , , , , )**: Created for isolated testing and debugging of Google Sheets authentication, data synchronization, and Supabase data retrieval, specifically to address environment variable loading issues and data fetching logic.
+-   ****: Main FastAPI entry point.
+-   ****: Handles NowPayments API for subscriptions, webhooks, and new withdrawal functionality.
+    -   **Changes**: Modified to fix , handle subscription cancellations, process webhooks (including robust IPN signature verification, email-based matching, amount-based detection, and error handling for duplicate subscriptions), implement JWT authentication via environment variables (, ), and incorporate new endpoints for crypto withdrawals with TOTP 2FA.
+-   ****: User authentication and profile management.
+    -   **Changes**: Enhanced for robust OAuth profile creation (removing direct email handling from profile and adding a dedicated endpoint), implemented comprehensive account deletion logic across 17 database tables, and updated the marketplace transaction processing to correctly handle funds and record purchases.
+-   ****: Dedicated service for Google Sheets API.
+    -   **Changes**: Modified to use Supabase RPC functions for fetching complete user emails, removed hardcoded Google credentials (now exclusively uses environment variables), and added logic for deleting user records from Google Sheets upon account deletion. Also, removed  column references.
+-   ****: API endpoints for Google Sheets sync.
+    -   **Changes**: Integrated with the updated  for user data synchronization.
+-   ****: Stores environment variables.
+    -   **Changes**: Documented requirements for , , , , and , ensuring all sensitive keys are externalized.
+-   ****: Python dependencies.
+    -   **Changes**: Added  for 2FA in withdrawals, and Google API client libraries.
+-   ****: Supabase client initialization.
+    -   **Changes**: Upgraded to include admin auth capabilities for functions like user deletion from  (though  required additional API enhancement).
+-   ****: Frontend component for crypto payments.
+    -   **Changes**: UI updated to replace View History with a Withdraw button, introduce a withdrawal form with address and amount fields, and display payment history by default. New withdrawal modal and status formatter were added.
+-   ****: Frontend service for NowPayments.
+    -   **Changes**: Added methods for initiating and confirming crypto withdrawals.
+-   ****: Authentication context for frontend.
+    -   **Changes**: Updated  to use the new robust OAuth profile creation endpoint, removed  references, and ensured  is handled in profile creation.
+-   ****: User settings page.
+    -   **Changes**: Removed  input field and related references. Updated account deletion to trigger the comprehensive backend deletion endpoint.
+-   ****: Supabase client utilities for frontend.
+    -   **Changes**: Removed lingering  column references in profile update and creation logic.
+-   ****: Frontend data synchronization.
+    -   **Changes**: Removed  column references. Updated  to use the new backend endpoint for purchase saving.
+-   ****: Frontend Supabase data operations.
+    -   **Changes**: Removed  column references. Adjusted  to work with the updated backend and fixed  to correctly handle vote types (confirming it wasn't confused with ratings).
+-   ****: New SQL schema for  table to track payout requests.
+-   ** (and its fixed versions)**: SQL to add  column, remove  column from , and populate existing emails.
+-   ****: SQL to create  RPC function for managing user account balances.
+-   ****: SQL to create  RPC function for tracking platform fees and total user funds in the  table.
 </code_architecture>
 
 <pending_tasks>
--   **User Action Required**: Manually execute the provided SQL script () in the Supabase SQL Editor to create the  RPC function.
--   **AI Verification**: After user confirms RPC function setup, verify its functionality using .
--   **AI Action**: Trigger a comprehensive Google Sheets sync to populate all user emails using the new RPC function.
+-   **User Action Required**: Manually execute the following SQL scripts in the Supabase SQL Editor:
+    1.   RPC function (provided in Chat Message 579, SQL Script 1)
+    2.   RPC function (provided in Chat Message 579, SQL Script 2)
+    3.  Grant permissions for both functions (provided in Chat Message 579, SQL Script 3)
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer successfully implemented automated Google Sheets synchronization for  and  data, including automated triggers on payment webhooks and user profile updates. A persistent and critical issue has been the presence of hardcoded Google Service Account credentials, which were repeatedly detected and disabled by Google. The AI engineer has completely removed all hardcoded credentials from the codebase, making the system exclusively reliant on environment variables.
-
-The focus then shifted to ensuring all user emails are synced. Initially, only a subset of user emails was available from  and . The user explicitly requested to include emails from the  table for complete user data. The AI engineer developed a Supabase RPC function () that joins  with other profile and subscription tables to gather comprehensive user information, including emails, name, country, phone, and subscription status. The SQL for this RPC function has been prepared and provided to the user for manual execution in the Supabase dashboard due to limitations in programmatic SQL execution. The  has been updated to utilize this RPC function.
+Immediately before this summary, the AI engineer successfully addressed two major bug reports related to the marketplace functionality. First, the issue where purchased products were not appearing in the user's My Purchases section was resolved. This was diagnosed as a frontend  failure due to RLS permissions and an incorrect schema assumption (expecting a  column instead of storing product data in a  field). The fix involved creating a new backend endpoint () with admin privileges to handle purchase saving to the  table and updating the frontend to utilize this new endpoint, ensuring the correct data structure was used. Second, the issue with new votes not displaying in UI was clarified and confirmed by the user to be a misunderstanding; the voting system (upvote/downvote and percentages) was already functioning correctly as per product requirements, and the confusion was between voting and numeric star ratings for reviews. The backend endpoint for saving purchases in  () was updated to correctly insert the  into the  table, resolving the display bug.
 </current_work>
 
 <optional_next_step>
-Verify the user's manual setup of the Supabase RPC function and then trigger a full Google Sheets sync.
+Await user confirmation of SQL execution for  and  RPC functions, then verify marketplace financial tracking.
 </optional_next_step>

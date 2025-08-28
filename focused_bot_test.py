@@ -8,7 +8,7 @@ import json
 import uuid
 from datetime import datetime
 
-BACKEND_URL = "https://dataflow-crypto.preview.emergentagent.com/api"
+BACKEND_URL = "https://payflow-ai.preview.emergentagent.com/api"
 
 def test_bot_creation_scenarios():
     """Test the specific scenarios mentioned in the review request"""
