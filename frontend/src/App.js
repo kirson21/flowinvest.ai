@@ -83,7 +83,7 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Public routes */}
+            {/* Public routes - available to everyone */}
             <Route path="/login" element={
               <PublicRoute>
                 <RealAuthScreen />
@@ -97,8 +97,16 @@ function App() {
             <Route path="/login/callback" element={<AuthCallback />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             
-            {/* Legacy callback route redirect */}
-            <Route path="/auth/callback" element={<AuthCallback />} />
+            {/* Public URL routes - Direct section access */}
+            <Route path="/marketplace" element={<Navigate to="/app?tab=portfolios" replace />} />
+            <Route path="/bots" element={<Navigate to="/app?tab=bots" replace />} />
+            <Route path="/feed" element={<Navigate to="/app?tab=feed" replace />} />
+            <Route path="/settings" element={<Navigate to="/app?tab=settings" replace />} />
+            
+            {/* Public resource URLs */}
+            <Route path="/marketplace/:slug" element={<PublicMarketplaceProduct />} />
+            <Route path="/bots/:slug" element={<PublicBotDetails />} />
+            <Route path="/feed/:slug" element={<PublicFeedPost />} />
             
             {/* Protected routes */}
             <Route path="/app" element={
@@ -113,8 +121,8 @@ function App() {
             {/* Default redirect */}
             <Route path="/" element={<Navigate to="/app" replace />} />
             
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/app" replace />} />
+            {/* User profile URLs - must be last to avoid conflicts */}
+            <Route path="/:displayName" element={<PublicUserProfile />} />
           </Routes>
         </div>
       </Router>
