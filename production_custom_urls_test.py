@@ -327,12 +327,12 @@ class ProductionCustomURLsTest:
         
         for name in test_names:
             try:
-                payload = {"text": name}
-                response = requests.post(f"{self.backend_url}/api/urls/generate-slug", json=payload, timeout=15)
+                encoded_name = quote(name)
+                response = requests.post(f"{self.backend_url}/api/urls/generate-slug?text={encoded_name}", timeout=15)
                 
                 if response.status_code == 200:
                     data = response.json()
-                    generated_slug = data.get('slug', '')
+                    generated_slug = data.get('generated_slug', '')
                     
                     if generated_slug and len(generated_slug) > 0:
                         successful_generations += 1
