@@ -78,6 +78,17 @@ const AppWithAuth = () => {
   );
 };
 
+// Wrapper for PersonalizedApp with AppProvider
+const PersonalizedAppWithProvider = ({ section }) => {
+  const { user } = useAuth();
+  
+  return (
+    <AppProvider initialUser={user}>
+      <PersonalizedApp section={section} />
+    </AppProvider>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
