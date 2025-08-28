@@ -110,7 +110,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Replace Capitalist payment system with NowPayments integration - implement invoice-based payment gateway and subscription system for crypto payments."
+user_problem_statement: "Implement Custom User & Resource URLs system - create unique, user-friendly URLs for users, application sections, bots, and marketplace products with slug generation, uniqueness validation, and public sharing capabilities."
 
 backend:
   - task: "Implement NowPayments Invoice Payment System"
