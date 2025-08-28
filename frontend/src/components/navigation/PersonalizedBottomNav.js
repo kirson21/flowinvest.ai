@@ -44,8 +44,17 @@ const PersonalizedBottomNav = ({ displayName, activeSection }) => {
     // Set active tab for component state
     setActiveTab(itemId);
     
+    // Map internal tab IDs to URL segments
+    const urlMapping = {
+      'feed': 'feed',
+      'bots': 'bots', 
+      'portfolios': 'marketplace', // Map portfolios to marketplace URL
+      'settings': 'settings'
+    };
+    
     // Navigate to personalized URL
-    const newUrl = `/${encodeURIComponent(displayName)}/${itemId}`;
+    const urlSegment = urlMapping[itemId] || itemId;
+    const newUrl = `/${encodeURIComponent(displayName)}/${urlSegment}`;
     navigate(newUrl);
   };
 
