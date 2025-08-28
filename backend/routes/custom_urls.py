@@ -154,7 +154,7 @@ async def get_reserved_words():
         raise HTTPException(status_code=500, detail=f"Error fetching reserved words: {str(e)}")
 
 # Public URL endpoints
-@router.get("/public/user/{display_name}")
+@router.get("/public/user/{display_name}", response_model=PublicUserProfile)
 async def get_public_user_profile(display_name: str):
     """Get public user profile by display name"""
     try:
