@@ -1,9 +1,9 @@
-import React from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
 import { supabase } from '../lib/supabase';
-import BottomNav from './navigation/BottomNav';
+import PersonalizedBottomNav from './navigation/PersonalizedBottomNav';
 import AIFeed from './feed/AIFeed';
 import TradingBots from './bots/TradingBots';
 import Portfolios from './portfolios/Portfolios';
