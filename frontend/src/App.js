@@ -123,22 +123,22 @@ function App() {
             {/* Personalized authenticated user routes */}
             <Route path="/:displayName/feed" element={
               <ProtectedRoute>
-                <PersonalizedApp section="feed" />
+                <PersonalizedAppWithProvider section="feed" />
               </ProtectedRoute>
             } />
             <Route path="/:displayName/bots" element={
               <ProtectedRoute>
-                <PersonalizedApp section="bots" />
+                <PersonalizedAppWithProvider section="bots" />
               </ProtectedRoute>
             } />
             <Route path="/:displayName/marketplace" element={
               <ProtectedRoute>
-                <PersonalizedApp section="portfolios" />
+                <PersonalizedAppWithProvider section="portfolios" />
               </ProtectedRoute>
             } />
             <Route path="/:displayName/settings" element={
               <ProtectedRoute>
-                <PersonalizedApp section="settings" />
+                <PersonalizedAppWithProvider section="settings" />
               </ProtectedRoute>
             } />
             
