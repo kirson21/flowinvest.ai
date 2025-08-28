@@ -276,8 +276,8 @@ async def get_public_marketplace_product(slug: str):
             seller_info=seller_info
         )
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error fetching public marketplace product: {e}")
         raise HTTPException(status_code=500, detail="Error fetching product details")
