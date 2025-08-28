@@ -313,8 +313,8 @@ async def get_public_feed_post(slug: str):
             published_at=post.get('published_at')
         )
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error fetching public feed post: {e}")
         raise HTTPException(status_code=500, detail="Error fetching feed post")
