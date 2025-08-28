@@ -5,6 +5,10 @@ import { AppProvider } from './contexts/AppContext'; // Keep the old AppProvider
 import RealAuthScreen from './components/auth/RealAuthScreen';
 import AuthCallback from './components/auth/AuthCallback';
 import MainApp from './components/MainApp';
+import PublicUserProfile from './components/public/PublicUserProfile';
+import PublicBotDetails from './components/public/PublicBotDetails';
+import PublicMarketplaceProduct from './components/public/PublicMarketplaceProduct';
+import PublicFeedPost from './components/public/PublicFeedPost';
 import { Loader2 } from 'lucide-react';
 import './App.css';
 
