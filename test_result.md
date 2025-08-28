@@ -113,6 +113,29 @@
 user_problem_statement: "Implement Custom User & Resource URLs system - create unique, user-friendly URLs for users, application sections, bots, and marketplace products with slug generation, uniqueness validation, and public sharing capabilities."
 
 backend:
+  - task: "Custom URLs Database Schema Implementation"
+    implemented: true
+    working: "testing"
+    file: "/app/custom_urls_schema.sql"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "testing"
+          agent: "main"
+          comment: "CUSTOM URLS DATABASE SCHEMA IMPLEMENTED: ✅ Added uniqueness constraint to display_name in user_profiles table for user profile URLs, ✅ Added slug and is_public columns to user_bots and portfolios tables for resource URLs, ✅ Created feed_posts table for shareable AI feed permalinks with slug support, ✅ Implemented comprehensive reserved_words table with system, brand, and profanity filters, ✅ Created slug generation function with proper sanitization and formatting, ✅ Added URL validation functions for uniqueness checking and format validation, ✅ Auto-generated slugs for existing user_bots and portfolios with duplicate handling, ✅ Implemented Row Level Security policies for public access control, ✅ Added proper indexing for optimal URL lookup performance. Database schema ready for custom URLs system with user profiles, bot pages, marketplace products, and feed post permalinks."
+
+  - task: "Backend API for Custom URLs and Slug Management"
+    implemented: false
+    working: false
+    file: "/app/backend/routes/custom_urls.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "NEXT TASK: Need to implement backend API endpoints for slug validation, uniqueness checking, public URL retrieval, and reserved word validation to support the custom URLs system."
   - task: "Implement NowPayments Invoice Payment System"
     implemented: true
     working: true
