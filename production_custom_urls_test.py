@@ -159,7 +159,7 @@ class ProductionCustomURLsTest:
         endpoints_to_test = [
             ("GET", "/api/urls/reserved-words"),
             ("POST", "/api/urls/validate-slug", {"slug": "test-slug"}),
-            ("POST", "/api/urls/generate-slug", {"text": "Test User"})
+            ("POST", "/api/urls/generate-slug?text=Test%20User")
         ]
         
         available_endpoints = 0
@@ -169,8 +169,12 @@ class ProductionCustomURLsTest:
                 if method == "GET":
                     response = requests.get(f"{self.backend_url}{endpoint}", timeout=15)
                 elif method == "POST":
-                    data = payload[0] if payload else {}
-                    response = requests.post(f"{self.backend_url}{endpoint}", json=data, timeout=15)
+                    if payload and isinstance(payload[0], dict):
+                        # JSON payload
+                        response = requests.post(f"{self.backend_url}{endpoint}", json=payload[0], timeout=15)
+                    else:
+                        # Query parameter endpoint
+                        response = requests.post(f"{self.backend_url}{endpoint}", timeout=15)
                 
                 if response.status_code in [200, 400, 422]:  # 400/422 might be expected for validation
                     available_endpoints += 1
