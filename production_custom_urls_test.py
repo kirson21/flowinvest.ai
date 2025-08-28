@@ -157,25 +157,29 @@ class ProductionCustomURLsTest:
     def test_custom_urls_route_availability(self):
         """Test 4: Custom URLs Route Availability"""
         endpoints_to_test = [
-            "/api/urls/reserved-words",
-            "/api/urls/validate-slug/test-slug",
-            "/api/urls/generate-slug/Test User"
+            ("GET", "/api/urls/reserved-words"),
+            ("POST", "/api/urls/validate-slug", {"slug": "test-slug"}),
+            ("POST", "/api/urls/generate-slug", {"text": "Test User"})
         ]
         
         available_endpoints = 0
         
-        for endpoint in endpoints_to_test:
+        for method, endpoint, *payload in endpoints_to_test:
             try:
-                response = requests.get(f"{self.backend_url}{endpoint}", timeout=15)
+                if method == "GET":
+                    response = requests.get(f"{self.backend_url}{endpoint}", timeout=15)
+                elif method == "POST":
+                    data = payload[0] if payload else {}
+                    response = requests.post(f"{self.backend_url}{endpoint}", json=data, timeout=15)
                 
                 if response.status_code in [200, 400, 422]:  # 400/422 might be expected for validation
                     available_endpoints += 1
-                    print(f"   ✅ {endpoint} - HTTP {response.status_code}")
+                    print(f"   ✅ {method} {endpoint} - HTTP {response.status_code}")
                 else:
-                    print(f"   ❌ {endpoint} - HTTP {response.status_code}")
+                    print(f"   ❌ {method} {endpoint} - HTTP {response.status_code}")
                     
             except Exception as e:
-                print(f"   ❌ {endpoint} - Error: {str(e)[:100]}")
+                print(f"   ❌ {method} {endpoint} - Error: {str(e)[:100]}")
         
         success = available_endpoints >= 2  # At least 2 out of 3 should work
         self.log_test(
