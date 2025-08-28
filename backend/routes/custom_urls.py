@@ -398,8 +398,8 @@ async def update_portfolio_slug(portfolio_id: str, new_slug: str = Query(...)):
         
         return {"success": True, "new_slug": new_slug, "portfolio_id": portfolio_id}
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error updating portfolio slug: {e}")
         raise HTTPException(status_code=500, detail="Error updating portfolio slug")
