@@ -5,6 +5,7 @@ import { AppProvider } from './contexts/AppContext'; // Keep the old AppProvider
 import RealAuthScreen from './components/auth/RealAuthScreen';
 import AuthCallback from './components/auth/AuthCallback';
 import MainApp from './components/MainApp';
+import PersonalizedApp from './components/PersonalizedApp';
 import PublicUserProfile from './components/public/PublicUserProfile';
 import PublicBotDetails from './components/public/PublicBotDetails';
 import PublicMarketplaceProduct from './components/public/PublicMarketplaceProduct';
