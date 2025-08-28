@@ -323,8 +323,8 @@ class ProductionCustomURLsTest:
         
         for name in test_names:
             try:
-                encoded_name = quote(name)
-                response = requests.get(f"{self.backend_url}/api/urls/generate-slug/{encoded_name}", timeout=15)
+                payload = {"text": name}
+                response = requests.post(f"{self.backend_url}/api/urls/generate-slug", json=payload, timeout=15)
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -336,7 +336,7 @@ class ProductionCustomURLsTest:
                     else:
                         print(f"   ❌ '{name}' -> Empty slug")
                 else:
-                    print(f"   ❌ '{name}' - HTTP {response.status_code}")
+                    print(f"   ❌ '{name}' - HTTP {response.status_code}: {response.text[:100]}")
                     
             except Exception as e:
                 print(f"   ❌ '{name}' - Error: {str(e)[:50]}")
