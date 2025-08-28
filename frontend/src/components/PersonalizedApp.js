@@ -126,12 +126,8 @@ const PersonalizedApp = ({ section = 'feed' }) => {
           {renderActiveSection()}
         </div>
         
-        {/* Custom Bottom Navigation with personalized URLs */}
-        <PersonalizedBottomNav 
-          displayName={displayName} 
-          activeSection={section} 
-          onTabChange={handleTabChange}
-        />
+        {/* Use original BottomNav component */}
+        <BottomNav />
       </div>
     </div>
   );
