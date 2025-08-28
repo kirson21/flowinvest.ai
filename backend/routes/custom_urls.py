@@ -473,8 +473,8 @@ async def create_feed_post(
             "public_url": f"/feed/{slug}"
         }
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error creating feed post: {e}")
         raise HTTPException(status_code=500, detail="Error creating feed post")
