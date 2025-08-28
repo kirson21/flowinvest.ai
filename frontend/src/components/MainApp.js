@@ -9,7 +9,17 @@ import Portfolios from './portfolios/Portfolios';
 import Settings from './settings/Settings';
 
 const MainApp = () => {
-  const { isAuthenticated, activeTab } = useApp();
+  const { isAuthenticated, activeTab, setActiveTab } = useApp();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  // Handle URL-based tab switching
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['feed', 'bots', 'portfolios', 'settings'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams, setActiveTab]);
 
   if (!isAuthenticated) {
     return <LoginScreen />;
