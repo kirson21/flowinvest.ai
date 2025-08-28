@@ -58,6 +58,19 @@ const PersonalizedBottomNav = ({ displayName, activeSection }) => {
     navigate(newUrl);
   };
 
+  // Map URL section back to nav item ID for active state
+  const getActiveItemId = (section) => {
+    const reverseMapping = {
+      'feed': 'feed',
+      'bots': 'bots',
+      'marketplace': 'portfolios', // Map marketplace URL back to portfolios ID
+      'settings': 'settings'
+    };
+    return reverseMapping[section] || section;
+  };
+
+  const activeItemId = getActiveItemId(activeSection);
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
       <div className="flex items-center justify-around px-4 py-2">
