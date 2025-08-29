@@ -23,6 +23,23 @@ const AIFeed = () => {
   // Auto-refresh interval (30 seconds)
   const REFRESH_INTERVAL = 30000;
 
+  // Generate slug for feed posts (for sharing)
+  const generatePostSlug = (post) => {
+    if (!post || !post.title) return `post-${post.id || 'unknown'}`;
+    
+    // Create slug from title
+    let slug = post.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s\-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+    
+    // Limit length and add post ID for uniqueness
+    slug = slug.substring(0, 50);
+    return `${slug}-${post.id}`;
+  };
+
   // Load feed entries on component mount and when language changes
   useEffect(() => {
     loadFeedEntries();
