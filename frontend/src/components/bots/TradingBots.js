@@ -606,7 +606,7 @@ const TradingBots = () => {
               description={bot.description}
               type="bot"
               size="small"
-              className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm"
+              className="hover:bg-gray-100 dark:hover:bg-gray-700"
             />
           </div>
         )}
