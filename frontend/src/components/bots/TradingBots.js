@@ -9,6 +9,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Progress } from '../ui/progress';
+import ShareButton from '../common/ShareButton';
 import { 
   Bot, 
   TrendingUp, 
