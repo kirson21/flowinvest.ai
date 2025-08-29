@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
+import ShareButton from '../common/ShareButton';
 import { RefreshCw, TrendingUp, TrendingDown, Minus, AlertCircle, Globe, Languages } from 'lucide-react';
 import { feedAPI } from '../../services/api';
 import { mockFeedPosts } from '../../data/mockData';
