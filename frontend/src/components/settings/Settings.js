@@ -1052,24 +1052,36 @@ const Settings = () => {
             <CardTitle className="text-[#474545] dark:text-white">
               {t('profile')}
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditing(!isEditing)}
-              disabled={loading}
-            >
-              {isEditing ? (
-                <>
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </>
-              ) : (
-                <>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </>
-              )}
-            </Button>
+            <div className="flex items-center space-x-2">
+              {/* Share Profile Button */}
+              <ShareButton
+                url={`/${encodeURIComponent(profileData.display_name || user?.email || 'user')}`}
+                title={`${profileData.display_name || user?.email || 'User'} on f01i.ai`}
+                description={profileData.bio || 'Professional investor and trader on f01i.ai platform'}
+                type="profile"
+                size="small"
+              />
+              
+              {/* Edit Profile Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+                disabled={loading}
+              >
+                {isEditing ? (
+                  <>
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
