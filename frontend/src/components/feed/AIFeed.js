@@ -255,8 +255,20 @@ const AIFeed = () => {
         {posts.map((post) => (
           <Card 
             key={post.id} 
-            className="border-l-4 border-l-[#0097B2] hover:shadow-lg transition-all duration-200 cursor-pointer group"
+            className="border-l-4 border-l-[#0097B2] hover:shadow-lg transition-all duration-200 cursor-pointer group relative"
           >
+            {/* Share Button for Feed Posts */}
+            <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+              <ShareButton
+                url={`/feed/${generatePostSlug(post)}`}
+                title={post.title}
+                description={post.summary}
+                type="post"
+                size="small"
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm"
+              />
+            </div>
+            
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
