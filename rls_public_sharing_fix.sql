@@ -42,7 +42,7 @@ CREATE POLICY "Authenticated users can read public portfolios" ON public.portfol
 -- Add policy for users to read their own portfolios
 DROP POLICY IF EXISTS "Users can read own portfolios" ON public.portfolios;
 CREATE POLICY "Users can read own portfolios" ON public.portfolios
-    FOR SELECT TO authenticated USING (auth.uid() = seller_id);
+    FOR SELECT TO authenticated USING (auth.uid()::text = user_id);
 
 -- Add policy for service role (admin access)
 DROP POLICY IF EXISTS "Service role full access portfolios" ON public.portfolios;
