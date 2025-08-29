@@ -1325,9 +1325,22 @@ const Portfolios = () => {
     <Card className="hover:shadow-md transition-all duration-200 group relative">
 
       
-      {/* Edit Button - Only visible to creators and super admin */}
-      {canEditProduct(portfolio) && (
-        <div className="absolute top-1 right-1 z-10">
+      {/* Top Right Action Buttons - Edit and Share */}
+      <div className="absolute top-1 right-1 z-10 flex items-center space-x-1">
+        {/* Share Button - Always visible for public products with slug */}
+        {portfolio.slug && (
+          <ShareButton
+            url={`/marketplace/${portfolio.slug}`}
+            title={portfolio.title || portfolio.name}
+            description={portfolio.description}
+            type="product"
+            size="small"
+            className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm"
+          />
+        )}
+        
+        {/* Edit Button - Only visible to creators and super admin */}
+        {canEditProduct(portfolio) && (
           <Button
             size="sm"
             variant="outline"
@@ -1337,8 +1350,8 @@ const Portfolios = () => {
             <Edit size={10} className="mr-0.5" />
             <span className="hidden sm:inline">Edit</span>
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Super Admin Delete Button - REMOVED - Use edit modal instead */}
       
