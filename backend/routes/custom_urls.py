@@ -244,8 +244,8 @@ async def get_public_marketplace_product(slug: str):
         # Fetch portfolio/product by slug, only if public
         result = supabase.table('portfolios')\
             .select('''
-                title, description, price, category, slug, rating, votes_count, created_at, seller_id,
-                user_profiles!portfolios_seller_id_fkey(display_name, avatar_url, seller_mode)
+                title, description, price, category, slug, rating, votes_count, created_at, user_id,
+                user_profiles!portfolios_user_id_fkey(display_name, avatar_url, seller_mode)
             ''')\
             .eq('slug', slug)\
             .eq('is_public', True)\
