@@ -20,9 +20,10 @@ CREATE POLICY "Authenticated users can read public bots" ON public.user_bots
     FOR SELECT TO authenticated USING (is_public = true AND is_prebuilt = true);
 
 -- Add policy for users to read their own bots
+-- Note: Using string comparison to handle potential type mismatches
 DROP POLICY IF EXISTS "Users can read own bots" ON public.user_bots;
 CREATE POLICY "Users can read own bots" ON public.user_bots
-    FOR SELECT TO authenticated USING (auth.uid() = user_id);
+    FOR SELECT TO authenticated USING (auth.uid()::text = user_id::text);
 
 -- Add policy for service role (admin access)
 DROP POLICY IF EXISTS "Service role full access bots" ON public.user_bots;
