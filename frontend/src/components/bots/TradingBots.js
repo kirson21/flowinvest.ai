@@ -596,7 +596,21 @@ const TradingBots = () => {
     const isConnected = getConnectionStatus(bot);
     
     return (
-      <Card className="hover:shadow-md transition-all duration-200 group">
+      <Card className="hover:shadow-md transition-all duration-200 group relative">
+        {/* Share Button for Prebuilt Bots */}
+        {bot.slug && bot.is_prebuilt && (
+          <div className="absolute top-1 right-1 z-10">
+            <ShareButton
+              url={`/bots/${bot.slug}`}
+              title={bot.name}
+              description={bot.description}
+              type="bot"
+              size="small"
+              className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm"
+            />
+          </div>
+        )}
+        
         <CardHeader className="pb-2 px-3 pt-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
