@@ -69,6 +69,13 @@ const ShareButton = ({
           defaultTitle: title || 'Check out this AI trading bot',
           defaultDescription: description || 'Advanced AI trading strategy on f01i.ai'
         };
+      case 'post':
+        return {
+          icon: '📰',
+          typeLabel: 'Feed Post',
+          defaultTitle: title || 'Check out this market analysis',
+          defaultDescription: description || 'AI-powered market insights from f01i.ai'
+        };
       default:
         return {
           icon: '🔗',
