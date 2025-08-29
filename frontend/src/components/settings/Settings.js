@@ -12,6 +12,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Alert, AlertDescription } from '../ui/alert';
+import ShareButton from '../common/ShareButton';
 import ProductEditModal from '../portfolios/ProductEditModal';
 import VerificationRequiredModal from '../verification/VerificationRequiredModal';
 import VerificationManagementModal from '../verification/VerificationManagementModal';
