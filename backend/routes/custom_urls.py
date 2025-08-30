@@ -284,16 +284,15 @@ async def get_public_marketplace_product(slug: str):
 
 @router.get("/public/feed/{slug}", response_model=FeedPostDetails)
 async def get_public_feed_post(slug: str):
-    """Get public feed post by slug"""
+    """Get public feed post by slug from news_feed table"""
     try:
         if not supabase:
             raise HTTPException(status_code=500, detail="Database connection not available")
         
-        # Fetch feed post by slug, only if public
-        result = supabase.table('feed_posts')\
-            .select('title, summary, content, sentiment, source, language, slug, created_at, published_at')\
+        # Fetch feed post by slug from news_feed table
+        result = supabase.table('news_feed')\
+            .select('title, summary, content, sentiment, source, original_language, created_at, published_at')\
             .eq('slug', slug)\
-            .eq('is_public', True)\
             .execute()
         
         if not result.data:
@@ -307,8 +306,8 @@ async def get_public_feed_post(slug: str):
             content=post.get('content'),
             sentiment=post.get('sentiment'),
             source=post.get('source'),
-            language=post.get('language', 'en'),
-            slug=post['slug'],
+            language=post.get('original_language', 'en'),
+            slug=slug,
             created_at=post['created_at'],
             published_at=post.get('published_at')
         )
