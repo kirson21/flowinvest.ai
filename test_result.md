@@ -114,6 +114,17 @@
 user_problem_statement: "Fix NowPayments withdrawal functionality - resolve 500 error when creating withdrawal requests through NowPayments API. Error: 'Failed to create withdrawal: 0' indicating database schema or RPC function issues."
 
 backend:
+  - task: "Fix NowPayments Withdrawal Creation Error"
+    implemented: false
+    working: false
+    file: "/app/backend/routes/nowpayments.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "main"
+          comment: "CRITICAL BUG IDENTIFIED: NowPayments withdrawal creation failing with 500 error 'Failed to create withdrawal: 0'. Server logs show: Error creating withdrawal: 0 indicating the Supabase RPC function 'create_withdrawal_request' likely doesn't exist in database. The nowpayments_withdrawals_schema.sql may not have been applied to production database. Need to verify database schema, check RPC function exists, and fix error handling to show actual errors instead of '0'."
   - task: "Custom URLs Database Schema Implementation"
     implemented: true
     working: true
