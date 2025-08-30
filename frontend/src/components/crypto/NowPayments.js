@@ -308,11 +308,12 @@ const NowPayments = () => {
       const result = await nowPaymentsService.createSubscription(subscriptionData, user?.id);
       
       if (result.success) {
-        setMessage(`Subscription created! Payment instructions sent to ${subscriptionEmail}`);
+        setMessage(`Subscription created! Payment instructions sent to ${subscriptionEmail}. 
+        ⏳ Note: Plan upgrades may take 5-15 minutes to process after payment. You'll be notified when your plan is upgraded.`);
         setTimeout(() => {
           setShowSubscriptionModal(false);
           resetSubscriptionForm();
-        }, 3000);
+        }, 5000); // Increased timeout to let user read the message
       }
     } catch (error) {
       setError(`Failed to create subscription: ${error.message}`);
