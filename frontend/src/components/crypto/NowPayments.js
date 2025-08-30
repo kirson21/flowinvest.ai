@@ -275,12 +275,24 @@ const NowPayments = () => {
       const result = await nowPaymentsService.createInvoice(invoiceData, user?.id);
       
       if (result.success) {
-        setMessage('Payment invoice created successfully! Redirecting...');
+        setMessage('Payment invoice created successfully! Opening payment gateway...');
         
-        // Redirect directly in the same tab to avoid popup blocking
+        // Open payment gateway in new window/tab to avoid redirect issues
         setTimeout(() => {
-          window.location.href = result.invoice_url;
-        }, 1500);
+          const paymentWindow = window.open(result.invoice_url, '_blank', 'noopener,noreferrer');
+          if (paymentWindow) {
+            setMessage('Payment gateway opened in new tab. Complete your payment there and return to this page.');
+            // Close the payment modal after opening payment window
+            setTimeout(() => {
+              setShowPaymentModal(false);
+              resetPaymentForm();
+            }, 2000);
+          } else {
+            // Fallback if popup blocked
+            setMessage('Please allow popups or manually open the payment link below:');
+            setError(`Payment URL: ${result.invoice_url}`);
+          }
+        }, 1000);
       }
     } catch (error) {
       setError(`Failed to create payment: ${error.message}`);
