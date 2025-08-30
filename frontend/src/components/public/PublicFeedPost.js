@@ -186,7 +186,7 @@ const PublicFeedPost = () => {
                   Go to App
                 </Button>
               ) : (
-                <>
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button onClick={handleLoginRedirect} variant="outline">
                     <LogIn className="h-4 w-4 mr-2" />
                     Login
@@ -194,7 +194,7 @@ const PublicFeedPost = () => {
                   <Button onClick={handleAppRedirect}>
                     Get Started
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </div>
