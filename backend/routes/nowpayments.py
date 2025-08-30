@@ -408,21 +408,35 @@ async def nowpayments_webhook(request: Request):
         # Verify IPN signature if secret is available
         if NOWPAYMENTS_IPN_SECRET and signature:
             try:
+                # NowPayments signature verification method
+                # The signature should be calculated as HMAC-SHA512 of the entire raw body
                 expected_signature = hmac.new(
                     NOWPAYMENTS_IPN_SECRET.encode('utf-8'),
                     body,
-                    hashlib.sha256
+                    hashlib.sha512  # Use SHA512, not SHA256
                 ).hexdigest()
                 
                 if signature != expected_signature:
                     print(f"❌ Invalid webhook signature.")
-                    print(f"   Expected: {expected_signature}")
+                    print(f"   Expected (SHA512): {expected_signature}")
                     print(f"   Received: {signature}")
-                    print(f"   Body: {body.decode()}")
-                    # Don't fail on signature verification for now - log and continue
-                    print(f"⚠️ Continuing webhook processing despite signature mismatch for debugging")
+                    print(f"   Body length: {len(body)} bytes")
+                    print(f"   IPN Secret configured: {'Yes' if NOWPAYMENTS_IPN_SECRET else 'No'}")
+                    
+                    # Try alternative signature methods for compatibility
+                    expected_sha256 = hmac.new(
+                        NOWPAYMENTS_IPN_SECRET.encode('utf-8'),
+                        body,
+                        hashlib.sha256
+                    ).hexdigest()
+                    
+                    if signature == expected_sha256:
+                        print(f"✅ Webhook signature verified with SHA256 method")
+                    else:
+                        print(f"   Also tried SHA256: {expected_sha256}")
+                        print(f"⚠️ Continuing webhook processing despite signature mismatch for debugging")
                 else:
-                    print(f"✅ Webhook signature verified successfully")
+                    print(f"✅ Webhook signature verified successfully with SHA512")
             except Exception as sig_error:
                 print(f"⚠️ Signature verification error: {sig_error}")
                 print(f"⚠️ Continuing webhook processing for debugging")
