@@ -1597,8 +1597,12 @@ async def create_withdrawal_request(request: WithdrawalRequest, user_id: str = Q
             raise HTTPException(status_code=400, detail=f"Currency {request.currency} is not supported")
         
         # Check minimum amount
-        min_amount_result = await get_withdrawal_min_amount(request.currency)
-        min_amount = min_amount_result.get("min_amount", 1.0)
+        try:
+            min_amount_result = await get_withdrawal_min_amount(request.currency)
+            min_amount = min_amount_result.get("min_amount", 1.0)
+        except Exception as e:
+            print(f"Warning: Could not get minimum amount for {request.currency}: {str(e)}")
+            min_amount = 1.0  # Default fallback
         
         if request.amount < min_amount:
             raise HTTPException(
@@ -1607,7 +1611,11 @@ async def create_withdrawal_request(request: WithdrawalRequest, user_id: str = Q
             )
         
         # Check user balance
-        user_balance_result = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        try:
+            user_balance_result = supabase.table('user_accounts').select('balance').eq('user_id', user_id).execute()
+        except Exception as e:
+            print(f"Error fetching user balance: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Database error: Could not fetch user balance - {str(e)}")
         
         user_balance = 0.0
         if user_balance_result.data:
@@ -1620,31 +1628,67 @@ async def create_withdrawal_request(request: WithdrawalRequest, user_id: str = Q
             )
         
         # Create withdrawal record using database function
-        result = supabase.rpc('create_withdrawal_request', {
-            'p_user_id': user_id,
-            'p_recipient_address': request.recipient_address,
-            'p_currency': request.currency,
-            'p_amount': request.amount,
-            'p_description': request.description
-        }).execute()
+        try:
+            print(f"🔄 Calling create_withdrawal_request RPC with user_id={user_id}, amount={request.amount}, currency={request.currency}")
+            
+            result = supabase.rpc('create_withdrawal_request', {
+                'p_user_id': user_id,
+                'p_recipient_address': request.recipient_address,
+                'p_currency': request.currency,
+                'p_amount': request.amount,
+                'p_description': request.description
+            }).execute()
+            
+            print(f"📊 RPC result: {result}")
+            
+        except Exception as rpc_error:
+            print(f"❌ RPC function error: {type(rpc_error).__name__}: {str(rpc_error)}")
+            
+            # Check if it's a function not found error
+            error_str = str(rpc_error).lower()
+            if 'function' in error_str and 'does not exist' in error_str:
+                raise HTTPException(
+                    status_code=500, 
+                    detail="Database schema error: Withdrawal function not found. Please contact administrator."
+                )
+            elif 'nowpayments_withdrawals' in error_str and 'does not exist' in error_str:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Database schema error: Withdrawal table not found. Please contact administrator."
+                )
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Database error during withdrawal creation: {str(rpc_error)}"
+                )
         
-        if not result.data or not result.data[0].get('success'):
-            error_msg = result.data[0].get('message', 'Unknown error') if result.data else 'Database function failed'
+        if not result.data:
+            raise HTTPException(status_code=500, detail="Database function returned no data")
+            
+        if isinstance(result.data, list) and len(result.data) > 0:
+            withdrawal_data = result.data[0]
+        else:
+            withdrawal_data = result.data
+            
+        if not withdrawal_data.get('success'):
+            error_msg = withdrawal_data.get('message', 'Unknown database error')
             raise HTTPException(status_code=400, detail=error_msg)
         
-        withdrawal_data = result.data[0]
         withdrawal_id = withdrawal_data['withdrawal_id']
         
         # Create notification
-        notification = {
-            'user_id': user_id,
-            'title': '🔄 Withdrawal Request Created',
-            'message': f'Your withdrawal request for {request.amount} {request.currency} has been created. Please verify the withdrawal to process it.',
-            'type': 'info',
-            'is_read': False
-        }
-        
-        supabase.table('user_notifications').insert(notification).execute()
+        try:
+            notification = {
+                'user_id': user_id,
+                'title': '🔄 Withdrawal Request Created',
+                'message': f'Your withdrawal request for {request.amount} {request.currency} has been created. Please verify the withdrawal to process it.',
+                'type': 'info',
+                'is_read': False
+            }
+            
+            supabase.table('user_notifications').insert(notification).execute()
+        except Exception as notif_error:
+            print(f"Warning: Failed to create notification: {str(notif_error)}")
         
         return {
             "success": True,
@@ -1660,8 +1704,9 @@ async def create_withdrawal_request(request: WithdrawalRequest, user_id: str = Q
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error creating withdrawal: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to create withdrawal: {str(e)}")
+        error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
+        print(f"❌ Unexpected error creating withdrawal: {error_msg}")
+        raise HTTPException(status_code=500, detail=f"Failed to create withdrawal: {error_msg}")
 
 @router.post("/nowpayments/withdrawal/verify")
 async def verify_and_process_withdrawal(request: VerifyWithdrawalRequest, user_id: str = Query(..., description="User ID for verification")):
