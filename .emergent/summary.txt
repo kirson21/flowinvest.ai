@@ -1,9 +1,22 @@
 <analysis>
-The AI engineer's trajectory involved a series of critical feature enhancements and bug fixes for the  application. Initially, efforts focused on resolving persistent SQL encoding issues, particularly with Supabase RPC functions, to enable comprehensive Google Sheets data synchronization, including all user emails. Subsequently, robust NowPayments withdrawal functionality with TOTP-based 2FA was implemented, along with a comprehensive account deletion system that ensures full data removal and Google Sheets cleanup. A significant portion addressed several payment-related bugs: fixing NowPayments JWT authentication, ensuring company balance accurately reflected subscription revenue, and resolving complex webhook processing issues (signature verification, missing email, and duplicate key errors) to enable automatic subscription upgrades and balance top-ups. Finally, the My Purchases section was fixed to correctly display user purchases, and company financial tracking for marketplace fees and user funds was enhanced, with the final SQL updates pending user execution.
+The AI engineer's trajectory focused on building and refining the  application, transitioning from foundational features to complex enhancements and bug fixes. The primary objective was the implementation of a comprehensive Custom URLs system, encompassing user profiles, application sections, marketplace products, bots, and feed posts. This involved extensive backend API development for slug generation, uniqueness validation, and frontend routing adjustments to support both public and authenticated personalized URLs.
+
+Throughout the process, the AI engineer addressed several critical bugs. Key challenges included resolving persistent Supabase RLS policy errors (incorrect column names, type mismatches), fixing NowPayments webhook signature verification, ensuring correct financial data synchronization (), and improving the user experience for top-up payments (new tab opening). UI consistency for share buttons and mobile responsiveness were also tackled. The work concluded by consolidating all database schema and RLS fixes into a single, comprehensive SQL script for user execution, ensuring all implemented features are correctly supported in the database.
 </analysis>
 
 <product_requirements>
-The  platform is an AI-powered investment application with a React frontend, FastAPI backend, and Supabase for authentication and database management, featuring a Free, Plus, and Pro subscription model with usage limits. The payment system uses NowPayments for crypto-based invoices and IPN webhooks for real-time updates of USDT and USDC subscriptions. Initial requirements included mobile UI/UX fixes, displaying subscription expiry, user ID-based payment association, and automatic user profile creation for Google OAuth users. Subsequent requirements included an enhanced data structure for  with monthly reports and a new  table, real-time/scheduled Google Sheets integration for  and aggregated  data (Name, Email, Country, Phone, Registration Date, Seller Status, Subscription Status, Total Commission Earned) via a Google Service Account with secure environment variable management. Later, explicit requests involved implementing user withdrawals/payouts with 2FA, proper account deletion that removes all user data, and fixing various payment and data synchronization bugs.
+The  platform is an AI-powered investment application with a React frontend, FastAPI backend, and Supabase for authentication and database management, offering Free, Plus, and Pro subscription tiers. The payment system utilizes NowPayments for crypto invoices and IPN webhooks for real-time USDT/USDC subscription updates.
+
+The core problem addressed in this trajectory was to implement a system of unique, user-friendly URLs for various application elements and to enable future sharing functionality. This included:
+1.  **User Profile Links**: Personal URLs like , with  validated for uniqueness, alphanumeric characters, underscores, and dashes. Auto-generation of  and the ability for users to change them later were required.
+2.  **Application Section Links**: Direct URLs for core sections: , , , .
+3.  **Product and Bot Links**: Unique URLs for marketplace products () and user-created bots (), with automatic slug generation and uniqueness validation within their categories.
+4.  **Feed Post Links**: Unique URLs for each feed post, e.g., .
+5.  **Future Proofing**: Ability to add social sharing and Open Graph/SEO metadata.
+6.  **Access Control**: Publicly shared links should only be active if the content is marked as public. Unauthenticated users can view public shared content but must register to access other features.
+7.  **Personalized Authenticated URLs**: For logged-in users, the application's internal navigation should use personalized URLs, e.g.,  instead of generic .
+
+Subsequent fixes included: NowPayments webhook signature verification, adding a notification for subscription processing time, fixing the  synchronization to reflect actual user balances, and ensuring top-up payment gateways open in new windows without redirect errors.
 </product_requirements>
 
 <key_technical_concepts>
@@ -12,60 +25,75 @@ The  platform is an AI-powered investment application with a React frontend, Fas
 -   **Supabase**: BaaS (PostgreSQL, Auth, RLS).
 -   **PostgreSQL/SQL**: Database schema, RLS, RPC functions.
 -   **NowPayments API**: Crypto payment gateway, webhooks, withdrawals.
--   **Google Sheets API**: Data synchronization with service accounts.
 -   **Pydantic**: Data validation.
 -   **Environment Variables**: Secure credential management for API keys and secrets.
--   **PyOTP**: Used for TOTP-based 2FA in NowPayments withdrawals.
+-   **React Router**: Frontend routing for dynamic and custom URLs.
 </key_technical_concepts>
 
 <code_architecture>
 
 -   ****: Main FastAPI entry point.
--   ****: Handles NowPayments API for subscriptions, webhooks, and new withdrawal functionality.
-    -   **Changes**: Modified to fix , handle subscription cancellations, process webhooks (including robust IPN signature verification, email-based matching, amount-based detection, and error handling for duplicate subscriptions), implement JWT authentication via environment variables (, ), and incorporate new endpoints for crypto withdrawals with TOTP 2FA.
--   ****: User authentication and profile management.
-    -   **Changes**: Enhanced for robust OAuth profile creation (removing direct email handling from profile and adding a dedicated endpoint), implemented comprehensive account deletion logic across 17 database tables, and updated the marketplace transaction processing to correctly handle funds and record purchases.
--   ****: Dedicated service for Google Sheets API.
-    -   **Changes**: Modified to use Supabase RPC functions for fetching complete user emails, removed hardcoded Google credentials (now exclusively uses environment variables), and added logic for deleting user records from Google Sheets upon account deletion. Also, removed  column references.
--   ****: API endpoints for Google Sheets sync.
-    -   **Changes**: Integrated with the updated  for user data synchronization.
--   ****: Stores environment variables.
-    -   **Changes**: Documented requirements for , , , , and , ensuring all sensitive keys are externalized.
--   ****: Python dependencies.
-    -   **Changes**: Added  for 2FA in withdrawals, and Google API client libraries.
--   ****: Supabase client initialization.
-    -   **Changes**: Upgraded to include admin auth capabilities for functions like user deletion from  (though  required additional API enhancement).
--   ****: Frontend component for crypto payments.
-    -   **Changes**: UI updated to replace View History with a Withdraw button, introduce a withdrawal form with address and amount fields, and display payment history by default. New withdrawal modal and status formatter were added.
--   ****: Frontend service for NowPayments.
-    -   **Changes**: Added methods for initiating and confirming crypto withdrawals.
--   ****: Authentication context for frontend.
-    -   **Changes**: Updated  to use the new robust OAuth profile creation endpoint, removed  references, and ensured  is handled in profile creation.
+    -   **Changes**: Registered the new  router.
+-   ** (New File)**: Handles backend logic for custom URLs.
+    -   **Summary**: Manages creation, validation, and retrieval of slugs for users, bots, products, and posts. Includes reserved word checks and uniqueness enforcement.
+    -   **Changes**: Implemented API endpoints for slug generation, validation, and fetching details based on slugs.
+-   ****: Handles NowPayments API for subscriptions, webhooks, and withdrawals.
+    -   **Changes**: Fixed  function to correctly handle SHA512 and SHA256 hashing for webhook validation. Updated to use  from environment.
+-   ****: Main React application entry point.
+    -   **Changes**: Updated to include new routing configurations for public custom URLs (, , , ) and authenticated personalized URLs (). Wrapped authenticated routes with .
+-   ****: Main application component, typically housing authenticated UI.
+    -   **Changes**: Modified to extract  from URL parameters for personalized routing.
+-   ** (New File)**: Component that wraps the main authenticated app content with necessary contexts for personalized routing.
+    -   **Summary**: Provides  context and handles redirection logic for authenticated users to their personalized URLs.
+-   ** (New File)**: A custom navigation component for authenticated users.
+    -   **Summary**: Replicates the original 's appearance but uses 's  and  to construct personalized URLs based on the active  and current section.
+-   ****: Original navigation component.
+    -   **Changes**: Reverted changes to restore original functionality, as  now handles personalized routing.
+-   ** (New File)**: Reusable React component for sharing functionality.
+    -   **Summary**: Provides a modal with social media sharing options (Twitter/X, LinkedIn, Telegram, TikTok, Instagram) and a Copy Link feature for various content types (user, product, bot, post).
+    -   **Changes**: Enhanced to handle different  props (, , , ) and generate appropriate sharing URLs.
 -   ****: User settings page.
-    -   **Changes**: Removed  input field and related references. Updated account deletion to trigger the comprehensive backend deletion endpoint.
--   ****: Supabase client utilities for frontend.
-    -   **Changes**: Removed lingering  column references in profile update and creation logic.
--   ****: Frontend data synchronization.
-    -   **Changes**: Removed  column references. Updated  to use the new backend endpoint for purchase saving.
--   ****: Frontend Supabase data operations.
-    -   **Changes**: Removed  column references. Adjusted  to work with the updated backend and fixed  to correctly handle vote types (confirming it wasn't confused with ratings).
--   ****: New SQL schema for  table to track payout requests.
--   ** (and its fixed versions)**: SQL to add  column, remove  column from , and populate existing emails.
--   ****: SQL to create  RPC function for managing user account balances.
--   ****: SQL to create  RPC function for tracking platform fees and total user funds in the  table.
+    -   **Changes**: Integrated  component next to the Edit Profile button.
+-   ****: Marketplace/Portfolios listing.
+    -   **Changes**: Integrated  into  components for sharing individual products. Adjusted the mapping for navigation to .
+-   ****: Trading Bots listing.
+    -   **Changes**: Integrated  into  components for sharing individual bots.
+-   ****: AI Feed display.
+    -   **Changes**: Integrated  into each feed post, including slug generation from post titles.
+-   ** (New File)**, ** (New File)**, ** (New File)**, ** (New File)**: Components for displaying publicly accessible content.
+    -   **Summary**: Render details for user profiles, bots, marketplace products, and feed posts when accessed via their public custom URLs, without requiring authentication.
+    -   **Changes**: Basic setup for rendering respective data based on URL slugs.
+-   ** (New File)**: Frontend service for interacting with custom URL backend APIs.
+    -   **Summary**: Contains functions to interact with the backend  endpoints (e.g., validating slugs, retrieving entity data).
+-   ****: Frontend component for crypto payments (Top-up, Subscriptions).
+    -   **Changes**: Modified the Top-up flow to open the NowPayments payment gateway in a new browser tab () instead of redirecting in the same window. Added a notification message about plan upgrade processing time.
+-   ****: Stores backend environment variables.
+    -   **Changes**: Temporarily attempted to remove hardcoded Supabase keys and move them to environment variables (rolled back due to user request). The  is now required.
+-   ****: Stores frontend environment variables.
+    -   **Changes**: Temporarily attempted to remove hardcoded Supabase keys and move them to environment variables (rolled back due to user request).  was fixed to point to production.
+-   ** (New File)**: A consolidated SQL script.
+    -   **Summary**: Contains all necessary database schema updates, RLS policies, and data migration scripts for custom URLs, public sharing, and company balance synchronization. This includes creating slug columns, adding uniqueness constraints, setting up RLS for public access to , , and  (instead of ), and fixing the  function to correctly handle  types and ensure accurate  data.
 </code_architecture>
 
 <pending_tasks>
--   **User Action Required**: Manually execute the following SQL scripts in the Supabase SQL Editor:
-    1.   RPC function (provided in Chat Message 579, SQL Script 1)
-    2.   RPC function (provided in Chat Message 579, SQL Script 2)
-    3.  Grant permissions for both functions (provided in Chat Message 579, SQL Script 3)
+-   **User Action Required**: Manually execute the  script in the Supabase SQL Editor.
+-   **Environment Variable**: Ensure  is added to the Render backend environment variables for automatic webhook processing.
+-   **Deployment**: Push the latest code changes to the Git repository for deployment to the production environment.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary, the AI engineer successfully addressed two major bug reports related to the marketplace functionality. First, the issue where purchased products were not appearing in the user's My Purchases section was resolved. This was diagnosed as a frontend  failure due to RLS permissions and an incorrect schema assumption (expecting a  column instead of storing product data in a  field). The fix involved creating a new backend endpoint () with admin privileges to handle purchase saving to the  table and updating the frontend to utilize this new endpoint, ensuring the correct data structure was used. Second, the issue with new votes not displaying in UI was clarified and confirmed by the user to be a misunderstanding; the voting system (upvote/downvote and percentages) was already functioning correctly as per product requirements, and the confusion was between voting and numeric star ratings for reviews. The backend endpoint for saving purchases in  () was updated to correctly insert the  into the  table, resolving the display bug.
+Immediately before this summary, the AI engineer was actively engaged in resolving critical bugs related to the  application's financial tracking and payment experience, as well as consolidating all database-related fixes.
+
+Specifically, the AI engineer addressed:
+1.  **Company Balance Synchronization**: The  was not correctly reflecting the actual user balances from . This involved multiple iterations of fixing SQL functions to:
+    *   Correctly reference column names ( was incorrectly used instead of  or ).
+    *   Handle  data types for user balances, specifically removing incorrect  functions and simplifying conditions to .
+    *   Ensure the  function accurately calculates and updates  from the  table.
+2.  **Top-up Payment Gateway Experience**: The payment gateway for topping up balances was opening in the same window, causing redirect errors upon completion. The fix involved modifying the frontend () to open the payment gateway in a new tab, allowing the user to remain on the f01i.ai application in the original tab, and automatically closing the payment modal.
+
+The final action taken was to combine all the database-related fixes (Custom URLs schema, RLS policies for public sharing across , , and the corrected  table, and the  sync logic) into a single, comprehensive SQL file named . This file is intended for a single, complete execution by the user in their Supabase SQL Editor to apply all necessary database changes.
 </current_work>
 
 <optional_next_step>
-Await user confirmation of SQL execution for  and  RPC functions, then verify marketplace financial tracking.
+Execute the  file in the Supabase SQL Editor.
 </optional_next_step>

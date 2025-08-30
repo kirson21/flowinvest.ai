@@ -19,7 +19,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://payflow-ai.preview.emergentagent.com/api"
+BACKEND_URL = "https://foliapp-slugs.preview.emergentagent.com/api"
 
 class AccountDeletionTester:
     def __init__(self):

@@ -8,7 +8,7 @@ import requests
 import json
 
 # Configuration
-BACKEND_URL = "https://payflow-ai.preview.emergentagent.com"
+BACKEND_URL = "https://foliapp-slugs.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_database_schema():
