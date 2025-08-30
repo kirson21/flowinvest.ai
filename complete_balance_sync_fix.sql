@@ -25,22 +25,21 @@ BEGIN
 END $$;
 
 -- Step 2: Create improved sync function
+-- Create function to calculate total user funds from user_accounts
 CREATE OR REPLACE FUNCTION calculate_total_user_funds()
 RETURNS DECIMAL(12,2) AS $$
 DECLARE
     total_funds DECIMAL(12,2) := 0;
     user_record RECORD;
 BEGIN
-    -- Debug: Log each user balance
+    -- Debug: Log each user balance (balance is NUMERIC type)
     FOR user_record IN 
         SELECT user_id, balance, currency 
         FROM public.user_accounts 
         WHERE balance IS NOT NULL 
-        AND balance != '0' 
-        AND balance != '0.00'
-        AND LENGTH(TRIM(balance)) > 0
+        AND balance > 0
     LOOP
-        total_funds := total_funds + user_record.balance::DECIMAL;
+        total_funds := total_funds + user_record.balance;
         RAISE NOTICE 'User %: Balance $%', user_record.user_id, user_record.balance;
     END LOOP;
     
