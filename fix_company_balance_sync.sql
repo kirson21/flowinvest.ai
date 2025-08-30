@@ -88,10 +88,13 @@ SELECT sync_company_balance_user_funds();
 -- =====================================================
 -- VERIFICATION QUERIES
 -- =====================================================
--- Check current sync status:
+-- Check current sync status (should show $20.16 after sync):
 -- SELECT 
---     (SELECT SUM(balance) FROM public.user_accounts WHERE balance > 0) as actual_user_funds,
---     (SELECT user_funds FROM public.company_balance ORDER BY created_at DESC LIMIT 1) as company_balance_user_funds;
+--     (SELECT SUM(balance::DECIMAL) FROM public.user_accounts WHERE balance IS NOT NULL AND balance != '0') as actual_user_funds,
+--     (SELECT user_funds FROM public.company_balance ORDER BY updated_at DESC LIMIT 1) as company_balance_user_funds;
 
--- Test the sync function:
+-- Test the sync function (should return $20.16):
 -- SELECT sync_company_balance_user_funds();
+
+-- Check individual user balances:
+-- SELECT user_id, balance, currency FROM public.user_accounts WHERE balance IS NOT NULL AND balance != '0';
