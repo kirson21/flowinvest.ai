@@ -289,14 +289,14 @@ async def get_public_feed_post(slug: str):
         if not supabase:
             raise HTTPException(status_code=500, detail="Database connection not available")
         
-        # Fetch feed post by slug from news_feed table
+        # Fetch feed post by slug from news_feed table (existing table)
         result = supabase.table('news_feed')\
             .select('title, summary, content, sentiment, source, original_language, created_at, published_at')\
             .eq('slug', slug)\
             .execute()
         
         if not result.data:
-            raise HTTPException(status_code=404, detail="Feed post not found or not publicly available")
+            raise HTTPException(status_code=404, detail="Feed post not found")
         
         post = result.data[0]
         
