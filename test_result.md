@@ -111,7 +111,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement Custom User & Resource URLs system - create unique, user-friendly URLs for users, application sections, bots, and marketplace products with slug generation, uniqueness validation, and public sharing capabilities."
+user_problem_statement: "Fix NowPayments withdrawal functionality - resolve 500 error when creating withdrawal requests through NowPayments API. Error: 'Failed to create withdrawal: 0' indicating database schema or RPC function issues."
 
 backend:
   - task: "Custom URLs Database Schema Implementation"
