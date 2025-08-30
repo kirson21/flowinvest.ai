@@ -10,10 +10,10 @@ DECLARE
     current_company_funds DECIMAL(12,2);
 BEGIN
     -- Calculate actual user funds total
-    SELECT COALESCE(SUM(balance::DECIMAL), 0)
+    SELECT COALESCE(SUM(balance), 0)
     INTO current_user_total
     FROM public.user_accounts
-    WHERE balance IS NOT NULL AND balance != '0' AND balance != '0.00';
+    WHERE balance > 0;
     
     -- Get current company balance user_funds
     SELECT COALESCE(user_funds::DECIMAL, 0)
