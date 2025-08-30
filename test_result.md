@@ -116,7 +116,7 @@ user_problem_statement: "Fix NowPayments withdrawal functionality - resolve 500 
 backend:
   - task: "Fix NowPayments Withdrawal Creation Error"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/routes/nowpayments.py"
     stuck_count: 0
     priority: "critical"
