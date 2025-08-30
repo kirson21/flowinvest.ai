@@ -9,10 +9,14 @@ RETURNS DECIMAL(12,2) AS $$
 DECLARE
     total_funds DECIMAL(12,2);
 BEGIN
-    SELECT COALESCE(SUM(balance), 0)
+    -- Sum balances from user_accounts, converting text to decimal
+    SELECT COALESCE(SUM(balance::DECIMAL), 0)
     INTO total_funds
     FROM public.user_accounts
-    WHERE balance > 0;
+    WHERE balance IS NOT NULL 
+    AND balance != '0' 
+    AND balance != '0.00'
+    AND LENGTH(TRIM(balance)) > 0;
     
     RETURN total_funds;
 END;
