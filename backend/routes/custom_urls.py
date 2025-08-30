@@ -303,7 +303,7 @@ async def get_public_feed_post(slug: str):
         return FeedPostDetails(
             title=post['title'],
             summary=post.get('summary'),
-            content=post.get('content'),
+            content=post.get('content', ''),
             sentiment=post.get('sentiment'),
             source=post.get('source'),
             language=post.get('original_language', 'en'),
