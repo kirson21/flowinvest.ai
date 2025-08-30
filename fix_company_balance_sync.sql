@@ -28,17 +28,28 @@ BEGIN
     -- Calculate total user funds
     current_user_funds := calculate_total_user_funds();
     
-    -- Update company_balance table
+    -- Update company_balance table (using correct column names)
     UPDATE public.company_balance
     SET 
         user_funds = current_user_funds,
+        last_updated = NOW(),
         updated_at = NOW()
-    WHERE id = (SELECT id FROM public.company_balance ORDER BY created_at DESC LIMIT 1);
+    WHERE id = (SELECT id FROM public.company_balance ORDER BY updated_at DESC LIMIT 1);
     
     -- If no company_balance record exists, create one
     IF NOT FOUND THEN
-        INSERT INTO public.company_balance (user_funds, marketplace_fees, subscription_revenue, created_at, updated_at)
-        VALUES (current_user_funds, 0, 0, NOW(), NOW());
+        INSERT INTO public.company_balance (
+            user_funds, 
+            company_funds, 
+            total_deposits, 
+            total_withdrawals, 
+            total_fees_earned, 
+            currency, 
+            last_updated, 
+            updated_at,
+            total_subscription_revenue
+        )
+        VALUES (current_user_funds, 0, 0, 0, 0, 'USD', NOW(), NOW(), 0);
     END IF;
     
     result := json_build_object(
