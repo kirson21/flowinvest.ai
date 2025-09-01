@@ -1,99 +1,99 @@
 <analysis>
-The AI engineer's trajectory focused on building and refining the  application, transitioning from foundational features to complex enhancements and bug fixes. The primary objective was the implementation of a comprehensive Custom URLs system, encompassing user profiles, application sections, marketplace products, bots, and feed posts. This involved extensive backend API development for slug generation, uniqueness validation, and frontend routing adjustments to support both public and authenticated personalized URLs.
-
-Throughout the process, the AI engineer addressed several critical bugs. Key challenges included resolving persistent Supabase RLS policy errors (incorrect column names, type mismatches), fixing NowPayments webhook signature verification, ensuring correct financial data synchronization (), and improving the user experience for top-up payments (new tab opening). UI consistency for share buttons and mobile responsiveness were also tackled. The work concluded by consolidating all database schema and RLS fixes into a single, comprehensive SQL script for user execution, ensuring all implemented features are correctly supported in the database.
+The AI engineer's work primarily focused on expanding the  application, initially by implementing a comprehensive Custom URLs system for various entities (users, bots, products, posts) and personalized authenticated navigation. This involved significant backend API development for slug management and corresponding frontend routing. Subsequently, the focus shifted to critical bug fixes. The trajectory details the resolution of a Failed to create withdrawal: 0 error in the NowPayments integration, which involved improving backend error handling, ensuring the correct database schema was applied to production (after initial environmental mismatches), and fixing the withdrawal webhook logic for automatic balance deduction. The latest challenge involved resolving a persistent SQL type casting error within the  function, requiring a complex SQL script to drop and recreate dependent database objects with  to correctly update .
 </analysis>
 
 <product_requirements>
-The  platform is an AI-powered investment application with a React frontend, FastAPI backend, and Supabase for authentication and database management, offering Free, Plus, and Pro subscription tiers. The payment system utilizes NowPayments for crypto invoices and IPN webhooks for real-time USDT/USDC subscription updates.
+The  platform is an AI-powered investment application built with a React frontend, FastAPI backend, and Supabase for database management and authentication, supporting Free, Plus, and Pro subscription tiers. NowPayments handles crypto invoices and IPN webhooks for real-time USDT/USDC subscription updates.
 
-The core problem addressed in this trajectory was to implement a system of unique, user-friendly URLs for various application elements and to enable future sharing functionality. This included:
-1.  **User Profile Links**: Personal URLs like , with  validated for uniqueness, alphanumeric characters, underscores, and dashes. Auto-generation of  and the ability for users to change them later were required.
+The initial product requirement aimed to implement a system of unique, user-friendly URLs and sharing functionality for various application elements:
+1.  **User Profile Links**: Personalized URLs like  with validation for uniqueness and specific characters.
 2.  **Application Section Links**: Direct URLs for core sections: , , , .
-3.  **Product and Bot Links**: Unique URLs for marketplace products () and user-created bots (), with automatic slug generation and uniqueness validation within their categories.
+3.  **Product and Bot Links**: Unique URLs like  and  with auto-generation and uniqueness validation.
 4.  **Feed Post Links**: Unique URLs for each feed post, e.g., .
-5.  **Future Proofing**: Ability to add social sharing and Open Graph/SEO metadata.
-6.  **Access Control**: Publicly shared links should only be active if the content is marked as public. Unauthenticated users can view public shared content but must register to access other features.
-7.  **Personalized Authenticated URLs**: For logged-in users, the application's internal navigation should use personalized URLs, e.g.,  instead of generic .
+5.  **Future Proofing**: Support for social sharing and SEO metadata.
+6.  **Access Control**: Publicly shared links visible to unauthenticated users if content is marked public.
+7.  **Personalized Authenticated URLs**: Logged-in users navigate using personalized paths, e.g., .
 
-Subsequent fixes included: NowPayments webhook signature verification, adding a notification for subscription processing time, fixing the  synchronization to reflect actual user balances, and ensuring top-up payment gateways open in new windows without redirect errors.
+Subsequent and current efforts are focused on resolving critical issues:
+- Fixing NowPayments webhook signature verification (addressed prior to this trajectory's core).
+- Correcting  synchronization to reflect actual user balances.
+- Ensuring top-up payment gateways open in new windows without redirection issues.
+- Addressing a critical bug preventing successful withdrawal creation and proper balance deduction via NowPayments.
 </product_requirements>
 
 <key_technical_concepts>
 -   **React**: Frontend UI development.
--   **FastAPI**: Python backend API.
--   **Supabase**: BaaS (PostgreSQL, Auth, RLS).
--   **PostgreSQL/SQL**: Database schema, RLS, RPC functions.
--   **NowPayments API**: Crypto payment gateway, webhooks, withdrawals.
--   **Pydantic**: Data validation.
--   **Environment Variables**: Secure credential management for API keys and secrets.
+-   **FastAPI**: Python backend API, including routing.
+-   **Supabase**: Backend-as-a-Service, providing PostgreSQL, Authentication, and Row-Level Security (RLS).
+-   **PostgreSQL/SQL**: Database schema definition, RLS policies, RPC functions, triggers.
+-   **NowPayments API**: Third-party crypto payment gateway for top-ups, subscriptions, and withdrawals, with IPN webhooks.
+-   **Pydantic**: Data validation for FastAPI.
+-   **Environment Variables**: Secure configuration management for API keys and URLs.
 -   **React Router**: Frontend routing for dynamic and custom URLs.
 </key_technical_concepts>
 
 <code_architecture>
 
--   ****: Main FastAPI entry point.
-    -   **Changes**: Registered the new  router.
--   ** (New File)**: Handles backend logic for custom URLs.
-    -   **Summary**: Manages creation, validation, and retrieval of slugs for users, bots, products, and posts. Includes reserved word checks and uniqueness enforcement.
-    -   **Changes**: Implemented API endpoints for slug generation, validation, and fetching details based on slugs.
--   ****: Handles NowPayments API for subscriptions, webhooks, and withdrawals.
-    -   **Changes**: Fixed  function to correctly handle SHA512 and SHA256 hashing for webhook validation. Updated to use  from environment.
--   ****: Main React application entry point.
-    -   **Changes**: Updated to include new routing configurations for public custom URLs (, , , ) and authenticated personalized URLs (). Wrapped authenticated routes with .
--   ****: Main application component, typically housing authenticated UI.
-    -   **Changes**: Modified to extract  from URL parameters for personalized routing.
--   ** (New File)**: Component that wraps the main authenticated app content with necessary contexts for personalized routing.
-    -   **Summary**: Provides  context and handles redirection logic for authenticated users to their personalized URLs.
--   ** (New File)**: A custom navigation component for authenticated users.
-    -   **Summary**: Replicates the original 's appearance but uses 's  and  to construct personalized URLs based on the active  and current section.
--   ****: Original navigation component.
-    -   **Changes**: Reverted changes to restore original functionality, as  now handles personalized routing.
--   ** (New File)**: Reusable React component for sharing functionality.
-    -   **Summary**: Provides a modal with social media sharing options (Twitter/X, LinkedIn, Telegram, TikTok, Instagram) and a Copy Link feature for various content types (user, product, bot, post).
-    -   **Changes**: Enhanced to handle different  props (, , , ) and generate appropriate sharing URLs.
--   ****: User settings page.
-    -   **Changes**: Integrated  component next to the Edit Profile button.
--   ****: Marketplace/Portfolios listing.
-    -   **Changes**: Integrated  into  components for sharing individual products. Adjusted the mapping for navigation to .
--   ****: Trading Bots listing.
-    -   **Changes**: Integrated  into  components for sharing individual bots.
--   ****: AI Feed display.
-    -   **Changes**: Integrated  into each feed post, including slug generation from post titles.
--   ** (New File)**, ** (New File)**, ** (New File)**, ** (New File)**: Components for displaying publicly accessible content.
-    -   **Summary**: Render details for user profiles, bots, marketplace products, and feed posts when accessed via their public custom URLs, without requiring authentication.
-    -   **Changes**: Basic setup for rendering respective data based on URL slugs.
--   ** (New File)**: Frontend service for interacting with custom URL backend APIs.
-    -   **Summary**: Contains functions to interact with the backend  endpoints (e.g., validating slugs, retrieving entity data).
--   ****: Frontend component for crypto payments (Top-up, Subscriptions).
-    -   **Changes**: Modified the Top-up flow to open the NowPayments payment gateway in a new browser tab () instead of redirecting in the same window. Added a notification message about plan upgrade processing time.
--   ****: Stores backend environment variables.
-    -   **Changes**: Temporarily attempted to remove hardcoded Supabase keys and move them to environment variables (rolled back due to user request). The  is now required.
--   ****: Stores frontend environment variables.
-    -   **Changes**: Temporarily attempted to remove hardcoded Supabase keys and move them to environment variables (rolled back due to user request).  was fixed to point to production.
--   ** (New File)**: A consolidated SQL script.
-    -   **Summary**: Contains all necessary database schema updates, RLS policies, and data migration scripts for custom URLs, public sharing, and company balance synchronization. This includes creating slug columns, adding uniqueness constraints, setting up RLS for public access to , , and  (instead of ), and fixing the  function to correctly handle  types and ensure accurate  data.
+-   ****:
+    -   **Summary**: Handles NowPayments API integrations for payments, subscriptions, webhooks, and withdrawals.
+    -   **Changes**: Improved error handling in the  endpoint to show actual errors instead of 0. Added balance deduction logic for successful withdrawals in the  handler and integrated  function.
+-   ****:
+    -   **Summary**: Frontend service for interacting with NowPayments backend APIs.
+    -   **Changes**: Examined to understand how withdrawal requests are made and the  usage.
+-   ****:
+    -   **Summary**: A consolidated SQL script containing database schema updates, RLS policies, and data migration for custom URLs and company balance synchronization.
+    -   **Changes**: This file was the base upon which  was built, indicating the progression of schema consolidation.
+-   ****:
+    -   **Summary**: A new, comprehensive SQL script combining all previous schema changes (custom URLs, RLS) with the newly added  table and related functions.
+    -   **Changes**: Created by the AI to ensure all necessary database components, including withdrawal functionality, are present for production deployment.
+-   ****:
+    -   **Summary**: Contains the SQL definitions for the  table and RPC functions like , , and .
+    -   **Changes**: This schema was confirmed to exist but needed to be applied to the production database. Its contents were incorporated into consolidated scripts.
+-   ****:
+    -   **Summary**: A targeted SQL script designed to add *only* the withdrawal-related database objects (table, functions, RLS) using  to avoid conflicts.
+    -   **Changes**: Created by the AI to address user's  error when applying the full schema. Includes the crucial  function.
+-   ****:
+    -   **Summary**: SQL script to fix the  function, specifically addressing a type casting error.
+    -   **Changes**: Re-defined the function to correctly handle  types for .
+-   ****:
+    -   **Summary**: A simple SQL script to manually update a user's balance and temporarily disable/re-enable the trigger.
+    -   **Changes**: Created as an immediate fix for the user's balance after a successful withdrawal.
+-   ****:
+    -   **Summary**: SQL script to fix the company balance function by explicitly dropping it before recreation.
+    -   **Changes**: Addressed PostgreSQL's restriction on changing function return types.
+-   ****:
+    -   **Summary**: A very basic SQL script to update the user's balance without involving triggers.
+    -   **Changes**: Provided as an alternative quick fix.
+-   ****:
+    -   **Summary**: The most comprehensive SQL script for fixing the  sync issue, handling all dependencies.
+    -   **Changes**: Drops triggers and functions with , then recreates  and its trigger with correct type handling, and updates the user's balance using . This is the final version to be applied.
 </code_architecture>
 
 <pending_tasks>
--   **User Action Required**: Manually execute the  script in the Supabase SQL Editor.
--   **Environment Variable**: Ensure  is added to the Render backend environment variables for automatic webhook processing.
--   **Deployment**: Push the latest code changes to the Git repository for deployment to the production environment.
+-   **User Action Required**: Execute the  script in the Supabase SQL Editor. This is crucial for resolving the  synchronization bug and correcting the user's balance.
+-   **Environment Variable**: Ensure  is added to the Render backend environment variables.
+-   **Deployment**: Push the latest code changes to the Git repository for deployment.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary, the AI engineer was actively engaged in resolving critical bugs related to the  application's financial tracking and payment experience, as well as consolidating all database-related fixes.
+Immediately before this summary, the AI engineer was addressing a critical and persistent database issue related to the  synchronization function. This problem manifested as a  error, specifically within the  function, which was being triggered by balance updates.
 
-Specifically, the AI engineer addressed:
-1.  **Company Balance Synchronization**: The  was not correctly reflecting the actual user balances from . This involved multiple iterations of fixing SQL functions to:
-    *   Correctly reference column names ( was incorrectly used instead of  or ).
-    *   Handle  data types for user balances, specifically removing incorrect  functions and simplifying conditions to .
-    *   Ensure the  function accurately calculates and updates  from the  table.
-2.  **Top-up Payment Gateway Experience**: The payment gateway for topping up balances was opening in the same window, causing redirect errors upon completion. The fix involved modifying the frontend () to open the payment gateway in a new tab, allowing the user to remain on the f01i.ai application in the original tab, and automatically closing the payment modal.
+The previous attempts to fix this involved:
+1.  Creating  to correct the  to  casting error.
+2.  Creating  and  for temporary balance corrections.
+3.  Creating  to drop and recreate the function, as PostgreSQL doesn't allow changing function return types directly.
 
-The final action taken was to combine all the database-related fixes (Custom URLs schema, RLS policies for public sharing across , , and the corrected  table, and the  sync logic) into a single, comprehensive SQL file named . This file is intended for a single, complete execution by the user in their Supabase SQL Editor to apply all necessary database changes.
+However, the user reported a new error: . This indicated that the trigger itself needed to be dropped *before* the function could be dropped and recreated.
+
+The current work culminated in the creation of the  script. This script is designed to:
+-   **Cleanly remove dependencies**: It proactively drops all related triggers and functions using the  option, ensuring a clean slate.
+-   **Recreate correctly**: It then recreates the  function with the proper  type handling () and reinstates the necessary trigger.
+-   **Fix user balance**: It includes a command to correctly update the user's balance (deducting the previously successful 0 withdrawal), using  to prevent negative balances.
+-   **Test**: It also includes commands to test the manual sync function and display the updated balances.
+
+This comprehensive script is the proposed solution to fully fix the  synchronization issue and correct the user's balance.
 </current_work>
 
 <optional_next_step>
-Execute the  file in the Supabase SQL Editor.
+The next step is to instruct the user to execute the  script in their Supabase SQL Editor.
 </optional_next_step>

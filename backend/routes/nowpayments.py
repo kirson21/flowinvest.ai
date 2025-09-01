@@ -25,7 +25,7 @@ NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "")
 NOWPAYMENTS_2FA_SECRET = os.getenv("NOWPAYMENTS_2FA_SECRET")  # For TOTP 2FA automation
 
 # Base URL for return URLs (will be configured in environment)
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://foliapp-slugs.preview.emergentagent.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://url-wizard.preview.emergentagent.com")
 
 # Pydantic models
 class InvoiceRequest(BaseModel):

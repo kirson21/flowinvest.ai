@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://foliapp-slugs.preview.emergentagent.com/api"
+BACKEND_URL = "https://url-wizard.preview.emergentagent.com/api"
 
 class RPCFunctionTester:
     def __init__(self):
