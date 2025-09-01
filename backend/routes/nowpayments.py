@@ -1928,96 +1928,156 @@ async def withdrawal_webhook(request: Request):
         
         print(f"🔔 Withdrawal webhook received: {webhook_data}")
         
-        # Extract relevant data
-        withdrawal_id = webhook_data.get('withdrawal_id') or webhook_data.get('id')
+        # Extract relevant data - check both 'id' and 'batch_withdrawal_id'
+        withdrawal_id = webhook_data.get('id')  # This is the batch withdrawal ID from NowPayments
+        batch_withdrawal_id = webhook_data.get('batch_withdrawal_id')  
         status = webhook_data.get('status')
-        transaction_hash = webhook_data.get('transaction_hash')
-        actual_amount = webhook_data.get('actual_amount')
+        transaction_hash = webhook_data.get('hash') or webhook_data.get('transaction_hash')
+        actual_amount = webhook_data.get('amount')
         error_message = webhook_data.get('error_message')
+        network_fee = webhook_data.get('fee', 0)
         
-        if not withdrawal_id:
-            print("❌ No withdrawal ID in webhook")
+        # Use the ID from webhook as batch_withdrawal_id
+        search_batch_id = withdrawal_id or batch_withdrawal_id
+        
+        if not search_batch_id:
+            print("❌ No withdrawal/batch ID in webhook")
             return {"success": False, "error": "Missing withdrawal ID"}
         
-        # Find withdrawal record by batch_withdrawal_id
-        withdrawal_result = supabase.table('nowpayments_withdrawals')\
-            .select('*')\
-            .eq('batch_withdrawal_id', str(withdrawal_id))\
-            .execute()
+        print(f"🔍 Looking for withdrawal with batch_withdrawal_id: {search_batch_id}")
         
-        if not withdrawal_result.data:
-            print(f"⚠️ Withdrawal record not found for batch ID: {withdrawal_id}")
-            return {"success": False, "error": "Withdrawal record not found"}
-        
-        withdrawal = withdrawal_result.data[0]
-        user_id = withdrawal['user_id']
-        
-        # Update withdrawal record
-        update_data = {
-            'api_response': webhook_data,
-            'updated_at': 'now()'
-        }
-        
-        # Map NowPayments status to our status
-        if status == 'sent':
-            update_data['status'] = 'sent'
-            update_data['transaction_hash'] = transaction_hash
-            update_data['actual_amount_sent'] = actual_amount
-        elif status == 'completed':
-            update_data['status'] = 'completed'
-            update_data['completed_at'] = 'now()'
-            update_data['transaction_hash'] = transaction_hash
-            update_data['actual_amount_sent'] = actual_amount
-        elif status == 'failed':
-            update_data['status'] = 'failed'
-            update_data['error_message'] = error_message
-        else:
-            update_data['status'] = status
-        
-        # Update the withdrawal record
-        supabase.table('nowpayments_withdrawals')\
-            .update(update_data)\
-            .eq('id', withdrawal['id'])\
-            .execute()
-        
-        # Create notification for user
-        notification_title = ""
-        notification_message = ""
-        notification_type = "info"
-        
-        if status == 'sent':
-            notification_title = "🚀 Withdrawal Sent"
-            notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has been sent to the blockchain. Transaction hash: {transaction_hash}"
-            notification_type = "info"
-        elif status == 'completed':
-            notification_title = "✅ Withdrawal Completed"
-            notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has been completed successfully. Transaction hash: {transaction_hash}"
-            notification_type = "success"
-        elif status == 'failed':
-            notification_title = "❌ Withdrawal Failed"
-            notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has failed. Reason: {error_message}. Your balance has been restored."
-            notification_type = "error"
-            
-            # Restore user balance if withdrawal failed
-            supabase.rpc('update_user_balance', {
-                'user_uuid': user_id,
-                'amount_change': withdrawal['amount']
+        # Use the new database function to update withdrawal status
+        try:
+            result = supabase.rpc('update_withdrawal_status_webhook', {
+                'p_batch_withdrawal_id': str(search_batch_id),
+                'p_status': status,
+                'p_transaction_hash': transaction_hash,
+                'p_network_fee': float(network_fee) if network_fee else 0,
+                'p_actual_amount_sent': float(actual_amount) if actual_amount else None
             }).execute()
-        
-        if notification_title:
-            notification = {
-                'user_id': user_id,
-                'title': notification_title,
-                'message': notification_message,
-                'type': notification_type,
-                'is_read': False
+            
+            if result.data and result.data[0].get('success'):
+                withdrawal_data = result.data[0]
+                print(f"✅ Withdrawal status updated via database function: {withdrawal_data}")
+                
+                # Get withdrawal info for notifications
+                withdrawal_result = supabase.table('nowpayments_withdrawals')\
+                    .select('*')\
+                    .eq('batch_withdrawal_id', str(search_batch_id))\
+                    .execute()
+                
+                if withdrawal_result.data:
+                    withdrawal = withdrawal_result.data[0]
+                    user_id = withdrawal['user_id']
+                    
+                    # Create notification for user
+                    notification_title = ""
+                    notification_message = ""
+                    notification_type = "info"
+                    
+                    if status in ['SENDING', 'sending']:
+                        notification_title = "🚀 Withdrawal Being Processed"
+                        notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} is being processed and sent to the blockchain."
+                        notification_type = "info"
+                    elif status in ['FINISHED', 'completed', 'sent']:
+                        notification_title = "✅ Withdrawal Completed"
+                        notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has been completed successfully! Balance deducted: ${withdrawal['amount']:.2f}"
+                        if transaction_hash:
+                            notification_message += f" | Transaction hash: {transaction_hash}"
+                        notification_type = "success"
+                    elif status in ['failed', 'FAILED']:
+                        notification_title = "❌ Withdrawal Failed"
+                        notification_message = f"Your withdrawal of {withdrawal['amount']} {withdrawal['currency']} has failed."
+                        if error_message:
+                            notification_message += f" Reason: {error_message}"
+                        notification_type = "error"
+                    
+                    # Create notification
+                    if notification_title:
+                        notification = {
+                            'user_id': user_id,
+                            'title': notification_title,
+                            'message': notification_message,
+                            'type': notification_type,
+                            'is_read': False
+                        }
+                        
+                        supabase.table('user_notifications').insert(notification).execute()
+                        print(f"📧 Notification created for user {user_id}")
+                
+                return {"success": True, "message": "Withdrawal webhook processed successfully"}
+            else:
+                error_msg = result.data[0].get('message', 'Database function failed') if result.data else 'No response from database function'
+                print(f"❌ Database function failed: {error_msg}")
+                return {"success": False, "error": error_msg}
+                
+        except Exception as db_error:
+            print(f"❌ Database function error: {str(db_error)}")
+            
+            # Fallback: Try to find and update the record manually
+            withdrawal_result = supabase.table('nowpayments_withdrawals')\
+                .select('*')\
+                .eq('batch_withdrawal_id', str(search_batch_id))\
+                .execute()
+            
+            if not withdrawal_result.data:
+                print(f"⚠️ Withdrawal record not found for batch ID: {search_batch_id}")
+                return {"success": False, "error": "Withdrawal record not found"}
+            
+            withdrawal = withdrawal_result.data[0]
+            user_id = withdrawal['user_id']
+            
+            # Manual update
+            update_data = {
+                'api_response': webhook_data,
+                'updated_at': 'now()',
+                'status': 'completed' if status == 'FINISHED' else status.lower()
             }
             
-            supabase.table('user_notifications').insert(notification).execute()
+            if transaction_hash:
+                update_data['transaction_hash'] = transaction_hash
+            if actual_amount:
+                update_data['actual_amount_sent'] = float(actual_amount)
+            if network_fee:
+                update_data['network_fee'] = float(network_fee)
+                
+            if status in ['FINISHED', 'completed']:
+                update_data['completed_at'] = 'now()'
+                
+                # Manually deduct balance for completed withdrawals
+                try:
+                    balance_result = supabase.table('user_accounts')\
+                        .select('balance')\
+                        .eq('user_id', user_id)\
+                        .execute()
+                    
+                    if balance_result.data:
+                        current_balance = float(balance_result.data[0]['balance'])
+                        if current_balance >= withdrawal['amount']:
+                            supabase.table('user_accounts')\
+                                .update({
+                                    'balance': current_balance - withdrawal['amount'],
+                                    'updated_at': 'now()'
+                                })\
+                                .eq('user_id', user_id)\
+                                .execute()
+                            print(f"💰 Manually deducted ${withdrawal['amount']} from user {user_id}")
+                        else:
+                            print(f"⚠️ Insufficient balance to deduct: ${current_balance} < ${withdrawal['amount']}")
+                except Exception as balance_error:
+                    print(f"❌ Failed to manually update balance: {str(balance_error)}")
+            
+            # Update withdrawal record
+            supabase.table('nowpayments_withdrawals')\
+                .update(update_data)\
+                .eq('id', withdrawal['id'])\
+                .execute()
+            
+            return {"success": True, "message": "Withdrawal webhook processed with manual fallback"}
         
-        print(f"✅ Withdrawal webhook processed for user {user_id}")
-        
-        return {"success": True, "message": "Withdrawal webhook processed"}
+    except Exception as e:
+        print(f"❌ Withdrawal webhook error: {str(e)}")
+        return {"success": False, "error": str(e)}
         
     except Exception as e:
         print(f"❌ Withdrawal webhook error: {str(e)}")
