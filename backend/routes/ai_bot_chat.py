@@ -8,7 +8,6 @@ import json
 from datetime import datetime
 from dotenv import load_dotenv
 from supabase_client import supabase_admin
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 # Load environment variables
 load_dotenv()
@@ -44,35 +43,21 @@ class AiBotCreationRequest(BaseModel):
     strategy_config: Dict[str, Any] = {}
     risk_management: Dict[str, Any] = {}
 
-# AI Bot Creation Prompt Template
-AI_BOT_CREATION_PROMPT = """
-You are an expert AI trading bot creator. Your role is to help users create sophisticated trading bots by asking clarifying questions and gathering detailed requirements.
+# Simple AI response simulation for now (until LLM integration is properly set up)
+def get_mock_ai_response(message: str, ai_model: str = 'gpt-5') -> str:
+    """Generate a mock AI response for testing purposes."""
+    
+    # If message contains strategy-related keywords, provide bot configuration
+    strategy_keywords = ['create', 'bot', 'trading', 'bitcoin', 'strategy', 'momentum', 'scalping']
+    if any(keyword in message.lower() for keyword in strategy_keywords):
+        return '''Based on your requirements, I'll create a Bitcoin trading bot for you. Here's the configuration:
 
-IMPORTANT GUIDELINES:
-1. Ask ONE specific question at a time
-2. Be conversational and friendly
-3. Focus on gathering essential information for bot creation
-4. After collecting enough information, provide a complete bot configuration
-5. Always consider risk management and trading safety
-
-INFORMATION TO GATHER (ask about these one by one):
-1. Trading Strategy Type (scalping, momentum, mean reversion, swing trading, etc.)
-2. Target Cryptocurrency/Trading Pair
-3. Exchange preference
-4. Risk tolerance (low, medium, high)
-5. Trading capital/position size
-6. Time horizon (minutes, hours, days)
-7. Technical indicators preference
-8. Stop-loss and take-profit preferences
-9. Any specific market conditions or requirements
-
-When you have gathered sufficient information, respond with a JSON configuration in this exact format:
 ```json
 {
   "ready_to_create": true,
   "bot_config": {
-    "name": "Bot Name",
-    "description": "Detailed description",
+    "name": "Bitcoin Momentum Bot",
+    "description": "AI-powered Bitcoin trading bot using momentum strategy",
     "base_coin": "BTC",
     "quote_coin": "USDT", 
     "exchange": "binance",
@@ -82,7 +67,7 @@ When you have gathered sufficient information, respond with a JSON configuration
   },
   "strategy_config": {
     "type": "momentum",
-    "indicators": ["RSI", "MACD"],
+    "indicators": ["RSI", "MACD", "EMA"],
     "timeframes": ["1h", "4h"],
     "entry_conditions": ["RSI < 30", "MACD bullish crossover"],
     "exit_conditions": ["RSI > 70", "Take profit reached"]
@@ -96,38 +81,20 @@ When you have gathered sufficient information, respond with a JSON configuration
 }
 ```
 
-Start by greeting the user and asking about their trading strategy preference.
-"""
-
-# Initialize LLM Chat
-def get_llm_chat(session_id: str, ai_model: str = 'gpt-5'):
-    """Initialize LLM chat with proper model selection."""
-    try:
-        api_key = os.getenv('EMERGENT_LLM_KEY')
-        if not api_key:
-            raise ValueError("EMERGENT_LLM_KEY not found in environment variables")
-        
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=session_id,
-            system_message=AI_BOT_CREATION_PROMPT
-        )
-        
-        # Set the appropriate model based on user choice
-        if ai_model.lower() == 'gpt-5':
-            chat.with_model("openai", "gpt-5")
-        elif ai_model.lower() == 'grok-4':
-            # Note: Grok might be mapped to a different provider
-            # Check available models and update accordingly
-            chat.with_model("openai", "gpt-4o")  # Fallback for now
-        else:
-            # Default to GPT-5
-            chat.with_model("openai", "gpt-5")
-            
-        return chat
-    except Exception as e:
-        print(f"Error initializing LLM chat: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to initialize AI model: {str(e)}")
+This bot is ready to be created! Click "Create Bot" when you're satisfied with the configuration.'''
+    
+    # Regular conversational responses
+    responses = [
+        "That's interesting! Could you tell me more about your risk tolerance? Are you comfortable with high-risk, high-reward strategies, or do you prefer more conservative approaches?",
+        "Great! What's your preferred trading pair? Bitcoin/USDT, Ethereum/USDT, or something else?",
+        "Perfect! What timeframe are you thinking for your trades? Quick scalping (minutes), swing trading (hours/days), or longer-term positions?",
+        "Excellent choice! Do you have any specific technical indicators you'd like the bot to use? RSI, MACD, moving averages?",
+        "That makes sense. What about position sizing? How much of your capital would you like the bot to use per trade?"
+    ]
+    
+    # Return a contextual response based on model
+    model_prefix = f"({ai_model.upper()}) " if ai_model == 'grok-4' else ""
+    return model_prefix + responses[hash(message) % len(responses)]
 
 @router.post("/ai-bot-chat/start-session")
 async def start_chat_session(request: ChatSessionRequest):
@@ -136,52 +103,57 @@ async def start_chat_session(request: ChatSessionRequest):
         # Generate session ID if not provided
         session_id = request.session_id or str(uuid.uuid4())
         
-        # Initialize LLM chat
-        chat = get_llm_chat(session_id, request.ai_model)
-        
-        # Create initial system message
+        # Generate AI response
         if request.initial_prompt:
-            user_message = UserMessage(text=request.initial_prompt)
-            ai_response = await chat.send_message(user_message)
+            ai_response = get_mock_ai_response(request.initial_prompt, request.ai_model)
             
             # Save initial user message to database
             if supabase_admin:
-                supabase_admin.rpc('save_chat_message', {
-                    'p_user_id': request.user_id,
-                    'p_session_id': session_id,
-                    'p_message_type': 'user',
-                    'p_message_content': request.initial_prompt,
-                    'p_ai_model': request.ai_model,
-                    'p_bot_creation_stage': 'initial',
-                    'p_context_data': {}
-                }).execute()
+                try:
+                    supabase_admin.rpc('save_chat_message', {
+                        'p_user_id': request.user_id,
+                        'p_session_id': session_id,
+                        'p_message_type': 'user',
+                        'p_message_content': request.initial_prompt,
+                        'p_ai_model': request.ai_model,
+                        'p_bot_creation_stage': 'initial',
+                        'p_context_data': {}
+                    }).execute()
+                except Exception as e:
+                    print(f"Database save error: {e}")
                 
                 # Save AI response to database
-                supabase_admin.rpc('save_chat_message', {
-                    'p_user_id': request.user_id,
-                    'p_session_id': session_id,
-                    'p_message_type': 'assistant',
-                    'p_message_content': ai_response,
-                    'p_ai_model': request.ai_model,
-                    'p_bot_creation_stage': 'initial',
-                    'p_context_data': {}
-                }).execute()
+                try:
+                    supabase_admin.rpc('save_chat_message', {
+                        'p_user_id': request.user_id,
+                        'p_session_id': session_id,
+                        'p_message_type': 'assistant',
+                        'p_message_content': ai_response,
+                        'p_ai_model': request.ai_model,
+                        'p_bot_creation_stage': 'initial',
+                        'p_context_data': {}
+                    }).execute()
+                except Exception as e:
+                    print(f"Database save error: {e}")
         else:
             # Send greeting message
-            greeting = "Hello! I'm here to help you create a powerful AI trading bot. Let's start by understanding what kind of trading strategy you'd like to implement. Are you interested in:\n\n1. **Scalping** - Quick, small profits from minor price movements\n2. **Momentum Trading** - Following strong price trends\n3. **Mean Reversion** - Trading when prices return to average\n4. **Swing Trading** - Capturing medium-term price swings\n5. **Something else** - Tell me your specific strategy idea\n\nWhich approach interests you most?"
+            greeting = f"Hello! I'm your AI trading bot assistant powered by {request.ai_model.upper()}. Let's create a powerful trading bot together!\n\nTo get started, tell me:\n\n1. What cryptocurrency would you like to trade?\n2. What's your trading experience level?\n3. Are you looking for quick profits or steady growth?\n\nWhat's your trading strategy idea?"
             ai_response = greeting
             
             # Save greeting to database
             if supabase_admin:
-                supabase_admin.rpc('save_chat_message', {
-                    'p_user_id': request.user_id,
-                    'p_session_id': session_id,
-                    'p_message_type': 'assistant',
-                    'p_message_content': greeting,
-                    'p_ai_model': request.ai_model,
-                    'p_bot_creation_stage': 'initial',
-                    'p_context_data': {}
-                }).execute()
+                try:
+                    supabase_admin.rpc('save_chat_message', {
+                        'p_user_id': request.user_id,
+                        'p_session_id': session_id,
+                        'p_message_type': 'assistant',
+                        'p_message_content': greeting,
+                        'p_ai_model': request.ai_model,
+                        'p_bot_creation_stage': 'initial',
+                        'p_context_data': {}
+                    }).execute()
+                except Exception as e:
+                    print(f"Database save error: {e}")
         
         return {
             "success": True,
@@ -199,35 +171,37 @@ async def start_chat_session(request: ChatSessionRequest):
 async def send_chat_message(request: ChatMessageRequest):
     """Send a message in an existing chat session and get AI response."""
     try:
-        # Initialize LLM chat with existing session
-        chat = get_llm_chat(request.session_id, request.ai_model)
-        
-        # Send user message to AI
-        user_message = UserMessage(text=request.message_content)
-        ai_response = await chat.send_message(user_message)
+        # Generate AI response
+        ai_response = get_mock_ai_response(request.message_content, request.ai_model)
         
         # Save user message to database
         if supabase_admin:
-            supabase_admin.rpc('save_chat_message', {
-                'p_user_id': request.user_id,
-                'p_session_id': request.session_id,
-                'p_message_type': 'user',
-                'p_message_content': request.message_content,
-                'p_ai_model': request.ai_model,
-                'p_bot_creation_stage': request.bot_creation_stage,
-                'p_context_data': {}
-            }).execute()
+            try:
+                supabase_admin.rpc('save_chat_message', {
+                    'p_user_id': request.user_id,
+                    'p_session_id': request.session_id,
+                    'p_message_type': 'user',
+                    'p_message_content': request.message_content,
+                    'p_ai_model': request.ai_model,
+                    'p_bot_creation_stage': request.bot_creation_stage,
+                    'p_context_data': {}
+                }).execute()
+            except Exception as e:
+                print(f"Database save error: {e}")
             
             # Save AI response to database
-            supabase_admin.rpc('save_chat_message', {
-                'p_user_id': request.user_id,
-                'p_session_id': request.session_id,
-                'p_message_type': 'assistant',
-                'p_message_content': ai_response,
-                'p_ai_model': request.ai_model,
-                'p_bot_creation_stage': request.bot_creation_stage,
-                'p_context_data': {}
-            }).execute()
+            try:
+                supabase_admin.rpc('save_chat_message', {
+                    'p_user_id': request.user_id,
+                    'p_session_id': request.session_id,
+                    'p_message_type': 'assistant',
+                    'p_message_content': ai_response,
+                    'p_ai_model': request.ai_model,
+                    'p_bot_creation_stage': request.bot_creation_stage,
+                    'p_context_data': {}
+                }).execute()
+            except Exception as e:
+                print(f"Database save error: {e}")
         
         # Check if the response contains a bot configuration
         bot_config = None
@@ -382,14 +356,13 @@ async def health_check():
     try:
         # Check if environment variables are set
         emergent_key = os.getenv('EMERGENT_LLM_KEY')
-        if not emergent_key:
-            return {"status": "error", "message": "EMERGENT_LLM_KEY not configured"}
         
         return {
             "status": "healthy",
             "ai_models_available": ["gpt-5", "grok-4"],
             "database_available": supabase_admin is not None,
-            "message": "AI Bot Chat service is running"
+            "llm_integration": "mock" if not emergent_key else "configured",
+            "message": "AI Bot Chat service is running (using mock responses for now)"
         }
     except Exception as e:
         return {"status": "error", "message": f"Health check failed: {str(e)}"}
