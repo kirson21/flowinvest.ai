@@ -373,52 +373,28 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                 </div>
               </div>
 
-              {/* Generate Button - Fixed at bottom for mobile */}
-              <div className="sticky bottom-0 bg-white dark:bg-gray-900 pt-3 sm:pt-0 sm:static sm:bg-transparent border-t sm:border-t-0 border-gray-200 dark:border-gray-700 -mx-3 sm:mx-0 px-3 sm:px-0 sm:border-none space-y-3">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
-                    onClick={handleGenerateBot}
-                    disabled={isLoading || !prompt.trim()}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-3 sm:py-2"
-                    size="lg"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        <span className="hidden sm:inline">AI is creating your bot...</span>
-                        <span className="sm:hidden">Creating bot...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Brain className="mr-2 h-4 w-4" />
-                        <span className="hidden sm:inline">Generate Bot with AI</span>
-                        <span className="sm:hidden">Generate Bot</span>
-                      </>
-                    )}
-                  </Button>
-                  
-                  <Button
-                    onClick={startChatSession}
-                    disabled={chatLoading || !prompt.trim()}
-                    variant="outline"
-                    className="flex-1 border-[#0097B2] text-[#0097B2] hover:bg-[#0097B2]/5 text-sm sm:text-base py-3 sm:py-2"
-                    size="lg"
-                  >
-                    {chatLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        <span className="sm:hidden">Starting chat...</span>
-                        <span className="hidden sm:inline">Starting AI Chat...</span>
-                      </>
-                    ) : (
-                      <>
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        <span className="sm:hidden">Chat with AI</span>
-                        <span className="hidden sm:inline">Chat with AI</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
+              {/* Single Generate with AI Button */}
+              <div className="sticky bottom-0 bg-white dark:bg-gray-900 pt-6 pb-8 sm:pt-0 sm:pb-0 sm:static sm:bg-transparent border-t sm:border-t-0 border-gray-200 dark:border-gray-700 -mx-3 sm:mx-0 px-3 sm:px-0 sm:border-none">
+                <Button
+                  onClick={startChatSession}
+                  disabled={chatLoading || !prompt.trim()}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-3 sm:py-4"
+                  size="lg"
+                >
+                  {chatLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span className="hidden sm:inline">AI is starting conversation...</span>
+                      <span className="sm:hidden">Starting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Generate with AI</span>
+                      <span className="sm:hidden">Generate with AI</span>
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           )}
