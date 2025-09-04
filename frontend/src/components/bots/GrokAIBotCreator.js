@@ -13,7 +13,7 @@ import aiBotChatService from '../../services/aiBotChatService';
 const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   const { user } = useAuth();
   const [prompt, setPrompt] = useState(editingBot?.description || '');
-  const [aiModel, setAiModel] = useState('gpt-5'); // Default to GPT-5
+  const [aiModel, setAiModel] = useState('gpt-4o'); // Default to GPT-4o
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedBot, setGeneratedBot] = useState(editingBot || null);
