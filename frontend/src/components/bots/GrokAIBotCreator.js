@@ -179,6 +179,8 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
       setChatLoading(false);
     }
   };
+
+  const handleGenerateBot = async () => {
     if (!prompt.trim()) {
       setError('Please enter a description for your trading bot');
       return;
