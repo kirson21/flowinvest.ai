@@ -1,53 +1,95 @@
 #!/usr/bin/env python3
 """
-AI Bot Chat System Backend Testing
-Tests the new AI Bot Chat system after database schema creation
+AI Bot Chat System Deployment Fix Verification Test
+Tests the AI Bot Chat system using existing GrokBotCreator service
 """
 
 import requests
 import json
 import uuid
 import time
-from datetime import datetime
+from typing import Dict, Any
 
 # Configuration
-BASE_URL = "https://url-wizard.preview.emergentagent.com"
+BACKEND_URL = "https://url-wizard.preview.emergentagent.com"
 TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
-AI_MODELS = ["gpt-5", "grok-4"]
 
 class AIBotChatTester:
     def __init__(self):
-        self.base_url = BASE_URL
+        self.base_url = f"{BACKEND_URL}/api"
         self.test_user_id = TEST_USER_ID
-        self.session_ids = {}
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Content-Type': 'application/json',
+            'User-Agent': 'AI-Bot-Chat-Tester/1.0'
+        })
+        
+        # Test tracking
+        self.tests_run = 0
+        self.tests_passed = 0
         self.test_results = []
         
-    def log_test(self, test_name, success, details="", error=""):
-        """Log test results"""
-        result = {
-            "test": test_name,
-            "success": success,
-            "details": details,
-            "error": error,
-            "timestamp": datetime.now().isoformat()
-        }
-        self.test_results.append(result)
+    def log_test(self, test_name: str, passed: bool, details: str = ""):
+        """Log test result"""
+        self.tests_run += 1
+        if passed:
+            self.tests_passed += 1
+            print(f"✅ {test_name}")
+        else:
+            print(f"❌ {test_name}")
         
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status} {test_name}")
         if details:
-            print(f"   Details: {details}")
-        if error:
-            print(f"   Error: {error}")
-        print()
+            print(f"   {details}")
+            
+        self.test_results.append({
+            'test': test_name,
+            'passed': passed,
+            'details': details
+        })
     
     def test_health_check(self):
-        """Test /api/ai-bot-chat/health endpoint"""
+        """Test 1: Health Check - Verify no dependency errors and proper integration"""
         try:
-            response = requests.get(f"{self.base_url}/api/ai-bot-chat/health", timeout=30)
+            response = self.session.get(f"{self.base_url}/ai-bot-chat/health")
             
             if response.status_code == 200:
                 data = response.json()
+                
+                # Check basic health status
+                if data.get('status') == 'healthy':
+                    # Verify GrokBotCreator integration
+                    grok_service = data.get('grok_service')
+                    database_available = data.get('database_available')
+                    ai_models = data.get('ai_models_available', [])
+                    message = data.get('message', '')
+                    
+                    # Check for proper integration message
+                    integration_confirmed = 'GrokBotCreator' in message
+                    
+                    if integration_confirmed and database_available and ai_models:
+                        self.log_test(
+                            "Health Check - GrokBotCreator Integration", 
+                            True,
+                            f"Status: {data.get('status')}, Models: {ai_models}, Grok Service: {grok_service}, DB: {database_available}"
+                        )
+                        return True
+                    else:
+                        self.log_test(
+                            "Health Check - GrokBotCreator Integration", 
+                            False,
+                            f"Missing integration components - Grok: {grok_service}, DB: {database_available}, Models: {ai_models}"
+                        )
+                        return False
+                else:
+                    self.log_test("Health Check - GrokBotCreator Integration", False, f"Unhealthy status: {data.get('status')}")
+                    return False
+            else:
+                self.log_test("Health Check - GrokBotCreator Integration", False, f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Health Check - GrokBotCreator Integration", False, f"Exception: {str(e)}")
+            return False
                 if data.get("status") == "healthy":
                     self.log_test(
                         "AI Bot Chat Health Check",
