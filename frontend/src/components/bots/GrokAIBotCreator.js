@@ -303,20 +303,26 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
               <div className="flex items-center space-x-2">
                 <Label className="text-xs text-gray-600">Model:</Label>
                 <Select value={aiModel} onValueChange={setAiModel}>
-                  <SelectTrigger className="w-24 h-8 text-xs">
+                  <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="gpt-5">
+                    <SelectItem value="gpt-4o">
                       <div className="flex items-center space-x-2">
                         <Brain className="text-[#0097B2]" size={14} />
-                        <span>GPT-5</span>
+                        <span>GPT-4o</span>
                       </div>
                     </SelectItem>
-                    <SelectItem value="grok-4">
+                    <SelectItem value="claude-3-7-sonnet">
                       <div className="flex items-center space-x-2">
-                        <Zap className="text-purple-500" size={14} />
-                        <span>Grok-4</span>
+                        <Brain className="text-orange-500" size={14} />
+                        <span>Claude</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="gemini-2.0-flash">
+                      <div className="flex items-center space-x-2">
+                        <Brain className="text-blue-500" size={14} />
+                        <span>Gemini</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
