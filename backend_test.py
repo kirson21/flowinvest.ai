@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
 """
-Custom URLs Backend API Testing Suite
-Tests the newly implemented Custom URLs backend API system including:
-- Database schema application verification
-- API health check
-- Slug validation endpoints
-- Reserved words system
-- Slug generation functionality
-- Public URL endpoints for user profiles, bots, marketplace products
+AI Bot Chat System Backend Testing
+Tests the new AI Bot Chat system after database schema creation
 """
 
 import requests
 import json
-import sys
+import uuid
 import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://url-wizard.preview.emergentagent.com"
-API_BASE = f"{BACKEND_URL}/api"
+BASE_URL = "https://url-wizard.preview.emergentagent.com"
+TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
+AI_MODELS = ["gpt-5", "grok-4"]
 
-class CustomURLsBackendTester:
+class AIBotChatTester:
     def __init__(self):
         self.test_results = []
         self.total_tests = 0
