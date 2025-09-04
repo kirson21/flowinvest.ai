@@ -194,6 +194,15 @@ except Exception as e:
     print(f"❌ Custom URLs routes failed to load: {e}")
     logger.warning(f"Custom URLs routes failed to load: {e}")
 
+try:
+    print("=== LOADING AI BOT CHAT ROUTES ===")
+    api_router.include_router(ai_bot_chat.router)
+    print(f"✅ AI Bot Chat routes loaded successfully")
+    logger.info("AI Bot Chat routes loaded successfully")
+except Exception as e:
+    print(f"❌ AI Bot Chat routes failed to load: {e}")
+    logger.warning(f"AI Bot Chat routes failed to load: {e}")
+
 print("=== ROUTE LOADING COMPLETE ===")
 print(f"Total API routes loaded: {len(api_router.routes)}")
 
