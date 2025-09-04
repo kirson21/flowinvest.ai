@@ -549,8 +549,14 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                     <Badge className={`${getRiskColor(generatedBot.risk_level)} text-xs mt-2 sm:mt-0`}>
                       {generatedBot.risk_level || 'medium'} risk
                     </Badge>
-                    <Badge className={aiModel === 'gpt-5' ? 'bg-[#0097B2] text-white' : 'bg-purple-500 text-white'}>
-                      {aiModel.toUpperCase()}
+                    <Badge className={
+                      aiModel === 'gpt-4o' ? 'bg-[#0097B2] text-white' : 
+                      aiModel === 'claude-3-7-sonnet' ? 'bg-orange-500 text-white' : 
+                      'bg-blue-500 text-white'
+                    }>
+                      {aiModel === 'gpt-4o' ? 'GPT-4o' : 
+                       aiModel === 'claude-3-7-sonnet' ? 'Claude' : 
+                       'Gemini'}
                     </Badge>
                   </div>
                 </div>
