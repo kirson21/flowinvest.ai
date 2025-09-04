@@ -44,7 +44,141 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
     "Build a mean reversion bot for stable coins during volatility"
   ];
 
-  const handleGenerateBot = async () => {
+  // Start chat session
+  const startChatSession = async () => {
+    try {
+      setChatLoading(true);
+      setError('');
+      
+      const response = await aiBotChatService.startChatSession(
+        user?.id,
+        aiModel,
+        prompt.trim() || null
+      );
+      
+      if (response.success) {
+        setChatSessionId(response.session_id);
+        
+        // Add the AI's initial message to chat
+        const initialMessages = [];
+        if (prompt.trim()) {
+          initialMessages.push({
+            type: 'user',
+            content: prompt.trim(),
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        initialMessages.push({
+          type: 'assistant',
+          content: response.message,
+          timestamp: new Date().toISOString(),
+          model: response.ai_model
+        });
+        
+        setChatMessages(initialMessages);
+        setShowChat(true);
+      } else {
+        setError('Failed to start chat session');
+      }
+    } catch (err) {
+      console.error('Error starting chat:', err);
+      setError('Failed to start chat session: ' + err.message);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // Send message in chat
+  const sendChatMessage = async () => {
+    if (!currentMessage.trim() || !chatSessionId) return;
+    
+    try {
+      setChatLoading(true);
+      
+      // Add user message to chat immediately
+      const userMessage = {
+        type: 'user',
+        content: currentMessage.trim(),
+        timestamp: new Date().toISOString()
+      };
+      
+      setChatMessages(prev => [...prev, userMessage]);
+      setCurrentMessage('');
+      
+      // Send to AI
+      const response = await aiBotChatService.sendChatMessage(
+        user?.id,
+        chatSessionId,
+        currentMessage.trim(),
+        aiModel,
+        'clarification'
+      );
+      
+      if (response.success) {
+        // Add AI response to chat
+        const aiMessage = {
+          type: 'assistant',
+          content: response.message,
+          timestamp: new Date().toISOString(),
+          model: aiModel
+        };
+        
+        setChatMessages(prev => [...prev, aiMessage]);
+        
+        // Check if bot is ready to create
+        if (response.ready_to_create && response.bot_config) {
+          setReadyToCreateBot(true);
+          setFinalBotConfig(response.bot_config);
+        }
+      } else {
+        setError('Failed to send message');
+      }
+    } catch (err) {
+      console.error('Error sending chat message:', err);
+      setError('Failed to send message: ' + err.message);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // Create bot from chat configuration
+  const createBotFromChat = async () => {
+    if (!finalBotConfig || !chatSessionId) return;
+    
+    try {
+      setChatLoading(true);
+      
+      const response = await aiBotChatService.createAiBot(
+        user?.id,
+        chatSessionId,
+        aiModel,
+        finalBotConfig,
+        finalBotConfig.strategy_config || {},
+        finalBotConfig.risk_management || {}
+      );
+      
+      if (response.success) {
+        // Set the generated bot for preview
+        setGeneratedBot({
+          id: response.bot_id,
+          ...finalBotConfig.bot_config,
+          strategy: finalBotConfig.strategy_config || {},
+          riskManagement: finalBotConfig.risk_management || {},
+          aiModel: aiModel
+        });
+        setStep('preview');
+        setShowChat(false);
+      } else {
+        setError('Failed to create bot: ' + response.message);
+      }
+    } catch (err) {
+      console.error('Error creating bot from chat:', err);
+      setError('Failed to create bot: ' + err.message);
+    } finally {
+      setChatLoading(false);
+    }
+  };
     if (!prompt.trim()) {
       setError('Please enter a description for your trading bot');
       return;
