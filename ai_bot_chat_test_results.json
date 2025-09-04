@@ -1,0 +1,134 @@
+{
+  "total_tests": 18,
+  "passed_tests": 18,
+  "failed_tests": 0,
+  "success_rate": 100.0,
+  "test_results": [
+    {
+      "test": "AI Bot Chat Health Check",
+      "success": true,
+      "details": "Status: healthy, Models: ['gpt-5', 'grok-4'], DB: True",
+      "error": "",
+      "timestamp": "2025-09-04T13:59:25.941866"
+    },
+    {
+      "test": "Get User AI Bots",
+      "success": true,
+      "details": "Retrieved 0 AI bots for user cd0e9717-f85d-4726-81e9-f260394ead58",
+      "error": "",
+      "timestamp": "2025-09-04T13:59:26.548888"
+    },
+    {
+      "test": "Start Chat Session (gpt-5)",
+      "success": true,
+      "details": "Session ID: cf5f7b29-c259-4e64-bacd-9aed93773af2, Stage: initial, Message length: 174",
+      "error": "",
+      "timestamp": "2025-09-04T13:59:34.080371"
+    },
+    {
+      "test": "Send Message (gpt-5)",
+      "success": true,
+      "details": "Response length: 215, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T13:59:42.842920"
+    },
+    {
+      "test": "Send Message (gpt-5)",
+      "success": true,
+      "details": "Response length: 165, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T13:59:49.889864"
+    },
+    {
+      "test": "Send Message (gpt-5)",
+      "success": true,
+      "details": "Response length: 291, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T13:59:59.251771"
+    },
+    {
+      "test": "Send Message (gpt-5)",
+      "success": true,
+      "details": "Response length: 162, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:06.857833"
+    },
+    {
+      "test": "Get Chat History (gpt-5)",
+      "success": true,
+      "details": "Retrieved 10 messages for session cf5f7b29-c259-4e64-bacd-9aed93773af2",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:08.402367"
+    },
+    {
+      "test": "Create AI Bot (gpt-5)",
+      "success": true,
+      "details": "Bot ID: c8a1540e-6c38-41ef-be5a-de1f0d57953b, Message: AI trading bot 'Test GPT-5 Momentum Bot' created successfully!",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:09.393241"
+    },
+    {
+      "test": "Start Chat Session (grok-4)",
+      "success": true,
+      "details": "Session ID: 0518a37c-9ee1-400d-aafe-b9739938901f, Stage: initial, Message length: 169",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:11.794755"
+    },
+    {
+      "test": "Send Message (grok-4)",
+      "success": true,
+      "details": "Response length: 278, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:14.225251"
+    },
+    {
+      "test": "Send Message (grok-4)",
+      "success": true,
+      "details": "Response length: 277, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:18.452346"
+    },
+    {
+      "test": "Send Message (grok-4)",
+      "success": true,
+      "details": "Response length: 244, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:22.303209"
+    },
+    {
+      "test": "Send Message (grok-4)",
+      "success": true,
+      "details": "Response length: 282, Ready to create: False",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:28.102798"
+    },
+    {
+      "test": "Get Chat History (grok-4)",
+      "success": true,
+      "details": "Retrieved 10 messages for session 0518a37c-9ee1-400d-aafe-b9739938901f",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:29.678939"
+    },
+    {
+      "test": "Create AI Bot (grok-4)",
+      "success": true,
+      "details": "Bot ID: ef944711-211a-41a0-a5da-f915420eb9f0, Message: AI trading bot 'Test GROK-4 Momentum Bot' created successfully!",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:30.681771"
+    },
+    {
+      "test": "Get User AI Bots",
+      "success": true,
+      "details": "Retrieved 2 AI bots for user cd0e9717-f85d-4726-81e9-f260394ead58",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:31.201777"
+    },
+    {
+      "test": "Bot Creation Verification",
+      "success": true,
+      "details": "Bot count increased from 0 to 2",
+      "error": "",
+      "timestamp": "2025-09-04T14:00:31.203150"
+    }
+  ]
+}
