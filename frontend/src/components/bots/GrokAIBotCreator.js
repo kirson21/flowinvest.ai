@@ -413,8 +413,14 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                 <div className="flex items-center space-x-2">
                   <MessageCircle className="h-5 w-5 text-purple-600" />
                   <h3 className="font-semibold text-lg">AI Bot Creation Assistant</h3>
-                  <Badge className={aiModel === 'gpt-5' ? 'bg-[#0097B2] text-white' : 'bg-purple-500 text-white'}>
-                    {aiModel.toUpperCase()}
+                  <Badge className={
+                    aiModel === 'gpt-4o' ? 'bg-[#0097B2] text-white' : 
+                    aiModel === 'claude-3-7-sonnet' ? 'bg-orange-500 text-white' : 
+                    'bg-blue-500 text-white'
+                  }>
+                    {aiModel === 'gpt-4o' ? 'GPT-4o' : 
+                     aiModel === 'claude-3-7-sonnet' ? 'Claude' : 
+                     'Gemini'}
                   </Badge>
                 </div>
                 <Button
