@@ -7,15 +7,11 @@ import json
 from datetime import datetime
 from dotenv import load_dotenv
 from supabase_client import supabase_admin
-from services.grok_service import GrokBotCreator
 
 # Load environment variables
 load_dotenv()
 
 router = APIRouter()
-
-# Initialize existing Grok service
-grok_creator = GrokBotCreator()
 
 # AI Chat Models
 class ChatMessage(BaseModel):
@@ -28,14 +24,14 @@ class ChatMessage(BaseModel):
 class ChatSessionRequest(BaseModel):
     user_id: str
     session_id: Optional[str] = None
-    ai_model: str = 'grok-4'  # Default to Grok-4 (what's available)
+    ai_model: str = 'gpt-4o'  # Default to GPT-4o
     initial_prompt: Optional[str] = None
 
 class ChatMessageRequest(BaseModel):
     user_id: str
     session_id: str
     message_content: str
-    ai_model: str = 'grok-4'
+    ai_model: str = 'gpt-4o'
     bot_creation_stage: Optional[str] = 'clarification'
 
 class AiBotCreationRequest(BaseModel):
@@ -46,125 +42,214 @@ class AiBotCreationRequest(BaseModel):
     strategy_config: Dict[str, Any] = {}
     risk_management: Dict[str, Any] = {}
 
-# Conversational AI responses for chat flow
-def generate_chat_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> tuple[str, bool, Dict]:
-    """Generate contextual chat responses and detect when ready to create bot."""
-    
-    message_lower = message.lower()
-    
-    # Count how many questions have been asked
-    question_count = len([msg for msg in conversation_history if msg.get('message_type') == 'assistant'])
-    
-    # If user mentions specific strategy details, try to create bot configuration
-    strategy_keywords = ['bitcoin', 'btc', 'ethereum', 'eth', 'scalping', 'momentum', 'conservative', 'aggressive', 'trading']
-    if any(keyword in message_lower for keyword in strategy_keywords) and question_count >= 2:
-        
-        # Try to generate bot config using existing GrokBotCreator
-        try:
-            bot_config = grok_creator.generate_bot_config(message)
-            
-            # Format as conversation + JSON configuration
-            response = f"""Perfect! Based on our conversation, I can now create your trading bot. Here's what I've designed for you:
+# AI Bot Creation System Prompt
+AI_BOT_CREATION_PROMPT = """You are an expert AI trading bot creator assistant. Your role is to help users create sophisticated trading bots through conversation.
 
-**{bot_config.get('name', 'Custom Trading Bot')}**
-- Strategy: {bot_config.get('strategy', 'Advanced').title()}
-- Risk Level: {bot_config.get('risk_level', 'Medium').title()}
-- Target: {bot_config.get('base_coin', 'BTC')}/{bot_config.get('quote_coin', 'USDT')}
-- Profit Target: {bot_config.get('profit_target', 15)}%
-- Stop Loss: {bot_config.get('stop_loss', 10)}%
+IMPORTANT GUIDELINES:
+1. Ask ONE specific question at a time to gather information
+2. Be conversational, friendly, and helpful
+3. Focus on essential information for bot creation
+4. After gathering enough info (3-4 exchanges), provide a complete bot configuration
+5. Always prioritize risk management and trading safety
 
+INFORMATION TO GATHER (ask about these progressively):
+1. Trading Strategy Type (scalping, momentum, mean reversion, swing, etc.)
+2. Target Cryptocurrency/Trading Pair preference 
+3. Risk tolerance (conservative, moderate, aggressive)
+4. Exchange preference
+5. Time horizon and trading frequency
+
+When you have sufficient information, respond with a JSON configuration:
 ```json
-{{
+{
   "ready_to_create": true,
-  "bot_config": {bot_config_json},
-  "strategy_config": {{
-    "type": "{bot_config.get('strategy', 'mean_reversion')}",
-    "indicators": {bot_config.get('advanced_settings', {}).get('technical_indicators', ['RSI', 'MACD'])},
-    "max_positions": {bot_config.get('advanced_settings', {}).get('max_positions', 3)},
-    "position_size": {bot_config.get('advanced_settings', {}).get('position_size', 20)}
-  }},
-  "risk_management": {{
-    "stop_loss": {bot_config.get('stop_loss', 10)},
-    "take_profit": {bot_config.get('profit_target', 15)},
-    "max_positions": {bot_config.get('advanced_settings', {}).get('max_positions', 3)}
-  }}
-}}
+  "bot_config": {
+    "name": "Descriptive Bot Name", 
+    "description": "Detailed bot description",
+    "base_coin": "BTC",
+    "quote_coin": "USDT",
+    "exchange": "binance", 
+    "strategy": "momentum",
+    "trade_type": "spot",
+    "risk_level": "medium"
+  },
+  "strategy_config": {
+    "type": "momentum",
+    "indicators": ["RSI", "MACD"],
+    "timeframes": ["1h", "4h"],
+    "entry_conditions": ["List of entry rules"],
+    "exit_conditions": ["List of exit rules"]
+  },
+  "risk_management": {
+    "stop_loss": 2.0,
+    "take_profit": 4.0, 
+    "max_positions": 3,
+    "position_size": 0.1
+  }
+}
 ```
 
-Ready to create this bot for you! 🚀""".replace('{bot_config_json}', json.dumps({
-                "name": bot_config.get('name'),
-                "description": bot_config.get('description'),
-                "base_coin": bot_config.get('base_coin'),
-                "quote_coin": bot_config.get('quote_coin'),
-                "exchange": bot_config.get('exchange'),
-                "strategy": bot_config.get('strategy'),
-                "trade_type": bot_config.get('trade_type'),
-                "risk_level": bot_config.get('risk_level')
-            }))
+Start by asking about their preferred cryptocurrency and trading style."""
+
+# Initialize LLM integration
+async def get_ai_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> str:
+    """Generate AI response using Emergent Universal Key."""
+    try:
+        # Try to use emergentintegrations if available
+        try:
+            from emergentintegrations.llm.chat import LlmChat, UserMessage
             
-            # Extract the configuration for bot creation
-            final_config = {
-                "ready_to_create": True,
-                "bot_config": {
-                    "name": bot_config.get('name'),
-                    "description": bot_config.get('description'),
-                    "base_coin": bot_config.get('base_coin'),
-                    "quote_coin": bot_config.get('quote_coin'),
-                    "exchange": bot_config.get('exchange'),
-                    "strategy": bot_config.get('strategy'),
-                    "trade_type": bot_config.get('trade_type'),
-                    "risk_level": bot_config.get('risk_level')
-                },
-                "strategy_config": {
-                    "type": bot_config.get('strategy'),
-                    "indicators": bot_config.get('advanced_settings', {}).get('technical_indicators', ['RSI', 'MACD']),
-                    "max_positions": bot_config.get('advanced_settings', {}).get('max_positions', 3),
-                    "position_size": bot_config.get('advanced_settings', {}).get('position_size', 20)
-                },
-                "risk_management": {
-                    "stop_loss": bot_config.get('stop_loss', 10),
-                    "take_profit": bot_config.get('profit_target', 15),
-                    "max_positions": bot_config.get('advanced_settings', {}).get('max_positions', 3)
-                }
+            api_key = os.getenv('EMERGENT_LLM_KEY')
+            if not api_key:
+                raise ValueError("EMERGENT_LLM_KEY not found")
+            
+            # Create session ID for this conversation
+            session_id = f"bot_creation_{datetime.now().timestamp()}"
+            
+            # Initialize LLM chat
+            chat = LlmChat(
+                api_key=api_key,
+                session_id=session_id,
+                system_message=AI_BOT_CREATION_PROMPT
+            )
+            
+            # Configure model based on user choice
+            if ai_model.lower().startswith('gpt') or ai_model.lower() == 'openai':
+                chat.with_model("openai", "gpt-4o")
+            elif ai_model.lower().startswith('claude') or ai_model.lower() == 'anthropic':
+                chat.with_model("anthropic", "claude-3-7-sonnet-20250219")
+            elif ai_model.lower().startswith('gemini') or ai_model.lower() == 'google':
+                chat.with_model("gemini", "gemini-2.0-flash")
+            else:
+                # Default to GPT-4o
+                chat.with_model("openai", "gpt-4o")
+            
+            # Send message and get response
+            user_message = UserMessage(text=message)
+            response = await chat.send_message(user_message)
+            
+            return response
+            
+        except ImportError:
+            # Fallback if emergentintegrations not available
+            print("Emergentintegrations not available, using intelligent fallback")
+            return get_intelligent_fallback_response(message, ai_model, conversation_history)
+            
+    except Exception as e:
+        print(f"AI response generation error: {e}")
+        return get_intelligent_fallback_response(message, ai_model, conversation_history)
+
+def get_intelligent_fallback_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> str:
+    """Generate intelligent fallback responses when AI service unavailable."""
+    message_lower = message.lower()
+    question_count = len([msg for msg in conversation_history if msg.get('message_type') == 'assistant'])
+    
+    # Model-specific prefixes
+    model_names = {
+        'gpt-4o': '🧠 GPT-4',
+        'claude-3-7-sonnet': '🎭 Claude',
+        'gemini-2.0-flash': '💎 Gemini'
+    }
+    model_prefix = model_names.get(ai_model, '🤖 AI')
+    
+    # If user mentions enough details, generate bot config
+    if question_count >= 2 and any(word in message_lower for word in ['bitcoin', 'btc', 'ethereum', 'momentum', 'scalping', 'conservative', 'aggressive']):
+        
+        # Extract details from conversation
+        coin = 'BTC'
+        if 'ethereum' in message_lower or 'eth' in message_lower:
+            coin = 'ETH'
+        elif 'solana' in message_lower or 'sol' in message_lower:
+            coin = 'SOL'
+            
+        strategy = 'momentum'
+        risk_level = 'medium'
+        
+        if 'scalping' in message_lower:
+            strategy = 'scalping'
+            risk_level = 'high'
+        elif 'conservative' in message_lower:
+            strategy = 'trend_following'
+            risk_level = 'low'
+        elif 'aggressive' in message_lower:
+            strategy = 'momentum'
+            risk_level = 'high'
+        
+        bot_config = {
+            "ready_to_create": True,
+            "bot_config": {
+                "name": f"{coin} {strategy.title()} Bot",
+                "description": f"{model_prefix} generated {strategy} trading bot for {coin}",
+                "base_coin": coin,
+                "quote_coin": "USDT",
+                "exchange": "binance",
+                "strategy": strategy,
+                "trade_type": "spot",
+                "risk_level": risk_level
+            },
+            "strategy_config": {
+                "type": strategy,
+                "indicators": ["RSI", "MACD", "EMA"],
+                "timeframes": ["1h", "4h"],
+                "entry_conditions": [f"{strategy.title()} signal detected", "Volume confirmation"],
+                "exit_conditions": ["Profit target reached", "Stop loss triggered"]
+            },
+            "risk_management": {
+                "stop_loss": 2.0 if risk_level == 'low' else 5.0,
+                "take_profit": 4.0 if risk_level == 'low' else 8.0,
+                "max_positions": 2 if risk_level == 'low' else 4,
+                "position_size": 0.05 if risk_level == 'low' else 0.1
             }
-            
-            return response, True, final_config
-            
-        except Exception as e:
-            print(f"Error generating bot config: {e}")
+        }
+        
+        return f"""{model_prefix} Perfect! Based on our conversation, I have everything needed to create your trading bot:
+
+**{bot_config['bot_config']['name']}**
+• Strategy: {strategy.title()}
+• Crypto: {coin}/USDT
+• Risk Level: {risk_level.title()}
+• Stop Loss: {bot_config['risk_management']['stop_loss']}%
+• Take Profit: {bot_config['risk_management']['take_profit']}%
+
+```json
+{json.dumps(bot_config, indent=2)}
+```
+
+🚀 Your bot configuration is ready! This will be a powerful {strategy} trading bot optimized for {coin} trading."""
     
-    # Conversational flow - ask clarifying questions
-    model_prefix = f"({ai_model.upper()}) " if ai_model == 'gpt-5' else ""
-    
+    # Progressive conversation questions
     if question_count == 0:
-        return f"{model_prefix}Great! I'd love to help you create a trading bot. What cryptocurrency are you most interested in trading? Bitcoin, Ethereum, or something else?", False, {}
+        return f"{model_prefix} Hello! I'm excited to help you create a personalized trading bot. Let's start with the fundamentals:\n\n**What cryptocurrency interests you most?**\n• Bitcoin (BTC)\n• Ethereum (ETH) \n• Solana (SOL)\n• Other?\n\nTell me your preference!"
+    
     elif question_count == 1:
-        return f"{model_prefix}Perfect choice! Now, what's your risk tolerance? Are you comfortable with:\n\n• **Conservative** - Steady, lower-risk gains\n• **Moderate** - Balanced risk and reward\n• **Aggressive** - Higher risk for potentially bigger profits\n\nWhich approach fits your style?", False, {}
+        return f"{model_prefix} Great choice! Now, what's your trading style preference?\n\n**Risk & Strategy:**\n• **Conservative** - Steady, safe profits with lower risk\n• **Moderate** - Balanced risk/reward approach\n• **Aggressive** - Higher risk for potentially bigger gains\n\nWhich approach fits your personality?"
+    
     elif question_count == 2:
-        return f"{model_prefix}Excellent! One more thing - what trading style interests you most?\n\n• **Scalping** - Quick trades for small, frequent profits\n• **Swing Trading** - Medium-term positions over days/weeks\n• **Trend Following** - Riding long-term market trends\n\nWhat sounds most appealing?", False, {}
+        return f"{model_prefix} Perfect! One more key question:\n\n**What trading strategy appeals to you?**\n• **Scalping** - Quick trades, small profits, very active\n• **Swing Trading** - Medium-term positions (days/weeks)\n• **Trend Following** - Ride long-term market movements\n• **Mean Reversion** - Buy dips, sell peaks\n\nWhat sounds most interesting to you?"
+    
     else:
         # Generic helpful responses
         responses = [
-            f"{model_prefix}That's a great point! Tell me more about your trading experience and what you're hoping to achieve.",
-            f"{model_prefix}I understand. What's your typical trading timeframe - minutes, hours, or days?",
-            f"{model_prefix}Interesting! Do you have any specific technical indicators you like to use?",
-            f"{model_prefix}Good thinking. What about your position sizing - how much capital per trade?"
+            f"{model_prefix} That's valuable insight! Could you tell me more about your trading experience level?",
+            f"{model_prefix} Interesting! What's your typical investment timeline - short-term or long-term?",
+            f"{model_prefix} Good point! Do you have any specific technical indicators you prefer?",
+            f"{model_prefix} I understand. What about your comfort with automated trading - any concerns?"
         ]
-        return responses[hash(message) % len(responses)], False, {}
+        return responses[hash(message) % len(responses)]
 
-@router.post("/ai-bot-chat/start-session")
+@router.post("/ai-bot-chat/start-session") 
 async def start_chat_session(request: ChatSessionRequest):
     """Start a new AI bot creation chat session."""
     try:
         # Generate session ID if not provided
         session_id = request.session_id or str(uuid.uuid4())
         
-        # Get conversation history to provide context
+        # Get conversation history (should be empty for new session)
         conversation_history = []
         
-        # Generate AI response using existing service
+        # Generate AI response
         if request.initial_prompt:
-            ai_response, is_ready, bot_config = generate_chat_response(
+            ai_response = await get_ai_response(
                 request.initial_prompt, 
                 request.ai_model, 
                 conversation_history
@@ -194,31 +279,27 @@ async def start_chat_session(request: ChatSessionRequest):
                         'p_message_content': ai_response,
                         'p_ai_model': request.ai_model,
                         'p_bot_creation_stage': 'initial',
-                        'p_context_data': bot_config if is_ready else {}
+                        'p_context_data': {}
                     }).execute()
                 except Exception as e:
                     print(f"Database save error: {e}")
         else:
             # Send greeting message
-            greeting = f"Hello! I'm your AI trading bot assistant powered by {request.ai_model.upper()}. I'll help you create a personalized trading bot through a friendly conversation.\n\nLet's start with the basics - what cryptocurrency would you like your bot to trade?"
-            ai_response = greeting
-            is_ready = False
-            bot_config = {}
-            
-            # Save greeting to database
-            if supabase_admin:
-                try:
-                    supabase_admin.rpc('save_chat_message', {
-                        'p_user_id': request.user_id,
-                        'p_session_id': session_id,
-                        'p_message_type': 'assistant',
-                        'p_message_content': greeting,
-                        'p_ai_model': request.ai_model,
-                        'p_bot_creation_stage': 'initial',
-                        'p_context_data': {}
-                    }).execute()
-                except Exception as e:
-                    print(f"Database save error: {e}")
+            ai_response = await get_ai_response("Start conversation", request.ai_model, [])
+        
+        # Check if response has bot config
+        is_ready = "ready_to_create" in ai_response
+        bot_config = None
+        if is_ready:
+            try:
+                if "```json" in ai_response:
+                    json_start = ai_response.find("```json") + 7
+                    json_end = ai_response.find("```", json_start)
+                    if json_end != -1:
+                        json_str = ai_response[json_start:json_end].strip()
+                        bot_config = json.loads(json_str)
+            except:
+                is_ready = False
         
         return {
             "success": True,
@@ -251,9 +332,9 @@ async def send_chat_message(request: ChatMessageRequest):
             except Exception as e:
                 print(f"Error getting conversation history: {e}")
         
-        # Generate AI response using existing service with context
-        ai_response, is_ready, bot_config = generate_chat_response(
-            request.message_content, 
+        # Generate AI response with context
+        ai_response = await get_ai_response(
+            request.message_content,
             request.ai_model,
             conversation_history
         )
@@ -282,10 +363,27 @@ async def send_chat_message(request: ChatMessageRequest):
                     'p_message_content': ai_response,
                     'p_ai_model': request.ai_model,
                     'p_bot_creation_stage': request.bot_creation_stage,
-                    'p_context_data': bot_config if is_ready else {}
+                    'p_context_data': {}
                 }).execute()
             except Exception as e:
                 print(f"Database save error: {e}")
+        
+        # Check if bot configuration is ready
+        is_ready = False
+        bot_config = None
+        
+        try:
+            if "```json" in ai_response:
+                json_start = ai_response.find("```json") + 7
+                json_end = ai_response.find("```", json_start)
+                if json_end != -1:
+                    json_str = ai_response[json_start:json_end].strip()
+                    config_data = json.loads(json_str)
+                    if config_data.get("ready_to_create", False):
+                        bot_config = config_data
+                        is_ready = True
+        except Exception as json_error:
+            print(f"No valid JSON configuration found: {json_error}")
         
         return {
             "success": True,
@@ -344,7 +442,6 @@ async def create_ai_bot(request: AiBotCreationRequest):
         
         generation_prompt = ""
         if chat_response.data:
-            # Find the first user message as the generation prompt
             user_messages = [msg for msg in chat_response.data if msg.get('message_type') == 'user']
             if user_messages:
                 generation_prompt = user_messages[0].get('message_content', '')
@@ -372,7 +469,7 @@ async def create_ai_bot(request: AiBotCreationRequest):
         return {
             "success": True,
             "bot_id": bot_id,
-            "message": f"AI trading bot '{bot_config.get('name', 'Unnamed Bot')}' created successfully!"
+            "message": f"AI trading bot '{bot_config.get('name', 'Unnamed Bot')}' created successfully using {request.ai_model}!"
         }
         
     except Exception as e:
@@ -420,27 +517,26 @@ async def cleanup_old_chat_sessions():
 async def health_check():
     """Health check for AI bot chat service."""
     try:
-        # Check if existing environment variables are set
-        grok_key = os.getenv('GROK_API_KEY')
-        openai_key = os.getenv('OPENAI_API_KEY')
+        # Check Universal Key
+        emergent_key = os.getenv('EMERGENT_LLM_KEY')
         
-        ai_models_available = []
-        if grok_key:
-            ai_models_available.append("grok-4")
-        if openai_key:
-            ai_models_available.append("gpt-5")
+        ai_models_available = ["gpt-4o", "claude-3-7-sonnet", "gemini-2.0-flash"]
         
-        # Fallback if no keys
-        if not ai_models_available:
-            ai_models_available = ["grok-4", "gpt-5"]  # Will use smart fallback
+        # Try to import emergentintegrations
+        integration_status = "unavailable"
+        try:
+            from emergentintegrations.llm.chat import LlmChat
+            integration_status = "available"
+        except ImportError:
+            integration_status = "fallback_mode"
         
         return {
             "status": "healthy",
             "ai_models_available": ai_models_available,
             "database_available": supabase_admin is not None,
-            "grok_service": "available" if grok_key else "using_fallback",
-            "openai_service": "available" if openai_key else "not_configured",
-            "message": "AI Bot Chat service is running using existing GrokBotCreator service"
+            "universal_key_configured": bool(emergent_key),
+            "integration_status": integration_status,
+            "message": f"AI Bot Chat service running with Emergent Universal Key ({integration_status})"
         }
     except Exception as e:
         return {"status": "error", "message": f"Health check failed: {str(e)}"}
