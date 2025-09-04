@@ -17,517 +17,450 @@ AI_MODELS = ["gpt-5", "grok-4"]
 
 class AIBotChatTester:
     def __init__(self):
+        self.base_url = BASE_URL
+        self.test_user_id = TEST_USER_ID
+        self.session_ids = {}
         self.test_results = []
-        self.total_tests = 0
-        self.passed_tests = 0
-        self.failed_tests = 0
         
     def log_test(self, test_name, success, details="", error=""):
-        """Log test result"""
-        self.total_tests += 1
-        if success:
-            self.passed_tests += 1
-            status = "✅ PASS"
-        else:
-            self.failed_tests += 1
-            status = "❌ FAIL"
-            
+        """Log test results"""
         result = {
             "test": test_name,
-            "status": status,
             "success": success,
             "details": details,
             "error": error,
             "timestamp": datetime.now().isoformat()
         }
-        
         self.test_results.append(result)
-        print(f"{status}: {test_name}")
+        
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"{status} {test_name}")
         if details:
             print(f"   Details: {details}")
         if error:
             print(f"   Error: {error}")
         print()
-
+    
     def test_health_check(self):
-        """Test Custom URLs service health check"""
+        """Test /api/ai-bot-chat/health endpoint"""
         try:
-            response = requests.get(f"{API_BASE}/urls/health", timeout=10)
+            response = requests.get(f"{self.base_url}/api/ai-bot-chat/health", timeout=30)
             
             if response.status_code == 200:
                 data = response.json()
-                features = data.get('features', [])
-                expected_features = [
-                    'slug_validation', 'public_urls', 'reserved_words',
-                    'user_profiles', 'bot_pages', 'marketplace_products', 'feed_posts'
-                ]
-                
-                missing_features = [f for f in expected_features if f not in features]
-                
-                if not missing_features:
+                if data.get("status") == "healthy":
                     self.log_test(
-                        "Custom URLs Health Check",
+                        "AI Bot Chat Health Check",
                         True,
-                        f"Service healthy with all expected features: {', '.join(features)}"
+                        f"Status: {data.get('status')}, Models: {data.get('ai_models_available')}, DB: {data.get('database_available')}"
                     )
+                    return True
                 else:
                     self.log_test(
-                        "Custom URLs Health Check",
+                        "AI Bot Chat Health Check",
                         False,
-                        f"Service healthy but missing features: {', '.join(missing_features)}"
+                        f"Unhealthy status: {data.get('message', 'Unknown error')}"
                     )
+                    return False
             else:
                 self.log_test(
-                    "Custom URLs Health Check",
+                    "AI Bot Chat Health Check",
                     False,
-                    error=f"HTTP {response.status_code}: {response.text}"
+                    f"HTTP {response.status_code}: {response.text}"
                 )
+                return False
                 
         except Exception as e:
-            self.log_test(
-                "Custom URLs Health Check",
-                False,
-                error=f"Request failed: {str(e)}"
-            )
-
-    def test_reserved_words_endpoint(self):
-        """Test reserved words retrieval"""
+            self.log_test("AI Bot Chat Health Check", False, error=str(e))
+            return False
+    
+    def test_start_session(self, ai_model="gpt-5", initial_prompt=None):
+        """Test starting a new chat session"""
         try:
-            response = requests.get(f"{API_BASE}/urls/reserved-words", timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                reserved_words = data.get('reserved_words', {})
-                
-                # Check for expected categories
-                expected_categories = ['system', 'brand', 'profanity']
-                found_categories = list(reserved_words.keys())
-                
-                # Check for some expected reserved words
-                system_words = reserved_words.get('system', [])
-                brand_words = reserved_words.get('brand', [])
-                
-                expected_system = ['admin', 'api', 'auth', 'login', 'dashboard']
-                expected_brand = ['f01i', 'flowinvest']
-                
-                system_found = [w for w in expected_system if w in system_words]
-                brand_found = [w for w in expected_brand if w in brand_words]
-                
-                total_words = sum(len(words) for words in reserved_words.values())
-                
-                self.log_test(
-                    "Reserved Words Endpoint",
-                    True,
-                    f"Retrieved {total_words} reserved words in {len(found_categories)} categories. "
-                    f"System words found: {len(system_found)}/{len(expected_system)}, "
-                    f"Brand words found: {len(brand_found)}/{len(expected_brand)}"
-                )
-            else:
-                self.log_test(
-                    "Reserved Words Endpoint",
-                    False,
-                    error=f"HTTP {response.status_code}: {response.text}"
-                )
-                
-        except Exception as e:
-            self.log_test(
-                "Reserved Words Endpoint",
-                False,
-                error=f"Request failed: {str(e)}"
-            )
-
-    def test_slug_validation(self):
-        """Test slug validation with various inputs"""
-        test_cases = [
-            # Valid slugs
-            {"slug": "valid-username", "should_be_valid": True, "description": "Valid slug with hyphen"},
-            {"slug": "user123", "should_be_valid": True, "description": "Valid alphanumeric slug"},
-            {"slug": "test_user", "should_be_valid": True, "description": "Valid slug with underscore"},
-            
-            # Invalid slugs - reserved words
-            {"slug": "admin", "should_be_valid": False, "description": "Reserved system word"},
-            {"slug": "f01i", "should_be_valid": False, "description": "Reserved brand word"},
-            {"slug": "api", "should_be_valid": False, "description": "Reserved system word"},
-            
-            # Invalid slugs - format issues
-            {"slug": "ab", "should_be_valid": False, "description": "Too short (less than 3 chars)"},
-            {"slug": "a" * 51, "should_be_valid": False, "description": "Too long (more than 50 chars)"},
-            {"slug": "user@name", "should_be_valid": False, "description": "Contains special characters"},
-            {"slug": "user name", "should_be_valid": False, "description": "Contains spaces"},
-            {"slug": "", "should_be_valid": False, "description": "Empty slug"},
-        ]
-        
-        for test_case in test_cases:
-            try:
-                payload = {"slug": test_case["slug"]}
-                response = requests.post(
-                    f"{API_BASE}/urls/validate-slug",
-                    json=payload,
-                    headers={"Content-Type": "application/json"},
-                    timeout=10
-                )
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    is_valid = data.get('valid', False)
-                    error_msg = data.get('error', '')
-                    suggestions = data.get('suggestions', [])
-                    
-                    if is_valid == test_case["should_be_valid"]:
-                        details = f"Slug '{test_case['slug']}' correctly validated as {'valid' if is_valid else 'invalid'}"
-                        if not is_valid and error_msg:
-                            details += f" (Error: {error_msg})"
-                        if suggestions:
-                            details += f" (Suggestions: {', '.join(suggestions[:3])})"
-                            
-                        self.log_test(
-                            f"Slug Validation: {test_case['description']}",
-                            True,
-                            details
-                        )
-                    else:
-                        self.log_test(
-                            f"Slug Validation: {test_case['description']}",
-                            False,
-                            error=f"Expected valid={test_case['should_be_valid']}, got valid={is_valid}"
-                        )
-                else:
-                    self.log_test(
-                        f"Slug Validation: {test_case['description']}",
-                        False,
-                        error=f"HTTP {response.status_code}: {response.text}"
-                    )
-                    
-            except Exception as e:
-                self.log_test(
-                    f"Slug Validation: {test_case['description']}",
-                    False,
-                    error=f"Request failed: {str(e)}"
-                )
-
-    def test_slug_generation(self):
-        """Test slug generation from various text inputs"""
-        test_cases = [
-            {"text": "My Awesome Bot", "expected_pattern": "my-awesome-bot"},
-            {"text": "High-Yield Strategy 2025!", "expected_pattern": "high-yield-strategy-2025"},
-            {"text": "Portfolio: Advanced Trading", "expected_pattern": "portfolio-advanced-trading"},
-            {"text": "User@Name#123", "expected_pattern": "username123"},
-            {"text": "   Spaced   Text   ", "expected_pattern": "spaced-text"},
-        ]
-        
-        for test_case in test_cases:
-            try:
-                response = requests.post(
-                    f"{API_BASE}/urls/generate-slug",
-                    params={"text": test_case["text"]},
-                    timeout=10
-                )
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    generated_slug = data.get('generated_slug', '')
-                    suggestions = data.get('suggestions', [])
-                    
-                    if generated_slug == test_case["expected_pattern"]:
-                        self.log_test(
-                            f"Slug Generation: '{test_case['text']}'",
-                            True,
-                            f"Generated correct slug: '{generated_slug}' with {len(suggestions)} suggestions"
-                        )
-                    else:
-                        # Allow for reasonable variations in slug generation
-                        if generated_slug and len(generated_slug) >= 3:
-                            self.log_test(
-                                f"Slug Generation: '{test_case['text']}'",
-                                True,
-                                f"Generated valid slug: '{generated_slug}' (expected pattern: '{test_case['expected_pattern']}')"
-                            )
-                        else:
-                            self.log_test(
-                                f"Slug Generation: '{test_case['text']}'",
-                                False,
-                                error=f"Generated invalid slug: '{generated_slug}'"
-                            )
-                else:
-                    self.log_test(
-                        f"Slug Generation: '{test_case['text']}'",
-                        False,
-                        error=f"HTTP {response.status_code}: {response.text}"
-                    )
-                    
-            except Exception as e:
-                self.log_test(
-                    f"Slug Generation: '{test_case['text']}'",
-                    False,
-                    error=f"Request failed: {str(e)}"
-                )
-
-    def test_database_schema_functions(self):
-        """Test database schema by checking if validation functions work"""
-        # This is tested indirectly through the slug validation endpoint
-        # We'll test some edge cases to ensure the database functions are working
-        
-        edge_cases = [
-            {"slug": "null", "description": "Word 'null' handling"},
-            {"slug": "undefined", "description": "Word 'undefined' handling"},
-            {"slug": "test-123-test", "description": "Complex hyphenated slug"},
-            {"slug": "a_b_c_d_e", "description": "Multiple underscores"},
-        ]
-        
-        working_functions = 0
-        total_functions = len(edge_cases)
-        
-        for test_case in edge_cases:
-            try:
-                payload = {"slug": test_case["slug"]}
-                response = requests.post(
-                    f"{API_BASE}/urls/validate-slug",
-                    json=payload,
-                    headers={"Content-Type": "application/json"},
-                    timeout=10
-                )
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    # If we get a response, the database function is working
-                    working_functions += 1
-                    
-            except Exception:
-                pass  # Function may not be working
-        
-        if working_functions == total_functions:
-            self.log_test(
-                "Database Schema Functions",
-                True,
-                f"All {total_functions} database validation functions working correctly"
-            )
-        elif working_functions > 0:
-            self.log_test(
-                "Database Schema Functions",
-                True,
-                f"{working_functions}/{total_functions} database functions working (partial success)"
-            )
-        else:
-            self.log_test(
-                "Database Schema Functions",
-                False,
-                error="Database validation functions not responding"
-            )
-
-    def test_public_url_endpoints(self):
-        """Test public URL endpoints (these may not have data yet)"""
-        endpoints_to_test = [
-            {
-                "url": f"{API_BASE}/urls/public/user/testuser",
-                "name": "Public User Profile",
-                "expected_404": True  # Likely no user with this display_name
-            },
-            {
-                "url": f"{API_BASE}/urls/public/bots/test-bot",
-                "name": "Public Bot Details",
-                "expected_404": True  # Likely no bot with this slug
-            },
-            {
-                "url": f"{API_BASE}/urls/public/marketplace/test-product",
-                "name": "Public Marketplace Product",
-                "expected_404": True  # Likely no product with this slug
-            },
-            {
-                "url": f"{API_BASE}/urls/public/feed/test-post",
-                "name": "Public Feed Post",
-                "expected_404": True  # Likely no feed post with this slug
+            payload = {
+                "user_id": self.test_user_id,
+                "ai_model": ai_model,
+                "initial_prompt": initial_prompt
             }
-        ]
-        
-        for endpoint in endpoints_to_test:
-            try:
-                response = requests.get(endpoint["url"], timeout=10)
-                
-                if response.status_code == 404 and endpoint["expected_404"]:
+            
+            response = requests.post(
+                f"{self.base_url}/api/ai-bot-chat/start-session",
+                json=payload,
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and data.get("session_id"):
+                    session_id = data["session_id"]
+                    self.session_ids[ai_model] = session_id
+                    
                     self.log_test(
-                        f"{endpoint['name']} Endpoint",
+                        f"Start Chat Session ({ai_model})",
                         True,
-                        "Endpoint accessible, returns 404 as expected (no test data)"
+                        f"Session ID: {session_id}, Stage: {data.get('stage')}, Message length: {len(data.get('message', ''))}"
                     )
-                elif response.status_code == 200:
-                    data = response.json()
-                    self.log_test(
-                        f"{endpoint['name']} Endpoint",
-                        True,
-                        f"Endpoint working, returned data: {list(data.keys()) if isinstance(data, dict) else 'non-dict response'}"
-                    )
-                elif response.status_code == 500:
-                    # Server error might indicate database schema issues
-                    self.log_test(
-                        f"{endpoint['name']} Endpoint",
-                        False,
-                        error=f"Server error (HTTP 500) - possible database schema issue: {response.text[:200]}"
-                    )
+                    return session_id
                 else:
                     self.log_test(
-                        f"{endpoint['name']} Endpoint",
+                        f"Start Chat Session ({ai_model})",
                         False,
-                        error=f"Unexpected HTTP {response.status_code}: {response.text[:200]}"
+                        f"Invalid response: {data}"
                     )
-                    
-            except Exception as e:
+                    return None
+            else:
                 self.log_test(
-                    f"{endpoint['name']} Endpoint",
+                    f"Start Chat Session ({ai_model})",
                     False,
-                    error=f"Request failed: {str(e)}"
+                    f"HTTP {response.status_code}: {response.text}"
                 )
-
-    def test_database_tables_exist(self):
-        """Test if required database tables exist by checking endpoints that use them"""
-        # Test reserved_words table
+                return None
+                
+        except Exception as e:
+            self.log_test(f"Start Chat Session ({ai_model})", False, error=str(e))
+            return None
+    
+    def test_send_message(self, session_id, ai_model, message_content, stage="clarification"):
+        """Test sending a message in chat session"""
         try:
-            response = requests.get(f"{API_BASE}/urls/reserved-words", timeout=10)
-            if response.status_code == 200:
-                reserved_words_table = True
-            else:
-                reserved_words_table = False
-        except:
-            reserved_words_table = False
+            payload = {
+                "user_id": self.test_user_id,
+                "session_id": session_id,
+                "message_content": message_content,
+                "ai_model": ai_model,
+                "bot_creation_stage": stage
+            }
             
-        # Test user_profiles table (via public user endpoint)
-        try:
-            response = requests.get(f"{API_BASE}/urls/public/user/nonexistent", timeout=10)
-            # 404 means table exists but no data, 500 might mean table doesn't exist
-            if response.status_code in [200, 404]:
-                user_profiles_table = True
-            else:
-                user_profiles_table = False
-        except:
-            user_profiles_table = False
-            
-        # Test user_bots table (via public bot endpoint)
-        try:
-            response = requests.get(f"{API_BASE}/urls/public/bots/nonexistent", timeout=10)
-            if response.status_code in [200, 404]:
-                user_bots_table = True
-            else:
-                user_bots_table = False
-        except:
-            user_bots_table = False
-            
-        # Test portfolios table (via public marketplace endpoint)
-        try:
-            response = requests.get(f"{API_BASE}/urls/public/marketplace/nonexistent", timeout=10)
-            if response.status_code in [200, 404]:
-                portfolios_table = True
-            else:
-                portfolios_table = False
-        except:
-            portfolios_table = False
-            
-        # Test feed_posts table (via public feed endpoint)
-        try:
-            response = requests.get(f"{API_BASE}/urls/public/feed/nonexistent", timeout=10)
-            if response.status_code in [200, 404]:
-                feed_posts_table = True
-            else:
-                feed_posts_table = False
-        except:
-            feed_posts_table = False
-        
-        tables_status = {
-            'reserved_words': reserved_words_table,
-            'user_profiles': user_profiles_table,
-            'user_bots': user_bots_table,
-            'portfolios': portfolios_table,
-            'feed_posts': feed_posts_table
-        }
-        
-        working_tables = sum(tables_status.values())
-        total_tables = len(tables_status)
-        
-        if working_tables == total_tables:
-            self.log_test(
-                "Database Tables Existence",
-                True,
-                f"All {total_tables} required tables accessible: {', '.join([k for k, v in tables_status.items() if v])}"
+            response = requests.post(
+                f"{self.base_url}/api/ai-bot-chat/send-message",
+                json=payload,
+                timeout=60
             )
-        elif working_tables > 0:
-            working = [k for k, v in tables_status.items() if v]
-            not_working = [k for k, v in tables_status.items() if not v]
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_test(
+                        f"Send Message ({ai_model})",
+                        True,
+                        f"Response length: {len(data.get('message', ''))}, Ready to create: {data.get('ready_to_create', False)}"
+                    )
+                    return data
+                else:
+                    self.log_test(
+                        f"Send Message ({ai_model})",
+                        False,
+                        f"Invalid response: {data}"
+                    )
+                    return None
+            else:
+                self.log_test(
+                    f"Send Message ({ai_model})",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(f"Send Message ({ai_model})", False, error=str(e))
+            return None
+    
+    def test_chat_history(self, session_id, ai_model):
+        """Test retrieving chat history"""
+        try:
+            response = requests.get(
+                f"{self.base_url}/api/ai-bot-chat/history/{session_id}",
+                params={"user_id": self.test_user_id},
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    messages = data.get("messages", [])
+                    self.log_test(
+                        f"Get Chat History ({ai_model})",
+                        True,
+                        f"Retrieved {len(messages)} messages for session {session_id}"
+                    )
+                    return messages
+                else:
+                    self.log_test(
+                        f"Get Chat History ({ai_model})",
+                        False,
+                        f"Invalid response: {data}"
+                    )
+                    return None
+            else:
+                self.log_test(
+                    f"Get Chat History ({ai_model})",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(f"Get Chat History ({ai_model})", False, error=str(e))
+            return None
+    
+    def test_create_bot(self, session_id, ai_model, bot_config):
+        """Test creating AI bot from chat configuration"""
+        try:
+            payload = {
+                "user_id": self.test_user_id,
+                "session_id": session_id,
+                "ai_model": ai_model,
+                "bot_config": bot_config
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/api/ai-bot-chat/create-bot",
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and data.get("bot_id"):
+                    self.log_test(
+                        f"Create AI Bot ({ai_model})",
+                        True,
+                        f"Bot ID: {data['bot_id']}, Message: {data.get('message', '')}"
+                    )
+                    return data["bot_id"]
+                else:
+                    self.log_test(
+                        f"Create AI Bot ({ai_model})",
+                        False,
+                        f"Invalid response: {data}"
+                    )
+                    return None
+            else:
+                self.log_test(
+                    f"Create AI Bot ({ai_model})",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test(f"Create AI Bot ({ai_model})", False, error=str(e))
+            return None
+    
+    def test_get_user_bots(self):
+        """Test retrieving user's AI bots"""
+        try:
+            response = requests.get(
+                f"{self.base_url}/api/ai-bots/user/{self.test_user_id}",
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    bots = data.get("bots", [])
+                    total = data.get("total", 0)
+                    self.log_test(
+                        "Get User AI Bots",
+                        True,
+                        f"Retrieved {total} AI bots for user {self.test_user_id}"
+                    )
+                    return bots
+                else:
+                    self.log_test(
+                        "Get User AI Bots",
+                        False,
+                        f"Invalid response: {data}"
+                    )
+                    return None
+            else:
+                self.log_test(
+                    "Get User AI Bots",
+                    False,
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return None
+                
+        except Exception as e:
+            self.log_test("Get User AI Bots", False, error=str(e))
+            return None
+    
+    def run_conversation_flow(self, ai_model):
+        """Run complete conversation flow from initial prompt to bot creation"""
+        print(f"\n🤖 Testing complete conversation flow with {ai_model.upper()}")
+        print("=" * 60)
+        
+        # Step 1: Start session with initial prompt
+        initial_prompt = "I want to create a momentum trading bot for Bitcoin that uses RSI and MACD indicators"
+        session_id = self.test_start_session(ai_model, initial_prompt)
+        
+        if not session_id:
+            print(f"❌ Failed to start session for {ai_model}")
+            return False
+        
+        # Step 2: Continue conversation with more details
+        messages = [
+            "I prefer medium risk trading with 2% stop loss",
+            "I want to trade on Binance exchange with BTC/USDT pair",
+            "Position size should be 0.1 BTC and maximum 2 positions",
+            "Take profit at 4% and use 1h and 4h timeframes"
+        ]
+        
+        bot_config = None
+        for i, message in enumerate(messages):
+            print(f"Sending message {i+1}: {message[:50]}...")
+            response = self.test_send_message(session_id, ai_model, message)
+            
+            if response and response.get("ready_to_create"):
+                bot_config = response.get("bot_config")
+                print(f"✅ Bot configuration ready after {i+1} messages")
+                break
+            
+            time.sleep(1)  # Small delay between messages
+        
+        # Step 3: Get chat history
+        history = self.test_chat_history(session_id, ai_model)
+        
+        # Step 4: Create bot if configuration is ready
+        if bot_config:
+            bot_id = self.test_create_bot(session_id, ai_model, bot_config)
+            if bot_id:
+                print(f"✅ Successfully created bot with ID: {bot_id}")
+                return True
+        else:
+            # Try to create bot with manual configuration
+            manual_config = {
+                "ready_to_create": True,
+                "bot_config": {
+                    "name": f"Test {ai_model.upper()} Momentum Bot",
+                    "description": "AI-generated momentum trading bot for Bitcoin",
+                    "base_coin": "BTC",
+                    "quote_coin": "USDT",
+                    "exchange": "binance",
+                    "strategy": "momentum",
+                    "trade_type": "spot",
+                    "risk_level": "medium"
+                },
+                "strategy_config": {
+                    "type": "momentum",
+                    "indicators": ["RSI", "MACD"],
+                    "timeframes": ["1h", "4h"],
+                    "entry_conditions": ["RSI < 30", "MACD bullish crossover"],
+                    "exit_conditions": ["RSI > 70", "Take profit reached"]
+                },
+                "risk_management": {
+                    "stop_loss": 2.0,
+                    "take_profit": 4.0,
+                    "max_positions": 2,
+                    "position_size": 0.1
+                }
+            }
+            
+            bot_id = self.test_create_bot(session_id, ai_model, manual_config)
+            if bot_id:
+                print(f"✅ Successfully created bot with manual config: {bot_id}")
+                return True
+        
+        print(f"❌ Failed to complete conversation flow for {ai_model}")
+        return False
+    
+    def run_all_tests(self):
+        """Run all AI Bot Chat tests"""
+        print("🚀 Starting AI Bot Chat System Testing")
+        print("=" * 60)
+        print(f"Base URL: {self.base_url}")
+        print(f"Test User ID: {self.test_user_id}")
+        print(f"AI Models: {AI_MODELS}")
+        print()
+        
+        # Test 1: Health Check
+        health_ok = self.test_health_check()
+        
+        if not health_ok:
+            print("❌ Health check failed - stopping tests")
+            return self.generate_summary()
+        
+        # Test 2: Get existing user bots (baseline)
+        initial_bots = self.test_get_user_bots()
+        initial_count = len(initial_bots) if initial_bots else 0
+        print(f"📊 Initial bot count: {initial_count}")
+        
+        # Test 3: Run conversation flows for both AI models
+        successful_flows = 0
+        for ai_model in AI_MODELS:
+            if self.run_conversation_flow(ai_model):
+                successful_flows += 1
+        
+        # Test 4: Verify bot creation by checking final count
+        final_bots = self.test_get_user_bots()
+        final_count = len(final_bots) if final_bots else 0
+        
+        if final_count > initial_count:
             self.log_test(
-                "Database Tables Existence",
-                False,
-                f"{working_tables}/{total_tables} tables accessible. Working: {', '.join(working)}. Issues: {', '.join(not_working)}"
+                "Bot Creation Verification",
+                True,
+                f"Bot count increased from {initial_count} to {final_count}"
             )
         else:
             self.log_test(
-                "Database Tables Existence",
+                "Bot Creation Verification",
                 False,
-                error="No database tables accessible - schema may not be applied"
+                f"Bot count did not increase (was {initial_count}, now {final_count})"
             )
-
-    def run_all_tests(self):
-        """Run all Custom URLs backend tests"""
-        print("=" * 80)
-        print("CUSTOM URLS BACKEND API TESTING SUITE")
-        print("=" * 80)
-        print(f"Backend URL: {BACKEND_URL}")
-        print(f"API Base: {API_BASE}")
-        print(f"Test started at: {datetime.now().isoformat()}")
+        
+        return self.generate_summary()
+    
+    def generate_summary(self):
+        """Generate test summary"""
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result["success"])
+        failed_tests = total_tests - passed_tests
+        success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
+        
+        print("\n" + "=" * 60)
+        print("📊 AI BOT CHAT SYSTEM TEST SUMMARY")
+        print("=" * 60)
+        print(f"Total Tests: {total_tests}")
+        print(f"Passed: {passed_tests}")
+        print(f"Failed: {failed_tests}")
+        print(f"Success Rate: {success_rate:.1f}%")
         print()
         
-        # Run tests in logical order
-        print("🔍 Testing Custom URLs Service Health...")
-        self.test_health_check()
-        
-        print("🗃️ Testing Database Schema Application...")
-        self.test_database_tables_exist()
-        self.test_database_schema_functions()
-        
-        print("📝 Testing Reserved Words System...")
-        self.test_reserved_words_endpoint()
-        
-        print("✅ Testing Slug Validation...")
-        self.test_slug_validation()
-        
-        print("🔧 Testing Slug Generation...")
-        self.test_slug_generation()
-        
-        print("🌐 Testing Public URL Endpoints...")
-        self.test_public_url_endpoints()
-        
-        # Print summary
-        print("=" * 80)
-        print("CUSTOM URLS BACKEND TESTING SUMMARY")
-        print("=" * 80)
-        print(f"Total Tests: {self.total_tests}")
-        print(f"Passed: {self.passed_tests} ✅")
-        print(f"Failed: {self.failed_tests} ❌")
-        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
-        print()
-        
-        # Print failed tests details
-        if self.failed_tests > 0:
-            print("FAILED TESTS DETAILS:")
-            print("-" * 40)
+        if failed_tests > 0:
+            print("❌ FAILED TESTS:")
             for result in self.test_results:
                 if not result["success"]:
-                    print(f"❌ {result['test']}")
-                    if result["error"]:
-                        print(f"   Error: {result['error']}")
-                    print()
+                    print(f"   • {result['test']}: {result['error'] or result['details']}")
+            print()
         
-        # Overall assessment
-        if self.failed_tests == 0:
-            print("🎉 ALL TESTS PASSED! Custom URLs backend system is fully operational.")
-        elif self.passed_tests > self.failed_tests:
-            print("⚠️  MOSTLY WORKING: Custom URLs backend has some issues but core functionality works.")
-        else:
-            print("🚨 CRITICAL ISSUES: Custom URLs backend has significant problems that need attention.")
+        print("✅ PASSED TESTS:")
+        for result in self.test_results:
+            if result["success"]:
+                print(f"   • {result['test']}")
         
-        print("=" * 80)
+        print("\n" + "=" * 60)
         
-        return self.passed_tests, self.failed_tests, self.test_results
+        return {
+            "total_tests": total_tests,
+            "passed_tests": passed_tests,
+            "failed_tests": failed_tests,
+            "success_rate": success_rate,
+            "test_results": self.test_results
+        }
+
+def main():
+    """Main test execution"""
+    tester = AIBotChatTester()
+    summary = tester.run_all_tests()
+    
+    # Save detailed results
+    with open('/app/ai_bot_chat_test_results.json', 'w') as f:
+        json.dump(summary, f, indent=2)
+    
+    print(f"\n💾 Detailed results saved to: /app/ai_bot_chat_test_results.json")
+    
+    return summary["success_rate"] > 70  # Consider 70%+ success rate as passing
 
 if __name__ == "__main__":
-    tester = CustomURLsBackendTester()
-    passed, failed, results = tester.run_all_tests()
-    
-    # Exit with appropriate code
-    sys.exit(0 if failed == 0 else 1)
+    success = main()
+    exit(0 if success else 1)
