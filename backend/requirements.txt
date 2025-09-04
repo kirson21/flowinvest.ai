@@ -20,3 +20,6 @@ pyotp==2.9.0          # TOTP 2FA code generation for withdrawals
 
 # Supabase client with compatible httpx version
 supabase==2.1.0
+
+# LLM Integration for AI bot creation chat
+emergentintegrations  # Custom LLM integration library
