@@ -374,25 +374,177 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
               </div>
 
               {/* Generate Button - Fixed at bottom for mobile */}
-              <div className="sticky bottom-0 bg-white dark:bg-gray-900 pt-3 sm:pt-0 sm:static sm:bg-transparent border-t sm:border-t-0 border-gray-200 dark:border-gray-700 -mx-3 sm:mx-0 px-3 sm:px-0 sm:border-none">
+              <div className="sticky bottom-0 bg-white dark:bg-gray-900 pt-3 sm:pt-0 sm:static sm:bg-transparent border-t sm:border-t-0 border-gray-200 dark:border-gray-700 -mx-3 sm:mx-0 px-3 sm:px-0 sm:border-none space-y-3">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={handleGenerateBot}
+                    disabled={isLoading || !prompt.trim()}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-3 sm:py-2"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <span className="hidden sm:inline">AI is creating your bot...</span>
+                        <span className="sm:hidden">Creating bot...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="mr-2 h-4 w-4" />
+                        <span className="hidden sm:inline">Generate Bot with AI</span>
+                        <span className="sm:hidden">Generate Bot</span>
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    onClick={startChatSession}
+                    disabled={chatLoading || !prompt.trim()}
+                    variant="outline"
+                    className="flex-1 border-[#0097B2] text-[#0097B2] hover:bg-[#0097B2]/5 text-sm sm:text-base py-3 sm:py-2"
+                    size="lg"
+                  >
+                    {chatLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <span className="sm:hidden">Starting chat...</span>
+                        <span className="hidden sm:inline">Starting AI Chat...</span>
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        <span className="sm:hidden">Chat with AI</span>
+                        <span className="hidden sm:inline">Chat with AI</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Chat Interface */}
+          {showChat && (
+            <div className="space-y-4">
+              {/* Chat Header */}
+              <div className="flex items-center justify-between p-4 border-b">
+                <div className="flex items-center space-x-2">
+                  <MessageCircle className="h-5 w-5 text-purple-600" />
+                  <h3 className="font-semibold text-lg">AI Bot Creation Assistant</h3>
+                  <Badge className={aiModel === 'gpt-5' ? 'bg-[#0097B2] text-white' : 'bg-purple-500 text-white'}>
+                    {aiModel.toUpperCase()}
+                  </Badge>
+                </div>
                 <Button
-                  onClick={handleGenerateBot}
-                  disabled={isLoading || !prompt.trim()}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-3 sm:py-2"
-                  size="lg"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowChat(false)}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <span className="hidden sm:inline">AI is creating your bot...</span>
-                      <span className="sm:hidden">Creating bot...</span>
-                    </>
+                  ← Back to Form
+                </Button>
+              </div>
+
+              {/* Chat Messages */}
+              <div 
+                ref={chatContainerRef}
+                className="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+              >
+                {chatMessages.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-xs sm:max-w-md lg:max-w-lg px-4 py-2 rounded-lg ${
+                      message.type === 'user'
+                        ? 'bg-[#0097B2] text-white'
+                        : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                    }`}>
+                      <div className="flex items-start space-x-2">
+                        {message.type === 'assistant' && (
+                          <BotIcon className="h-4 w-4 mt-1 text-purple-600" />
+                        )}
+                        {message.type === 'user' && (
+                          <User className="h-4 w-4 mt-1 text-white" />
+                        )}
+                        <div className="flex-1">
+                          <div 
+                            className={`text-sm ${message.type === 'user' ? 'text-white' : 'text-gray-800 dark:text-gray-200'}`}
+                            dangerouslySetInnerHTML={{
+                              __html: aiBotChatService.formatMessage(message.content)
+                            }}
+                          />
+                          <div className={`text-xs mt-1 ${
+                            message.type === 'user' ? 'text-white/70' : 'text-gray-500'
+                          }`}>
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                            {message.model && ` • ${message.model}`}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {chatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <BotIcon className="h-4 w-4 text-purple-600" />
+                        <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                        <span className="text-sm text-gray-600 dark:text-gray-300">AI is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Ready to Create Bot Banner */}
+              {readyToCreateBot && (
+                <Alert className="border-green-500 bg-green-50">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-700">
+                    🎉 Perfect! I have all the information needed to create your trading bot.
+                    <Button
+                      onClick={createBotFromChat}
+                      disabled={chatLoading}
+                      className="ml-3 bg-green-600 hover:bg-green-700 text-white"
+                      size="sm"
+                    >
+                      {chatLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                      Create Bot
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Chat Input */}
+              <div className="flex space-x-2 p-4 border-t bg-white dark:bg-gray-800">
+                <div className="flex-1">
+                  <Textarea
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    placeholder="Ask me anything about your trading bot strategy..."
+                    className="min-h-[50px] resize-none border-[#0097B2]/20 focus:border-[#0097B2]"
+                    disabled={chatLoading}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendChatMessage();
+                      }
+                    }}
+                  />
+                </div>
+                <Button
+                  onClick={sendChatMessage}
+                  disabled={chatLoading || !currentMessage.trim()}
+                  className="bg-[#0097B2] hover:bg-[#0097B2]/90"
+                  size="sm"
+                >
+                  {chatLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <>
-                      <Brain className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Generate Bot with AI</span>
-                      <span className="sm:hidden">Generate Bot</span>
-                    </>
+                    <Send className="h-4 w-4" />
                   )}
                 </Button>
               </div>
