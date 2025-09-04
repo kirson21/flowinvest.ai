@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -7,7 +7,8 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
-import { Loader2, Brain, TrendingUp, Shield, Zap, CheckCircle, Trash2 } from 'lucide-react';
+import { Loader2, Brain, TrendingUp, Shield, Zap, CheckCircle, Trash2, Send, MessageCircle, User, Bot as BotIcon } from 'lucide-react';
+import aiBotChatService from '../../services/aiBotChatService';
 
 const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   const { user } = useAuth();
