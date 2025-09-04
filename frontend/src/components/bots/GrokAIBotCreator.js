@@ -18,6 +18,23 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   const [error, setError] = useState('');
   const [generatedBot, setGeneratedBot] = useState(editingBot || null);
   const [step, setStep] = useState(editingBot ? 'preview' : 'input'); // Start in preview if editing
+  
+  // New chat functionality state
+  const [showChat, setShowChat] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [chatSessionId, setChatSessionId] = useState(null);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [readyToCreateBot, setReadyToCreateBot] = useState(false);
+  const [finalBotConfig, setFinalBotConfig] = useState(null);
+  const chatContainerRef = useRef(null);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   const suggestedPrompts = [
     "Create a conservative Bitcoin bot that buys during dips and sells at modest profits",
