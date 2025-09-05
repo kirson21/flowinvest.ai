@@ -164,102 +164,309 @@ async def get_ai_response(message: str, ai_model: str, conversation_history: Lis
         return get_intelligent_fallback_response(message, ai_model, conversation_history)
 
 def get_intelligent_fallback_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> str:
-    """Generate intelligent fallback responses when AI service unavailable."""
+    """Generate professional trading systems responses following the expert prompt structure."""
     message_lower = message.lower()
     question_count = len([msg for msg in conversation_history if msg.get('message_type') == 'assistant'])
     
-    # Model-specific prefixes
-    model_names = {
-        'gpt-4o': '🧠 GPT-4',
-        'claude-3-7-sonnet': '🎭 Claude',
-        'gemini-2.0-flash': '💎 Gemini'
-    }
-    model_prefix = model_names.get(ai_model, '🤖 AI')
+    # Track mandatory information gathered
+    has_capital_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['$', 'dollar', 'capital', 'budget', '1000', '5000', '10000'])
+    has_instruments_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['spot', 'futures', 'margin', 'leverage'])
+    has_risk_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['risk', 'conservative', 'aggressive', 'drawdown', 'stop loss'])
+    has_timeframe_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['minute', 'hour', 'day', 'swing', 'scalping', 'intraday'])
+    has_strategy_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['momentum', 'mean reversion', 'grid', 'arbitrage', 'scalping'])
     
-    # If user mentions enough details, generate bot config
-    if question_count >= 2 and any(word in message_lower for word in ['bitcoin', 'btc', 'ethereum', 'momentum', 'scalping', 'conservative', 'aggressive']):
+    # Professional model prefixes
+    model_names = {
+        'gpt-4o': '🧠 **GPT-4 Trading Systems**',
+        'claude-3-7-sonnet': '🎭 **Claude Trading Expert**',
+        'gemini-2.0-flash': '💎 **Gemini Quant Specialist**'
+    }
+    model_prefix = model_names.get(ai_model, '🤖 **Trading Systems Agent**')
+    
+    # Generate professional bot specification when enough info gathered
+    if question_count >= 4 and has_capital_info and has_risk_info and (has_strategy_info or any(word in message_lower for word in ['bitcoin', 'btc', 'ethereum', 'momentum', 'scalping'])):
         
-        # Extract details from conversation
+        # Extract professional trading parameters
+        # Capital analysis
+        trading_capital = 10000  # Conservative default
+        leverage = 1.0  # Spot only default
+        
+        if '1000' in message_lower or '1k' in message_lower:
+            trading_capital = 1000
+        elif '5000' in message_lower or '5k' in message_lower:
+            trading_capital = 5000
+        elif '10000' in message_lower or '10k' in message_lower:
+            trading_capital = 10000
+        elif '50000' in message_lower or '50k' in message_lower:
+            trading_capital = 50000
+        
+        if 'leverage' in message_lower or 'futures' in message_lower:
+            if 'conservative' in message_lower:
+                leverage = 2.0
+            elif 'aggressive' in message_lower:
+                leverage = 5.0
+            else:
+                leverage = 3.0
+        
+        # Coin analysis
         coin = 'BTC'
         if 'ethereum' in message_lower or 'eth' in message_lower:
             coin = 'ETH'
         elif 'solana' in message_lower or 'sol' in message_lower:
             coin = 'SOL'
             
+        # Strategy and risk analysis
         strategy = 'momentum'
         risk_level = 'medium'
+        max_risk_per_trade = 2.0
+        max_drawdown = 10.0
         
         if 'scalping' in message_lower:
             strategy = 'scalping'
             risk_level = 'high'
-        elif 'conservative' in message_lower:
+            max_risk_per_trade = 1.0  # Lower per trade for high frequency
+            max_drawdown = 8.0
+        elif 'conservative' in message_lower or 'low risk' in message_lower:
             strategy = 'trend_following'
             risk_level = 'low'
-        elif 'aggressive' in message_lower:
+            max_risk_per_trade = 1.0
+            max_drawdown = 5.0
+        elif 'aggressive' in message_lower or 'high risk' in message_lower:
             strategy = 'momentum'
             risk_level = 'high'
+            max_risk_per_trade = 3.0
+            max_drawdown = 15.0
         
+        # Timeframe analysis
+        timeframe = '1h'
+        if 'scalping' in message_lower or 'minute' in message_lower:
+            timeframe = '5m'
+        elif 'swing' in message_lower or 'daily' in message_lower:
+            timeframe = '4h'
+        elif 'intraday' in message_lower:
+            timeframe = '15m'
+        
+        # Create professional bot configuration following the exact JSON schema
         bot_config = {
             "ready_to_create": True,
             "bot_config": {
-                "name": f"{coin} {strategy.title()} Bot",
-                "description": f"{model_prefix} generated {strategy} trading bot for {coin}",
+                "name": f"{model_prefix.split('**')[1].split('**')[0].strip()} {coin} {strategy.title()} System",
+                "description": f"Professional {strategy} trading system for {coin}/USDT with institutional risk management and execution standards. Capital: ${trading_capital:,}, Risk/Trade: {max_risk_per_trade}%, Max Drawdown: {max_drawdown}%",
+                "trading_capital_usd": trading_capital,
+                "leverage_allowed": leverage,
+                "instruments": "spot" if leverage == 1.0 else "futures",
                 "base_coin": coin,
                 "quote_coin": "USDT",
                 "exchange": "binance",
-                "strategy": strategy,
-                "trade_type": "spot",
-                "risk_level": risk_level
+                "strategy_type": strategy,
+                "trade_type": "spot" if leverage == 1.0 else "futures",
+                "risk_level": risk_level,
+                "timeframe": timeframe,
+                "execution_notes": f"Production-ready {strategy} system designed for {risk_level} risk profile with {timeframe} timeframe analysis, capital preservation prioritized"
             },
             "strategy_config": {
-                "type": strategy,
-                "indicators": ["RSI", "MACD", "EMA"],
-                "timeframes": ["1h", "4h"],
-                "entry_conditions": [f"{strategy.title()} signal detected", "Volume confirmation"],
-                "exit_conditions": ["Profit target reached", "Stop loss triggered"]
+                "strategy_intent": "long_only" if risk_level == 'low' else "long_short_capable",
+                "technical_indicators": ["RSI_14", "MACD_12_26_9", "EMA_20", "Volume_SMA_20"],
+                "entry_conditions": [
+                    f"{strategy.title()} signal confirmation on {timeframe}",
+                    "Volume above 20-period average", 
+                    "Risk parameters within limits",
+                    "Position sizing calculated and approved"
+                ],
+                "exit_conditions": [
+                    "Take profit target reached",
+                    "Stop loss triggered",
+                    f"Signal reversal on {timeframe}",
+                    "Maximum position time exceeded"
+                ],
+                "timeframes": [timeframe, "15m", "1h"],
+                "signal_logic": f"Multi-timeframe {strategy} analysis with confluence requirements and volume confirmation",
+                "custom_parameters": {
+                    "min_volume_filter": True,
+                    "market_regime_detection": True,
+                    "volatility_adjustment": True,
+                    "news_event_filter": False
+                }
             },
             "risk_management": {
-                "stop_loss": 2.0 if risk_level == 'low' else 5.0,
-                "take_profit": 4.0 if risk_level == 'low' else 8.0,
-                "max_positions": 2 if risk_level == 'low' else 4,
-                "position_size": 0.05 if risk_level == 'low' else 0.1
+                "max_risk_per_trade_percent": max_risk_per_trade,
+                "max_portfolio_drawdown_percent": max_drawdown,
+                "max_concurrent_positions": 2 if risk_level == 'low' else 3 if risk_level == 'medium' else 4,
+                "stop_loss_percent": 2.0 if risk_level == 'low' else 3.5,
+                "take_profit_percent": 4.0 if risk_level == 'low' else 6.0,
+                "position_sizing_method": "fixed_percent",
+                "position_size_percent": 2.0 if risk_level == 'low' else 3.0 if risk_level == 'medium' else 5.0,
+                "kill_switch_conditions": [
+                    f"Daily loss exceeds {max_risk_per_trade * 3}% of capital",
+                    "System connectivity loss > 30 seconds",
+                    "Unusual market volatility detected (>20% price movement in 1h)",
+                    "Exchange API rate limit exceeded"
+                ]
+            },
+            "execution_config": {
+                "slippage_assumption_bps": 5 if strategy == 'scalping' else 10,
+                "trading_fees_bps": 10,
+                "execution_latency_tolerance_ms": 500 if strategy == 'scalping' else 1000,
+                "order_types": ["market", "limit", "stop_limit"],
+                "rate_limit_handling": True,
+                "secrets_handling": "environment_variables",
+                "idempotency": True
             }
         }
         
-        return f"""{model_prefix} Perfect! Based on our conversation, I have everything needed to create your trading bot:
+        return f"""{model_prefix}
 
-**{bot_config['bot_config']['name']}**
-• Strategy: {strategy.title()}
-• Crypto: {coin}/USDT
-• Risk Level: {risk_level.title()}
-• Stop Loss: {bot_config['risk_management']['stop_loss']}%
-• Take Profit: {bot_config['risk_management']['take_profit']}%
+**PROFESSIONAL TRADING BOT SPECIFICATION COMPLETE**
+
+I have analyzed your requirements and designed a production-ready trading system following institutional standards:
+
+**System Overview:**
+• Capital: ${trading_capital:,} USD
+• Leverage: {leverage}x ({'Spot Only' if leverage == 1.0 else 'Futures Enabled'})
+• Strategy: {strategy.title()} Trading System
+• Risk Profile: {risk_level.title()}
+• Primary Timeframe: {timeframe}
+• Target Instrument: {coin}/USDT
+
+**Risk Management Framework:**
+• Max Risk per Trade: {max_risk_per_trade}% of capital
+• Portfolio Drawdown Limit: {max_drawdown}%
+• Position Size: {2.0 if risk_level == 'low' else 3.0 if risk_level == 'medium' else 5.0}% of capital per position
+• Stop Loss: {2.0 if risk_level == 'low' else 3.5}%
+• Take Profit: {4.0 if risk_level == 'low' else 6.0}%
+• Max Concurrent Positions: {2 if risk_level == 'low' else 3 if risk_level == 'medium' else 4}
+
+**Production Features:**
+• Kill-switch protection with multiple triggers
+• Rate limit handling and API error recovery
+• Idempotent execution for reliability
+• Environment-based secrets management
+• Multi-timeframe confluence analysis
+• Volume and volatility filters
 
 ```json
 {json.dumps(bot_config, indent=2)}
 ```
 
-🚀 Your bot configuration is ready! This will be a powerful {strategy} trading bot optimized for {coin} trading."""
+**This bot specification meets institutional trading standards and is ready for production deployment with comprehensive risk controls.**"""
     
-    # Progressive conversation questions
+    # Professional mandatory questions flow
     if question_count == 0:
-        return f"{model_prefix} Hello! I'm excited to help you create a personalized trading bot. Let's start with the fundamentals:\n\n**What cryptocurrency interests you most?**\n• Bitcoin (BTC)\n• Ethereum (ETH) \n• Solana (SOL)\n• Other?\n\nTell me your preference!"
+        return f"""{model_prefix}
+
+Welcome to professional trading systems design. I am an expert in trading theory, market microstructure, and quantitative strategy development.
+
+**Mandatory Question 1: Trading Capital & Leverage**
+
+To design appropriate risk management and position sizing:
+
+• What is your available trading capital (in USD)?
+• What leverage are you comfortable with?
+  - **1x (Spot Only)**: Safest, no liquidation risk
+  - **2-3x (Moderate)**: Balanced risk/reward
+  - **5x+ (Aggressive)**: Higher risk, requires experience
+
+Example: "$10,000 capital with 1x leverage (spot only)"
+
+Please specify your trading capital and maximum leverage tolerance."""
     
     elif question_count == 1:
-        return f"{model_prefix} Great choice! Now, what's your trading style preference?\n\n**Risk & Strategy:**\n• **Conservative** - Steady, safe profits with lower risk\n• **Moderate** - Balanced risk/reward approach\n• **Aggressive** - Higher risk for potentially bigger gains\n\nWhich approach fits your personality?"
+        return f"""{model_prefix}
+
+**Mandatory Question 2: Instrument Type & Market Access**
+
+Critical for execution strategy design:
+
+• **Spot Trading**: Buy/hold physical assets, no liquidation risk, lower capital efficiency
+• **Futures/Margin**: Leverage trading, short selling capability, liquidation risk present
+• **Mixed Approach**: Primarily spot with selective futures for hedging
+
+**Which instrument type aligns with your risk management philosophy and trading experience?**
+
+Note: Spot-only recommended for conservative approaches, futures for advanced risk management."""
     
     elif question_count == 2:
-        return f"{model_prefix} Perfect! One more key question:\n\n**What trading strategy appeals to you?**\n• **Scalping** - Quick trades, small profits, very active\n• **Swing Trading** - Medium-term positions (days/weeks)\n• **Trend Following** - Ride long-term market movements\n• **Mean Reversion** - Buy dips, sell peaks\n\nWhat sounds most interesting to you?"
+        return f"""{model_prefix}
+
+**Mandatory Question 3: Risk Control Parameters**
+
+Essential for capital preservation (industry standards):
+
+**Position Risk Limits:**
+• Max risk per single trade (% of equity)?
+  - Conservative: 1-2% 
+  - Moderate: 2-3%
+  - Aggressive: 3-5%
+
+**Portfolio Risk Limits:**
+• Maximum portfolio drawdown (% loss that stops trading)?
+  - Conservative: 5-10%
+  - Moderate: 10-15%
+  - Aggressive: 15-20%
+
+• Maximum concurrent positions? (Recommended: 1-3 for risk control)
+
+Example: "2% max per trade, 10% max drawdown, 2 positions maximum"
+
+**Please specify your risk control parameters.**"""
     
+    elif question_count == 3:
+        return f"""{model_prefix}
+
+**Mandatory Question 4: Strategy Intent & Timeframe**
+
+For signal generation and execution design:
+
+**Strategy Types:**
+• **Momentum**: Trend following, breakout trading
+• **Mean Reversion**: Buy dips, sell peaks, range trading  
+• **Scalping**: High-frequency, small profits, sub-minute trades
+• **Grid Trading**: Automated buy/sell at intervals
+• **Statistical Arbitrage**: Market-neutral, correlation-based
+• **Market Making**: Provide liquidity, capture bid-ask spread
+
+**Timeframe Preferences:**
+• **Scalping**: 1m-5m (requires fast execution)
+• **Intraday**: 15m-1h (momentum/mean reversion)
+• **Swing**: 4h-1d (trend following)
+• **Position**: Multi-day (fundamental analysis)
+
+**What strategy type and timeframe match your trading objectives?**"""
+        
     else:
-        # Generic helpful responses
-        responses = [
-            f"{model_prefix} That's valuable insight! Could you tell me more about your trading experience level?",
-            f"{model_prefix} Interesting! What's your typical investment timeline - short-term or long-term?",
-            f"{model_prefix} Good point! Do you have any specific technical indicators you prefer?",
-            f"{model_prefix} I understand. What about your comfort with automated trading - any concerns?"
+        # Professional follow-up questions for missing mandatory information
+        follow_ups = [
+            f"""{model_prefix}
+
+**Clarification: Execution & Latency Requirements**
+
+For production system specifications:
+• Execution speed priority: Standard (1-5 seconds) or High-frequency (<100ms)?
+• Exchange preference: Binance (high liquidity) or Bybit (derivatives focus)?
+• Slippage tolerance: Conservative (0.05%) or Moderate (0.1%)?
+• Co-location requirements for latency-sensitive strategies?""",
+            
+            f"""{model_prefix}
+
+**Clarification: Signal Generation & Indicators**
+
+For quantitative strategy implementation:
+• Preferred technical indicators: RSI, MACD, moving averages, custom signals?
+• Market regime detection: Bull/bear/sideways adaptation needed?
+• Volume analysis: Include volume confirmation in signals?
+• External data sources: News sentiment, on-chain metrics, order book data?""",
+            
+            f"""{model_prefix}
+
+**Clarification: Operational & Safety Parameters**
+
+For production deployment reliability:
+• Trading session hours: 24/7 automated or specific market hours?
+• Emergency procedures: Manual override capability required?
+• Kill-switch conditions: Beyond standard drawdown limits?
+• Monitoring requirements: Real-time alerts, dashboard access?"""
         ]
-        return responses[hash(message) % len(responses)]
+        return follow_ups[hash(message) % len(follow_ups)]
 
 @router.post("/ai-bot-chat/start-session") 
 async def start_chat_session(request: ChatSessionRequest):
