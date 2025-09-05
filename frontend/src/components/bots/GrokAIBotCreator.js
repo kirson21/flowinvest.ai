@@ -598,7 +598,7 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Strategy:</span>
                       <span className="font-medium capitalize">
-                        {generatedBot.strategy?.type || generatedBot.strategy?.replace('_', ' ') || 'AI Strategy'}
+                        {(generatedBot.strategy?.type || generatedBot.strategy || generatedBot.strategy_type || 'AI Strategy').toString().replace('_', ' ')}
                       </span>
                     </div>
                     {generatedBot.trade_type && (
