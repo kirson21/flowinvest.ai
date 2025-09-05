@@ -184,7 +184,7 @@ def get_intelligent_fallback_response(message: str, ai_model: str, conversation_
     model_prefix = model_names.get(ai_model, '🤖 **Trading Systems Agent**')
     
     # Generate professional bot specification when enough info gathered
-    if question_count >= 4 and has_capital_info and has_risk_info and (has_strategy_info or any(word in message_lower for word in ['bitcoin', 'btc', 'ethereum', 'momentum', 'scalping'])):
+    if question_count >= 5 and has_capital_info and has_risk_info and (has_strategy_info or any(word in message_lower for word in ['bitcoin', 'btc', 'ethereum', 'momentum', 'scalping'])):
         
         # Extract professional trading parameters
         # Capital analysis
