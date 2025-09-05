@@ -248,7 +248,10 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   };
 
   const getRiskColor = (riskLevel) => {
-    switch (riskLevel) {
+    // Handle undefined/null risk level values safely
+    const riskStr = (riskLevel || '').toString().toLowerCase();
+    
+    switch (riskStr) {
       case 'low': return 'bg-green-100 text-green-800';
       case 'medium': return 'bg-yellow-100 text-yellow-800';
       case 'high': return 'bg-red-100 text-red-800';
