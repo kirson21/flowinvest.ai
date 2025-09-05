@@ -638,7 +638,8 @@ async def send_chat_message(request: ChatMessageRequest):
         ai_response = await get_ai_response(
             request.message_content,
             request.ai_model,
-            conversation_history
+            conversation_history,
+            request.session_id  # Pass session_id for context continuity
         )
         
         # Save user message to database
