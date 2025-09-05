@@ -116,8 +116,8 @@ JSON Schema for final bot specification:
 Begin by greeting the user professionally and asking about their trading capital and preferred instruments (spot vs futures) as these are fundamental to bot design."""
 
 # Initialize LLM integration
-async def get_ai_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> str:
-    """Generate AI response using Emergent Universal Key."""
+async def get_ai_response(message: str, ai_model: str, conversation_history: List[Dict] = [], session_id: str = None) -> str:
+    """Generate AI response using Emergent Universal Key with proper conversation context."""
     try:
         # Try to use emergentintegrations if available
         try:
@@ -127,40 +127,56 @@ async def get_ai_response(message: str, ai_model: str, conversation_history: Lis
             if not api_key:
                 raise ValueError("EMERGENT_LLM_KEY not found")
             
-            # Create session ID for this conversation
-            session_id = f"bot_creation_{datetime.now().timestamp()}"
+            # Use the provided session ID to maintain conversation context
+            if not session_id:
+                session_id = f"bot_creation_{datetime.now().timestamp()}"
             
-            # Initialize LLM chat
+            # Initialize LLM chat with proper session continuity
             chat = LlmChat(
                 api_key=api_key,
-                session_id=session_id,
+                session_id=session_id,  # Use existing session ID for continuity
                 system_message=AI_BOT_CREATION_PROMPT
             )
             
             # Configure model based on user choice
-            if ai_model.lower().startswith('gpt') or ai_model.lower() == 'openai':
+            if ai_model.lower().startswith('gpt') or ai_model.lower() == 'openai' or ai_model == 'gpt-4o':
                 chat.with_model("openai", "gpt-4o")
-            elif ai_model.lower().startswith('claude') or ai_model.lower() == 'anthropic':
+            elif ai_model.lower().startswith('claude') or ai_model.lower() == 'anthropic' or ai_model == 'claude-3-7-sonnet':
                 chat.with_model("anthropic", "claude-3-7-sonnet-20250219")
-            elif ai_model.lower().startswith('gemini') or ai_model.lower() == 'google':
+            elif ai_model.lower().startswith('gemini') or ai_model.lower() == 'google' or ai_model == 'gemini-2.0-flash':
                 chat.with_model("gemini", "gemini-2.0-flash")
             else:
                 # Default to GPT-4o
                 chat.with_model("openai", "gpt-4o")
             
+            # Build conversation context from history if available
+            context_message = message
+            if conversation_history and len(conversation_history) > 0:
+                # Add conversation context to help AI understand the flow
+                context_parts = []
+                for msg in conversation_history[-6:]:  # Last 6 messages for context
+                    if msg.get('message_type') == 'user':
+                        context_parts.append(f"Previous user input: {msg.get('message_content', '')}")
+                    elif msg.get('message_type') == 'assistant':
+                        context_parts.append(f"Previous AI response: {msg.get('message_content', '')[:200]}...")
+                
+                if context_parts:
+                    context_message = f"CONVERSATION CONTEXT:\n{chr(10).join(context_parts[-4:])}\n\nCURRENT USER MESSAGE: {message}"
+            
             # Send message and get response
-            user_message = UserMessage(text=message)
+            user_message = UserMessage(text=context_message)
             response = await chat.send_message(user_message)
             
+            print(f"🌐 Real AI response generated (length: {len(response)})")
             return response
             
         except ImportError:
             # Fallback if emergentintegrations not available
-            print("Emergentintegrations not available, using intelligent fallback")
+            print("🔄 Emergentintegrations not available, using intelligent fallback")
             return get_intelligent_fallback_response(message, ai_model, conversation_history)
             
     except Exception as e:
-        print(f"AI response generation error: {e}")
+        print(f"⚠️ AI response generation error: {e}")
         return get_intelligent_fallback_response(message, ai_model, conversation_history)
 
 def get_intelligent_fallback_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> str:
