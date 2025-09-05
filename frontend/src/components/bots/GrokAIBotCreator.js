@@ -257,10 +257,14 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   };
 
   const getStrategyIcon = (strategy) => {
-    switch (strategy.toLowerCase()) {
+    // Handle undefined/null strategy values safely
+    const strategyStr = (strategy || '').toString().toLowerCase();
+    
+    switch (strategyStr) {
       case 'scalping': return <Zap className="h-4 w-4" />;
       case 'momentum': return <TrendingUp className="h-4 w-4" />;
       case 'mean_reversion': return <Shield className="h-4 w-4" />;
+      case 'trend_following': return <TrendingUp className="h-4 w-4" />;
       default: return <Brain className="h-4 w-4" />;
     }
   };
