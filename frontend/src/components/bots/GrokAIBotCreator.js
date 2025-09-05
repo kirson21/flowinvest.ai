@@ -242,7 +242,30 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
 
   const handleSaveBot = () => {
     if (generatedBot && onSave) {
-      onSave(generatedBot);
+      // For AI-generated bots, use the AI bots table structure
+      const aiBot = {
+        name: generatedBot.name || generatedBot.botName || 'AI Generated Bot',
+        description: generatedBot.description || 'AI-powered trading bot',
+        strategy: generatedBot.strategy || generatedBot.strategy_type || 'ai_generated',
+        exchange: generatedBot.exchange || 'binance',
+        trading_pair: `${generatedBot.base_coin || 'BTC'}/${generatedBot.quote_coin || 'USDT'}`,
+        risk_level: generatedBot.risk_level || 'medium',
+        config: generatedBot,
+        type: 'ai_generated',
+        id: editingBot?.id,
+        // Add additional AI bot specific fields
+        ai_model: generatedBot.aiModel || aiModel,
+        bot_config: generatedBot,
+        strategy_config: generatedBot.strategy_config || generatedBot.strategy || {},
+        risk_management: generatedBot.risk_management || generatedBot.riskManagement || {},
+        base_coin: generatedBot.base_coin,
+        quote_coin: generatedBot.quote_coin,
+        trade_type: generatedBot.trade_type || 'spot',
+        instruments: generatedBot.instruments || 'spot',
+        trading_capital_usd: generatedBot.trading_capital_usd || 10000
+      };
+      
+      onSave(aiBot);
       setStep('saved');
     }
   };
