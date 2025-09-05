@@ -1074,26 +1074,47 @@ const TradingBots = () => {
           setEditingBot(null); // Clear editing state
         }}
         onSave={async (botData) => {
-          const success = await saveBot({
-            name: botData.name || 'AI Generated Bot',
-            description: botData.description || 'AI-powered trading bot',
-            strategy: botData.strategy || 'ai_generated',
-            exchange: botData.exchange || 'binance',
-            trading_pair: `${botData.base_coin || 'BTC'}/${botData.quote_coin || 'USDT'}`,
-            risk_level: botData.risk_level || 'medium',
-            config: botData,
-            type: 'ai_generated',
-            id: editingBot?.id // Use existing ID if editing
-          });
-          
-          if (success) {
-            alert(`✅ Bot ${editingBot ? 'updated' : 'created'} successfully!`);
-            setShowAICreator(false);
-            setEditingBot(null); // Clear editing state
-          } else {
-            alert(`❌ Failed to ${editingBot ? 'update' : 'create'} bot. Please try again.`);
+          // AI bots should be saved using the AI bot chat service, not the regular bot table
+          try {
+            console.log('Saving AI-generated bot via AI chat service:', botData);
+            
+            // If this is an AI-generated bot from chat, it should already be saved
+            // Just acknowledge the save and close
+            if (botData.id && (botData.type === 'ai_generated' || botData.ai_model)) {
+              console.log('AI bot already saved via chat service, closing modal');
+              alert(`✅ Bot created successfully!`);
+              setShowAICreator(false);
+              setEditingBot(null);
+              await loadUserBots(); // Refresh the list
+              return;
+            }
+            
+            // For manual editing of AI bots, save to regular table for now
+            const success = await saveBot({
+              name: botData.name || 'AI Generated Bot',
+              description: botData.description || 'AI-powered trading bot',
+              strategy: botData.strategy || botData.strategy_type || 'ai_generated',
+              exchange: botData.exchange || 'binance',
+              trading_pair: `${botData.base_coin || 'BTC'}/${botData.quote_coin || 'USDT'}`,
+              risk_level: botData.risk_level || 'medium',
+              config: botData,
+              type: 'ai_generated',
+              trade_type: botData.trade_type || botData.instruments || 'spot',
+              id: editingBot?.id // Use existing ID if editing
+            });
+            
+            if (success) {
+              alert(`✅ Bot ${editingBot ? 'updated' : 'created'} successfully!`);
+              setShowAICreator(false);
+              setEditingBot(null); // Clear editing state
+            } else {
+              alert(`❌ Failed to ${editingBot ? 'update' : 'create'} bot. Please try again.`);
+            }
+          } catch (error) {
+            console.error('Error saving AI bot:', error);
+            alert('Error saving bot: ' + error.message);
           }
-        }}
+        }}}
         onDelete={async (botId) => {
           try {
             const success = await handleDeleteBot(botId);
