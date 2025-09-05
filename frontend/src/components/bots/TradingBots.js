@@ -836,18 +836,40 @@ const TradingBots = () => {
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
-                {t('exchange')}
+                Trade Type
               </p>
               <p className="text-xs font-medium text-[#474545] dark:text-white truncate">
-                {bot.exchange}
+                {(bot.trade_type || bot.instruments || 'Spot').charAt(0).toUpperCase() + (bot.trade_type || bot.instruments || 'Spot').slice(1)}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
-                {t('tradingPair')}
+                Trading Pairs
               </p>
               <p className="text-xs font-medium text-[#474545] dark:text-white truncate">
-                {bot.trading_pair}
+                {(() => {
+                  // Extract trading pairs from bot config
+                  const baseCoin = bot.base_coin || bot.trading_pair?.split('/')[0] || 'BTC';
+                  const quoteCoin = bot.quote_coin || bot.trading_pair?.split('/')[1] || 'USDT';
+                  const primaryPair = `${baseCoin}/${quoteCoin}`;
+                  
+                  // For AI bots, they can trade multiple pairs
+                  if (bot.type === 'ai_generated' || bot.strategy === 'ai_generated') {
+                    // Get additional pairs from config
+                    const additionalPairs = bot.config?.strategy_config?.additional_pairs || 
+                                          bot.strategy_config?.additional_pairs || [];
+                    
+                    if (additionalPairs.length > 0) {
+                      return `${primaryPair} + ${additionalPairs.length}`;
+                    } else {
+                      // Default additional pairs for AI bots
+                      return `${primaryPair} + 20`;
+                    }
+                  } else {
+                    // Manual bots typically trade single pair
+                    return primaryPair;
+                  }
+                })()}
               </p>
             </div>
             <div>
