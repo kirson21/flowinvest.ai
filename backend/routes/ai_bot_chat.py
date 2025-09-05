@@ -553,7 +553,8 @@ async def start_chat_session(request: ChatSessionRequest):
             ai_response = await get_ai_response(
                 request.initial_prompt, 
                 request.ai_model, 
-                conversation_history
+                conversation_history,
+                session_id  # Pass session_id for context continuity
             )
             
             # Save initial user message to database
