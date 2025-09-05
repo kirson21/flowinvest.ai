@@ -126,10 +126,10 @@ user_problem_statement: "Fix NowPayments withdrawal functionality - resolve 500 
 backend:
   - task: "Implement AI Bot Chat System Backend"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/routes/ai_bot_chat.py"
-    stuck_count: 0
-    priority: "high"
+    stuck_count: 1
+    priority: "critical"
     needs_retesting: false
     status_history:
         - working: true
@@ -144,6 +144,9 @@ backend:
         - working: "NA"
           agent: "testing"
           comment: "✅ PROFESSIONAL TRADING AGENT WITH BOT NAME QUESTION CODE ANALYSIS COMPLETED: Comprehensive code review confirms the enhanced Professional Trading Agent system is properly implemented with 5 mandatory questions including bot name. CRITICAL CODE VERIFICATION RESULTS: ✅ Bot Name Question Implemented - Line 437-448 in ai_bot_chat.py contains 'Mandatory Question 5: Bot Name & Identity' with prompt 'What would you like to name your trading bot?', ✅ 5-Question Flow Structure - Professional fallback system implements complete 5-question sequence: (1) Trading Capital & Leverage, (2) Instrument Type & Market Access, (3) Risk Control Parameters, (4) Strategy Intent & Timeframe, (5) Bot Name & Identity, ✅ Professional Trading Expertise - AI_BOT_CREATION_PROMPT contains expert-level trading systems knowledge with mandatory questions covering capital, instruments, risk limits, strategy/timeframe, and bot naming, ✅ Custom Bot Name Integration - Bot creation logic in create_ai_bot() function saves custom bot names to user_ai_bots table via save_ai_bot RPC call with p_name parameter, ✅ Multi-Model Support - All three AI models (GPT-4o, Claude-3-7-sonnet, Gemini-2.0-flash) configured with professional trading agent prompt and bot name question flow, ✅ Database Storage Ready - Bot names properly stored in user_ai_bots table with complete bot configuration including custom names from conversation. TESTING LIMITATION: User requested to stop testing before runtime verification could be completed. CODE ANALYSIS CONFIRMS: The Professional Trading Agent with bot name question is fully implemented and ready for production use with all 5 mandatory questions including custom bot naming functionality."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL PROFESSIONAL TRADING AGENT FIXES TESTING FAILED: Comprehensive testing reveals MAJOR ISSUES with the Professional Trading Agent system preventing all critical fixes from working. CRITICAL FAILURES IDENTIFIED: ❌ User Answer Following BROKEN - AI does not follow user specifications (futures trading with 3-5x leverage, altcoins), instead creates default BTC spot bots, ❌ Conversation Context BROKEN - AI repeats Question 1 (capital/leverage) instead of progressing to Question 2 (instruments), indicating conversation history not maintained, ❌ Bot Configuration Generation FAILED - No bot config generated after 5 conversation steps, preventing testing of database storage and user specifications, ❌ Question 5 (Bot Name) NEVER ASKED - Bot name question not reached due to conversation context issues, custom bot names cannot be captured, ❌ Database Storage UNTESTABLE - Cannot test VARCHAR errors or user_ai_bots table storage without bot config generation. ROOT CAUSE ANALYSIS: The emergentintegrations library creates a new session ID for each AI call (line 131: session_id = f'bot_creation_{datetime.now().timestamp()}'), causing conversation context to be lost. The conversation history is retrieved from database but NOT passed to the AI model, resulting in the AI treating each message as a new conversation. IMPACT: All critical fixes mentioned in review request are NON-FUNCTIONAL: (1) User specifications not followed, (2) Database storage cannot be tested, (3) Bot name integration broken, (4) 5-question flow broken. URGENT FIXES REQUIRED: Fix conversation context in get_ai_response() function to maintain session continuity and pass conversation history to AI model."
   - task: "Fix NowPayments Withdrawal Creation Error"
     implemented: true
     working: true
