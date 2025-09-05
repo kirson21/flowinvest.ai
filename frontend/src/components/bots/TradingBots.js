@@ -1114,7 +1114,7 @@ const TradingBots = () => {
             console.error('Error saving AI bot:', error);
             alert('Error saving bot: ' + error.message);
           }
-        }}}
+        }}
         onDelete={async (botId) => {
           try {
             const success = await handleDeleteBot(botId);
