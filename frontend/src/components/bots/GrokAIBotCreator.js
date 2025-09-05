@@ -316,13 +316,13 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                     <SelectItem value="claude-3-7-sonnet">
                       <div className="flex items-center space-x-2">
                         <Brain className="text-orange-500" size={14} />
-                        <span>Claude</span>
+                        <span>Claude Sonnet</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="gemini-2.0-flash">
                       <div className="flex items-center space-x-2">
                         <Brain className="text-blue-500" size={14} />
-                        <span>Gemini</span>
+                        <span>Gemini Flash</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
