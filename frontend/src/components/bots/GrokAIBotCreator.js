@@ -553,7 +553,7 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                 <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
                   <div className="flex-1">
                     <h3 className="text-lg sm:text-xl font-semibold flex items-center space-x-2">
-                      {getStrategyIcon(generatedBot.strategy?.type || generatedBot.strategy)}
+                      {getStrategyIcon(generatedBot.strategy?.type || generatedBot.strategy || generatedBot.strategy_type || '')}
                       <span className="break-words">{generatedBot.botName || generatedBot.name}</span>
                     </h3>
                     <p className="text-gray-600 mt-1 text-xs sm:text-sm">{generatedBot.description}</p>
