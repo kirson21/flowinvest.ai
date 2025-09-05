@@ -168,12 +168,9 @@ def get_intelligent_fallback_response(message: str, ai_model: str, conversation_
     message_lower = message.lower()
     question_count = len([msg for msg in conversation_history if msg.get('message_type') == 'assistant'])
     
-    # Track mandatory information gathered
-    has_capital_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['$', 'dollar', 'capital', 'budget', '1000', '5000', '10000'])
-    has_instruments_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['spot', 'futures', 'margin', 'leverage'])
-    has_risk_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['risk', 'conservative', 'aggressive', 'drawdown', 'stop loss'])
-    has_timeframe_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['minute', 'hour', 'day', 'swing', 'scalping', 'intraday'])
-    has_strategy_info = any(word in ' '.join([msg.get('message_content', '') for msg in conversation_history]) for word in ['momentum', 'mean reversion', 'grid', 'arbitrage', 'scalping'])
+    # Extract user preferences from ALL conversation history
+    all_user_messages = ' '.join([msg.get('message_content', '') for msg in conversation_history if msg.get('message_type') == 'user'])
+    combined_text = (all_user_messages + ' ' + message).lower()
     
     # Professional model prefixes
     model_names = {
@@ -183,109 +180,159 @@ def get_intelligent_fallback_response(message: str, ai_model: str, conversation_
     }
     model_prefix = model_names.get(ai_model, '🤖 **Trading Systems Agent**')
     
-    # Generate professional bot specification when enough info gathered
-    if question_count >= 5 and has_capital_info and has_risk_info and (has_strategy_info or any(word in message_lower for word in ['bitcoin', 'btc', 'ethereum', 'momentum', 'scalping'])):
+    # Generate professional bot specification when enough info gathered (after bot name question)
+    if question_count >= 5:
         
-        # Extract professional trading parameters
-        # Capital analysis
-        trading_capital = 10000  # Conservative default
-        leverage = 1.0  # Spot only default
+        # EXTRACT USER PREFERENCES FROM CONVERSATION HISTORY
         
-        if '1000' in message_lower or '1k' in message_lower:
+        # 1. CAPITAL ANALYSIS - Extract from actual user responses
+        trading_capital = 10000  # Default
+        leverage = 1.0  # Default to spot
+        
+        if any(word in combined_text for word in ['1000', '1k']):
             trading_capital = 1000
-        elif '5000' in message_lower or '5k' in message_lower:
+        elif any(word in combined_text for word in ['5000', '5k']):
             trading_capital = 5000
-        elif '10000' in message_lower or '10k' in message_lower:
+        elif any(word in combined_text for word in ['10000', '10k']):
             trading_capital = 10000
-        elif '50000' in message_lower or '50k' in message_lower:
+        elif any(word in combined_text for word in ['50000', '50k']):
             trading_capital = 50000
+        elif any(word in combined_text for word in ['100000', '100k']):
+            trading_capital = 100000
         
-        if 'leverage' in message_lower or 'futures' in message_lower:
-            if 'conservative' in message_lower:
+        # Extract leverage from user answers
+        if 'futures' in combined_text or 'leverage' in combined_text:
+            if '2x' in combined_text or 'leverage 2' in combined_text:
                 leverage = 2.0
-            elif 'aggressive' in message_lower:
-                leverage = 5.0
-            else:
+            elif '3x' in combined_text or 'leverage 3' in combined_text:
                 leverage = 3.0
+            elif '3-5x' in combined_text or '4x' in combined_text or '5x' in combined_text:
+                leverage = 5.0
+            elif '10x' in combined_text:
+                leverage = 10.0
+            else:
+                leverage = 3.0  # Default for futures
         
-        # Coin analysis
-        coin = 'BTC'
-        if 'ethereum' in message_lower or 'eth' in message_lower:
+        # 2. COIN ANALYSIS - Extract from actual user responses
+        coin = 'BTC'  # Default
+        if any(word in combined_text for word in ['ethereum', 'eth']):
             coin = 'ETH'
-        elif 'solana' in message_lower or 'sol' in message_lower:
+        elif any(word in combined_text for word in ['solana', 'sol']):
             coin = 'SOL'
-            
-        # Strategy and risk analysis
-        strategy = 'momentum'
+        elif any(word in combined_text for word in ['altcoin', 'altcoins']):
+            coin = 'ALT'  # Mixed altcoins
+        elif any(word in combined_text for word in ['ada', 'cardano']):
+            coin = 'ADA'
+        elif any(word in combined_text for word in ['matic', 'polygon']):
+            coin = 'MATIC'
+        elif any(word in combined_text for word in ['doge', 'dogecoin']):
+            coin = 'DOGE'
+        
+        # 3. STRATEGY ANALYSIS - Extract from user answers
+        strategy = 'momentum'  # Default
+        if 'scalping' in combined_text:
+            strategy = 'scalping'
+        elif any(word in combined_text for word in ['mean reversion', 'dip', 'peak']):
+            strategy = 'mean_reversion'
+        elif any(word in combined_text for word in ['grid', 'range']):
+            strategy = 'grid'
+        elif any(word in combined_text for word in ['arbitrage', 'neutral']):
+            strategy = 'arbitrage'
+        elif any(word in combined_text for word in ['trend', 'following']):
+            strategy = 'trend_following'
+        elif 'momentum' in combined_text:
+            strategy = 'momentum'
+        
+        # 4. RISK ANALYSIS - Extract from user answers
         risk_level = 'medium'
         max_risk_per_trade = 2.0
         max_drawdown = 10.0
         
-        if 'scalping' in message_lower:
-            strategy = 'scalping'
-            risk_level = 'high'
-            max_risk_per_trade = 1.0  # Lower per trade for high frequency
-            max_drawdown = 8.0
-        elif 'conservative' in message_lower or 'low risk' in message_lower:
-            strategy = 'trend_following'
+        if any(word in combined_text for word in ['conservative', 'low risk', 'safe']):
             risk_level = 'low'
             max_risk_per_trade = 1.0
             max_drawdown = 5.0
-        elif 'aggressive' in message_lower or 'high risk' in message_lower:
-            strategy = 'momentum'
+        elif any(word in combined_text for word in ['aggressive', 'high risk', 'risky']):
             risk_level = 'high'
             max_risk_per_trade = 3.0
             max_drawdown = 15.0
         
-        # Timeframe analysis
-        timeframe = '1h'
-        if 'scalping' in message_lower or 'minute' in message_lower:
-            timeframe = '5m'
-        elif 'swing' in message_lower or 'daily' in message_lower:
-            timeframe = '4h'
-        elif 'intraday' in message_lower:
-            timeframe = '15m'
+        # Extract specific risk percentages from user answers
+        import re
+        risk_matches = re.findall(r'(\d+)%?\s*(?:risk|per trade)', combined_text)
+        if risk_matches:
+            max_risk_per_trade = float(risk_matches[0])
         
-        # Create professional bot configuration following the exact JSON schema
+        drawdown_matches = re.findall(r'(\d+)%?\s*(?:drawdown|max loss)', combined_text)
+        if drawdown_matches:
+            max_drawdown = float(drawdown_matches[0])
+        
+        # 5. TIMEFRAME ANALYSIS - Extract from user answers  
+        timeframe = '1h'
+        if any(word in combined_text for word in ['scalping', 'minute', '1m', '5m']):
+            timeframe = '5m'
+        elif any(word in combined_text for word in ['swing', 'daily', '4h', '1d']):
+            timeframe = '4h'
+        elif any(word in combined_text for word in ['intraday', '15m', '1h']):
+            timeframe = '1h'
+        
+        # 6. BOT NAME ANALYSIS - Extract from user answers
+        bot_name = f"{coin} {strategy.title()} Pro"  # Default
+        
+        # Look for bot name in the latest message
+        latest_message = message.strip()
+        if len(latest_message) > 0 and not any(word in latest_message.lower() for word in ['question', 'what', 'how', 'when', 'where', 'why']):
+            # User likely provided a bot name
+            if len(latest_message.split()) <= 5:  # Reasonable bot name length
+                bot_name = latest_message
+        
+        # 7. INSTRUMENTS - Extract from user answers
+        instruments = 'spot'
+        trade_type = 'spot'
+        if 'futures' in combined_text:
+            instruments = 'futures'
+            trade_type = 'futures'
+        
+        # Create professional bot configuration using EXTRACTED USER PREFERENCES
         bot_config = {
             "ready_to_create": True,
             "bot_config": {
-                "name": f"{model_prefix.split('**')[1].split('**')[0].strip()} {coin} {strategy.title()} System",
-                "description": f"Professional {strategy} trading system for {coin}/USDT with institutional risk management and execution standards. Capital: ${trading_capital:,}, Risk/Trade: {max_risk_per_trade}%, Max Drawdown: {max_drawdown}%",
+                "name": bot_name,
+                "description": f"Professional {strategy} trading system for {coin} based on user specifications: {risk_level} risk, {leverage}x leverage, {timeframe} timeframe",
                 "trading_capital_usd": trading_capital,
                 "leverage_allowed": leverage,
-                "instruments": "spot" if leverage == 1.0 else "futures",
+                "instruments": instruments,
                 "base_coin": coin,
                 "quote_coin": "USDT",
                 "exchange": "binance",
                 "strategy_type": strategy,
-                "trade_type": "spot" if leverage == 1.0 else "futures",
+                "trade_type": trade_type,
                 "risk_level": risk_level,
                 "timeframe": timeframe,
-                "execution_notes": f"Production-ready {strategy} system designed for {risk_level} risk profile with {timeframe} timeframe analysis, capital preservation prioritized"
+                "execution_notes": f"Created per user specs: {coin} trading, {leverage}x leverage, {strategy} strategy, {risk_level} risk"
             },
             "strategy_config": {
-                "strategy_intent": "long_only" if risk_level == 'low' else "long_short_capable",
+                "strategy_intent": "long_only" if leverage == 1.0 else "long_short_capable",
                 "technical_indicators": ["RSI_14", "MACD_12_26_9", "EMA_20", "Volume_SMA_20"],
                 "entry_conditions": [
                     f"{strategy.title()} signal confirmation on {timeframe}",
                     "Volume above 20-period average", 
-                    "Risk parameters within limits",
-                    "Position sizing calculated and approved"
+                    "Risk parameters within user limits",
+                    f"Leverage {leverage}x position sizing approved"
                 ],
                 "exit_conditions": [
                     "Take profit target reached",
                     "Stop loss triggered",
                     f"Signal reversal on {timeframe}",
-                    "Maximum position time exceeded"
+                    "User-specified risk limits exceeded"
                 ],
                 "timeframes": [timeframe, "15m", "1h"],
-                "signal_logic": f"Multi-timeframe {strategy} analysis with confluence requirements and volume confirmation",
+                "signal_logic": f"User-specified {strategy} analysis for {coin} with {leverage}x leverage",
                 "custom_parameters": {
-                    "min_volume_filter": True,
-                    "market_regime_detection": True,
-                    "volatility_adjustment": True,
-                    "news_event_filter": False
+                    "user_specified_coin": coin,
+                    "user_specified_leverage": leverage,
+                    "user_specified_strategy": strategy,
+                    "user_specified_risk": risk_level
                 }
             },
             "risk_management": {
@@ -298,9 +345,8 @@ def get_intelligent_fallback_response(message: str, ai_model: str, conversation_
                 "position_size_percent": 2.0 if risk_level == 'low' else 3.0 if risk_level == 'medium' else 5.0,
                 "kill_switch_conditions": [
                     f"Daily loss exceeds {max_risk_per_trade * 3}% of capital",
-                    "System connectivity loss > 30 seconds",
-                    "Unusual market volatility detected (>20% price movement in 1h)",
-                    "Exchange API rate limit exceeded"
+                    f"Leverage exceeds user limit of {leverage}x",
+                    "User-specified drawdown limit exceeded"
                 ]
             },
             "execution_config": {
@@ -318,37 +364,32 @@ def get_intelligent_fallback_response(message: str, ai_model: str, conversation_
 
 **PROFESSIONAL TRADING BOT SPECIFICATION COMPLETE**
 
-I have analyzed your requirements and designed a production-ready trading system following institutional standards:
+✅ **Created Per Your Exact Specifications:**
 
-**System Overview:**
-• Capital: ${trading_capital:,} USD
-• Leverage: {leverage}x ({'Spot Only' if leverage == 1.0 else 'Futures Enabled'})
-• Strategy: {strategy.title()} Trading System
-• Risk Profile: {risk_level.title()}
-• Primary Timeframe: {timeframe}
-• Target Instrument: {coin}/USDT
+**System Configuration:**
+• Bot Name: **{bot_name}**
+• Target Asset: **{coin}** (as you specified)
+• Trading Type: **{trade_type.title()}** with **{leverage}x leverage** (as requested)
+• Strategy: **{strategy.title()}** (from your preferences)
+• Risk Level: **{risk_level.title()}** (per your tolerance)
+• Timeframe: **{timeframe}** (based on your requirements)
 
-**Risk Management Framework:**
-• Max Risk per Trade: {max_risk_per_trade}% of capital
-• Portfolio Drawdown Limit: {max_drawdown}%
-• Position Size: {2.0 if risk_level == 'low' else 3.0 if risk_level == 'medium' else 5.0}% of capital per position
-• Stop Loss: {2.0 if risk_level == 'low' else 3.5}%
-• Take Profit: {4.0 if risk_level == 'low' else 6.0}%
-• Max Concurrent Positions: {2 if risk_level == 'low' else 3 if risk_level == 'medium' else 4}
+**Capital & Risk (Your Specifications):**
+• Trading Capital: **${trading_capital:,} USD**
+• Max Risk per Trade: **{max_risk_per_trade}%**
+• Portfolio Drawdown Limit: **{max_drawdown}%**
+• Position Size: **{2.0 if risk_level == 'low' else 3.0 if risk_level == 'medium' else 5.0}%** of capital
 
-**Production Features:**
-• Kill-switch protection with multiple triggers
-• Rate limit handling and API error recovery
-• Idempotent execution for reliability
-• Environment-based secrets management
-• Multi-timeframe confluence analysis
-• Volume and volatility filters
+**Following Your Requirements:**
+• Instrument Type: **{instruments.title()}** (as you requested)
+• Leverage Level: **{leverage}x** (matching your specification)
+• Strategy Focus: **{strategy.title()}** for **{coin}** (per your answers)
 
 ```json
 {json.dumps(bot_config, indent=2)}
 ```
 
-**This bot specification meets institutional trading standards and is ready for production deployment with comprehensive risk controls.**"""
+**🚀 This bot follows your EXACT specifications and is ready for deployment!**"""
     
     # Professional mandatory questions flow
     if question_count == 0:
