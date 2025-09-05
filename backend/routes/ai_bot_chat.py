@@ -165,7 +165,6 @@ async def get_ai_response(message: str, ai_model: str, conversation_history: Lis
 
 def get_intelligent_fallback_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> str:
     """Generate professional trading systems responses following the expert prompt structure."""
-    message_lower = message.lower()
     question_count = len([msg for msg in conversation_history if msg.get('message_type') == 'assistant'])
     
     # Extract user preferences from ALL conversation history
