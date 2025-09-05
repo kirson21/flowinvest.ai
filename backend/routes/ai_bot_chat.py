@@ -432,6 +432,20 @@ For signal generation and execution design:
 • **Position**: Multi-day (fundamental analysis)
 
 **What strategy type and timeframe match your trading objectives?**"""
+    
+    elif question_count == 4:
+        return f"""{model_prefix}
+
+**Mandatory Question 5: Bot Name & Identity**
+
+For system identification and management:
+
+**Please choose a name for your trading bot:**
+• Should be descriptive and memorable
+• Examples: "Bitcoin Momentum Pro", "ETH Scalping Engine", "Conservative DCA Bot"
+• Will be used for identification in your bot portfolio
+
+**What would you like to name your trading bot?**"""
         
     else:
         # Professional follow-up questions for missing mandatory information
