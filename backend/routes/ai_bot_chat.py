@@ -321,10 +321,18 @@ async def start_chat_session(request: ChatSessionRequest):
     try:
         session_id = request.session_id or str(uuid.uuid4())
         
+        # Create initial conversation history with user's prompt for state analysis
+        initial_history = []
+        if request.initial_prompt:
+            initial_history = [{
+                'message_type': 'user',
+                'message_content': request.initial_prompt
+            }]
+        
         response = await get_contextual_ai_response(
             request.initial_prompt or "Hello", 
             request.ai_model, 
-            [],
+            initial_history,
             session_id
         )
         
