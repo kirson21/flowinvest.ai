@@ -1,49 +1,14 @@
 #!/usr/bin/env python3
 """
-Professional Trading Agent Critical Fixes Testing
-=================================================
-
-Testing the CRITICAL FIXES for Professional Trading Agent context and user answer following:
-
-CRITICAL ISSUE FIXED: Session context continuity - Now using same session_id instead of creating new ones each time
-
-Test Requirements:
-
-1. **User Answer Following Fix Test**: 
-   - Start session with "Futures trading with leverage 3-5x, altcoins"
-   - Answer questions with specific requirements
-   - Verify final bot config has: FUTURES trading, 5x leverage, ALTCOINS (not BTC), custom bot name
-   - Confirm AI follows exact user specifications
-
-2. **Context Continuity Fix Test**:
-   - Verify AI progresses through 5 mandatory questions properly
-   - Test that Question 1 → Question 2 → Question 3 → Question 4 → Question 5 (Bot Name)
-   - Confirm conversation context is maintained between messages
-
-3. **Database Table Fix Test**:
-   - Verify AI bots save to user_ai_bots table (not user_bots)
-   - Test no VARCHAR(100) errors during bot creation
-   - Confirm bot creation completes successfully with all user specifications
-
-4. **Professional Bot Name Test**:
-   - Verify Question 5 asks for bot name
-   - Test custom bot names are captured and used
-   - Confirm bot names appear in final configuration
-
-Use test user ID: cd0e9717-f85d-4726-81e9-f260394ead58
-
-Critical Success Criteria:
-- AI creates ALTCOIN FUTURES bot with 5X leverage (not BTC spot)
-- All 5 questions asked in sequence with context continuity
-- Bot saved successfully without database errors
-- Custom bot name from Question 5 used in final bot
+Professional Trading Agent Context System Testing
+Tests the completely rewritten ConversationTracker class for context issues
 """
 
 import requests
 import json
-import time
 import uuid
-from datetime import datetime
+import time
+from typing import Dict, Any, List
 
 # Configuration
 BACKEND_URL = "https://url-wizard.preview.emergentagent.com/api"
