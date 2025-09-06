@@ -772,7 +772,7 @@ async def send_chat_message(request: ChatMessageRequest):
                 print(f"Error getting conversation history: {e}")
         
         # Generate AI response with context
-        ai_response = await get_ai_response(
+        ai_response = await get_contextual_ai_response(
             request.message_content,
             request.ai_model,
             conversation_history,
