@@ -115,58 +115,46 @@ JSON Schema for final bot specification:
 
 Begin by greeting the user professionally and asking about their trading capital and preferred instruments (spot vs futures) as these are fundamental to bot design."""
 
-# Initialize LLM integration  
-async def get_ai_response(message: str, ai_model: str, conversation_history: List[Dict] = [], session_id: str = None) -> str:
-    """Generate AI response using Emergent Universal Key with proper conversation context."""
+# Simplified AI response function
+async def get_contextual_ai_response(message: str, ai_model: str, conversation_history: List[Dict], session_id: str) -> str:
+    """Generate contextual AI response that follows conversation flow."""
+    
+    # Analyze conversation state
+    state = conversation_tracker.get_conversation_state(session_id, conversation_history)
+    
+    print(f"🔍 Conversation state: {state}")
+    
+    # Generate appropriate response based on state
+    response, is_ready, bot_config = conversation_tracker.generate_next_question(ai_model, state, message)
+    
+    # Try real AI first, fallback to our logic
     try:
-        # Try to use emergentintegrations if available
-        try:
-            from emergentintegrations.llm.chat import LlmChat, UserMessage
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        api_key = os.getenv('EMERGENT_LLM_KEY')
+        if api_key and len(conversation_history) <= 2:  # Use AI for early conversation
+            chat = LlmChat(api_key=api_key, session_id=session_id, system_message=TRADING_EXPERT_PROMPT)
             
-            api_key = os.getenv('EMERGENT_LLM_KEY')
-            if not api_key:
-                raise ValueError("EMERGENT_LLM_KEY not found")
-            
-            # Use the provided session ID to maintain conversation context
-            if not session_id:
-                session_id = f"bot_creation_{datetime.now().timestamp()}"
-            
-            print(f"🧠 Using AI model {ai_model} with session {session_id}")
-            
-            # Initialize LLM chat with proper session continuity
-            chat = LlmChat(
-                api_key=api_key,
-                session_id=session_id,  # This should maintain context automatically
-                system_message=AI_BOT_CREATION_PROMPT
-            )
-            
-            # Configure model based on user choice
             if ai_model == 'gpt-4o':
                 chat.with_model("openai", "gpt-4o")
             elif ai_model == 'claude-3-7-sonnet':
-                chat.with_model("anthropic", "claude-3-7-sonnet-20250219")
+                chat.with_model("anthropic", "claude-3-7-sonnet-20250219")  
             elif ai_model == 'gemini-2.0-flash':
                 chat.with_model("gemini", "gemini-2.0-flash")
-            else:
-                # Default to GPT-4o
-                chat.with_model("openai", "gpt-4o")
             
-            # Send ONLY the current message - let LlmChat handle session context
-            # Note: LlmChat should maintain context automatically via session_id
-            user_message = UserMessage(text=message)
-            response = await chat.send_message(user_message)
+            # Add conversation context manually
+            context_msg = f"CONVERSATION SO FAR: {state['user_input']}\n\nCURRENT MESSAGE: {message}"
+            user_message = UserMessage(text=context_msg)
+            ai_response = await chat.send_message(user_message)
             
-            print(f"🌐 Real AI response generated (length: {len(response)}) for session {session_id}")
-            return response
-            
-        except ImportError as import_err:
-            # Fallback if emergentintegrations not available
-            print(f"🔄 Emergentintegrations not available ({import_err}), using intelligent fallback")
-            return get_intelligent_fallback_response(message, ai_model, conversation_history)
-            
+            if len(ai_response) > 100:  # Real AI response
+                return ai_response
+                
     except Exception as e:
-        print(f"⚠️ AI response generation error: {e}")
-        return get_intelligent_fallback_response(message, ai_model, conversation_history)
+        print(f"AI error: {e}")
+    
+    # Use our deterministic logic for reliability
+    return response
 
 def get_intelligent_fallback_response(message: str, ai_model: str, conversation_history: List[Dict] = []) -> str:
     """Generate professional trading systems responses following the expert prompt structure."""
