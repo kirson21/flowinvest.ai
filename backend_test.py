@@ -223,38 +223,29 @@ class ProfessionalTradingAgentTester:
         
         print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
         
-        # Step 2: Answer about instruments (should be skipped since user said futures)
-        message2 = "Futures with short selling capability"
+        # Step 2: Answer the risk question that AI asked (not instruments)
+        message2 = "2% per trade, 10% max drawdown, 2 positions"
         print(f"\n👤 USER: {message2}")
         
-        if not self.send_message(message2, "risk"):
+        if not self.send_message(message2, "strategy"):
             return False
         
         print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
         
-        # Step 3: Answer about risk
-        message3 = "2% per trade, 10% max drawdown, 2 positions"
+        # Step 3: Answer about strategy
+        message3 = "Momentum trading with 1-hour timeframes"
         print(f"\n👤 USER: {message3}")
         
-        if not self.send_message(message3, "strategy"):
+        if not self.send_message(message3, "name"):
             return False
         
         print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
         
-        # Step 4: Answer about strategy
-        message4 = "Momentum trading with 1-hour timeframes"
+        # Step 4: Provide bot name
+        message4 = "Altcoin Futures Momentum Pro"
         print(f"\n👤 USER: {message4}")
         
-        if not self.send_message(message4, "name"):
-            return False
-        
-        print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
-        
-        # Step 5: Provide bot name
-        message5 = "Altcoin Futures Momentum Pro"
-        print(f"\n👤 USER: {message5}")
-        
-        if not self.send_message(message5):
+        if not self.send_message(message4):
             return False
         
         print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
