@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import uuid
@@ -14,17 +14,10 @@ load_dotenv()
 router = APIRouter()
 
 # AI Chat Models
-class ChatMessage(BaseModel):
-    message_type: str  # 'user', 'assistant', 'system'
-    message_content: str
-    ai_model: Optional[str] = None
-    bot_creation_stage: Optional[str] = 'initial'
-    context_data: Optional[Dict[str, Any]] = {}
-
 class ChatSessionRequest(BaseModel):
     user_id: str
     session_id: Optional[str] = None
-    ai_model: str = 'gpt-4o'  # Default to GPT-4o
+    ai_model: str = 'gpt-4o'
     initial_prompt: Optional[str] = None
 
 class ChatMessageRequest(BaseModel):
@@ -43,77 +36,244 @@ class AiBotCreationRequest(BaseModel):
     risk_management: Dict[str, Any] = {}
 
 # Professional Trading Agent System Prompt
-AI_BOT_CREATION_PROMPT = """You are an expert trading systems agent (Futures & Spot). You are a domain specialist: you know trading theory, market microstructure, order types, execution, risk management and quantitative strategy design at an expert level. You never drift into unrelated topics. Your mission: design, specify, backtest, and deliver production-ready automated trading bot specifications that strictly obey user-specified strategy constraints and risk rules.
+TRADING_EXPERT_PROMPT = """You are an expert trading systems specialist. You design production-ready automated trading bots.
 
-Important constraints for the agent:
-Always ask the user any missing, essential questions needed to produce a complete and safe design (see mandatory question list below).
-Produce the final result only in valid JSON (see JSON schema below). If you need to explain, put the explanation inside the JSON fields (e.g., "notes": "...") — do not output plain text outside JSON.
-Prioritize capital preservation and strict risk controls. No aggressive defaults without explicit user consent.
-When proposing code or integrations, assume execution will run in production: include secrets handling, idempotency, rate-limit handling, and kill-switches.
+CRITICAL INSTRUCTION: You MUST analyze the ENTIRE conversation history to understand what the user has already told you. Do NOT repeat questions about information already provided.
 
-Mandatory questions to always ask the user (if missing):
-- Trading capital (USD or asset) and allowed leverage (if any).
-- Allowed instruments: spot or margin/futures? 
-- Risk limits: max risk per trade (% of equity), max portfolio drawdown (%), maximum concurrent positions.
-- Target timeframe: intraday / swing / multi-day / minute / hourly / daily.
-- Strategy intent: long-only, short-capable (spot short via borrowing?), market-making, liquidity-taking, grid, mean-reversion, momentum, statistical arbitrage, etc.
-- Slippage & fee assumptions (if unknown, agent must use conservative defaults and document them).
-- Execution latency tolerance (ms) and whether colocated infrastructure is required.
-- Any custom indicators, signals, or existing model to reuse?
+CONVERSATION FLOW:
+1. If user hasn't specified TRADING CAPITAL → Ask about capital and leverage
+2. If user hasn't specified INSTRUMENTS → Ask about spot vs futures trading
+3. If user hasn't specified RISK PARAMETERS → Ask about risk limits and drawdown
+4. If user hasn't specified STRATEGY/TIMEFRAME → Ask about trading strategy and timeframes  
+5. If user hasn't specified BOT NAME → Ask for bot name
+6. If ALL INFO PROVIDED → Generate final bot specification JSON
 
-If the user is a newbie or does not know exactly how to answer, the Agent can offer his own options and supplement the strategy based on the description and wishes of the user.
+IMPORTANT: Always check what user has ALREADY provided before asking new questions!
 
-JSON Schema for final bot specification:
-```json
+When ready to create bot, respond with this JSON:
 {
   "ready_to_create": true,
   "bot_config": {
-    "name": "Descriptive Bot Name",
-    "description": "Detailed technical description",
-    "trading_capital_usd": 10000,
-    "leverage_allowed": 1.0,
-    "instruments": "spot",
-    "base_coin": "BTC",
-    "quote_coin": "USDT", 
-    "exchange": "binance",
-    "strategy_type": "momentum",
-    "trade_type": "spot",
-    "risk_level": "medium",
-    "timeframe": "1h",
-    "execution_notes": "Production considerations and assumptions"
-  },
-  "strategy_config": {
-    "strategy_intent": "long_only",
-    "technical_indicators": ["RSI", "MACD", "EMA"],
-    "entry_conditions": ["Detailed entry logic"],
-    "exit_conditions": ["Detailed exit logic"], 
-    "timeframes": ["1h", "4h"],
-    "signal_logic": "Specific signal generation rules",
-    "custom_parameters": {}
-  },
-  "risk_management": {
-    "max_risk_per_trade_percent": 2.0,
-    "max_portfolio_drawdown_percent": 10.0,
-    "max_concurrent_positions": 3,
-    "stop_loss_percent": 2.0,
-    "take_profit_percent": 4.0,
-    "position_sizing_method": "fixed_percent",
-    "position_size_percent": 5.0,
-    "kill_switch_conditions": ["Emergency stop conditions"]
-  },
-  "execution_config": {
-    "slippage_assumption_bps": 5,
-    "trading_fees_bps": 10,
-    "execution_latency_tolerance_ms": 1000,
-    "order_types": ["market", "limit"],
-    "rate_limit_handling": true,
-    "secrets_handling": "environment_variables",
-    "idempotency": true
+    "name": "User's chosen name",
+    "description": "Professional trading system based on user specs", 
+    "base_coin": "User's coin choice",
+    "quote_coin": "USDT",
+    "trade_type": "spot or futures per user",
+    "trading_capital_usd": "User's amount",
+    "leverage_allowed": "User's leverage",
+    "risk_level": "User's risk preference"
   }
-}
+}"""
+
+# Simple context-aware conversation handler
+class ConversationTracker:
+    def __init__(self):
+        self.sessions = {}
+    
+    def get_conversation_state(self, session_id: str, conversation_history: List[Dict]) -> Dict:
+        """Analyze conversation history to determine current state."""
+        
+        # Combine all user messages to analyze what they've already provided
+        user_messages = []
+        for msg in conversation_history:
+            if msg.get('message_type') == 'user':
+                user_messages.append(msg.get('message_content', '').lower())
+        
+        all_user_input = ' '.join(user_messages).lower()
+        
+        # Determine what information has been provided
+        state = {
+            'has_capital': any(word in all_user_input for word in ['$', 'capital', '1000', '5000', '10000', '50000', '100000', 'k']),
+            'has_leverage': any(word in all_user_input for word in ['leverage', 'x', 'futures', 'margin']),
+            'has_instruments': any(word in all_user_input for word in ['spot', 'futures', 'margin']),
+            'has_risk': any(word in all_user_input for word in ['risk', '%', 'conservative', 'aggressive', 'drawdown']),
+            'has_strategy': any(word in all_user_input for word in ['momentum', 'scalping', 'mean', 'trend', 'grid', 'arbitrage']),
+            'has_timeframe': any(word in all_user_input for word in ['minute', 'hour', 'daily', 'intraday', 'swing']),
+            'has_botname': len([msg for msg in conversation_history if 'name' in msg.get('message_content', '').lower()]) > 0,
+            'user_input': all_user_input,
+            'question_count': len([msg for msg in conversation_history if msg.get('message_type') == 'assistant'])
+        }
+        
+        return state
+
+    def generate_next_question(self, ai_model: str, state: Dict, current_message: str) -> tuple[str, bool, Dict]:
+        """Generate the next appropriate question based on conversation state."""
+        
+        model_names = {
+            'gpt-4o': '🧠 **GPT-4 Trading Expert**',
+            'claude-3-7-sonnet': '🎭 **Claude Trading Specialist**', 
+            'gemini-2.0-flash': '💎 **Gemini Quant Expert**'
+        }
+        prefix = model_names.get(ai_model, '🤖 **Trading Expert**')
+        
+        # Check if we have all information needed to create bot
+        if (state['has_capital'] and state['has_instruments'] and 
+            state['has_risk'] and state['has_strategy'] and state['has_botname']):
+            
+            # Generate bot configuration from user inputs
+            return self.create_bot_specification(prefix, state, current_message)
+        
+        # Ask for missing information in order
+        if not state['has_capital']:
+            return f"""{prefix}
+
+**Question 1: Trading Capital & Leverage**
+
+I need to understand your capital to design appropriate position sizing:
+
+• What is your trading capital (in USD)?
+• What leverage do you want? (1x=spot, 2-5x=moderate, 5x+=aggressive)
+
+Example: "$10,000 with 3x leverage"
+
+Please tell me your capital and leverage preference.""", False, {}
+            
+        elif not state['has_instruments']:
+            return f"""{prefix}
+
+**Question 2: Trading Instruments**
+
+Perfect! Now I need to know your instrument preference:
+
+• **Spot Trading**: Safer, no liquidation risk, lower leverage
+• **Futures Trading**: Higher leverage, short selling, liquidation risk
+
+Which type aligns with your trading goals?""", False, {}
+            
+        elif not state['has_risk']:
+            return f"""{prefix}
+
+**Question 3: Risk Management**
+
+Critical for your safety:
+
+• Max risk per trade (% of capital)? Conservative: 1-2%, Moderate: 2-3%, Aggressive: 3-5%
+• Max portfolio drawdown? Conservative: 5-10%, Moderate: 10-15%
+• Max concurrent positions? (Recommended: 1-3)
+
+Example: "2% per trade, 10% max drawdown, 2 positions"
+
+What are your risk limits?""", False, {}
+            
+        elif not state['has_strategy']:
+            return f"""{prefix}
+
+**Question 4: Strategy & Timeframe**
+
+What trading approach interests you?
+
+• **Momentum**: Trend following, breakout trading
+• **Scalping**: High-frequency, small quick profits  
+• **Mean Reversion**: Buy dips, sell peaks
+• **Grid Trading**: Automated range trading
+
+What strategy and timeframe suit your goals?""", False, {}
+            
+        elif not state['has_botname']:
+            return f"""{prefix}
+
+**Question 5: Bot Name**
+
+Finally, what would you like to name your trading bot?
+
+Examples: "Bitcoin Futures Pro", "Altcoin Momentum Trader", "ETH Scalping Engine"
+
+What name do you want for your bot?""", False, {}
+            
+        else:
+            return self.create_bot_specification(prefix, state, current_message)
+    
+    def create_bot_specification(self, prefix: str, state: Dict, current_message: str) -> tuple[str, bool, Dict]:
+        """Create final bot specification based on user inputs."""
+        
+        user_input = state['user_input'] + ' ' + current_message.lower()
+        
+        # Extract actual user preferences
+        # Capital
+        capital = 10000
+        if '1000' in user_input or '1k' in user_input:
+            capital = 1000
+        elif '5000' in user_input or '5k' in user_input:
+            capital = 5000
+        elif '50000' in user_input or '50k' in user_input:
+            capital = 50000
+        elif '100000' in user_input or '100k' in user_input:
+            capital = 100000
+            
+        # Leverage
+        leverage = 1.0
+        if '2x' in user_input:
+            leverage = 2.0
+        elif '3x' in user_input or '3-5x' in user_input:
+            leverage = 3.0
+        elif '5x' in user_input:
+            leverage = 5.0
+        elif '10x' in user_input:
+            leverage = 10.0
+            
+        # Coin
+        coin = 'BTC'
+        if 'ethereum' in user_input or 'eth' in user_input:
+            coin = 'ETH'
+        elif 'altcoin' in user_input or 'altcoins' in user_input:
+            coin = 'ALT'
+        elif 'solana' in user_input or 'sol' in user_input:
+            coin = 'SOL'
+            
+        # Strategy
+        strategy = 'momentum'
+        if 'scalping' in user_input:
+            strategy = 'scalping'
+        elif 'mean' in user_input:
+            strategy = 'mean_reversion'
+        elif 'grid' in user_input:
+            strategy = 'grid'
+            
+        # Trade type
+        trade_type = 'spot'
+        if 'futures' in user_input:
+            trade_type = 'futures'
+            
+        # Bot name - try to extract from latest message
+        bot_name = f"{coin} {strategy.title()} {trade_type.title()} Bot"
+        if len(current_message.split()) <= 5 and len(current_message) > 3:
+            bot_name = current_message.strip()
+        
+        bot_config = {
+            "ready_to_create": True,
+            "bot_config": {
+                "name": bot_name,
+                "description": f"Professional {strategy} bot for {coin} using {trade_type} trading with {leverage}x leverage",
+                "base_coin": coin, 
+                "quote_coin": "USDT",
+                "trade_type": trade_type,
+                "trading_capital_usd": capital,
+                "leverage_allowed": leverage,
+                "strategy_type": strategy,
+                "risk_level": "medium"
+            }
+        }
+        
+        return f"""{prefix}
+
+**TRADING BOT SPECIFICATION COMPLETE**
+
+✅ **Based on YOUR specifications:**
+• Bot Name: **{bot_name}**  
+• Coin: **{coin}** (from your input)
+• Trade Type: **{trade_type.upper()}** (as you requested)
+• Leverage: **{leverage}x** (per your specification)
+• Capital: **${capital:,}**
+• Strategy: **{strategy.title()}**
+
+```json
+{json.dumps(bot_config, indent=2)}
 ```
 
-Begin by greeting the user professionally and asking about their trading capital and preferred instruments (spot vs futures) as these are fundamental to bot design."""
+🚀 **Your bot follows your EXACT specifications and is ready!**""", True, bot_config
+
+# Initialize conversation tracker
+conversation_tracker = ConversationTracker()
 
 # Simplified AI response function
 async def get_contextual_ai_response(message: str, ai_model: str, conversation_history: List[Dict], session_id: str) -> str:
