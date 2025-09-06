@@ -687,7 +687,7 @@ async def start_chat_session(request: ChatSessionRequest):
         
         # Generate AI response
         if request.initial_prompt:
-            ai_response = await get_ai_response(
+            ai_response = await get_contextual_ai_response(
                 request.initial_prompt, 
                 request.ai_model, 
                 conversation_history,
