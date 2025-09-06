@@ -612,12 +612,6 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                         <span className="font-medium">{generatedBot.base_coin || 'BTC'}/{generatedBot.quote_coin || 'USDT'}</span>
                       </div>
                     )}
-                    {generatedBot.exchange && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Exchange:</span>
-                        <span className="font-medium capitalize">{generatedBot.exchange}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Strategy:</span>
                       <span className="font-medium capitalize">
@@ -638,6 +632,12 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Trade Type:</span>
                         <span className="font-medium uppercase">{generatedBot.trade_type}</span>
+                      </div>
+                    )}
+                    {generatedBot.trading_capital_usd && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Trading Capital:</span>
+                        <span className="font-medium">${generatedBot.trading_capital_usd?.toLocaleString()}</span>
                       </div>
                     )}
                   </CardContent>
