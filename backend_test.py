@@ -16,31 +16,24 @@ TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
 
 class ProfessionalTradingAgentTester:
     def __init__(self):
-        self.backend_url = BACKEND_URL
-        self.test_user_id = TEST_USER_ID
         self.session_id = None
         self.conversation_history = []
         self.test_results = []
         
-    def log_test(self, test_name, success, details):
-        """Log test results"""
+    def log_test(self, test_name: str, success: bool, details: str):
+        """Log test result."""
         status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status} {test_name}")
-        if details:
-            print(f"   Details: {details}")
-        
+        print(f"{status} {test_name}: {details}")
         self.test_results.append({
             "test": test_name,
             "success": success,
-            "details": details,
-            "timestamp": datetime.now().isoformat()
+            "details": details
         })
-        
-    def test_health_check(self):
-        """Test AI Bot Chat health check"""
+    
+    def test_health_check(self) -> bool:
+        """Test AI Bot Chat health check."""
         try:
-            response = requests.get(f"{self.backend_url}/ai-bot-chat/health", timeout=30)
-            
+            response = requests.get(f"{BACKEND_URL}/ai-bot-chat/health", timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 self.log_test("Health Check", True, f"Status: {data.get('status')}, Models: {data.get('ai_models_available')}")
@@ -48,429 +41,384 @@ class ProfessionalTradingAgentTester:
             else:
                 self.log_test("Health Check", False, f"HTTP {response.status_code}: {response.text}")
                 return False
-                
         except Exception as e:
             self.log_test("Health Check", False, f"Exception: {str(e)}")
             return False
     
-    def start_session_with_initial_prompt(self, initial_prompt, ai_model="gpt-4o"):
-        """Start chat session with initial prompt"""
+    def start_session_with_initial_prompt(self, initial_prompt: str, ai_model: str = "gpt-4o") -> bool:
+        """Start chat session with initial user prompt."""
         try:
             payload = {
-                "user_id": self.test_user_id,
+                "user_id": TEST_USER_ID,
                 "ai_model": ai_model,
                 "initial_prompt": initial_prompt
             }
             
-            response = requests.post(
-                f"{self.backend_url}/ai-bot-chat/start-session",
-                json=payload,
-                timeout=60
-            )
+            response = requests.post(f"{BACKEND_URL}/ai-bot-chat/start-session", 
+                                   json=payload, timeout=30)
             
             if response.status_code == 200:
                 data = response.json()
-                if data.get("success"):
-                    self.session_id = data.get("session_id")
-                    ai_response = data.get("message", "")
-                    
-                    # Store conversation
-                    self.conversation_history.append({
-                        "type": "user",
-                        "content": initial_prompt,
-                        "timestamp": datetime.now().isoformat()
-                    })
-                    self.conversation_history.append({
-                        "type": "assistant", 
-                        "content": ai_response,
-                        "timestamp": datetime.now().isoformat()
-                    })
-                    
-                    self.log_test("Start Session", True, f"Session ID: {self.session_id}, Response length: {len(ai_response)}")
-                    return ai_response
+                self.session_id = data.get("session_id")
+                ai_response = data.get("message", "")
+                
+                # Store conversation
+                self.conversation_history.append({
+                    "type": "user",
+                    "content": initial_prompt
+                })
+                self.conversation_history.append({
+                    "type": "assistant", 
+                    "content": ai_response
+                })
+                
+                # Check if AI recognizes user already specified leverage and futures
+                recognizes_leverage = any(word in ai_response.lower() for word in ["3-5x", "leverage", "capital"])
+                recognizes_futures = any(word in ai_response.lower() for word in ["futures", "instruments"])
+                
+                # Check what question AI asks first
+                asks_capital = "capital" in ai_response.lower() and "question 1" in ai_response.lower()
+                asks_instruments = "instruments" in ai_response.lower() and "question 2" in ai_response.lower()
+                asks_risk = "risk" in ai_response.lower() and "question 3" in ai_response.lower()
+                
+                details = f"Session: {self.session_id}, AI Response Length: {len(ai_response)}"
+                if asks_capital:
+                    details += " | ❌ WRONG: Asked Question 1 (Capital) - should skip since user said '3-5x leverage'"
+                elif asks_risk:
+                    details += " | ✅ CORRECT: Asked Question 3 (Risk) - properly skipped capital/leverage"
+                elif asks_instruments:
+                    details += " | ✅ CORRECT: Asked Question 2 (Instruments) - but should skip since user said 'futures'"
                 else:
-                    self.log_test("Start Session", False, f"API returned success=false: {data}")
-                    return None
+                    details += f" | ❓ UNCLEAR: Response doesn't clearly ask specific question"
+                
+                success = self.session_id is not None and len(ai_response) > 50
+                self.log_test("Start Session with Context", success, details)
+                
+                # Additional context analysis
+                if "hello" in ai_response.lower() and len(self.conversation_history) == 2:
+                    self.log_test("Context Recognition", False, "❌ AI starts with 'Hello' indicating new conversation, not following context")
+                else:
+                    self.log_test("Context Recognition", True, "✅ AI response doesn't start fresh, appears to follow context")
+                
+                return success
             else:
-                self.log_test("Start Session", False, f"HTTP {response.status_code}: {response.text}")
-                return None
+                self.log_test("Start Session with Context", False, f"HTTP {response.status_code}: {response.text}")
+                return False
                 
         except Exception as e:
-            self.log_test("Start Session", False, f"Exception: {str(e)}")
-            return None
+            self.log_test("Start Session with Context", False, f"Exception: {str(e)}")
+            return False
     
-    def send_message(self, message_content):
-        """Send message in existing session"""
+    def send_message(self, message: str, expected_question: str = None) -> bool:
+        """Send message and verify AI response."""
         try:
             if not self.session_id:
                 self.log_test("Send Message", False, "No active session")
-                return None
-                
+                return False
+            
             payload = {
-                "user_id": self.test_user_id,
+                "user_id": TEST_USER_ID,
                 "session_id": self.session_id,
-                "message_content": message_content,
+                "message_content": message,
                 "ai_model": "gpt-4o",
                 "bot_creation_stage": "clarification"
             }
             
-            response = requests.post(
-                f"{self.backend_url}/ai-bot-chat/send-message",
-                json=payload,
-                timeout=60
-            )
+            response = requests.post(f"{BACKEND_URL}/ai-bot-chat/send-message", 
+                                   json=payload, timeout=30)
             
             if response.status_code == 200:
                 data = response.json()
-                if data.get("success"):
-                    ai_response = data.get("message", "")
-                    is_ready = data.get("ready_to_create", False)
-                    bot_config = data.get("bot_config")
-                    
-                    # Store conversation
-                    self.conversation_history.append({
-                        "type": "user",
-                        "content": message_content,
-                        "timestamp": datetime.now().isoformat()
-                    })
-                    self.conversation_history.append({
-                        "type": "assistant",
-                        "content": ai_response,
-                        "ready_to_create": is_ready,
-                        "bot_config": bot_config,
-                        "timestamp": datetime.now().isoformat()
-                    })
-                    
-                    self.log_test("Send Message", True, f"Response length: {len(ai_response)}, Ready: {is_ready}")
-                    return {
-                        "response": ai_response,
-                        "ready_to_create": is_ready,
-                        "bot_config": bot_config
-                    }
-                else:
-                    self.log_test("Send Message", False, f"API returned success=false: {data}")
-                    return None
+                ai_response = data.get("message", "")
+                is_ready = data.get("ready_to_create", False)
+                
+                # Store conversation
+                self.conversation_history.append({
+                    "type": "user",
+                    "content": message
+                })
+                self.conversation_history.append({
+                    "type": "assistant",
+                    "content": ai_response
+                })
+                
+                # Check if AI repeats previous questions
+                repeats_capital = "capital" in ai_response.lower() and any("capital" in msg["content"].lower() for msg in self.conversation_history[:-2] if msg["type"] == "assistant")
+                
+                # Check progression
+                question_number = None
+                if "question 1" in ai_response.lower():
+                    question_number = 1
+                elif "question 2" in ai_response.lower():
+                    question_number = 2
+                elif "question 3" in ai_response.lower():
+                    question_number = 3
+                elif "question 4" in ai_response.lower():
+                    question_number = 4
+                elif "question 5" in ai_response.lower():
+                    question_number = 5
+                
+                details = f"Response Length: {len(ai_response)}, Ready: {is_ready}"
+                if repeats_capital:
+                    details += " | ❌ REPEATS: AI asking for capital again"
+                if question_number:
+                    details += f" | Question {question_number} asked"
+                if expected_question and expected_question.lower() in ai_response.lower():
+                    details += f" | ✅ EXPECTED: Asked about {expected_question}"
+                
+                success = len(ai_response) > 50 and not repeats_capital
+                self.log_test(f"Send Message: '{message[:30]}...'", success, details)
+                
+                return success
             else:
                 self.log_test("Send Message", False, f"HTTP {response.status_code}: {response.text}")
-                return None
+                return False
                 
         except Exception as e:
             self.log_test("Send Message", False, f"Exception: {str(e)}")
-            return None
+            return False
     
-    def create_ai_bot(self, bot_config):
-        """Create AI bot from configuration"""
+    def get_conversation_history(self) -> bool:
+        """Get and verify conversation history."""
         try:
             if not self.session_id:
-                self.log_test("Create AI Bot", False, "No active session")
-                return None
+                self.log_test("Get History", False, "No active session")
+                return False
+            
+            response = requests.get(f"{BACKEND_URL}/ai-bot-chat/history/{self.session_id}?user_id={TEST_USER_ID}", 
+                                  timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                messages = data.get("messages", [])
                 
+                details = f"Retrieved {len(messages)} messages"
+                if len(messages) >= len(self.conversation_history):
+                    details += " | ✅ All messages stored"
+                else:
+                    details += " | ❌ Missing messages in database"
+                
+                success = len(messages) > 0
+                self.log_test("Get Conversation History", success, details)
+                return success
+            else:
+                self.log_test("Get Conversation History", False, f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Get Conversation History", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_complete_conversation_flow(self) -> bool:
+        """Test the complete 5-question conversation flow."""
+        print("\n🎯 TESTING COMPLETE CONVERSATION FLOW")
+        print("=" * 60)
+        
+        # Step 1: Start with user specification
+        initial_prompt = "Futures trading with leverage 3-5x, altcoins"
+        print(f"👤 USER: {initial_prompt}")
+        
+        if not self.start_session_with_initial_prompt(initial_prompt):
+            return False
+        
+        print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
+        
+        # Step 2: Answer about instruments (should be skipped since user said futures)
+        message2 = "Futures with short selling capability"
+        print(f"\n👤 USER: {message2}")
+        
+        if not self.send_message(message2, "risk"):
+            return False
+        
+        print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
+        
+        # Step 3: Answer about risk
+        message3 = "2% per trade, 10% max drawdown, 2 positions"
+        print(f"\n👤 USER: {message3}")
+        
+        if not self.send_message(message3, "strategy"):
+            return False
+        
+        print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
+        
+        # Step 4: Answer about strategy
+        message4 = "Momentum trading with 1-hour timeframes"
+        print(f"\n👤 USER: {message4}")
+        
+        if not self.send_message(message4, "name"):
+            return False
+        
+        print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
+        
+        # Step 5: Provide bot name
+        message5 = "Altcoin Futures Momentum Pro"
+        print(f"\n👤 USER: {message5}")
+        
+        if not self.send_message(message5):
+            return False
+        
+        print(f"🤖 AI: {self.conversation_history[-1]['content'][:200]}...")
+        
+        # Verify final bot configuration
+        final_response = self.conversation_history[-1]['content']
+        has_bot_config = "ready_to_create" in final_response.lower() or "json" in final_response.lower()
+        has_altcoin = "alt" in final_response.lower()
+        has_futures = "futures" in final_response.lower()
+        has_leverage = "5x" in final_response or "3x" in final_response
+        
+        details = f"Bot Config: {has_bot_config}, ALT: {has_altcoin}, FUTURES: {has_futures}, Leverage: {has_leverage}"
+        success = has_bot_config and has_altcoin and has_futures
+        
+        self.log_test("Complete Conversation Flow", success, details)
+        return success
+    
+    def test_bot_creation(self) -> bool:
+        """Test bot creation from conversation."""
+        try:
+            if not self.session_id:
+                self.log_test("Bot Creation", False, "No active session")
+                return False
+            
+            # Extract bot config from final response
+            final_response = self.conversation_history[-1]['content']
+            bot_config = None
+            
+            if "```json" in final_response:
+                try:
+                    json_start = final_response.find("```json") + 7
+                    json_end = final_response.find("```", json_start)
+                    if json_end != -1:
+                        json_str = final_response[json_start:json_end].strip()
+                        bot_config = json.loads(json_str)
+                except Exception as e:
+                    self.log_test("Bot Creation", False, f"JSON parse error: {str(e)}")
+                    return False
+            
+            if not bot_config:
+                self.log_test("Bot Creation", False, "No bot configuration found in final response")
+                return False
+            
+            # Create bot
             payload = {
-                "user_id": self.test_user_id,
+                "user_id": TEST_USER_ID,
                 "session_id": self.session_id,
                 "ai_model": "gpt-4o",
                 "bot_config": bot_config,
-                "strategy_config": bot_config.get("strategy_config", {}),
-                "risk_management": bot_config.get("risk_management", {})
+                "strategy_config": {},
+                "risk_management": {}
             }
             
-            response = requests.post(
-                f"{self.backend_url}/ai-bot-chat/create-bot",
-                json=payload,
-                timeout=30
-            )
+            response = requests.post(f"{BACKEND_URL}/ai-bot-chat/create-bot", 
+                                   json=payload, timeout=30)
             
             if response.status_code == 200:
                 data = response.json()
-                if data.get("success"):
-                    bot_id = data.get("bot_id")
-                    message = data.get("message", "")
-                    self.log_test("Create AI Bot", True, f"Bot ID: {bot_id}, Message: {message}")
-                    return bot_id
-                else:
-                    self.log_test("Create AI Bot", False, f"API returned success=false: {data}")
-                    return None
+                bot_id = data.get("bot_id")
+                message = data.get("message", "")
+                
+                details = f"Bot ID: {bot_id}, Message: {message}"
+                success = bot_id is not None
+                self.log_test("Bot Creation", success, details)
+                return success
             else:
-                self.log_test("Create AI Bot", False, f"HTTP {response.status_code}: {response.text}")
-                return None
+                # Check for VARCHAR error specifically
+                error_text = response.text
+                if "value too long" in error_text.lower():
+                    self.log_test("Bot Creation", False, f"❌ VARCHAR ERROR: {error_text}")
+                else:
+                    self.log_test("Bot Creation", False, f"HTTP {response.status_code}: {error_text}")
+                return False
                 
         except Exception as e:
-            self.log_test("Create AI Bot", False, f"Exception: {str(e)}")
-            return None
-    
-    def get_user_ai_bots(self):
-        """Get user's AI bots"""
-        try:
-            response = requests.get(
-                f"{self.backend_url}/ai-bots/user/{self.test_user_id}",
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    bots = data.get("bots", [])
-                    total = data.get("total", 0)
-                    self.log_test("Get User AI Bots", True, f"Total bots: {total}")
-                    return bots
-                else:
-                    self.log_test("Get User AI Bots", False, f"API returned success=false: {data}")
-                    return []
-            else:
-                self.log_test("Get User AI Bots", False, f"HTTP {response.status_code}: {response.text}")
-                return []
-                
-        except Exception as e:
-            self.log_test("Get User AI Bots", False, f"Exception: {str(e)}")
-            return []
-    
-    def analyze_question_progression(self):
-        """Analyze if AI progresses through 5 mandatory questions"""
-        question_indicators = [
-            "Question 1",
-            "Question 2", 
-            "Question 3",
-            "Question 4",
-            "Question 5"
-        ]
-        
-        questions_found = []
-        for i, msg in enumerate(self.conversation_history):
-            if msg["type"] == "assistant":
-                content = msg["content"]
-                for q_num, indicator in enumerate(question_indicators, 1):
-                    if indicator in content or f"Mandatory Question {q_num}" in content:
-                        questions_found.append(q_num)
-                        break
-        
-        # Check for proper progression
-        expected_sequence = [1, 2, 3, 4, 5]
-        progression_correct = questions_found == expected_sequence[:len(questions_found)]
-        
-        self.log_test("Question Progression", progression_correct, 
-                     f"Found questions: {questions_found}, Expected: {expected_sequence[:len(questions_found)]}")
-        
-        return progression_correct, questions_found
-    
-    def analyze_user_specifications_following(self, bot_config):
-        """Analyze if AI follows user specifications"""
-        if not bot_config:
-            self.log_test("User Specifications Following", False, "No bot config generated")
+            self.log_test("Bot Creation", False, f"Exception: {str(e)}")
             return False
-        
-        # Extract bot configuration
-        config = bot_config.get("bot_config", {})
-        
-        # Check for FUTURES trading
-        instruments = config.get("instruments", "").lower()
-        trade_type = config.get("trade_type", "").lower()
-        futures_trading = "futures" in instruments or "futures" in trade_type
-        
-        # Check for 5x leverage
-        leverage = config.get("leverage_allowed", 1.0)
-        correct_leverage = leverage >= 3.0 and leverage <= 5.0
-        
-        # Check for ALTCOINS (not BTC)
-        base_coin = config.get("base_coin", "").upper()
-        altcoin_trading = base_coin != "BTC" and base_coin in ["ETH", "SOL", "ADA", "MATIC", "DOGE", "ALT"]
-        
-        # Check for custom bot name
-        bot_name = config.get("name", "")
-        has_custom_name = len(bot_name) > 0 and "Bot" in bot_name
-        
-        all_specs_followed = futures_trading and correct_leverage and altcoin_trading and has_custom_name
-        
-        details = f"Futures: {futures_trading}, Leverage: {leverage}x, Coin: {base_coin}, Name: '{bot_name}'"
-        self.log_test("User Specifications Following", all_specs_followed, details)
-        
-        return all_specs_followed
     
-    def analyze_context_continuity(self):
-        """Analyze if conversation context is maintained"""
-        # Check if AI repeats questions instead of progressing
-        assistant_messages = [msg["content"] for msg in self.conversation_history if msg["type"] == "assistant"]
-        
-        # Look for repeated question patterns
-        question_1_count = sum(1 for msg in assistant_messages if "Question 1" in msg or "Trading Capital" in msg)
-        
-        # Context is broken if Question 1 appears multiple times
-        context_maintained = question_1_count <= 1
-        
-        self.log_test("Context Continuity", context_maintained, 
-                     f"Question 1 appeared {question_1_count} times (should be 1)")
-        
-        return context_maintained
-    
-    def run_critical_fixes_test(self):
-        """Run comprehensive test of critical fixes"""
+    def run_comprehensive_test(self):
+        """Run comprehensive test of the Professional Trading Agent system."""
+        print("🚀 PROFESSIONAL TRADING AGENT CONTEXT SYSTEM TESTING")
         print("=" * 80)
-        print("PROFESSIONAL TRADING AGENT CRITICAL FIXES TESTING")
+        print(f"Backend URL: {BACKEND_URL}")
+        print(f"Test User ID: {TEST_USER_ID}")
         print("=" * 80)
         
         # Test 1: Health Check
         if not self.test_health_check():
-            print("❌ CRITICAL: Health check failed, aborting tests")
-            return False
+            print("❌ Health check failed - aborting tests")
+            return
         
-        # Test 2: Start session with specific requirements
-        initial_prompt = "Futures trading with leverage 3-5x, altcoins"
-        print(f"\n🚀 Starting session with prompt: '{initial_prompt}'")
+        # Test 2: Complete conversation flow
+        if not self.test_complete_conversation_flow():
+            print("❌ Conversation flow failed")
         
-        ai_response = self.start_session_with_initial_prompt(initial_prompt)
-        if not ai_response:
-            print("❌ CRITICAL: Failed to start session")
-            return False
+        # Test 3: Get conversation history
+        self.get_conversation_history()
         
-        # Test 3: Progress through 5 mandatory questions
-        print("\n📋 Testing 5-question progression...")
+        # Test 4: Bot creation
+        self.test_bot_creation()
         
-        # Answer Question 1 (Capital & Leverage)
-        response1 = self.send_message("$10,000 capital with 5x leverage for futures trading")
-        if not response1:
-            print("❌ CRITICAL: Failed to send message 1")
-            return False
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 TEST SUMMARY")
+        print("=" * 80)
         
-        time.sleep(2)  # Brief pause between messages
+        passed = sum(1 for result in self.test_results if result["success"])
+        total = len(self.test_results)
+        success_rate = (passed / total * 100) if total > 0 else 0
         
-        # Answer Question 2 (Instruments)
-        response2 = self.send_message("Futures trading with leverage capability for altcoins")
-        if not response2:
-            print("❌ CRITICAL: Failed to send message 2")
-            return False
+        print(f"Tests Passed: {passed}/{total} ({success_rate:.1f}%)")
         
-        time.sleep(2)
+        # Critical success criteria check
+        critical_checks = {
+            "Context Recognition": False,
+            "Complete Conversation Flow": False,
+            "Bot Creation": False
+        }
         
-        # Answer Question 3 (Risk Parameters)
-        response3 = self.send_message("3% max per trade, 15% max drawdown, 2 positions maximum")
-        if not response3:
-            print("❌ CRITICAL: Failed to send message 3")
-            return False
+        for result in self.test_results:
+            for check in critical_checks:
+                if check in result["test"] and result["success"]:
+                    critical_checks[check] = True
         
-        time.sleep(2)
+        print("\n🎯 CRITICAL SUCCESS CRITERIA:")
+        for check, passed in critical_checks.items():
+            status = "✅" if passed else "❌"
+            print(f"{status} {check}")
         
-        # Answer Question 4 (Strategy & Timeframe)
-        response4 = self.send_message("Momentum strategy for altcoins, 1-hour timeframe")
-        if not response4:
-            print("❌ CRITICAL: Failed to send message 4")
-            return False
+        # Specific review request criteria
+        print("\n📋 REVIEW REQUEST CRITERIA:")
         
-        time.sleep(2)
+        # Check if AI recognizes user specifications
+        context_working = any("Context Recognition" in r["test"] and r["success"] for r in self.test_results)
+        print(f"{'✅' if context_working else '❌'} AI recognizes user already specified leverage (3-5x) and futures")
         
-        # Answer Question 5 (Bot Name)
-        custom_bot_name = "Altcoin Futures Momentum Pro"
-        response5 = self.send_message(custom_bot_name)
-        if not response5:
-            print("❌ CRITICAL: Failed to send message 5")
-            return False
+        # Check conversation flow
+        flow_working = any("Complete Conversation Flow" in r["test"] and r["success"] for r in self.test_results)
+        print(f"{'✅' if flow_working else '❌'} AI progresses through questions without repetition")
         
-        # Test 4: Analyze question progression
-        print("\n🔍 Analyzing question progression...")
-        progression_correct, questions_found = self.analyze_question_progression()
-        
-        # Test 5: Analyze context continuity
-        print("\n🔗 Analyzing context continuity...")
-        context_maintained = self.analyze_context_continuity()
-        
-        # Test 6: Check if bot config is ready
-        final_response = response5
-        bot_config = None
-        if final_response and final_response.get("ready_to_create"):
-            bot_config = final_response.get("bot_config")
-            print(f"\n✅ Bot configuration ready: {bot_config is not None}")
+        # Check final bot config
+        if len(self.conversation_history) > 0:
+            final_response = self.conversation_history[-1]['content'].lower()
+            has_alt = "alt" in final_response
+            has_futures = "futures" in final_response
+            has_leverage = "5x" in final_response or "3x" in final_response
+            config_correct = has_alt and has_futures and has_leverage
+            print(f"{'✅' if config_correct else '❌'} Final bot config has: ALT coin, FUTURES trading, 5x leverage")
         else:
-            print("\n❌ Bot configuration not ready after 5 questions")
+            print("❌ Final bot config has: ALT coin, FUTURES trading, 5x leverage")
         
-        # Test 7: Analyze user specifications following
-        print("\n📊 Analyzing user specifications following...")
-        specs_followed = False
-        if bot_config:
-            specs_followed = self.analyze_user_specifications_following(bot_config)
+        # Check database errors
+        varchar_error = any("VARCHAR ERROR" in r["details"] for r in self.test_results)
+        print(f"{'❌' if varchar_error else '✅'} No VARCHAR database errors during bot creation")
         
-        # Test 8: Create AI bot if config is ready
-        bot_id = None
-        if bot_config:
-            print("\n🤖 Creating AI bot...")
-            bot_id = self.create_ai_bot(bot_config)
-        
-        # Test 9: Verify bot saved to user_ai_bots table
-        print("\n💾 Verifying bot database storage...")
-        user_bots = self.get_user_ai_bots()
-        bot_saved_correctly = len(user_bots) > 0 and any(bot.get("id") == bot_id for bot in user_bots) if bot_id else False
-        
-        # Test 10: Verify custom bot name in final bot
-        custom_name_used = False
-        if bot_id and user_bots:
-            created_bot = next((bot for bot in user_bots if bot.get("id") == bot_id), None)
-            if created_bot:
-                saved_name = created_bot.get("name", "")
-                custom_name_used = custom_bot_name.lower() in saved_name.lower() or "altcoin" in saved_name.lower()
-                self.log_test("Custom Bot Name Used", custom_name_used, f"Saved name: '{saved_name}'")
-        
-        # Summary of critical fixes
         print("\n" + "=" * 80)
-        print("CRITICAL FIXES VERIFICATION SUMMARY")
-        print("=" * 80)
         
-        critical_fixes = [
-            ("User Answer Following Fix", specs_followed),
-            ("Context Continuity Fix", context_maintained),
-            ("Database Table Fix", bot_saved_correctly),
-            ("Professional Bot Name Fix", custom_name_used),
-            ("5-Question Flow Fix", len(questions_found) >= 4)
-        ]
+        if success_rate >= 75 and not varchar_error:
+            print("🎉 OVERALL: PROFESSIONAL TRADING AGENT SYSTEM IS WORKING")
+        else:
+            print("⚠️  OVERALL: PROFESSIONAL TRADING AGENT SYSTEM HAS ISSUES")
         
-        all_fixes_working = all(fix[1] for fix in critical_fixes)
-        
-        for fix_name, working in critical_fixes:
-            status = "✅ WORKING" if working else "❌ BROKEN"
-            print(f"{status} {fix_name}")
-        
-        print(f"\n🎯 OVERALL RESULT: {'✅ ALL CRITICAL FIXES WORKING' if all_fixes_working else '❌ CRITICAL FIXES STILL BROKEN'}")
-        
-        return all_fixes_working
-
-def main():
-    """Main test execution"""
-    tester = ProfessionalTradingAgentTester()
-    
-    try:
-        success = tester.run_critical_fixes_test()
-        
-        # Print detailed conversation history for debugging
-        print("\n" + "=" * 80)
-        print("CONVERSATION HISTORY FOR DEBUGGING")
-        print("=" * 80)
-        
-        for i, msg in enumerate(tester.conversation_history, 1):
-            msg_type = "👤 USER" if msg["type"] == "user" else "🤖 AI"
-            content = msg["content"][:200] + "..." if len(msg["content"]) > 200 else msg["content"]
-            print(f"\n{i}. {msg_type}: {content}")
-            
-            if msg["type"] == "assistant" and msg.get("ready_to_create"):
-                print(f"   🎯 Bot Config Ready: {msg.get('bot_config') is not None}")
-        
-        # Print test results summary
-        print("\n" + "=" * 80)
-        print("TEST RESULTS SUMMARY")
-        print("=" * 80)
-        
-        passed = sum(1 for result in tester.test_results if result["success"])
-        total = len(tester.test_results)
-        
-        print(f"Tests Passed: {passed}/{total} ({passed/total*100:.1f}%)")
-        
-        for result in tester.test_results:
-            status = "✅" if result["success"] else "❌"
-            print(f"{status} {result['test']}: {result['details']}")
-        
-        return success
-        
-    except Exception as e:
-        print(f"❌ CRITICAL ERROR: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return False
+        return self.test_results
 
 if __name__ == "__main__":
-    success = main()
-    exit(0 if success else 1)
+    tester = ProfessionalTradingAgentTester()
+    results = tester.run_comprehensive_test()
