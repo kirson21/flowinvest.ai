@@ -152,10 +152,11 @@ async def get_ai_response(message: str, ai_model: str, conversation_history: Lis
                 chat.with_model("openai", "gpt-4o")
             
             # Send ONLY the current message - let LlmChat handle session context
+            # Note: LlmChat should maintain context automatically via session_id
             user_message = UserMessage(text=message)
             response = await chat.send_message(user_message)
             
-            print(f"🌐 Real AI response generated (length: {len(response)})")
+            print(f"🌐 Real AI response generated (length: {len(response)}) for session {session_id}")
             return response
             
         except ImportError as import_err:
