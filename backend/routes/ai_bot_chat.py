@@ -291,7 +291,7 @@ async def get_contextual_ai_response(message: str, ai_model: str, conversation_h
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         api_key = os.getenv('EMERGENT_LLM_KEY')
-        if api_key and len(conversation_history) <= 2:  # Use AI for early conversation
+        if False and api_key and len(conversation_history) <= 2:  # Temporarily disabled for testing
             chat = LlmChat(api_key=api_key, session_id=session_id, system_message=TRADING_EXPERT_PROMPT)
             
             if ai_model == 'gpt-4o':
