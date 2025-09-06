@@ -377,7 +377,7 @@ async def start_chat_session(request: ChatSessionRequest):
                     if json_end != -1:
                         json_str = ai_response[json_start:json_end].strip()
                         bot_config = json.loads(json_str)
-            except:
+            except Exception:
                 is_ready = False
         
         return {
