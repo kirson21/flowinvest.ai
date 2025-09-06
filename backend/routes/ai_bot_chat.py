@@ -82,7 +82,7 @@ class ConversationTracker:
         
         # Determine what information has been provided
         state = {
-            'has_capital': any(word in all_user_input for word in ['$', 'capital', '1000', '5000', '10000', '50000', '100000', 'k']),
+            'has_capital': any(word in all_user_input for word in ['$', 'capital', '1000', '5000', '10000', '50000', '100000', 'k']) or any(word in all_user_input for word in ['3x', '4x', '5x', '10x', '2-5x', '3-5x']),
             'has_leverage': any(word in all_user_input for word in ['leverage', 'x', 'futures', 'margin']),
             'has_instruments': any(word in all_user_input for word in ['spot', 'futures', 'margin']),
             'has_risk': any(word in all_user_input for word in ['risk', '%', 'conservative', 'aggressive', 'drawdown']),
