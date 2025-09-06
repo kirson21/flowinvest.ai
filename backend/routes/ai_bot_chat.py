@@ -724,7 +724,7 @@ async def start_chat_session(request: ChatSessionRequest):
                     print(f"Database save error: {e}")
         else:
             # Send greeting message
-            ai_response = await get_ai_response("Start conversation", request.ai_model, [], session_id)
+            ai_response = await get_contextual_ai_response("Start conversation", request.ai_model, [], session_id)
         
         # Check if response has bot config
         is_ready = "ready_to_create" in ai_response
