@@ -315,90 +315,62 @@ async def get_contextual_ai_response(message: str, ai_model: str, conversation_h
     # Use our deterministic logic for reliability
     return response
 
-@router.post("/ai-bot-chat/start-session") 
+@router.post("/ai-bot-chat/start-session")
 async def start_chat_session(request: ChatSessionRequest):
-    """Start a new AI bot creation chat session."""
+    """Start AI bot chat session."""
     try:
-        # Generate session ID if not provided
         session_id = request.session_id or str(uuid.uuid4())
         
-        # Get conversation history (should be empty for new session)
-        conversation_history = []
+        response = await get_contextual_ai_response(
+            request.initial_prompt or "Hello", 
+            request.ai_model, 
+            [],
+            session_id
+        )
         
-        # Generate AI response
-        if request.initial_prompt:
-            ai_response = await get_contextual_ai_response(
-                request.initial_prompt, 
-                request.ai_model, 
-                conversation_history,
-                session_id  # Pass session_id for context continuity
-            )
-            
-            # Save initial user message to database
-            if supabase_admin:
-                try:
-                    supabase_admin.rpc('save_chat_message', {
-                        'p_user_id': request.user_id,
-                        'p_session_id': session_id,
-                        'p_message_type': 'user',
-                        'p_message_content': request.initial_prompt,
-                        'p_ai_model': request.ai_model,
-                        'p_bot_creation_stage': 'initial',
-                        'p_context_data': {}
-                    }).execute()
-                except Exception as e:
-                    print(f"Database save error: {e}")
-                
-                # Save AI response to database
-                try:
-                    supabase_admin.rpc('save_chat_message', {
-                        'p_user_id': request.user_id,
-                        'p_session_id': session_id,
-                        'p_message_type': 'assistant',
-                        'p_message_content': ai_response,
-                        'p_ai_model': request.ai_model,
-                        'p_bot_creation_stage': 'initial',
-                        'p_context_data': {}
-                    }).execute()
-                except Exception as e:
-                    print(f"Database save error: {e}")
-        else:
-            # Send greeting message
-            ai_response = await get_contextual_ai_response("Start conversation", request.ai_model, [], session_id)
-        
-        # Check if response has bot config
-        is_ready = "ready_to_create" in ai_response
-        bot_config = None
-        if is_ready:
+        # Save messages to database
+        if supabase_admin and request.initial_prompt:
             try:
-                if "```json" in ai_response:
-                    json_start = ai_response.find("```json") + 7
-                    json_end = ai_response.find("```", json_start)
-                    if json_end != -1:
-                        json_str = ai_response[json_start:json_end].strip()
-                        bot_config = json.loads(json_str)
-            except Exception:
-                is_ready = False
+                # Save user message
+                supabase_admin.rpc('save_chat_message', {
+                    'p_user_id': request.user_id,
+                    'p_session_id': session_id,
+                    'p_message_type': 'user', 
+                    'p_message_content': request.initial_prompt,
+                    'p_ai_model': request.ai_model,
+                    'p_bot_creation_stage': 'initial'
+                }).execute()
+                
+                # Save AI response
+                supabase_admin.rpc('save_chat_message', {
+                    'p_user_id': request.user_id,
+                    'p_session_id': session_id,
+                    'p_message_type': 'assistant',
+                    'p_message_content': response,
+                    'p_ai_model': request.ai_model,
+                    'p_bot_creation_stage': 'initial'
+                }).execute()
+            except Exception as e:
+                print(f"Database save error: {e}")
         
         return {
             "success": True,
             "session_id": session_id,
             "ai_model": request.ai_model,
-            "message": ai_response,
-            "stage": "initial",
-            "ready_to_create": is_ready,
-            "bot_config": bot_config if is_ready else None
+            "message": response,
+            "ready_to_create": "ready_to_create" in response,
+            "bot_config": None
         }
         
     except Exception as e:
-        print(f"Error starting chat session: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to start chat session: {str(e)}")
+        print(f"Session start error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/ai-bot-chat/send-message")
+@router.post("/ai-bot-chat/send-message") 
 async def send_chat_message(request: ChatMessageRequest):
-    """Send a message in an existing chat session and get AI response."""
+    """Send message in chat session."""
     try:
-        # Get conversation history for context
+        # Get conversation history
         conversation_history = []
         if supabase_admin:
             try:
@@ -406,77 +378,69 @@ async def send_chat_message(request: ChatMessageRequest):
                     'p_user_id': request.user_id,
                     'p_session_id': request.session_id
                 }).execute()
-                if history_response.data:
-                    conversation_history = history_response.data
+                conversation_history = history_response.data or []
             except Exception as e:
-                print(f"Error getting conversation history: {e}")
+                print(f"History retrieval error: {e}")
         
-        # Generate AI response with context
-        ai_response = await get_contextual_ai_response(
+        # Generate contextual response
+        response = await get_contextual_ai_response(
             request.message_content,
             request.ai_model,
             conversation_history,
-            request.session_id  # Pass session_id for context continuity
+            request.session_id
         )
         
-        # Save user message to database
+        # Save messages to database
         if supabase_admin:
             try:
+                # Save user message
                 supabase_admin.rpc('save_chat_message', {
                     'p_user_id': request.user_id,
                     'p_session_id': request.session_id,
                     'p_message_type': 'user',
                     'p_message_content': request.message_content,
                     'p_ai_model': request.ai_model,
-                    'p_bot_creation_stage': request.bot_creation_stage,
-                    'p_context_data': {}
+                    'p_bot_creation_stage': request.bot_creation_stage
                 }).execute()
-            except Exception as e:
-                print(f"Database save error: {e}")
-            
-            # Save AI response to database
-            try:
+                
+                # Save AI response
                 supabase_admin.rpc('save_chat_message', {
                     'p_user_id': request.user_id,
                     'p_session_id': request.session_id,
                     'p_message_type': 'assistant',
-                    'p_message_content': ai_response,
+                    'p_message_content': response,
                     'p_ai_model': request.ai_model,
-                    'p_bot_creation_stage': request.bot_creation_stage,
-                    'p_context_data': {}
+                    'p_bot_creation_stage': request.bot_creation_stage
                 }).execute()
             except Exception as e:
                 print(f"Database save error: {e}")
         
-        # Check if bot configuration is ready
-        is_ready = False
+        # Check if bot is ready
+        is_ready = "ready_to_create" in response
         bot_config = None
         
-        try:
-            if "```json" in ai_response:
-                json_start = ai_response.find("```json") + 7
-                json_end = ai_response.find("```", json_start)
-                if json_end != -1:
-                    json_str = ai_response[json_start:json_end].strip()
-                    config_data = json.loads(json_str)
-                    if config_data.get("ready_to_create", False):
-                        bot_config = config_data
-                        is_ready = True
-        except Exception as json_error:
-            print(f"No valid JSON configuration found: {json_error}")
+        if is_ready:
+            try:
+                if "```json" in response:
+                    json_start = response.find("```json") + 7
+                    json_end = response.find("```", json_start)
+                    if json_end != -1:
+                        json_str = response[json_start:json_end].strip()
+                        bot_config = json.loads(json_str)
+            except Exception as e:
+                print(f"JSON parse error: {e}")
         
         return {
             "success": True,
             "session_id": request.session_id,
-            "message": ai_response,
-            "stage": request.bot_creation_stage,
+            "message": response,
             "ready_to_create": is_ready,
-            "bot_config": bot_config if is_ready else None
+            "bot_config": bot_config
         }
         
     except Exception as e:
-        print(f"Error sending chat message: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to send message: {str(e)}")
+        print(f"Send message error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/ai-bot-chat/history/{session_id}")
 async def get_chat_history(session_id: str, user_id: str):
