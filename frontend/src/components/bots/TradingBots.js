@@ -488,16 +488,9 @@ const TradingBots = () => {
     console.log('Editing bot:', bot);
     setEditingBot(bot);
     
-    // Determine bot creation method based on tags or properties
-    const isAIGenerated = bot.tags?.includes('ai_generated') || bot.creationMethod === 'ai';
-    
-    if (isAIGenerated) {
-      // Open AI Creator for editing
-      setShowAICreator(true);
-    } else {
-      // Open Advanced Bot Builder for editing
-      setShowAdvancedBuilder(true);
-    }
+    // Now ALL bots are edited using AI Creator - no more advanced settings
+    // Open AI Creator for editing with existing bot context
+    setShowAICreator(true);
   };
 
   const handleUpdateAPI = async (botId, apiData) => {
