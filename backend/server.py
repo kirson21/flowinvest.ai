@@ -19,7 +19,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Import routes (using httpx-based supabase client - no Rust dependencies)
-from routes import auth, webhook, verification, ai_bots, nowpayments, google_sheets, custom_urls, ai_bot_chat
+from routes import auth, webhook, verification, ai_bots, nowpayments, google_sheets, custom_urls, ai_bot_chat_fixed as ai_bot_chat
 # Crypto payments temporarily disabled due to pydantic v2 conflicts
 # from routes import crypto_payments
 
