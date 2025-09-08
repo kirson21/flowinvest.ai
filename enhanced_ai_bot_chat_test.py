@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://flowinvest-ai.onrender.com/api"
+BACKEND_URL = "http://localhost:8001/api"
 TEST_USER_ID = "test-user-" + str(uuid.uuid4())[:8]
 
 def print_test_header(test_name):
