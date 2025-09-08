@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://url-wizard.preview.emergentagent.com"
+BACKEND_URL = "https://ai-flow-invest.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_data_integrity():

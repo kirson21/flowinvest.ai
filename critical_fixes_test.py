@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://url-wizard.preview.emergentagent.com"
+BACKEND_URL = "https://ai-flow-invest.preview.emergentagent.com"
 TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
 
 def test_critical_fixes():

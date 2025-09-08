@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Get backend URL from environment
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://url-wizard.preview.emergentagent.com';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://ai-flow-invest.preview.emergentagent.com';
 
 class CustomUrlsService {
   constructor() {

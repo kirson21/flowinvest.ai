@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://url-wizard.preview.emergentagent.com/api"
+BACKEND_URL = "https://ai-flow-invest.preview.emergentagent.com/api"
 EXISTING_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"  # Known existing user
 INVALID_USER_ID = "invalid-user-id-12345"
 

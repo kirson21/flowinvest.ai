@@ -16,7 +16,7 @@ import time
 from datetime import datetime
 
 # Configuration - Use the frontend URL from environment
-BACKEND_URL = "https://url-wizard.preview.emergentagent.com"
+BACKEND_URL = "https://ai-flow-invest.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test user ID from the review request
