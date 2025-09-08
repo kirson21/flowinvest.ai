@@ -239,123 +239,184 @@ class ConversationTracker:
         }
         prefix = model_names.get(ai_model, '🤖 **Trading Expert**')
         
-        # CRITICAL: Check if user provided comprehensive initial request
-        if (state['has_comprehensive_request'] and state['question_count'] == 0 and 
-            state['has_leverage'] and state['has_instruments'] and state['has_trading_pair']):
-            
-            print("🚀 COMPREHENSIVE REQUEST DETECTED - Proceeding directly to bot creation")
-            
-            # User provided detailed specs upfront - create bot immediately
-            return self.create_bot_specification(prefix, state, current_message)
+    def generate_next_question(self, ai_model: str, state: Dict, current_message: str) -> tuple[str, bool, Dict]:
+        """Generate the next appropriate question based on conversation state."""
         
-        # Check if we have all basic information needed to create bot
-        basic_info_complete = (state['has_capital'] and state['has_instruments'] and 
-                             state['has_risk'] and state['has_strategy'] and state['has_trading_pair'])
+        model_names = {
+            'gpt-4o': '🧠 **GPT-4 Trading Expert**',
+            'claude-3-7-sonnet': '🎭 **Claude Trading Specialist**', 
+            'gemini-2.0-flash': '💎 **Gemini Quant Expert**'
+        }
+        prefix = model_names.get(ai_model, '🤖 **Trading Expert**')
         
-        if basic_info_complete:
-            # Check if user wants advanced features or if we should ask about them
-            has_advanced_info = (state['has_entry_conditions'] or state['has_exit_conditions'] or 
-                               state['has_grid_settings'] or state['has_order_management'])
+        # NEVER auto-create bots - always have conversation first
+        # Analyze what user provided and ask about what's missing
+        
+        provided_info = []
+        missing_info = []
+        
+        # Check what information was provided in user's message
+        if state['has_trading_pair'] or state['has_coin']:
+            provided_info.append("Trading pair/coin")
+        else:
+            missing_info.append("trading pair")
             
-            # If user has provided advanced info or explicitly declined, create bot
-            wants_advanced = 'yes' in current_message.lower() or 'advanced' in current_message.lower()
-            declines_advanced = any(word in current_message.lower() for word in ['no', 'basic', 'simple', 'skip', 'create'])
+        if state['has_leverage'] or state['has_instruments']:
+            provided_info.append("Leverage/Trade type")
+        else:
+            missing_info.append("leverage and trade type")
             
-            if has_advanced_info or declines_advanced or state['question_count'] >= 8:
-                # Generate bot configuration from user inputs
-                return self.create_bot_specification(prefix, state, current_message)
-            elif not wants_advanced and state['question_count'] < 6:
-                # Ask if they want advanced features
+        if state['has_indicators']:
+            provided_info.append("Technical indicators")
+        else:
+            missing_info.append("technical indicators")
+            
+        if state['has_capital']:
+            provided_info.append("Capital")
+        else:
+            missing_info.append("trading capital")
+            
+        if state['has_risk']:
+            provided_info.append("Risk parameters")
+        else:
+            missing_info.append("risk management")
+            
+        if state['has_strategy']:
+            provided_info.append("Strategy type")
+        else:
+            missing_info.append("strategy type")
+        
+        # If this is the first question, acknowledge what user provided and ask about first missing item
+        if state['question_count'] == 0 and provided_info:
+            # User provided some information - acknowledge and ask about missing
+            acknowledgment = f"Great! I see you want: **{', '.join(provided_info)}**. "
+            
+            # Ask about the first missing critical parameter
+            if "trading capital" in missing_info:
                 return f"""{prefix}
 
-**🎯 Ready to Create Your Professional Bot!**
+{acknowledgment}
 
-I have enough information to create a solid trading bot. Would you like to add advanced features?
+**Question 1: Trading Capital**
 
-🔹 **Entry Conditions**: Custom buy signals using RSI, MACD, Bollinger Bands
-🔹 **Exit Strategy**: Sophisticated take-profit and stop-loss rules  
-🔹 **Grid Trading**: Automated order grid with martingale scaling
-🔹 **Risk Controls**: Advanced position sizing and drawdown protection
+To design proper position sizing, I need to know:
+• What's your trading capital (in USD)?
 
-Type **"add advanced features"** or **"create basic bot"** to proceed.""", False, {}
-            else:
-                return self.create_bot_specification(prefix, state, current_message)
-        
-        # Ask for missing basic information in order
-        if not (state['has_capital'] or state['has_leverage']):
-            return f"""{prefix}
+Example: "$10,000" or "5k USD"
 
-**Question 1: Trading Capital & Leverage**
+Please tell me your capital amount.""", False, {}
 
-I need to understand your capital to design appropriate position sizing:
+            elif "leverage and trade type" in missing_info:
+                return f"""{prefix}
 
-• What is your trading capital (in USD)?
-• What leverage do you prefer? (1x=spot, 2-5x=moderate, 5x+=aggressive)
+{acknowledgment}
 
-Example: "$10,000 with 3x leverage"
+**Question 1: Leverage & Trade Type**
 
-Please tell me your capital and leverage preference.""", False, {}
-            
-        elif not (state['has_instruments'] or state['has_trading_pair']):
-            return f"""{prefix}
+I need to understand:
+• What leverage do you prefer? (1x=spot, 2-5x=moderate, 5x+=aggressive)  
+• Spot trading or futures trading?
 
-**Question 2: Trading Instruments & Pairs**
+Example: "3x leverage, futures trading"
 
-Perfect! Now I need to know your trading preferences:
+Please tell me your leverage and trade type preference.""", False, {}
 
-• **Spot Trading**: Safer, no liquidation risk, lower leverage
-• **Futures Trading**: Higher leverage, short selling, liquidation risk
-• **Trading Pairs**: BTC/USDT, ETH/USDT, altcoins, or specific preferences?
+            elif "risk management" in missing_info:
+                return f"""{prefix}
 
-Which instruments and pairs align with your goals?""", False, {}
-            
-        elif not state['has_strategy']:
-            return f"""{prefix}
+{acknowledgment}
 
-**Question 3: Trading Strategy & Timeframe**
+**Question 1: Risk Management**
 
-What trading approach interests you?
+For safety, I need to know:
+• What % risk per trade? (1-2% conservative, 3-5% aggressive)
+• Stop loss percentage?
+• Take profit target?
 
-• **Momentum**: Trend following, breakout trading (15m-4h)
-• **Scalping**: High-frequency, small quick profits (1m-15m)  
-• **Mean Reversion**: Buy dips, sell peaks (1h-1d)
-• **Grid Trading**: Automated range trading (any timeframe)
+Example: "2% risk per trade, 3% stop loss, 5% profit target"
+
+What are your risk preferences?""", False, {}
+
+            elif "strategy type" in missing_info:
+                return f"""{prefix}
+
+{acknowledgment}
+
+**Question 1: Strategy Type**
+
+What trading strategy do you prefer?
+• **Scalping**: Quick profits (1-5 minutes)
+• **Swing Trading**: Medium-term positions (hours to days)
+• **Grid Trading**: Range-bound automated trading
 • **DCA**: Dollar cost averaging with safety orders
 
-What strategy and timeframe suit your goals?""", False, {}
+Which strategy interests you?""", False, {}
+
+        # Continue with missing information in logical order
+        if not state['has_capital']:
+            return f"""{prefix}
+
+**Trading Capital**
+
+I need to know your trading capital for proper position sizing:
+
+Example: "$10,000" or "5k USD"
+
+What's your trading capital?""", False, {}
+            
+        elif not (state['has_leverage'] and state['has_instruments']):
+            return f"""{prefix}
+
+**Leverage & Trade Type**
+
+Please specify:
+• What leverage? (1x=spot, 2-5x=moderate, 5x+=aggressive)
+• Spot or futures trading?
+
+Example: "3x leverage, futures"
+
+Your preference?""", False, {}
             
         elif not state['has_risk']:
             return f"""{prefix}
 
-**Question 4: Risk Management**
+**Risk Management**
 
-Critical for protecting your capital:
+Critical for safety:
+• Risk per trade %? (1-2% conservative, 3-5% aggressive)
+• Stop loss %?
+• Take profit %?
 
-• Max risk per trade? Conservative: 1-2%, Moderate: 2-3%, Aggressive: 3-5%
-• Stop loss percentage? (e.g., 2-5% depending on strategy)
-• Take profit target? (e.g., 1-3% for scalping, 5-20% for swing)
-• Max concurrent positions? (1-3 recommended)
+Example: "2% risk, 3% stop loss, 5% profit"
 
-Example: "2% risk per trade, 3% stop loss, 4% take profit, max 2 positions"
+Your risk settings?""", False, {}
+            
+        elif not state['has_strategy']:
+            return f"""{prefix}
 
-What are your risk management preferences?""", False, {}
+**Strategy Type**
+
+What trading approach?
+• **Scalping**: Quick profits
+• **Swing**: Medium-term  
+• **Grid**: Range trading
+• **DCA**: Dollar averaging
+
+Your strategy preference?""", False, {}
             
         elif not state['has_botname']:
             return f"""{prefix}
 
-**Question 5: Bot Identity**
+**Bot Name**
 
-Finally, let's name your trading bot:
+Almost done! What would you like to name your bot?
 
-Examples: 
-• "ETH Futures Pro" (for ETH futures trading)
-• "Grid Master Bot" (for grid trading)
-• "Volume Scalper" (for volume-based scalping)
-• "Conservative Trader" (for low-risk strategies)
+Examples: "ETH Futures Pro", "Volume Scalper", "Grid Master"
 
-What descriptive name do you want for your bot?""", False, {}
+Your bot name?""", False, {}
             
         else:
+            # All information collected - create bot
             return self.create_bot_specification(prefix, state, current_message)
     
     def create_bot_specification(self, prefix: str, state: Dict, current_message: str) -> tuple[str, bool, Dict]:
