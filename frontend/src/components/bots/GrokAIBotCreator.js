@@ -206,26 +206,36 @@ Please help me modify this bot. What would you like to change?`;
     try {
       setChatLoading(true);
       
+      // Extract bot config - handle both nested and direct formats
+      let botConfig = finalBotConfig;
+      if (finalBotConfig.bot_config) {
+        botConfig = finalBotConfig.bot_config;
+      }
+      
+      console.log('Creating bot with config:', botConfig);
+      
       const response = await aiBotChatService.createAiBot(
         user?.id,
         chatSessionId,
         aiModel,
-        finalBotConfig,
-        finalBotConfig.strategy_config || {},
-        finalBotConfig.risk_management || {}
+        botConfig,
+        botConfig.strategy_config || botConfig.advanced_settings || {},
+        botConfig.risk_management || {}
       );
       
       if (response.success) {
         // Set the generated bot for preview
         setGeneratedBot({
           id: response.bot_id,
-          ...finalBotConfig.bot_config,
-          strategy: finalBotConfig.strategy_config || {},
-          riskManagement: finalBotConfig.risk_management || {},
-          aiModel: aiModel
+          ...botConfig,
+          strategy: botConfig.strategy_type || botConfig.strategy || 'ai_generated',
+          riskManagement: botConfig.risk_management || {},
+          aiModel: aiModel,
+          advanced_settings: botConfig.advanced_settings || {}
         });
         setStep('preview');
         setShowChat(false);
+        setReadyToCreateBot(false); // Reset state
       } else {
         setError('Failed to create bot: ' + response.message);
       }
