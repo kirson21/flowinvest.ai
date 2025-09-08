@@ -144,10 +144,26 @@ Please help me modify this bot. What would you like to change?`;
         
         setChatMessages(prev => [...prev, aiMessage]);
         
-        // Check if bot is ready to create
+        // Check if bot is ready to create - enhanced detection
         if (response.ready_to_create && response.bot_config) {
+          console.log('✅ Bot is ready to create:', response.bot_config);
           setReadyToCreateBot(true);
           setFinalBotConfig(response.bot_config);
+        } else {
+          // Also check if the AI message contains JSON config
+          try {
+            const jsonMatch = response.message.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+            if (jsonMatch) {
+              const jsonConfig = JSON.parse(jsonMatch[1]);
+              if (jsonConfig.ready_to_create && jsonConfig.bot_config) {
+                console.log('✅ Found bot config in message:', jsonConfig);
+                setReadyToCreateBot(true);
+                setFinalBotConfig(jsonConfig);
+              }
+            }
+          } catch (e) {
+            console.log('No JSON config found in message');
+          }
         }
       } else {
         setError('Failed to send message');
