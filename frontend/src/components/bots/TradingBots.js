@@ -1202,6 +1202,7 @@ const TradingBots = () => {
                 <MessageSquare size={16} className="mr-2" />
                 AI Creator
               </Button>
+              {/* HIDDEN: Advanced Settings - keeping code in repository for potential future use 
               <Button
                 onClick={async () => {
                   // Check manual bot creation limits before opening Advanced Builder
@@ -1224,6 +1225,7 @@ const TradingBots = () => {
                 <Settings size={16} className="mr-2" />
                 Advanced Settings
               </Button>
+              */}
             </div>
           </div>
 
