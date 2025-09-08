@@ -95,6 +95,29 @@ Please help me modify this bot. What would you like to change?`;
         });
         
         setChatMessages(initialMessages);
+        
+        // Check if bot is immediately ready to create from comprehensive initial request
+        if (response.ready_to_create && response.bot_config) {
+          console.log('✅ Bot ready immediately from initial request:', response.bot_config);
+          setReadyToCreateBot(true);
+          setFinalBotConfig(response.bot_config);
+        } else {
+          // Also check if the AI message contains JSON config
+          try {
+            const jsonMatch = response.message.match(/```json\s*(\{[\s\S]*?\})\s*```/);
+            if (jsonMatch) {
+              const jsonConfig = JSON.parse(jsonMatch[1]);
+              if (jsonConfig.ready_to_create && jsonConfig.bot_config) {
+                console.log('✅ Found bot config in initial message:', jsonConfig);
+                setReadyToCreateBot(true);
+                setFinalBotConfig(jsonConfig);
+              }
+            }
+          } catch (e) {
+            console.log('No JSON config found in initial message');
+          }
+        }
+        
         setShowChat(true);
       } else {
         setError('Failed to start chat session');
