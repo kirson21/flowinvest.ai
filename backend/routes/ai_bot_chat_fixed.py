@@ -229,9 +229,28 @@ class ConversationTracker:
         }
         prefix = model_names.get(ai_model, '🤖 **Trading Expert**')
         
+    def generate_next_question(self, ai_model: str, state: Dict, current_message: str) -> tuple[str, bool, Dict]:
+        """Generate the next appropriate question based on conversation state."""
+        
+        model_names = {
+            'gpt-4o': '🧠 **GPT-4 Trading Expert**',
+            'claude-3-7-sonnet': '🎭 **Claude Trading Specialist**', 
+            'gemini-2.0-flash': '💎 **Gemini Quant Expert**'
+        }
+        prefix = model_names.get(ai_model, '🤖 **Trading Expert**')
+        
+        # CRITICAL: Check if user provided comprehensive initial request
+        if (state['has_comprehensive_request'] and state['question_count'] == 0 and 
+            state['has_leverage'] and state['has_instruments'] and state['has_trading_pair']):
+            
+            print("🚀 COMPREHENSIVE REQUEST DETECTED - Proceeding directly to bot creation")
+            
+            # User provided detailed specs upfront - create bot immediately
+            return self.create_bot_specification(prefix, state, current_message)
+        
         # Check if we have all basic information needed to create bot
         basic_info_complete = (state['has_capital'] and state['has_instruments'] and 
-                             state['has_risk'] and state['has_strategy'] and state['has_botname'])
+                             state['has_risk'] and state['has_strategy'] and state['has_trading_pair'])
         
         if basic_info_complete:
             # Check if user wants advanced features or if we should ask about them
@@ -240,7 +259,7 @@ class ConversationTracker:
             
             # If user has provided advanced info or explicitly declined, create bot
             wants_advanced = 'yes' in current_message.lower() or 'advanced' in current_message.lower()
-            declines_advanced = any(word in current_message.lower() for word in ['no', 'basic', 'simple', 'skip'])
+            declines_advanced = any(word in current_message.lower() for word in ['no', 'basic', 'simple', 'skip', 'create'])
             
             if has_advanced_info or declines_advanced or state['question_count'] >= 8:
                 # Generate bot configuration from user inputs
@@ -249,21 +268,21 @@ class ConversationTracker:
                 # Ask if they want advanced features
                 return f"""{prefix}
 
-**Advanced Configuration Options**
+**🎯 Ready to Create Your Professional Bot!**
 
-Your basic bot is ready! Would you like to configure advanced features?
+I have enough information to create a solid trading bot. Would you like to add advanced features?
 
 🔹 **Entry Conditions**: Custom buy signals using RSI, MACD, Bollinger Bands
 🔹 **Exit Strategy**: Sophisticated take-profit and stop-loss rules  
 🔹 **Grid Trading**: Automated order grid with martingale scaling
 🔹 **Risk Controls**: Advanced position sizing and drawdown protection
 
-Type **"yes"** for professional features or **"create basic bot"** to proceed with current settings.""", False, {}
+Type **"add advanced features"** or **"create basic bot"** to proceed.""", False, {}
             else:
                 return self.create_bot_specification(prefix, state, current_message)
         
         # Ask for missing basic information in order
-        if not state['has_capital']:
+        if not (state['has_capital'] or state['has_leverage']):
             return f"""{prefix}
 
 **Question 1: Trading Capital & Leverage**
@@ -271,13 +290,13 @@ Type **"yes"** for professional features or **"create basic bot"** to proceed wi
 I need to understand your capital to design appropriate position sizing:
 
 • What is your trading capital (in USD)?
-• What leverage do you want? (1x=spot, 2-5x=moderate, 5x+=aggressive)
+• What leverage do you prefer? (1x=spot, 2-5x=moderate, 5x+=aggressive)
 
 Example: "$10,000 with 3x leverage"
 
 Please tell me your capital and leverage preference.""", False, {}
             
-        elif not state['has_instruments']:
+        elif not (state['has_instruments'] or state['has_trading_pair']):
             return f"""{prefix}
 
 **Question 2: Trading Instruments & Pairs**
@@ -329,10 +348,10 @@ What are your risk management preferences?""", False, {}
 Finally, let's name your trading bot:
 
 Examples: 
-• "BTC Momentum Pro" (for momentum strategy)
-• "Altcoin Grid Master" (for grid trading)
-• "ETH Scalping Engine" (for scalping)
-• "Conservative DCA Bot" (for dollar cost averaging)
+• "ETH Futures Pro" (for ETH futures trading)
+• "Grid Master Bot" (for grid trading)
+• "Volume Scalper" (for volume-based scalping)
+• "Conservative Trader" (for low-risk strategies)
 
 What descriptive name do you want for your bot?""", False, {}
             
