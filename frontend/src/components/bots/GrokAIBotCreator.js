@@ -167,25 +167,67 @@ Please help me modify this bot. What would you like to change?`;
         
         setChatMessages(prev => [...prev, aiMessage]);
         
+        console.log('🔍 Checking response for bot creation readiness:', response);
+        
         // Check if bot is ready to create - enhanced detection
         if (response.ready_to_create && response.bot_config) {
-          console.log('✅ Bot is ready to create:', response.bot_config);
+          console.log('✅ Bot is ready to create from response.ready_to_create:', response.bot_config);
           setReadyToCreateBot(true);
           setFinalBotConfig(response.bot_config);
         } else {
+          // Also check if the AI message contains ready to create indicator
+          const messageContent = response.message.toLowerCase();
+          
+          // Look for completion phrases
+          const completionPhrases = [
+            'your bot is ready',
+            'bot is ready for deployment',
+            'trading bot created',
+            'bot specification complete',
+            'ready for deployment',
+            'institutional-grade trading bot is ready'
+          ];
+          
+          const hasCompletionPhrase = completionPhrases.some(phrase => messageContent.includes(phrase));
+          
           // Also check if the AI message contains JSON config
           try {
             const jsonMatch = response.message.match(/```json\s*(\{[\s\S]*?\})\s*```/);
             if (jsonMatch) {
               const jsonConfig = JSON.parse(jsonMatch[1]);
-              if (jsonConfig.ready_to_create && jsonConfig.bot_config) {
+              console.log('🔍 Found JSON in message:', jsonConfig);
+              
+              if ((jsonConfig.ready_to_create && jsonConfig.bot_config) || hasCompletionPhrase) {
                 console.log('✅ Found bot config in message:', jsonConfig);
                 setReadyToCreateBot(true);
                 setFinalBotConfig(jsonConfig);
               }
+            } else if (hasCompletionPhrase) {
+              // AI says bot is ready but no JSON - show ready state anyway
+              console.log('✅ AI indicates bot is ready (completion phrase detected)');
+              setReadyToCreateBot(true);
+              // Use a minimal config if no JSON found
+              setFinalBotConfig({
+                ready_to_create: true,
+                bot_config: {
+                  name: "AI Generated Bot",
+                  description: "Bot created from conversation"
+                }
+              });
             }
           } catch (e) {
-            console.log('No JSON config found in message');
+            console.log('❌ JSON parsing error:', e);
+            if (hasCompletionPhrase) {
+              console.log('✅ Bot ready based on completion phrase');
+              setReadyToCreateBot(true);
+              setFinalBotConfig({
+                ready_to_create: true,
+                bot_config: {
+                  name: "AI Generated Bot",
+                  description: "Bot created from conversation"
+                }
+              });
+            }
           }
         }
       } else {
