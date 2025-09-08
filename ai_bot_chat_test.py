@@ -24,8 +24,8 @@ from datetime import datetime
 BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://ai-flow-invest.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-# Test user ID
-TEST_USER_ID = "test-user-" + str(uuid.uuid4())[:8]
+# Test user ID - using proper UUID format
+TEST_USER_ID = str(uuid.uuid4())
 
 class AIBotChatTester:
     def __init__(self):
