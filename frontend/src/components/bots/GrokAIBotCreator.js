@@ -50,10 +50,28 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
       setChatLoading(true);
       setError('');
       
+      // For editing mode, create context from existing bot
+      let initialPrompt = prompt.trim();
+      if (editingBot && !initialPrompt) {
+        // Create context from existing bot configuration
+        const botContext = `I want to modify my existing trading bot: "${editingBot.name}". 
+
+Current configuration:
+- Strategy: ${editingBot.strategy || 'Unknown'}
+- Trading Pair: ${editingBot.trading_pair || (editingBot.base_coin + '/' + editingBot.quote_coin) || 'BTC/USDT'}
+- Trade Type: ${editingBot.trade_type || editingBot.instruments || 'Spot'}
+- Risk Level: ${editingBot.risk_level || 'Medium'}
+- Description: ${editingBot.description || 'No description'}
+
+Please help me modify this bot. What would you like to change?`;
+        initialPrompt = botContext;
+        setPrompt(botContext);
+      }
+      
       const response = await aiBotChatService.startChatSession(
         user?.id,
         aiModel,
-        prompt.trim() || null
+        initialPrompt || null
       );
       
       if (response.success) {
@@ -61,10 +79,10 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
         
         // Add the AI's initial message to chat
         const initialMessages = [];
-        if (prompt.trim()) {
+        if (initialPrompt) {
           initialMessages.push({
             type: 'user',
-            content: prompt.trim(),
+            content: initialPrompt,
             timestamp: new Date().toISOString()
           });
         }
