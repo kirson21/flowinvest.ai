@@ -176,17 +176,29 @@ class ConversationTracker:
         
         all_user_input = ' '.join(user_messages).lower()
         
-        # Determine what information has been provided
+        # Enhanced state detection for professional trading parameters
         state = {
-            'has_capital': any(word in all_user_input for word in ['$', 'capital', '1000', '5000', '10000', '50000', '100000', 'k']),
-            'has_leverage': any(word in all_user_input for word in ['leverage', 'x', 'futures', 'margin']),
-            'has_instruments': any(word in all_user_input for word in ['spot', 'futures', 'margin']),
-            'has_risk': any(word in all_user_input for word in ['risk', '%', 'conservative', 'aggressive', 'drawdown']),
-            'has_strategy': any(word in all_user_input for word in ['momentum', 'scalping', 'mean', 'trend', 'grid', 'arbitrage']),
-            'has_timeframe': any(word in all_user_input for word in ['minute', 'hour', 'daily', 'intraday', 'swing']),
+            # Basic Requirements
+            'has_capital': any(word in all_user_input for word in ['$', 'capital', '1000', '5000', '10000', '50000', '100000', 'k', 'usd', 'budget']),
+            'has_leverage': any(word in all_user_input for word in ['leverage', 'x', 'futures', 'margin', '2x', '5x', '10x']),
+            'has_instruments': any(word in all_user_input for word in ['spot', 'futures', 'margin', 'derivatives', 'perpetual']),
+            'has_risk': any(word in all_user_input for word in ['risk', '%', 'conservative', 'aggressive', 'drawdown', 'stop loss', 'take profit']),
+            'has_strategy': any(word in all_user_input for word in ['momentum', 'scalping', 'mean', 'trend', 'grid', 'arbitrage', 'dca', 'swing']),
+            'has_timeframe': any(word in all_user_input for word in ['minute', 'hour', 'daily', 'intraday', 'swing', '1m', '5m', '15m', '1h', '4h']),
             'has_botname': len([msg for msg in conversation_history if 'name' in msg.get('message_content', '').lower()]) > 0,
+            
+            # Advanced Parameters Detection
+            'has_entry_conditions': any(word in all_user_input for word in ['entry', 'buy signal', 'entry condition', 'trigger', 'rsi', 'macd', 'bollinger']),
+            'has_exit_conditions': any(word in all_user_input for word in ['exit', 'sell signal', 'exit condition', 'profit target', 'stop loss']),
+            'has_indicators': any(word in all_user_input for word in ['rsi', 'macd', 'sma', 'ema', 'bollinger', 'stochastic', 'williams']),
+            'has_grid_settings': any(word in all_user_input for word in ['grid', 'orders', 'spacing', 'martingale', 'dca', 'averaging']),
+            'has_risk_management': any(word in all_user_input for word in ['stop loss', 'take profit', 'drawdown', 'position size', 'risk per trade']),
+            'has_order_management': any(word in all_user_input for word in ['order size', 'base order', 'safety order', 'position sizing']),
+            
+            # Context for AI decision making
             'user_input': all_user_input,
-            'question_count': len([msg for msg in conversation_history if msg.get('message_type') == 'assistant'])
+            'question_count': len([msg for msg in conversation_history if msg.get('message_type') == 'assistant']),
+            'is_editing_mode': 'modify' in all_user_input or 'edit' in all_user_input or 'change' in all_user_input
         }
         
         return state
