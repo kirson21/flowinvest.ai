@@ -256,7 +256,7 @@ class ConversationTracker:
         missing_info = []
         
         # Check what information was provided in user's message
-        if state['has_trading_pair'] or state['has_coin']:
+        if state['has_trading_pair']:
             provided_info.append("Trading pair/coin")
         else:
             missing_info.append("trading pair")
