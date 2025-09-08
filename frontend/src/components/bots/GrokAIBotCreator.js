@@ -349,33 +349,33 @@ Please help me modify this bot. What would you like to change?`;
     }
   };
 
-  const handleSaveBot = () => {
-    if (generatedBot && onSave) {
-      // For AI-generated bots, use the AI bots table structure
-      const aiBot = {
-        name: generatedBot.name || generatedBot.botName || 'AI Generated Bot',
-        description: generatedBot.description || 'AI-powered trading bot',
-        strategy: generatedBot.strategy || generatedBot.strategy_type || 'ai_generated',
-        exchange: generatedBot.exchange || 'binance',
-        trading_pair: `${generatedBot.base_coin || 'BTC'}/${generatedBot.quote_coin || 'USDT'}`,
-        risk_level: generatedBot.risk_level || 'medium',
-        config: generatedBot,
-        type: 'ai_generated',
-        id: editingBot?.id,
-        // Add additional AI bot specific fields
-        ai_model: generatedBot.aiModel || aiModel,
-        bot_config: generatedBot,
-        strategy_config: generatedBot.strategy_config || generatedBot.strategy || {},
-        risk_management: generatedBot.risk_management || generatedBot.riskManagement || {},
-        base_coin: generatedBot.base_coin,
-        quote_coin: generatedBot.quote_coin,
-        trade_type: generatedBot.trade_type || 'spot',
-        instruments: generatedBot.instruments || 'spot',
-        trading_capital_usd: generatedBot.trading_capital_usd || 10000
-      };
-      
-      onSave(aiBot);
-      setStep('saved');
+  const handleSaveBot = async () => {
+    if (generatedBot) {
+      // Always save AI bots using the AI bot service (to user_ai_bots table)
+      try {
+        setChatLoading(true);
+        
+        // Create the bot using AI bot service
+        const response = await aiBotChatService.createAiBot(
+          user?.id,
+          chatSessionId || `manual-${Date.now()}`, // Use session ID or create one
+          aiModel,
+          generatedBot,
+          generatedBot.strategy_config || generatedBot.advanced_settings || {},
+          generatedBot.risk_management || {}
+        );
+        
+        if (response.success) {
+          setStep('saved');
+        } else {
+          setError('Failed to save bot: ' + response.message);
+        }
+      } catch (err) {
+        console.error('Error saving bot:', err);
+        setError('Failed to save bot: ' + err.message);
+      } finally {
+        setChatLoading(false);
+      }
     }
   };
 
