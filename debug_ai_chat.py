@@ -15,7 +15,8 @@ BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://ai-flow-invest.preview
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test user ID - using proper UUID format
-TEST_USER_ID = str(uuid.uuid4())
+# Test user ID - using existing user from database
+TEST_USER_ID = "cd0e9717-f85d-4726-81e9-f260394ead58"
 
 def test_conversation_flow():
     """Test the complete conversation flow step by step."""
