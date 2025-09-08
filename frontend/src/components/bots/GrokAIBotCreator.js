@@ -761,25 +761,31 @@ Please help me modify this bot. What would you like to change?`;
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Leverage:</span>
                       <span className="font-medium">
-                        {generatedBot.riskManagement?.leverage || 'N/A'}x
+                        {generatedBot.leverage || generatedBot.riskManagement?.leverage || generatedBot.advanced_settings?.risk_management?.leverage || 'N/A'}x
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Profit Target:</span>
                       <span className="font-medium text-green-600">
-                        +{generatedBot.riskManagement?.takeProfitPercent || generatedBot.profit_target || 'N/A'}%
+                        +{generatedBot.advanced_settings?.risk_management?.take_profit_percent || 
+                          generatedBot.riskManagement?.takeProfitPercent || 
+                          generatedBot.profit_target || 'N/A'}%
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Stop Loss:</span>
                       <span className="font-medium text-red-600">
-                        -{generatedBot.riskManagement?.stopLossPercent || generatedBot.stop_loss || 'N/A'}%
+                        -{generatedBot.advanced_settings?.risk_management?.stop_loss_percent || 
+                          generatedBot.riskManagement?.stopLossPercent || 
+                          generatedBot.stop_loss || 'N/A'}%
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Max Trades:</span>
                       <span className="font-medium">
-                        {generatedBot.riskManagement?.maxConcurrentTrades || generatedBot.advanced_settings?.max_positions || 'N/A'}
+                        {generatedBot.advanced_settings?.risk_management?.max_positions || 
+                         generatedBot.riskManagement?.maxConcurrentTrades || 
+                         generatedBot.max_positions || 'N/A'}
                       </span>
                     </div>
                   </CardContent>
