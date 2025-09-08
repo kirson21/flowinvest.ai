@@ -324,93 +324,247 @@ What descriptive name do you want for your bot?""", False, {}
             return self.create_bot_specification(prefix, state, current_message)
     
     def create_bot_specification(self, prefix: str, state: Dict, current_message: str) -> tuple[str, bool, Dict]:
-        """Create final bot specification based on user inputs."""
+        """Create comprehensive bot specification based on user inputs."""
         
         user_input = state['user_input'] + ' ' + current_message.lower()
         
-        # Extract actual user preferences
-        # Capital
+        # Extract trading parameters with intelligent defaults
+        
+        # Capital extraction
         capital = 10000
-        if '1000' in user_input or '1k' in user_input:
-            capital = 1000
-        elif '5000' in user_input or '5k' in user_input:
-            capital = 5000
-        elif '50000' in user_input or '50k' in user_input:
-            capital = 50000
-        elif '100000' in user_input or '100k' in user_input:
-            capital = 100000
-            
-        # Leverage
+        capital_matches = []
+        import re
+        numbers = re.findall(r'[\$]?(\d+)k?(?:\s*(?:usd|dollar|capital))?', user_input)
+        for num in numbers:
+            val = int(num)
+            if 'k' in user_input and val < 1000:
+                val *= 1000
+            if 1000 <= val <= 1000000:
+                capital = val
+                break
+        
+        # Leverage detection
         leverage = 1.0
-        if '2x' in user_input:
+        if any(x in user_input for x in ['2x', '2-5x']):
             leverage = 2.0
-        elif '3x' in user_input or '3-5x' in user_input:
+        elif any(x in user_input for x in ['3x', '3-5x']):
             leverage = 3.0
         elif '5x' in user_input:
             leverage = 5.0
         elif '10x' in user_input:
             leverage = 10.0
+        elif 'futures' in user_input and leverage == 1.0:
+            leverage = 3.0  # Default for futures
             
-        # Coin
+        # Coin selection
         coin = 'BTC'
-        if 'ethereum' in user_input or 'eth' in user_input:
+        if any(word in user_input for word in ['ethereum', 'eth/']):
             coin = 'ETH'
-        elif 'altcoin' in user_input or 'altcoins' in user_input:
+        elif any(word in user_input for word in ['altcoin', 'altcoins', 'alt', 'other coins']):
             coin = 'ALT'
-        elif 'solana' in user_input or 'sol' in user_input:
+        elif any(word in user_input for word in ['solana', 'sol/']):
             coin = 'SOL'
+        elif any(word in user_input for word in ['dogecoin', 'doge']):
+            coin = 'DOGE'
             
-        # Strategy
+        # Strategy detection
         strategy = 'momentum'
         if 'scalping' in user_input:
             strategy = 'scalping'
-        elif 'mean' in user_input:
+        elif any(word in user_input for word in ['mean reversion', 'mean', 'reversal']):
             strategy = 'mean_reversion'
-        elif 'grid' in user_input:
+        elif any(word in user_input for word in ['grid', 'range']):
             strategy = 'grid'
+        elif any(word in user_input for word in ['dca', 'dollar cost', 'averaging']):
+            strategy = 'dca'
+        elif any(word in user_input for word in ['swing', 'position']):
+            strategy = 'swing'
             
         # Trade type
         trade_type = 'spot'
-        if 'futures' in user_input:
+        if any(word in user_input for word in ['futures', 'perpetual', 'leverage']):
             trade_type = 'futures'
             
-        # Bot name - try to extract from latest message
-        bot_name = f"{coin} {strategy.title()} {trade_type.title()} Bot"
-        if len(current_message.split()) <= 5 and len(current_message) > 3:
-            bot_name = current_message.strip()
+        # Risk level detection
+        risk_level = 'medium'
+        if any(word in user_input for word in ['conservative', 'safe', 'low risk']):
+            risk_level = 'low'
+        elif any(word in user_input for word in ['aggressive', 'high risk', 'risky']):
+            risk_level = 'high'
+            
+        # Timeframe detection
+        timeframe = '15m'
+        if strategy == 'scalping':
+            timeframe = '5m'
+        elif strategy == 'swing':
+            timeframe = '4h'
+        elif any(word in user_input for word in ['1m', '1 minute']):
+            timeframe = '1m'
+        elif any(word in user_input for word in ['5m', '5 minute']):
+            timeframe = '5m'
+        elif any(word in user_input for word in ['1h', '1 hour']):
+            timeframe = '1h'
+        elif any(word in user_input for word in ['4h', '4 hour']):
+            timeframe = '4h'
+        elif any(word in user_input for word in ['1d', 'daily']):
+            timeframe = '1d'
+            
+        # Risk management parameters
+        stop_loss_percent = 3.0
+        take_profit_percent = 5.0
+        max_positions = 2
         
+        if risk_level == 'low':
+            stop_loss_percent = 2.0
+            take_profit_percent = 3.0
+            max_positions = 1
+        elif risk_level == 'high':
+            stop_loss_percent = 5.0
+            take_profit_percent = 8.0
+            max_positions = 3
+            
+        if strategy == 'scalping':
+            stop_loss_percent = 1.5
+            take_profit_percent = 2.0
+        elif strategy == 'swing':
+            stop_loss_percent = 5.0
+            take_profit_percent = 10.0
+            
+        # Bot name extraction or generation
+        bot_name = f"{coin} {strategy.title().replace('_', ' ')} Pro"
+        if len(current_message) < 50 and any(word in current_message.lower() for word in ['bot', 'trader', 'pro', 'master', 'engine']):
+            bot_name = current_message.strip()
+            
+        # Advanced settings based on user input
+        advanced_settings = {}
+        
+        # Entry conditions
+        entry_conditions = []
+        if state['has_indicators'] or state['has_entry_conditions']:
+            if 'rsi' in user_input:
+                entry_conditions.append("RSI below 30 (oversold)")
+            if 'macd' in user_input:
+                entry_conditions.append("MACD bullish crossover")
+            if 'bollinger' in user_input:
+                entry_conditions.append("Price touches lower Bollinger Band")
+            if 'sma' in user_input:
+                entry_conditions.append("Price above 20-period SMA")
+                
+        if not entry_conditions:  # Default entry conditions based on strategy
+            if strategy == 'momentum':
+                entry_conditions = ["Price breaks above resistance", "Volume confirms breakout"]
+            elif strategy == 'scalping':
+                entry_conditions = ["RSI oversold (< 30)", "Price at support level"]
+            elif strategy == 'mean_reversion':
+                entry_conditions = ["Price 2 standard deviations below mean", "RSI oversold"]
+            elif strategy == 'grid':
+                entry_conditions = ["Price within grid range", "Automatic grid order placement"]
+                
+        # Exit conditions
+        exit_conditions = []
+        if state['has_exit_conditions']:
+            exit_conditions.append(f"Take profit at {take_profit_percent}%")
+            exit_conditions.append(f"Stop loss at {stop_loss_percent}%")
+        else:
+            exit_conditions = [
+                f"Take profit: +{take_profit_percent}%",
+                f"Stop loss: -{stop_loss_percent}%",
+                "Trailing stop when profitable"
+            ]
+            
+        # Grid and order settings
+        grid_settings = {}
+        if strategy == 'grid' or state['has_grid_settings']:
+            grid_settings = {
+                "orders_count": 10,
+                "spacing_type": "linear",
+                "spacing_percentage": 2.0,
+                "martingale_multiplier": 1.2
+            }
+            
+        # Order management
+        order_management = {
+            "base_order_size": capital * 0.1,  # 10% of capital
+            "safety_order_size": capital * 0.05,  # 5% for DCA
+            "safety_orders_count": 3,
+            "price_deviation": 2.5
+        }
+        
+        if strategy == 'scalping':
+            order_management["base_order_size"] = capital * 0.05  # Smaller positions for scalping
+            
+        # Technical indicators
+        technical_indicators = {
+            "primary": "RSI" if strategy in ['scalping', 'mean_reversion'] else "MACD",
+            "interval": timeframe,
+            "signal_type": "bar_closing"
+        }
+        
+        # Risk management
+        risk_management = {
+            "stop_loss_percent": stop_loss_percent,
+            "take_profit_percent": take_profit_percent,
+            "max_positions": max_positions,
+            "risk_per_trade": min(capital * 0.02, 200),  # 2% or $200 max
+            "max_drawdown": capital * 0.15  # 15% max drawdown
+        }
+        
+        # Create comprehensive bot configuration
         bot_config = {
             "ready_to_create": True,
             "bot_config": {
                 "name": bot_name,
-                "description": f"Professional {strategy} bot for {coin} using {trade_type} trading with {leverage}x leverage",
-                "base_coin": coin, 
+                "description": f"Professional {strategy.replace('_', ' ')} bot for {coin} using {trade_type} trading with advanced risk management",
+                "base_coin": coin,
                 "quote_coin": "USDT",
                 "trade_type": trade_type,
                 "trading_capital_usd": capital,
-                "leverage_allowed": leverage,
+                "leverage": leverage,
                 "strategy_type": strategy,
-                "risk_level": "medium"
+                "timeframe": timeframe,
+                "risk_level": risk_level,
+                "advanced_settings": {
+                    "entry_conditions": entry_conditions,
+                    "exit_conditions": exit_conditions,
+                    "technical_indicators": technical_indicators,
+                    "grid_settings": grid_settings if grid_settings else None,
+                    "risk_management": risk_management,
+                    "order_management": order_management
+                }
             }
         }
         
+        # Generate professional summary
+        advanced_features_summary = ""
+        if entry_conditions:
+            advanced_features_summary += f"\n• **Entry Signals**: {', '.join(entry_conditions[:2])}"
+        if exit_conditions:
+            advanced_features_summary += f"\n• **Exit Strategy**: {take_profit_percent}% profit target, {stop_loss_percent}% stop loss"
+        if grid_settings:
+            advanced_features_summary += f"\n• **Grid Trading**: {grid_settings['orders_count']} orders with {grid_settings['spacing_percentage']}% spacing"
+            
         return f"""{prefix}
 
-**TRADING BOT SPECIFICATION COMPLETE**
+🚀 **PROFESSIONAL TRADING BOT CREATED**
 
-✅ **Based on YOUR specifications:**
-• Bot Name: **{bot_name}**  
-• Coin: **{coin}** (from your input)
-• Trade Type: **{trade_type.upper()}** (as you requested)
-• Leverage: **{leverage}x** (per your specification)
-• Capital: **${capital:,}**
-• Strategy: **{strategy.title()}**
+✅ **YOUR SPECIFICATIONS:**
+• **Bot Name**: {bot_name}
+• **Strategy**: {strategy.title().replace('_', ' ')} on {timeframe} timeframe
+• **Asset**: {coin}/USDT ({trade_type.upper()})
+• **Capital**: ${capital:,} with {leverage}x leverage
+• **Risk Level**: {risk_level.title()} ({stop_loss_percent}% stop loss)
+{advanced_features_summary}
+
+🛡️ **RISK PROTECTION:**
+• Max {max_positions} concurrent positions
+• Stop loss: {stop_loss_percent}% | Take profit: {take_profit_percent}%
+• Max drawdown protection: 15%
 
 ```json
-{json.dumps(bot_config, indent=2)}
+{json.dumps(bot_config["bot_config"], indent=2)}
 ```
 
-🚀 **Your bot follows your EXACT specifications and is ready!**""", True, bot_config
+**Your institutional-grade trading bot is ready for deployment!**""", True, bot_config
 
 # Initialize conversation tracker
 conversation_tracker = ConversationTracker()
