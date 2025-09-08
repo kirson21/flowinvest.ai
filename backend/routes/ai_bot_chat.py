@@ -220,9 +220,21 @@ class ConversationTracker:
         }
         prefix = model_names.get(ai_model, '🤖 **Trading Expert**')
         
-        # Check if we have all basic information needed to create bot
+        # Check if we have comprehensive information for immediate bot creation
+        has_comprehensive_info = (
+            state['has_leverage'] and state['has_instruments'] and 
+            (state['has_coin'] or state['has_strategy']) and
+            (state['has_indicators'] or state['has_risk'] or state['has_entry_conditions'])
+        )
+        
+        # Check if we have all basic information needed to create bot (traditional flow)
         basic_info_complete = (state['has_capital'] and state['has_instruments'] and 
                              state['has_risk'] and state['has_strategy'] and state['has_botname'])
+        
+        # If we have comprehensive info from the start, proceed to bot creation
+        if has_comprehensive_info and state['question_count'] == 0:
+            print(f"🚀 Comprehensive request detected! Creating bot immediately.")
+            return self.create_bot_specification(prefix, state, current_message)
         
         if basic_info_complete:
             # Check if user wants advanced features or if we should ask about them
