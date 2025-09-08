@@ -165,7 +165,7 @@ class ConversationTracker:
     def __init__(self):
         self.sessions = {}
     
-    def get_conversation_state(self, session_id: str, conversation_history: List[Dict]) -> Dict:
+    def get_conversation_state(self, session_id: str, conversation_history: List[Dict], current_message: str = "") -> Dict:
         """Analyze conversation history to determine current state."""
         
         # Combine all user messages to analyze what they've already provided
@@ -173,6 +173,10 @@ class ConversationTracker:
         for msg in conversation_history:
             if msg.get('message_type') == 'user':
                 user_messages.append(msg.get('message_content', '').lower())
+        
+        # Include current message in analysis
+        if current_message:
+            user_messages.append(current_message.lower())
         
         all_user_input = ' '.join(user_messages).lower()
         
