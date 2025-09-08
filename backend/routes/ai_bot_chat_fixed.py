@@ -165,32 +165,38 @@ class ConversationTracker:
     def __init__(self):
         self.sessions = {}
     
-    def get_conversation_state(self, session_id: str, conversation_history: List[Dict]) -> Dict:
-        """Analyze conversation history to determine current state."""
+    def get_conversation_state(self, session_id: str, conversation_history: List[Dict], current_message: str = "") -> Dict:
+        """Analyze conversation history including current message to determine current state."""
         
-        # Combine all user messages to analyze what they've already provided
+        # Combine all user messages INCLUDING current message
         user_messages = []
         for msg in conversation_history:
             if msg.get('message_type') == 'user':
                 user_messages.append(msg.get('message_content', '').lower())
         
-        all_user_input = ' '.join(user_messages).lower()
+        # Include current message in analysis - CRITICAL for initial context detection
+        if current_message:
+            user_messages.append(current_message.lower())
         
-        # Enhanced state detection for professional trading parameters
+        all_user_input = ' '.join(user_messages).lower()
+        print(f"🔍 ANALYZING ALL USER INPUT: {all_user_input[:200]}...")
+        
+        # Enhanced state detection - more comprehensive keyword matching
         state = {
-            # Basic Requirements
-            'has_capital': any(word in all_user_input for word in ['$', 'capital', '1000', '5000', '10000', '50000', '100000', 'k', 'usd', 'budget']),
-            'has_leverage': any(word in all_user_input for word in ['leverage', 'x', 'futures', 'margin', '2x', '5x', '10x']),
-            'has_instruments': any(word in all_user_input for word in ['spot', 'futures', 'margin', 'derivatives', 'perpetual']),
-            'has_risk': any(word in all_user_input for word in ['risk', '%', 'conservative', 'aggressive', 'drawdown', 'stop loss', 'take profit']),
-            'has_strategy': any(word in all_user_input for word in ['momentum', 'scalping', 'mean', 'trend', 'grid', 'arbitrage', 'dca', 'swing']),
-            'has_timeframe': any(word in all_user_input for word in ['minute', 'hour', 'daily', 'intraday', 'swing', '1m', '5m', '15m', '1h', '4h']),
-            'has_botname': len([msg for msg in conversation_history if 'name' in msg.get('message_content', '').lower()]) > 0,
+            # Basic Requirements - improved detection
+            'has_capital': any(word in all_user_input for word in ['$', 'capital', '1000', '5000', '10000', '50000', '100000', 'k', 'usd', 'budget', 'money', 'fund']),
+            'has_leverage': any(word in all_user_input for word in ['leverage', 'x', 'futures', 'margin', '2x', '3x', '4x', '5x', '10x', '20x']) or 'futures' in all_user_input,
+            'has_instruments': any(word in all_user_input for word in ['spot', 'futures', 'margin', 'derivatives', 'perpetual', 'long', 'short', 'long and short']),
+            'has_risk': any(word in all_user_input for word in ['risk', '%', 'conservative', 'aggressive', 'drawdown', 'stop loss', 'take profit', 'safe', 'risky']),
+            'has_strategy': any(word in all_user_input for word in ['momentum', 'scalping', 'mean', 'trend', 'grid', 'arbitrage', 'dca', 'swing', 'reversal', 'following']),
+            'has_timeframe': any(word in all_user_input for word in ['minute', 'hour', 'daily', 'intraday', 'swing', '1m', '5m', '15m', '1h', '4h', '1d']),
+            'has_botname': any(word in all_user_input for word in ['name', 'call it', 'named', 'title']),
+            'has_trading_pair': any(word in all_user_input for word in ['btc', 'eth', 'ethereum', 'bitcoin', 'usdt', 'usdc', 'bnb', 'sol', 'ada', 'dot', '/', 'pair']),
             
             # Advanced Parameters Detection
-            'has_entry_conditions': any(word in all_user_input for word in ['entry', 'buy signal', 'entry condition', 'trigger', 'rsi', 'macd', 'bollinger']),
+            'has_entry_conditions': any(word in all_user_input for word in ['entry', 'buy signal', 'entry condition', 'trigger', 'rsi', 'macd', 'bollinger', 'indicator', 'signal']),
             'has_exit_conditions': any(word in all_user_input for word in ['exit', 'sell signal', 'exit condition', 'profit target', 'stop loss']),
-            'has_indicators': any(word in all_user_input for word in ['rsi', 'macd', 'sma', 'ema', 'bollinger', 'stochastic', 'williams']),
+            'has_indicators': any(word in all_user_input for word in ['rsi', 'macd', 'sma', 'ema', 'bollinger', 'stochastic', 'williams', 'volume', 'indicator']),
             'has_grid_settings': any(word in all_user_input for word in ['grid', 'orders', 'spacing', 'martingale', 'dca', 'averaging']),
             'has_risk_management': any(word in all_user_input for word in ['stop loss', 'take profit', 'drawdown', 'position size', 'risk per trade']),
             'has_order_management': any(word in all_user_input for word in ['order size', 'base order', 'safety order', 'position sizing']),
@@ -198,8 +204,18 @@ class ConversationTracker:
             # Context for AI decision making
             'user_input': all_user_input,
             'question_count': len([msg for msg in conversation_history if msg.get('message_type') == 'assistant']),
-            'is_editing_mode': 'modify' in all_user_input or 'edit' in all_user_input or 'change' in all_user_input
+            'is_editing_mode': 'modify' in all_user_input or 'edit' in all_user_input or 'change' in all_user_input,
+            'has_comprehensive_request': len(all_user_input.split()) > 15  # Long detailed request
         }
+        
+        print(f"🔍 STATE ANALYSIS:")
+        print(f"   - has_capital: {state['has_capital']}")
+        print(f"   - has_leverage: {state['has_leverage']}")
+        print(f"   - has_instruments: {state['has_instruments']}")
+        print(f"   - has_strategy: {state['has_strategy']}")
+        print(f"   - has_trading_pair: {state['has_trading_pair']}")
+        print(f"   - has_indicators: {state['has_indicators']}")
+        print(f"   - comprehensive_request: {state['has_comprehensive_request']}")
         
         return state
 
