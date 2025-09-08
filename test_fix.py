@@ -1,7 +1,7 @@
 import requests
 import json
 
-# Test the specific comprehensive request
+# Test the specific comprehensive request - use local backend
 comprehensive_request = 'Create a bot that trades Eth, Long and Short, only futures, with 5x leverage. Uses volume indicators to understand when there is active buying or selling'
 
 session_data = {
@@ -10,7 +10,8 @@ session_data = {
     'initial_prompt': comprehensive_request
 }
 
-response = requests.post('https://flowinvest-ai.onrender.com/api/ai-bot-chat/start-session', json=session_data, timeout=30)
+# Use local backend URL
+response = requests.post('http://localhost:8001/api/ai-bot-chat/start-session', json=session_data, timeout=30)
 
 if response.status_code == 200:
     data = response.json()
