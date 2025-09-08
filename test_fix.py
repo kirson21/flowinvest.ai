@@ -1,11 +1,12 @@
 import requests
 import json
+import uuid
 
 # Test the specific comprehensive request - use local backend
 comprehensive_request = 'Create a bot that trades Eth, Long and Short, only futures, with 5x leverage. Uses volume indicators to understand when there is active buying or selling'
 
 session_data = {
-    'user_id': 'test-debug-user-2',
+    'user_id': str(uuid.uuid4()),  # Use proper UUID
     'ai_model': 'gpt-4o',
     'initial_prompt': comprehensive_request
 }
