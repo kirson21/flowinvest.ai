@@ -577,8 +577,8 @@ conversation_tracker = ConversationTracker()
 async def get_contextual_ai_response(message: str, ai_model: str, conversation_history: List[Dict], session_id: str) -> str:
     """Generate contextual AI response that follows conversation flow."""
     
-    # Analyze conversation state
-    state = conversation_tracker.get_conversation_state(session_id, conversation_history)
+    # Analyze conversation state including current message
+    state = conversation_tracker.get_conversation_state(session_id, conversation_history, message)
     
     print(f"🔍 Conversation state: {state}")
     
