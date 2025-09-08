@@ -608,8 +608,8 @@ conversation_tracker = ConversationTracker()
 async def get_contextual_ai_response(message: str, ai_model: str, conversation_history: List[Dict], session_id: str) -> str:
     """Generate contextual AI response that follows conversation flow."""
     
-    # Analyze conversation state
-    state = conversation_tracker.get_conversation_state(session_id, conversation_history)
+    # Analyze conversation state INCLUDING current message
+    state = conversation_tracker.get_conversation_state(session_id, conversation_history, message)
     
     print(f"🔍 Conversation state: {state}")
     
@@ -631,8 +631,8 @@ async def get_contextual_ai_response(message: str, ai_model: str, conversation_h
             elif ai_model == 'gemini-2.0-flash':
                 chat.with_model("gemini", "gemini-2.0-flash")
             
-            # Add conversation context manually
-            context_msg = f"CONVERSATION SO FAR: {state['user_input']}\n\nCURRENT MESSAGE: {message}"
+            # Add conversation context manually including current message
+            context_msg = f"CONVERSATION SO FAR: {state['user_input']}\n\nCURRENT MESSAGE: {message}\n\nPLEASE ANALYZE ALL PROVIDED INFORMATION AND RESPOND ACCORDINGLY."
             user_message = UserMessage(text=context_msg)
             ai_response = await chat.send_message(user_message)
             
