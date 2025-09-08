@@ -213,14 +213,40 @@ class ConversationTracker:
         }
         prefix = model_names.get(ai_model, '🤖 **Trading Expert**')
         
-        # Check if we have all information needed to create bot
-        if (state['has_capital'] and state['has_instruments'] and 
-            state['has_risk'] and state['has_strategy'] and state['has_botname']):
-            
-            # Generate bot configuration from user inputs
-            return self.create_bot_specification(prefix, state, current_message)
+        # Check if we have all basic information needed to create bot
+        basic_info_complete = (state['has_capital'] and state['has_instruments'] and 
+                             state['has_risk'] and state['has_strategy'] and state['has_botname'])
         
-        # Ask for missing information in order
+        if basic_info_complete:
+            # Check if user wants advanced features or if we should ask about them
+            has_advanced_info = (state['has_entry_conditions'] or state['has_exit_conditions'] or 
+                               state['has_grid_settings'] or state['has_order_management'])
+            
+            # If user has provided advanced info or explicitly declined, create bot
+            wants_advanced = 'yes' in current_message.lower() or 'advanced' in current_message.lower()
+            declines_advanced = any(word in current_message.lower() for word in ['no', 'basic', 'simple', 'skip'])
+            
+            if has_advanced_info or declines_advanced or state['question_count'] >= 8:
+                # Generate bot configuration from user inputs
+                return self.create_bot_specification(prefix, state, current_message)
+            elif not wants_advanced and state['question_count'] < 6:
+                # Ask if they want advanced features
+                return f"""{prefix}
+
+**Advanced Configuration Options**
+
+Your basic bot is ready! Would you like to configure advanced features?
+
+🔹 **Entry Conditions**: Custom buy signals using RSI, MACD, Bollinger Bands
+🔹 **Exit Strategy**: Sophisticated take-profit and stop-loss rules  
+🔹 **Grid Trading**: Automated order grid with martingale scaling
+🔹 **Risk Controls**: Advanced position sizing and drawdown protection
+
+Type **"yes"** for professional features or **"create basic bot"** to proceed with current settings.""", False, {}
+            else:
+                return self.create_bot_specification(prefix, state, current_message)
+        
+        # Ask for missing basic information in order
         if not state['has_capital']:
             return f"""{prefix}
 
@@ -238,54 +264,61 @@ Please tell me your capital and leverage preference.""", False, {}
         elif not state['has_instruments']:
             return f"""{prefix}
 
-**Question 2: Trading Instruments**
+**Question 2: Trading Instruments & Pairs**
 
-Perfect! Now I need to know your instrument preference:
+Perfect! Now I need to know your trading preferences:
 
 • **Spot Trading**: Safer, no liquidation risk, lower leverage
 • **Futures Trading**: Higher leverage, short selling, liquidation risk
+• **Trading Pairs**: BTC/USDT, ETH/USDT, altcoins, or specific preferences?
 
-Which type aligns with your trading goals?""", False, {}
-            
-        elif not state['has_risk']:
-            return f"""{prefix}
-
-**Question 3: Risk Management**
-
-Critical for your safety:
-
-• Max risk per trade (% of capital)? Conservative: 1-2%, Moderate: 2-3%, Aggressive: 3-5%
-• Max portfolio drawdown? Conservative: 5-10%, Moderate: 10-15%
-• Max concurrent positions? (Recommended: 1-3)
-
-Example: "2% per trade, 10% max drawdown, 2 positions"
-
-What are your risk limits?""", False, {}
+Which instruments and pairs align with your goals?""", False, {}
             
         elif not state['has_strategy']:
             return f"""{prefix}
 
-**Question 4: Strategy & Timeframe**
+**Question 3: Trading Strategy & Timeframe**
 
 What trading approach interests you?
 
-• **Momentum**: Trend following, breakout trading
-• **Scalping**: High-frequency, small quick profits  
-• **Mean Reversion**: Buy dips, sell peaks
-• **Grid Trading**: Automated range trading
+• **Momentum**: Trend following, breakout trading (15m-4h)
+• **Scalping**: High-frequency, small quick profits (1m-15m)  
+• **Mean Reversion**: Buy dips, sell peaks (1h-1d)
+• **Grid Trading**: Automated range trading (any timeframe)
+• **DCA**: Dollar cost averaging with safety orders
 
 What strategy and timeframe suit your goals?""", False, {}
+            
+        elif not state['has_risk']:
+            return f"""{prefix}
+
+**Question 4: Risk Management**
+
+Critical for protecting your capital:
+
+• Max risk per trade? Conservative: 1-2%, Moderate: 2-3%, Aggressive: 3-5%
+• Stop loss percentage? (e.g., 2-5% depending on strategy)
+• Take profit target? (e.g., 1-3% for scalping, 5-20% for swing)
+• Max concurrent positions? (1-3 recommended)
+
+Example: "2% risk per trade, 3% stop loss, 4% take profit, max 2 positions"
+
+What are your risk management preferences?""", False, {}
             
         elif not state['has_botname']:
             return f"""{prefix}
 
-**Question 5: Bot Name**
+**Question 5: Bot Identity**
 
-Finally, what would you like to name your trading bot?
+Finally, let's name your trading bot:
 
-Examples: "Bitcoin Futures Pro", "Altcoin Momentum Trader", "ETH Scalping Engine"
+Examples: 
+• "BTC Momentum Pro" (for momentum strategy)
+• "Altcoin Grid Master" (for grid trading)
+• "ETH Scalping Engine" (for scalping)
+• "Conservative DCA Bot" (for dollar cost averaging)
 
-What name do you want for your bot?""", False, {}
+What descriptive name do you want for your bot?""", False, {}
             
         else:
             return self.create_bot_specification(prefix, state, current_message)
