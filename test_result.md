@@ -123,9 +123,62 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix NowPayments withdrawal functionality - resolve 500 error when creating withdrawal requests through NowPayments API. Error: 'Failed to create withdrawal: 0' indicating database schema or RPC function issues."
+user_problem_statement: "Remove Advanced Settings button from UI but keep code in repository. Modify Edit functionality so all bots are edited through AI Creator with saved context. Enhance AI Creator Agent to handle professional trading parameters like entry/exit conditions, stop losses, technical indicators, order grids, timeframes, martingale strategies, and all advanced parameters from Advanced Settings."
 
 backend:
+  - task: "Enhanced Professional AI Trading Agent"
+    implemented: true
+    working: "testing"
+    file: "/app/backend/routes/ai_bot_chat_fixed.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "in_progress"
+          agent: "main"
+          comment: "ENHANCED AI TRADING AGENT IMPLEMENTATION: ✅ Completely rewrote TRADING_EXPERT_PROMPT with comprehensive professional trading parameters, ✅ Added support for advanced entry/exit conditions, technical indicators (RSI, MACD, Bollinger Bands, SMA, EMA), timeframes (1m-1d), grid trading settings, martingale strategies, ✅ Enhanced conversation state detection to recognize advanced parameters (entry_conditions, exit_conditions, indicators, grid_settings, risk_management, order_management), ✅ Updated question flow to ask about professional features after basic info is collected, ✅ Completely rewritten create_bot_specification function to generate comprehensive bot configurations with all advanced parameters from Advanced Settings, ✅ Added intelligent parameter extraction for capital, leverage, coins, strategies, risk levels, timeframes, ✅ Implemented professional risk management with stop loss, take profit, position sizing, drawdown protection, ✅ Added grid trading configuration with order spacing, martingale multipliers, ✅ Enhanced technical indicators setup with primary indicators, intervals, signal types, ✅ Created institutional-grade bot specifications with entry/exit conditions, order management, risk controls. AI Agent now handles ALL parameters that were previously in Advanced Settings interface."
+
+frontend:
+  - task: "Hide Advanced Settings Button and Modify Edit Functionality"
+    implemented: true
+    working: "testing"
+    file: "/app/frontend/src/components/bots/TradingBots.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "in_progress"
+          agent: "main"
+          comment: "UI MODIFICATIONS FOR AI-ONLY BOT CREATION: ✅ Hidden Advanced Settings button using code comments to preserve code for future use, ✅ Modified handleEditBot function to ALWAYS open AI Creator regardless of bot type - no more advanced builder for editing, ✅ All bots (both existing and new) are now edited through conversational AI interface, ✅ Preserved Advanced Settings component code in repository for potential future restoration, ✅ Updated bot creation flow to only show AI Creator button, ✅ Maintained subscription limits and validation for AI bot creation. Users can now ONLY create and edit bots through the enhanced AI Creator interface."
+
+  - task: "Enhanced AI Creator with Edit Mode Support"
+    implemented: true
+    working: "testing"
+    file: "/app/frontend/src/components/bots/GrokAIBotCreator.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "in_progress"
+          agent: "main"
+          comment: "AI CREATOR EDIT MODE ENHANCEMENT: ✅ Enhanced startChatSession function to handle editing mode with existing bot context, ✅ When editing existing bots, automatically generates context prompt with current bot configuration (name, strategy, trading pair, trade type, risk level, description), ✅ AI agent receives full context of existing bot and asks user what they want to modify, ✅ Seamless transition from existing bot parameters to conversational editing interface, ✅ Preserved all existing AI Creator functionality while adding edit mode support. Users can now edit any existing bot through natural conversation with AI agent that understands current bot configuration."
+
+metadata:
+  created_by: "main_agent"
+  version: "3.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Test Enhanced Professional AI Trading Agent Backend"
+    - "Test Hidden Advanced Settings and AI-Only Bot Creation UI"
+    - "Test AI Creator Edit Mode with Existing Bot Context"
+    - "Verify Professional Trading Parameters in Bot Generation"
+    - "Test All Advanced Parameters Previously in Advanced Settings"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
   - task: "Implement AI Bot Chat System Backend"
     implemented: true
     working: true
