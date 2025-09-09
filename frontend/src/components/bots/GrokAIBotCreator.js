@@ -28,6 +28,11 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
   const [readyToCreateBot, setReadyToCreateBot] = useState(false);
   const [finalBotConfig, setFinalBotConfig] = useState(null);
   const chatContainerRef = useRef(null);
+  
+  // Balance and billing state
+  const [userBalance, setUserBalance] = useState(0);
+  const [hasInsufficientBalance, setHasInsufficientBalance] = useState(false);
+  const [costPerMessage] = useState(0.10);
 
   // Auto-scroll chat to bottom
   useEffect(() => {
