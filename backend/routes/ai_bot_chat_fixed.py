@@ -679,10 +679,16 @@ async def get_contextual_ai_response(message: str, ai_model: str, conversation_h
     
     # Try real AI first, fallback to our logic
     try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        # Make emergentintegrations import optional for Render compatibility
+        try:
+            from emergentintegrations.llm.chat import LlmChat, UserMessage
+            emergent_available = True
+        except ImportError:
+            print("⚠️ EmergentIntegrations not available - using fallback logic")
+            emergent_available = False
         
         api_key = os.getenv('EMERGENT_LLM_KEY')
-        if api_key and len(conversation_history) <= 2:  # Use AI for early conversation
+        if api_key and emergent_available and len(conversation_history) <= 2:  # Use AI for early conversation
             chat = LlmChat(api_key=api_key, session_id=session_id, system_message=TRADING_EXPERT_PROMPT)
             
             if ai_model == 'gpt-4o':
