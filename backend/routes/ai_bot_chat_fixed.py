@@ -1042,13 +1042,25 @@ async def health_check():
     """Health check."""
     try:
         emergent_key = os.getenv('EMERGENT_LLM_KEY')
+        print(f"🔑 EMERGENT_LLM_KEY check: {emergent_key[:20]}..." if emergent_key else "❌ EMERGENT_LLM_KEY not found")
+        
+        # Test emergentintegrations import
+        emergent_available = False
+        try:
+            from emergentintegrations.llm.chat import LlmChat
+            emergent_available = True
+            print("✅ EmergentIntegrations import successful")
+        except ImportError as e:
+            print(f"❌ EmergentIntegrations import failed: {e}")
         
         return {
             "status": "healthy",
             "ai_models_available": ["gpt-4o", "claude-3-7-sonnet", "gemini-2.0-flash"],
             "database_available": supabase_admin is not None,
-            "universal_key_configured": bool(emergent_key),
-            "message": "Professional Trading Agent with context-aware conversation flow"
+            "universal_key_configured": bool(emergent_key) and emergent_available,
+            "emergent_key_present": bool(emergent_key),
+            "emergent_library_available": emergent_available,
+            "message": "Professional Trading Agent with context-aware conversation flow and EmergentIntegrations"
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
