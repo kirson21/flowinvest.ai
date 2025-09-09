@@ -41,6 +41,31 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
     }
   }, [chatMessages]);
 
+  // Load user balance on component mount
+  useEffect(() => {
+    if (user?.id) {
+      loadUserBalance();
+    }
+  }, [user]);
+
+  // Load user balance
+  const loadUserBalance = async () => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/ai-bot-chat/balance/${user.id}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setUserBalance(data.balance_usd || 0);
+        setHasInsufficientBalance(!data.has_sufficient_funds);
+      }
+    } catch (err) {
+      console.error('Error loading balance:', err);
+      setUserBalance(0);
+      setHasInsufficientBalance(true);
+    }
+  };
+
   const suggestedPrompts = [
     "Create a conservative Bitcoin bot that buys during dips and sells at modest profits",
     "Build an aggressive scalping bot for Ethereum with tight stop losses",
