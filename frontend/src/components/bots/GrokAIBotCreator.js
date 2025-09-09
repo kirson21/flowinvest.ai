@@ -620,7 +620,7 @@ Please help me modify this bot. What would you like to change?`;
                   ) : (
                     <>
                       <MessageCircle className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Generate with AI (${costPerMessage.toFixed(2)})</span>
+                      <span className="hidden sm:inline">Generate with AI</span>
                       <span className="sm:hidden">Generate with AI</span>
                     </>
                   )}
