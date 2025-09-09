@@ -296,11 +296,37 @@ class AIBotChatTester:
                         bot_name = created_bot.get('name', '')
                         description = created_bot.get('description', '')
                         
-                        # CRITICAL FIX 1: Verify ETH detection worked correctly
-                        is_eth_bot = base_coin.upper() == 'ETH' or 'eth' in bot_name.lower() or 'ethereum' in description.lower()
-                        is_not_btc = base_coin.upper() != 'BTC' and 'btc' not in bot_name.lower() and 'bitcoin' not in description.lower()
+                        # Also check the bot_config JSON for more accurate data
+                        bot_config_str = created_bot.get('bot_config', '{}')
+                        try:
+                            bot_config_json = json.loads(bot_config_str)
+                            config_base_coin = bot_config_json.get('base_coin', '')
+                            config_name = bot_config_json.get('name', '')
+                            config_trade_type = bot_config_json.get('trade_type', '')
+                        except:
+                            config_base_coin = ''
+                            config_name = ''
+                            config_trade_type = ''
                         
-                        details = f"Base coin: {base_coin}, Name: {bot_name}, ETH bot: {is_eth_bot}, Not BTC: {is_not_btc}"
+                        # CRITICAL FIX 1: Verify ETH detection worked correctly
+                        # Check both the main fields and the config JSON
+                        is_eth_bot = (
+                            (base_coin and base_coin.upper() == 'ETH') or
+                            (config_base_coin and config_base_coin.upper() == 'ETH') or
+                            'eth' in bot_name.lower() or 
+                            'eth' in config_name.lower() or
+                            'ethereum' in description.lower()
+                        )
+                        
+                        is_not_btc = (
+                            (not base_coin or base_coin.upper() != 'BTC') and
+                            (not config_base_coin or config_base_coin.upper() != 'BTC') and
+                            'btc' not in bot_name.lower() and 
+                            'btc' not in config_name.lower() and
+                            'bitcoin' not in description.lower()
+                        )
+                        
+                        details = f"Base coin: {base_coin}, Config base coin: {config_base_coin}, Name: {bot_name}, Config name: {config_name}, ETH bot: {is_eth_bot}, Not BTC: {is_not_btc}"
                         
                         if is_eth_bot and is_not_btc:
                             self.log_test("Verify Bot Details (ETH Detection)", True, details)
