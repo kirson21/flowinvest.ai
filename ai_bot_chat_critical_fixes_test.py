@@ -183,6 +183,7 @@ class AIBotChatTester:
                     bot_config = data.get('bot_config')
                     
                     details = f"Response length: {len(ai_response)} chars, Ready to create: {ready_to_create}"
+                    details += f"\nFirst 150 chars: {ai_response[:150]}..."
                     
                     # Check for expected keywords if provided
                     if expected_keywords:
