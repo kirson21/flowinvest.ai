@@ -379,8 +379,16 @@ class AIBotChatTester:
         while not ready and conversation_count < max_conversations and msg_ok:
             print(f"📋 CONTINUING CONVERSATION (Attempt {conversation_count + 1})")
             
-            # Provide generic positive response to continue
-            continue_message = "Yes, that sounds good. Please continue."
+            # Provide appropriate response based on what AI is asking
+            if "risk" in response.lower() and "%" in response.lower():
+                continue_message = "2% risk per trade, 3% stop loss, 5% take profit"
+            elif "strategy" in response.lower():
+                continue_message = "Momentum trading strategy"
+            elif "name" in response.lower() or "bot" in response.lower():
+                continue_message = "ETH Momentum Futures Pro"
+            else:
+                continue_message = "Yes, that sounds good. Please continue."
+                
             msg_ok, response, ready, bot_config = self.test_send_message(continue_message)
             conversation_count += 1
         
