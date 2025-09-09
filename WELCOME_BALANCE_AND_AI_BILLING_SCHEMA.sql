@@ -3,21 +3,21 @@
 
 -- 1. Add welcome balance to existing users who have $0 balance
 UPDATE user_accounts 
-SET balance_usd = 3.00 
-WHERE balance_usd = 0.00 OR balance_usd IS NULL;
+SET balance = 3.00 
+WHERE balance = 0.00 OR balance IS NULL;
 
 -- 2. Create trigger function to give $3 welcome balance to new users
 CREATE OR REPLACE FUNCTION give_welcome_balance()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Give $3 welcome balance to new users
-    INSERT INTO user_accounts (user_id, balance_usd, created_at, updated_at)
-    VALUES (NEW.id, 3.00, NOW(), NOW())
+    INSERT INTO user_accounts (user_id, balance, currency, created_at, updated_at)
+    VALUES (NEW.id, 3.00, 'USD', NOW(), NOW())
     ON CONFLICT (user_id) 
     DO UPDATE SET 
-        balance_usd = CASE 
-            WHEN user_accounts.balance_usd = 0 THEN 3.00 
-            ELSE user_accounts.balance_usd 
+        balance = CASE 
+            WHEN user_accounts.balance = 0 THEN 3.00 
+            ELSE user_accounts.balance 
         END,
         updated_at = NOW();
     
@@ -80,7 +80,7 @@ DECLARE
     v_new_balance DECIMAL;
 BEGIN
     -- Get current user balance
-    SELECT balance_usd INTO v_current_balance
+    SELECT balance INTO v_current_balance
     FROM user_accounts
     WHERE user_id = p_user_id;
     
@@ -97,12 +97,12 @@ BEGIN
     
     -- Deduct cost from user balance
     UPDATE user_accounts 
-    SET balance_usd = balance_usd - p_cost_usd,
+    SET balance = balance - p_cost_usd,
         updated_at = NOW()
     WHERE user_id = p_user_id;
     
     -- Get new balance
-    SELECT balance_usd INTO v_new_balance
+    SELECT balance INTO v_new_balance
     FROM user_accounts 
     WHERE user_id = p_user_id;
     
@@ -130,7 +130,7 @@ RETURNS TABLE (
 DECLARE
     v_balance DECIMAL;
 BEGIN
-    SELECT balance_usd INTO v_balance
+    SELECT balance INTO v_balance
     FROM user_accounts
     WHERE user_id = p_user_id;
     
@@ -155,8 +155,8 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT 
-        ua.balance_usd,
-        (ua.balance_usd >= 0.10) as has_sufficient_funds
+        ua.balance as balance_usd,
+        (ua.balance >= 0.10) as has_sufficient_funds
     FROM user_accounts ua
     WHERE ua.user_id = auth.uid();
 END;
