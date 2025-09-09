@@ -135,6 +135,7 @@ class AIBotChatTester:
                     
                     details = f"Session ID: {self.session_id}, ETH mentioned: {eth_mentioned}, Futures mentioned: {futures_mentioned}"
                     details += f"\nAI Response length: {len(ai_response)} chars"
+                    details += f"\nFirst 200 chars: {ai_response[:200]}..."
                     
                     # This tests CRITICAL FIX 1: ETH Detection Fix
                     if self.session_id and len(ai_response) > 50:
