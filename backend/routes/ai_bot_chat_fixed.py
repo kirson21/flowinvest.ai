@@ -796,6 +796,29 @@ async def start_chat_session(request: ChatSessionRequest):
 async def send_chat_message(request: ChatMessageRequest):
     """Send message in chat session."""
     try:
+        # Check user balance first
+        ai_cost = 0.10  # $0.10 per AI message
+        
+        try:
+            balance_result = await supabase_admin.rpc('check_ai_usage_balance', {
+                'p_user_id': request.user_id,
+                'p_required_cost': ai_cost
+            }).execute()
+            
+            if balance_result.data and len(balance_result.data) > 0:
+                balance_info = balance_result.data[0]
+                if not balance_info.get('has_sufficient_balance', False):
+                    return {
+                        "success": False,
+                        "error": "insufficient_balance",
+                        "message": f"Insufficient balance for AI usage. Current balance: ${balance_info.get('current_balance', 0):.2f}, Required: ${ai_cost:.2f}",
+                        "current_balance": float(balance_info.get('current_balance', 0)),
+                        "required_cost": ai_cost
+                    }
+        except Exception as e:
+            print(f"⚠️ Balance check error: {e}")
+            # Continue anyway for graceful degradation
+        
         # Get conversation history
         conversation_history = []
         if supabase_admin:
@@ -815,6 +838,18 @@ async def send_chat_message(request: ChatMessageRequest):
             conversation_history,
             request.session_id
         )
+        
+        # Deduct cost from user balance after successful AI response
+        try:
+            await supabase_admin.rpc('deduct_ai_usage_cost', {
+                'p_user_id': request.user_id,
+                'p_session_id': request.session_id,
+                'p_ai_model': request.ai_model,
+                'p_message_content': request.message_content,
+                'p_cost_usd': ai_cost
+            }).execute()
+        except Exception as e:
+            print(f"⚠️ Billing deduction error: {e}")
         
         # Save messages to database
         if supabase_admin:
