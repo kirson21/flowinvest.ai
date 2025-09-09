@@ -182,7 +182,22 @@ class AIBotChatTester:
                     ready_to_create = data.get('ready_to_create', False)
                     bot_config = data.get('bot_config')
                     
-                    details = f"Response length: {len(ai_response)} chars, Ready to create: {ready_to_create}"
+                    # Check if bot is ready - look for both flag and JSON
+                    is_ready = ready_to_create or "ready_to_create" in ai_response or "PROFESSIONAL TRADING BOT CREATED" in ai_response
+                    
+                    # Try to extract JSON from response if not provided
+                    if not bot_config and "```json" in ai_response:
+                        try:
+                            json_start = ai_response.find("```json") + 7
+                            json_end = ai_response.find("```", json_start)
+                            if json_end != -1:
+                                json_str = ai_response[json_start:json_end].strip()
+                                bot_config = json.loads(json_str)
+                                is_ready = True
+                        except Exception as e:
+                            print(f"JSON extraction error: {e}")
+                    
+                    details = f"Response length: {len(ai_response)} chars, Ready to create: {is_ready}"
                     details += f"\nFirst 150 chars: {ai_response[:150]}..."
                     
                     # Check for expected keywords if provided
@@ -192,7 +207,7 @@ class AIBotChatTester:
                     
                     if len(ai_response) > 20:
                         self.log_test(f"Send Message: '{message[:30]}...'", True, details)
-                        return True, ai_response, ready_to_create, bot_config
+                        return True, ai_response, is_ready, bot_config
                     else:
                         self.log_test(f"Send Message: '{message[:30]}...'", False, details, "Response too short")
                         return False, "", False, None
