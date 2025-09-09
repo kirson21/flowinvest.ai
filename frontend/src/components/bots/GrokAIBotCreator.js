@@ -180,6 +180,13 @@ Please help me modify this bot. What would you like to change?`;
     try {
       setChatLoading(true);
       
+      // Check balance before sending
+      if (hasInsufficientBalance) {
+        setError(`Insufficient balance for AI usage. Current: $${userBalance.toFixed(2)}, Required: $${costPerMessage.toFixed(2)}. Please top up your balance.`);
+        setChatLoading(false);
+        return;
+      }
+      
       // Add user message to chat immediately
       const userMessage = {
         type: 'user',
@@ -273,6 +280,13 @@ Please help me modify this bot. What would you like to change?`;
             }
           }
         }
+        
+        // Reload balance after AI usage
+        await loadUserBalance();
+        
+      } else if (response.error === 'insufficient_balance') {
+        setError(`Insufficient balance: $${response.current_balance?.toFixed(2) || '0.00'}. Required: $${response.required_cost?.toFixed(2) || '0.10'}. Please top up your balance.`);
+        setHasInsufficientBalance(true);
       } else {
         setError('Failed to send message');
       }
