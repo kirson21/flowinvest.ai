@@ -740,13 +740,20 @@ async def start_chat_session(request: ChatSessionRequest):
             session_id
         )
         
-        # Deduct cost from user balance after successful AI response - simplified
+        # Deduct cost from user balance after successful AI response - FIXED SQL syntax
         try:
-            # Direct balance deduction without RPC
-            supabase_admin.table('user_accounts').update({
-                'balance': f'balance - {ai_cost}',
-                'updated_at': 'NOW()'
-            }).eq('user_id', request.user_id).execute()
+            # Get current balance first
+            current_balance_result = supabase_admin.table('user_accounts').select('balance').eq('user_id', request.user_id).execute()
+            
+            if current_balance_result.data and len(current_balance_result.data) > 0:
+                current_balance = float(current_balance_result.data[0].get('balance', 0))
+                new_balance = current_balance - ai_cost
+                
+                # Update with calculated new balance
+                supabase_admin.table('user_accounts').update({
+                    'balance': new_balance,
+                    'updated_at': 'NOW()'
+                }).eq('user_id', request.user_id).execute()
         except Exception as e:
             print(f"⚠️ Billing deduction error: {e}")
         
