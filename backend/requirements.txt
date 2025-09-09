@@ -23,3 +23,4 @@ supabase==2.1.0
 
 # LLM Integration using Emergent Universal Key  
 # Note: Install with: pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+emergentintegrations
