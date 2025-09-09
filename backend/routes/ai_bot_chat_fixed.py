@@ -1002,7 +1002,7 @@ async def get_user_ai_bots(user_id: str):
 async def get_user_ai_balance(user_id: str):
     """Get user balance for AI usage."""
     try:
-        balance_result = await supabase_admin.rpc('get_user_balance_for_ai').execute()
+        balance_result = supabase_admin.rpc('get_user_balance_for_ai').execute()
         
         if balance_result.data and len(balance_result.data) > 0:
             balance_info = balance_result.data[0]
