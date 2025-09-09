@@ -597,8 +597,12 @@ Please help me modify this bot. What would you like to change?`;
               <div className="sticky bottom-0 bg-white dark:bg-gray-900 pt-6 pb-8 sm:pt-0 sm:pb-0 sm:static sm:bg-transparent border-t sm:border-t-0 border-gray-200 dark:border-gray-700 -mx-3 sm:mx-0 px-3 sm:px-0 sm:border-none">
                 <Button
                   onClick={startChatSession}
-                  disabled={chatLoading || !prompt.trim()}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-3 sm:py-4"
+                  disabled={chatLoading || !prompt.trim() || hasInsufficientBalance}
+                  className={`w-full text-sm sm:text-base py-3 sm:py-4 ${
+                    hasInsufficientBalance 
+                      ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' 
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  }`}
                   size="lg"
                 >
                   {chatLoading ? (
@@ -607,10 +611,16 @@ Please help me modify this bot. What would you like to change?`;
                       <span className="hidden sm:inline">AI is starting conversation...</span>
                       <span className="sm:hidden">Starting...</span>
                     </>
+                  ) : hasInsufficientBalance ? (
+                    <>
+                      <span className="mr-2">💰</span>
+                      <span className="hidden sm:inline">Insufficient Balance (${userBalance.toFixed(2)})</span>
+                      <span className="sm:hidden">Low Balance</span>
+                    </>
                   ) : (
                     <>
                       <MessageCircle className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Generate with AI</span>
+                      <span className="hidden sm:inline">Generate with AI (${costPerMessage.toFixed(2)})</span>
                       <span className="sm:hidden">Generate with AI</span>
                     </>
                   )}
