@@ -190,7 +190,7 @@ class ConversationTracker:
             'has_risk': any(word in all_user_input for word in ['risk', '%', 'conservative', 'aggressive', 'drawdown', 'stop loss', 'take profit', 'safe', 'risky']),
             'has_strategy': any(word in all_user_input for word in ['momentum', 'scalping', 'mean', 'trend', 'grid', 'arbitrage', 'dca', 'swing', 'reversal', 'following']),
             'has_timeframe': any(word in all_user_input for word in ['minute', 'hour', 'daily', 'intraday', 'swing', '1m', '5m', '15m', '1h', '4h', '1d']),
-            'has_botname': any(word in all_user_input for word in ['name', 'call it', 'named', 'title']),
+            'has_botname': any(word in all_user_input for word in ['name', 'call it', 'named', 'title']) or len(current_message.split()) <= 4,
             'has_trading_pair': any(word in all_user_input for word in ['btc', 'eth', 'ethereum', 'bitcoin', 'usdt', 'usdc', 'bnb', 'sol', 'ada', 'dot', '/', 'pair']),
             
             # Advanced Parameters Detection
