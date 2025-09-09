@@ -998,6 +998,32 @@ async def get_user_ai_bots(user_id: str):
         print(f"Get bots error: {e}")
         return {"success": True, "bots": [], "total": 0}
 
+@router.get("/ai-bot-chat/balance/{user_id}")
+async def get_user_ai_balance(user_id: str):
+    """Get user balance for AI usage."""
+    try:
+        balance_result = await supabase_admin.rpc('get_user_balance_for_ai').execute()
+        
+        if balance_result.data and len(balance_result.data) > 0:
+            balance_info = balance_result.data[0]
+            return {
+                "success": True,
+                "balance_usd": float(balance_info.get('balance_usd', 0)),
+                "has_sufficient_funds": balance_info.get('has_sufficient_funds', False),
+                "cost_per_message": 0.10
+            }
+        else:
+            return {
+                "success": True,
+                "balance_usd": 0.00,
+                "has_sufficient_funds": False,
+                "cost_per_message": 0.10
+            }
+        
+    except Exception as e:
+        print(f"Error getting user balance: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/ai-bot-chat/health")
 async def health_check():
     """Health check."""
