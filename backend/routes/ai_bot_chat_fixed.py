@@ -794,23 +794,21 @@ async def start_chat_session(request: ChatSessionRequest):
 async def send_chat_message(request: ChatMessageRequest):
     """Send message in chat session."""
     try:
-        # Check user balance first
+        # Check user balance first - simplified without RPC for now
         ai_cost = 0.10  # $0.10 per AI message
         
         try:
-            balance_result = await supabase_admin.rpc('check_ai_usage_balance', {
-                'p_user_id': request.user_id,
-                'p_required_cost': ai_cost
-            }).execute()
+            # Use direct query instead of RPC call to avoid issues
+            balance_result = supabase_admin.table('user_accounts').select('balance').eq('user_id', request.user_id).execute()
             
             if balance_result.data and len(balance_result.data) > 0:
-                balance_info = balance_result.data[0]
-                if not balance_info.get('has_sufficient_balance', False):
+                current_balance = float(balance_result.data[0].get('balance', 0))
+                if current_balance < ai_cost:
                     return {
                         "success": False,
-                        "error": "insufficient_balance",
-                        "message": f"Insufficient balance for AI usage. Current balance: ${balance_info.get('current_balance', 0):.2f}, Required: ${ai_cost:.2f}",
-                        "current_balance": float(balance_info.get('current_balance', 0)),
+                        "error": "insufficient_balance", 
+                        "message": f"Insufficient balance for AI usage. Current balance: ${current_balance:.2f}, Required: ${ai_cost:.2f}",
+                        "current_balance": current_balance,
                         "required_cost": ai_cost
                     }
         except Exception as e:
