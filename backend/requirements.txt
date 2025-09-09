@@ -22,5 +22,5 @@ pyotp==2.9.0          # TOTP 2FA code generation for withdrawals
 supabase==2.1.0
 
 # LLM Integration using Emergent Universal Key  
-# Note: Install with: pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
-emergentintegrations
+# Note: Install manually with: pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+# emergentintegrations - NOT in requirements.txt due to special index URL requirement
