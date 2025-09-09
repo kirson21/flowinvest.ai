@@ -452,13 +452,13 @@ Your bot name?""", False, {}
         elif 'futures' in user_input and leverage == 1.0:
             leverage = 3.0  # Default for futures
             
-        # Coin selection
+        # Coin selection - FIXED: detect ETH properly without slash requirement
         coin = 'BTC'
-        if any(word in user_input for word in ['ethereum', 'eth/']):
+        if any(word in user_input for word in ['ethereum', 'eth', 'eth/', 'ether']):
             coin = 'ETH'
         elif any(word in user_input for word in ['altcoin', 'altcoins', 'alt', 'other coins']):
             coin = 'ALT'
-        elif any(word in user_input for word in ['solana', 'sol/']):
+        elif any(word in user_input for word in ['solana', 'sol', 'sol/']):
             coin = 'SOL'
         elif any(word in user_input for word in ['dogecoin', 'doge']):
             coin = 'DOGE'
