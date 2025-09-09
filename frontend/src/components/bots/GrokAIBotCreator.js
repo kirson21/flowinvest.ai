@@ -539,6 +539,17 @@ Please help me modify this bot. What would you like to change?`;
         <CardContent className="p-3 sm:p-6">
           {step === 'input' && (
             <div className="space-y-4 sm:space-y-6">
+              {/* Balance Warning */}
+              {hasInsufficientBalance && (
+                <Alert className="border-orange-500 bg-orange-50">
+                  <AlertDescription className="text-orange-700">
+                    💰 <strong>Insufficient Balance:</strong> You have ${userBalance.toFixed(2)} but need ${costPerMessage.toFixed(2)} per AI message.
+                    <br />
+                    <span className="text-sm">Please top up your balance to use AI Creator.</span>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               {/* Error Alert */}
               {error && (
                 <Alert className="border-red-500 bg-red-50">
