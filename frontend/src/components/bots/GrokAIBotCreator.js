@@ -80,6 +80,13 @@ const GrokAIBotCreator = ({ onClose, onSave, editingBot, onDelete }) => {
       setChatLoading(true);
       setError('');
       
+      // Check balance first
+      if (hasInsufficientBalance) {
+        setError(`Insufficient balance for AI usage. Current: $${userBalance.toFixed(2)}, Required: $${costPerMessage.toFixed(2)}. Please top up your balance.`);
+        setChatLoading(false);
+        return;
+      }
+      
       // For editing mode, create context from existing bot
       let initialPrompt = prompt.trim();
       if (editingBot && !initialPrompt) {
@@ -149,6 +156,12 @@ Please help me modify this bot. What would you like to change?`;
         }
         
         setShowChat(true);
+        
+        // Reload balance after AI usage
+        await loadUserBalance();
+      } else if (response.error === 'insufficient_balance') {
+        setError(`Insufficient balance: $${response.current_balance?.toFixed(2) || '0.00'}. Required: $${response.required_cost?.toFixed(2) || '0.10'}. Please top up your balance.`);
+        setHasInsufficientBalance(true);
       } else {
         setError('Failed to start chat session');
       }
