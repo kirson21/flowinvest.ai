@@ -657,7 +657,7 @@ Your bot name?""", False, {}
 • Max drawdown protection: 15%
 
 ```json
-{json.dumps(bot_config["bot_config"], indent=2)}
+{json.dumps(bot_config, indent=2)}
 ```
 
 **Your institutional-grade trading bot is ready for deployment!**""", True, bot_config
