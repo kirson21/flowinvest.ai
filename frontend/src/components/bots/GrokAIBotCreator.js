@@ -468,6 +468,13 @@ Please help me modify this bot. What would you like to change?`;
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              {/* Balance Badge */}
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                hasInsufficientBalance ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+              }`}>
+                💰 ${userBalance.toFixed(2)} Balance
+              </div>
+              
               {/* Model Selection Dropdown */}
               <div className="flex items-center space-x-2">
                 <Label className="text-xs text-gray-600">Model:</Label>
